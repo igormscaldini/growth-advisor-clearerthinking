@@ -1,0 +1,53 @@
+Google Ads API — Design Document
+Tool name: Growth Advisor (internal)
+Owner: Igor Scaldini, Growth Marketing — ClearerThinking.org
+Date: May 2026
+
+1. Purpose
+Growth Advisor is an internal analytics tool used by the ClearerThinking.org growth marketing team. Its purpose is to consolidate marketing performance data from multiple sources (Google Analytics 4, Google Search Console, beehiiv newsletter, Stripe, Ahrefs, and Google Ads) into a single view, so that internal stakeholders can make better decisions about content, audience growth, and paid campaigns. The tool is for our own internal use only. It is not distributed, sold, licensed, or made available to any third party.
+
+2. Users
+The tool is used by a single internal user — the growth marketing lead at ClearerThinking.org — and runs locally on that user's workstation.
+
+3. Google Ads data accessed
+Read-only access is requested for the following resources, restricted to ClearerThinking.org's own Google Ads account:
+- Customer information (account-level metadata)
+- Campaigns (name, status, budget, start/end dates)
+- Ad groups
+- Ads
+- Keywords and search terms
+- Performance metrics (impressions, clicks, cost, conversions, CTR, CPC, conversion rate, conversion value)
+- Conversion actions
+
+4. Functionality
+- Pull weekly/monthly performance reports for our own ad campaigns
+- Compute simple aggregates already visible in the Google Ads UI (cost-per-click, cost-per-acquisition, return on ad spend)
+- Cross-reference Google Ads spend with website conversion data (from Google Analytics 4) and email signups (from beehiiv) to better understand campaign efficiency
+- Generate internal Markdown / CSV summaries that the marketing lead reviews directly
+
+5. What the tool does NOT do
+- It does NOT create, modify, pause, enable, or delete any campaign, ad group, ad, keyword, budget, bid, or any other Google Ads entity. All access is strictly read-only.
+- It does NOT manage any account other than ClearerThinking.org's own.
+- It does NOT serve a user-facing UI to anyone outside ClearerThinking.org.
+- It does NOT publish, share, sell, or otherwise distribute Google Ads data to any third party.
+
+6. Architecture
+- A small Python codebase running locally on a single macOS workstation.
+- Authentication: OAuth 2.0 user delegation with the scope https://www.googleapis.com/auth/adwords. Tokens are obtained via Google's standard installed-application OAuth flow.
+- API client: the official google-ads Python library.
+- Refresh tokens are stored only in a local `.env`-style configuration file in the user's home directory, with file system permissions restricted to that single user.
+- Data outputs: terminal printouts, local Markdown/CSV files, optional notifications to a private internal Slack channel. No outputs leave the local environment without explicit user action.
+
+7. Data storage and retention
+- API responses are processed in-memory and not persisted in raw form.
+- Only small derived aggregates (e.g., monthly totals, top-N campaigns) may be saved locally as Markdown/CSV for personal review.
+- No raw Google Ads row-level data is stored long-term.
+- All credentials are stored only in a local configuration file that is excluded from version control and is never transmitted off the user's machine.
+
+8. Compliance
+- The tool will operate within Google Ads API policies and Google's User Data Policy.
+- Read-only access is used exclusively.
+- No data accessed via the API leaves the local user environment except as voluntarily reviewed by the single internal user on their own machine.
+
+9. Mockups / screenshots
+The tool is a command-line / Python script — there is no graphical user interface. The output is plain-text reports printed to a terminal and saved locally as Markdown or CSV files for the user's personal review.

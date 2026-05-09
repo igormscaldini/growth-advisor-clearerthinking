@@ -10,6 +10,7 @@ client_secret*.json
 token.json
 *.sqlite
 *.db
+secrets/
 
 # ---- Python ----
 __pycache__/
@@ -54,3 +55,7 @@ tmp/
 # ---- Claude Code (local-only) ----
 .claude/settings.local.json
 .claude/auto-push.log
+
+# ---- Streamlit local cache / secrets ----
+.streamlit/secrets.toml
+streamlit-secrets.toml
