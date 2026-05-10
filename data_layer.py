@@ -382,8 +382,20 @@ def ga4_modules_finished_by_channel(start: date, end: date) -> list[dict]:
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
-def stripe_charges_daily_by_amounts(start: date, end: date, amounts_cents: tuple[int, ...]) -> dict:
-    """Total + per-day count of successful charges whose `amount` matches any target (in cents)."""
+def stripe_charges_daily_by_amounts(
+    start: date,
+    end: date,
+    amounts_cents: tuple[int, ...],
+    exclude_subscriptions: bool = False,
+) -> dict:
+    """Total + per-day count of successful charges whose `amount` matches any target (in cents).
+
+    When `exclude_subscriptions=True`, charges that came from a subscription invoice are
+    skipped. Detection uses two signals (either is sufficient):
+      - The expanded `invoice` field is set (means the charge originated from an invoice).
+      - The charge `description` starts with "Subscription" (matches Stripe's auto-generated
+        descriptions like "Subscription update").
+    """
     from stripe_client import get_client
 
     s = get_client()
@@ -391,15 +403,26 @@ def stripe_charges_daily_by_amounts(start: date, end: date, amounts_cents: tuple
     end_ts = _date_to_ts(end) + 86400
     targets = set(amounts_cents)
 
+    list_kwargs = {"created": {"gte": start_ts, "lt": end_ts}, "limit": 100}
+    if exclude_subscriptions:
+        list_kwargs["expand"] = ["data.invoice"]
+
     daily: dict[str, int] = defaultdict(int)
     total = 0
-    for ch in s.Charge.list(created={"gte": start_ts, "lt": end_ts}, limit=100).auto_paging_iter():
+    for ch in s.Charge.list(**list_kwargs).auto_paging_iter():
         if ch.status != "succeeded":
             continue
-        if (ch.amount or 0) in targets:
-            d = datetime.fromtimestamp(ch.created, tz=timezone.utc).date().isoformat()
-            daily[d] += 1
-            total += 1
+        if (ch.amount or 0) not in targets:
+            continue
+        if exclude_subscriptions:
+            if getattr(ch, "invoice", None):
+                continue
+            desc = (getattr(ch, "description", "") or "").lower().strip()
+            if desc.startswith("subscription"):
+                continue
+        d = datetime.fromtimestamp(ch.created, tz=timezone.utc).date().isoformat()
+        daily[d] += 1
+        total += 1
 
     rows = []
     cur = start

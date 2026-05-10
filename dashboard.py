@@ -105,7 +105,7 @@ with st.spinner("Loading data..."):
     new_subs_daily = beehiiv_daily_new_subscribers(start, end)
     engaged = beehiiv_engaged_readers()
     cog_sales = stripe_charges_daily_by_amounts(start, end, COG_AMOUNTS)
-    pdf_sales = stripe_charges_daily_by_amounts(start, end, PERSONALITY_AMOUNTS)
+    pdf_sales = stripe_charges_daily_by_amounts(start, end, PERSONALITY_AMOUNTS, exclude_subscriptions=True)
     keyword_pos = gsc_keyword_position("personality test")
     modules_by_channel = ga4_modules_finished_by_channel(start, end)
 
@@ -249,7 +249,7 @@ with tab_overview:
     metric_section(
         label="📄 Personality Test PDF Sales",
         value=fmt_int(pdf_sales.get("total")),
-        tooltip="Stripe • count of successful charges with amount $9.00 in window.",
+        tooltip="Stripe • count of successful charges with amount $9.00, EXCLUDING subscription charges. Detection: charges from a subscription invoice or with description starting with 'Subscription' are skipped (a $9 sub tier exists, so without this filter we'd count subscription renewals as PDF sales).",
         df=pdf_df, y_col="count", color="#A855F7", y_title="Sales / day",
     )
 
