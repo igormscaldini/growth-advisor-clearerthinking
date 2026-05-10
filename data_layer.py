@@ -317,7 +317,7 @@ def stripe_active_subscriber_count() -> int:
     return sum(1 for _ in s.Subscription.list(status="active", limit=100).auto_paging_iter())
 
 
-@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+@st.cache_data(ttl=3600, show_spinner=False)  # GSC has 3-day lag — refreshing more often is wasted
 def gsc_keyword_position(keyword: str) -> dict:
     """Average GSC position for a specific keyword, last 28 days (with GSC's 3-day lag)."""
     from gsc_client import SITE_URL, get_client
@@ -349,6 +349,37 @@ def gsc_keyword_position(keyword: str) -> dict:
         "impressions": int(rows[0]["impressions"]),
         "keyword": keyword,
     }
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def ga4_modules_finished_by_campaign(start: date, end: date) -> list[dict]:
+    """Count of 'Submitted Email' events grouped by sessionCampaignName."""
+    from google.analytics.data_v1beta.types import (
+        DateRange,
+        Dimension,
+        Filter,
+        FilterExpression,
+        Metric,
+        OrderBy,
+        RunReportRequest,
+    )
+    from ga4_client import get_client, property_path
+
+    resp = get_client().run_report(RunReportRequest(
+        property=property_path(),
+        date_ranges=[DateRange(start_date=str(start), end_date=str(end))],
+        dimensions=[Dimension(name="sessionCampaignName")],
+        metrics=[Metric(name="eventCount")],
+        dimension_filter=FilterExpression(
+            filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="Submitted Email")),
+        ),
+        order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="eventCount"), desc=True)],
+        limit=200,
+    ))
+    return [
+        {"campaign": row.dimension_values[0].value or "(not set)", "count": int(row.metric_values[0].value)}
+        for row in resp.rows
+    ]
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
@@ -683,22 +714,18 @@ def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
     end_ts = max(_date_to_ts(end) + 86400, int(datetime.now(timezone.utc).timestamp()))
 
     daily: dict[str, int] = defaultdict(int)
+    seen_ids: set = set()  # dedupe across page boundaries (beehiiv overlaps a sub between pages)
     page = 1
-    PAGE_CAP = 500  # safety: max ~50K subs scanned per call
+    PAGE_CAP = 100  # beehiiv hard-caps pagination around here
+    capped = False
     while page <= PAGE_CAP:
         r = requests.get(
             f"{BEEHIIV_BASE}/publications/{pub_id}/subscriptions",
             headers=headers,
-            params={
-                "limit": 100,
-                "page": page,
-                "order_by": "created",
-                "direction": "desc",
-            },
+            params={"limit": 100, "page": page, "order_by": "created", "direction": "desc"},
         )
         if r.status_code != 200:
-            # beehiiv caps pagination around page 100; once we hit that, return what
-            # we've collected rather than throwing it away.
+            capped = True
             break
         subs = r.json().get("data", [])
         if not subs:
@@ -706,6 +733,10 @@ def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
 
         all_below_start = True
         for sub in subs:
+            sid = sub.get("id")
+            if sid in seen_ids:
+                continue
+            seen_ids.add(sid)
             ts = sub.get("created")
             if isinstance(ts, str):
                 try:
@@ -715,16 +746,19 @@ def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
             if not isinstance(ts, int):
                 continue
             if ts < start_ts:
-                continue  # too old; will trigger break after the loop
+                continue
             all_below_start = False
             if ts >= end_ts:
-                continue  # newer than the window (rare)
+                continue
             d = datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()
             daily[d] += 1
 
         if all_below_start:
-            break  # we're past the window — no need to paginate further
+            break
         page += 1
+    else:
+        # while-else: ran the full PAGE_CAP without breaking — likely capped
+        capped = True
 
     rows = []
     cur = start
@@ -732,10 +766,10 @@ def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
         di = cur.isoformat()
         rows.append({"date": di, "count": daily.get(di, 0)})
         cur += timedelta(days=1)
-    return {"total": sum(daily.values()), "daily": rows, "error": None}
+    return {"total": sum(daily.values()), "daily": rows, "error": None, "capped": capped}
 
 
-@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+@st.cache_data(ttl=3600, show_spinner=False)  # segments don't change minute-to-minute
 def beehiiv_engaged_readers() -> dict:
     """Subscriber count from the beehiiv segment 'Engaged Reades - Open > 40%' (their existing segment)."""
     api_key = os.getenv("BEEHIIV_API_KEY", "").strip()

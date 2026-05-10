@@ -3,6 +3,7 @@ from secrets_loader import materialize_cloud_secrets
 
 materialize_cloud_secrets()
 
+import concurrent.futures
 from datetime import date, datetime, timedelta
 
 import pandas as pd
@@ -18,7 +19,9 @@ from data_layer import (
     beehiiv_metrics,
     ga4_audience_metrics,
     ga4_daily_users_and_events,
+    ga4_modules_finished_by_campaign,
     ga4_modules_finished_by_channel,
+    google_ads_metrics,
     gsc_keyword_position,
     stripe_active_subscriber_count,
     stripe_charges_daily_by_amounts,
@@ -93,21 +96,66 @@ st.caption(f"**{start}** → **{end}**  •  {(end - start).days + 1} days")
 COG_AMOUNTS = (3500, 1750)
 PERSONALITY_AMOUNTS = (900,)
 
-with st.spinner("Loading data..."):
-    ga4 = ga4_audience_metrics(start, end)
-    ga4_daily = ga4_daily_users_and_events(start, end)
-    stripe_m = stripe_metrics(start, end)
-    mrr_history = stripe_mrr_history(start, end)
-    current_mrr = stripe_current_mrr()
-    active_subs = stripe_active_subscriber_count()
-    bh = beehiiv_metrics(start, end)
-    bh_daily_rates = beehiiv_daily_rates(start, end)
-    new_subs_daily = beehiiv_daily_new_subscribers(start, end)
-    engaged = beehiiv_engaged_readers()
-    cog_sales = stripe_charges_daily_by_amounts(start, end, COG_AMOUNTS)
-    pdf_sales = stripe_charges_daily_by_amounts(start, end, PERSONALITY_AMOUNTS, exclude_subscriptions=True)
-    keyword_pos = gsc_keyword_position("personality test")
-    modules_by_channel = ga4_modules_finished_by_channel(start, end)
+# Compute the prior comparison window: same length, immediately before `start`
+period_days = (end - start).days + 1
+prior_end = start - timedelta(days=1)
+prior_start = prior_end - timedelta(days=period_days - 1)
+
+
+# Single thread pool runs current + prior period fetches in parallel (~28 tasks).
+# Each call hits @st.cache_data, so repeat runs reuse cached values.
+def _fetch_period(ex, start_, end_) -> dict:
+    """Submit all per-period tasks. Returns dict of futures."""
+    return {
+        "ga4": ex.submit(ga4_audience_metrics, start_, end_),
+        "ga4_daily": ex.submit(ga4_daily_users_and_events, start_, end_),
+        "stripe_m": ex.submit(stripe_metrics, start_, end_),
+        "mrr_history": ex.submit(stripe_mrr_history, start_, end_),
+        "bh": ex.submit(beehiiv_metrics, start_, end_),
+        "bh_daily_rates": ex.submit(beehiiv_daily_rates, start_, end_),
+        "new_subs_daily": ex.submit(beehiiv_daily_new_subscribers, start_, end_),
+        "cog_sales": ex.submit(stripe_charges_daily_by_amounts, start_, end_, COG_AMOUNTS, False),
+        "pdf_sales": ex.submit(stripe_charges_daily_by_amounts, start_, end_, PERSONALITY_AMOUNTS, True),
+        "ads": ex.submit(google_ads_metrics, start_, end_),
+        "modules_by_channel": ex.submit(ga4_modules_finished_by_channel, start_, end_),
+        "modules_by_campaign": ex.submit(ga4_modules_finished_by_campaign, start_, end_),
+    }
+
+
+with st.spinner("Loading data (current + prior period in parallel)..."):
+    _t0 = datetime.now()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=24) as ex:
+        # Period-independent fetches once
+        f_current_mrr = ex.submit(stripe_current_mrr)
+        f_active_subs = ex.submit(stripe_active_subscriber_count)
+        f_engaged = ex.submit(beehiiv_engaged_readers)
+        f_keyword = ex.submit(gsc_keyword_position, "personality test")
+        # Per-period fetches
+        f_curr = _fetch_period(ex, start, end)
+        f_prior = _fetch_period(ex, prior_start, prior_end)
+        cur = {k: f.result() for k, f in f_curr.items()}
+        pri = {k: f.result() for k, f in f_prior.items()}
+        current_mrr = f_current_mrr.result()
+        active_subs = f_active_subs.result()
+        engaged = f_engaged.result()
+        keyword_pos = f_keyword.result()
+    _elapsed = (datetime.now() - _t0).total_seconds()
+
+ga4 = cur["ga4"]
+ga4_daily = cur["ga4_daily"]
+stripe_m = cur["stripe_m"]
+mrr_history = cur["mrr_history"]
+bh = cur["bh"]
+bh_daily_rates = cur["bh_daily_rates"]
+new_subs_daily = cur["new_subs_daily"]
+cog_sales = cur["cog_sales"]
+pdf_sales = cur["pdf_sales"]
+ads = cur["ads"]
+modules_by_channel = cur["modules_by_channel"]
+modules_by_campaign = cur["modules_by_campaign"]
+
+st.sidebar.caption(f"⏱ Last fetch: {_elapsed:.1f}s")
+st.sidebar.caption(f"Comparing vs prior {period_days}d ({prior_start} → {prior_end})")
 
 
 # ---------- Helpers ----------
@@ -148,10 +196,44 @@ def line_chart(title: str, df: pd.DataFrame, y_col: str, color: str, y_title: st
     st.plotly_chart(fig, use_container_width=True)
 
 
-def metric_section(label: str, value: str, tooltip: str, df: pd.DataFrame, y_col: str, color: str, is_percent: bool = False, y_title: str = "") -> None:
+def variance(curr, prev) -> float | None:
+    """Return % change. None if prior is missing/zero."""
+    if prev is None or curr is None:
+        return None
+    try:
+        prev_f = float(prev)
+        curr_f = float(curr)
+    except (TypeError, ValueError):
+        return None
+    if prev_f == 0:
+        return None
+    return ((curr_f - prev_f) / prev_f) * 100
+
+
+def metric_section(
+    label: str, value: str, tooltip: str, df: pd.DataFrame, y_col: str, color: str,
+    *, delta_pct: float | None = None, delta_inverse: bool = False,
+    is_percent: bool = False, y_title: str = "",
+) -> None:
     st.markdown(f"### {label}", help=tooltip)
     c_left, c_right = st.columns([1, 4])
-    c_left.markdown(f"<div style='font-size: 2.4em; font-weight: 700; line-height: 1.1;'>{value}</div>", unsafe_allow_html=True)
+    c_left.markdown(
+        f"<div style='font-size: 2.4em; font-weight: 700; line-height: 1.1;'>{value}</div>",
+        unsafe_allow_html=True,
+    )
+    if delta_pct is not None:
+        sign = "▲" if delta_pct >= 0 else "▼"
+        is_good = (delta_pct >= 0) ^ delta_inverse  # invert when "more = bad" (e.g., unsub rate)
+        col = "#16A34A" if is_good else "#DC2626"
+        c_left.markdown(
+            f"<div style='color:{col}; font-size:0.95em; margin-top:0.25em;'>{sign} {abs(delta_pct):.1f}% vs prior {period_days}d</div>",
+            unsafe_allow_html=True,
+        )
+    elif delta_pct is None:
+        c_left.markdown(
+            "<div style='color:#888; font-size:0.85em; margin-top:0.25em;'>(no comparison available)</div>",
+            unsafe_allow_html=True,
+        )
     with c_right:
         line_chart(label, df, y_col, color, y_title=y_title, is_percent=is_percent)
     st.markdown("---")
@@ -180,24 +262,28 @@ with tab_overview:
         value=fmt_int(ga4.get("modules_finished")),
         tooltip='GA4 • count of "Submitted Email" event in window.',
         df=mf_df, y_col="modules_finished", color="#16A34A", y_title="Submissions / day",
+        delta_pct=variance(ga4.get("modules_finished"), pri["ga4"].get("modules_finished")),
     )
 
     # 2. New Subscribers
     ns_df = pd.DataFrame(new_subs_daily.get("daily", []))
+    capped_note = " (capped at 10K — beehiiv's pagination cap; actual may be higher)" if new_subs_daily.get("capped") else ""
     metric_section(
         label="📨 New Subscribers",
-        value=fmt_int(new_subs_daily.get("total")),
-        tooltip="beehiiv • count of subscriptions with `created` timestamp inside window. Paginated `created desc` until below window.",
+        value=fmt_int(new_subs_daily.get("total")) + ("+" if new_subs_daily.get("capped") else ""),
+        tooltip=f"beehiiv • subscriptions with `created` timestamp in window, deduped by id. Paginated until subs go below window or beehiiv's pagination cap.{capped_note}",
         df=ns_df, y_col="count", color="#4F8BF9", y_title="New subs / day",
+        delta_pct=variance(new_subs_daily.get("total"), pri["new_subs_daily"].get("total")),
     )
 
-    # 3. Engaged Readers
+    # 3. Engaged Readers (snapshot — no variance)
     seg_name = engaged.get("segment_name") or "Engaged Reades - Open > 40%"
     last_calc = engaged.get("last_calculated", "?")
     tooltip_engaged = f'beehiiv • subscriber count from segment "{seg_name}" (open rate > 40%). Last recalculated by beehiiv: {last_calc}.'
     st.markdown("### 💚 Engaged Readers", help=tooltip_engaged)
     c_left, c_right = st.columns([1, 4])
     c_left.markdown(f"<div style='font-size: 2.4em; font-weight: 700; line-height: 1.1;'>{fmt_int(engaged.get('engaged'))}</div>", unsafe_allow_html=True)
+    c_left.markdown("<div style='color:#888; font-size:0.85em; margin-top:0.25em;'>(snapshot — no historical comparison)</div>", unsafe_allow_html=True)
     c_left.caption(f'segment: "{seg_name}"')
     with c_right:
         flat_df = pd.DataFrame({"date": date_idx, "engaged": [engaged.get("engaged", 0)] * len(date_idx)})
@@ -208,13 +294,15 @@ with tab_overview:
         st.caption("⚠️ Curve is flat — beehiiv segments only expose a current count, not a historical time series.")
     st.markdown("---")
 
-    # 4. Unsubscribe Rate
+    # 4. Unsubscribe Rate (delta_inverse: increase is bad)
     ur_df = pd.DataFrame(bh_daily_rates) if bh_daily_rates else pd.DataFrame(columns=["date", "unsubscribe_rate"])
     metric_section(
         label="🚪 Unsubscribe Rate",
         value=fmt_pct(bh.get("unsubscribe_rate")),
         tooltip="beehiiv • total unsubscribes / total recipients in window.",
         df=ur_df, y_col="unsubscribe_rate", color="#DC2626", is_percent=True, y_title="Rate (%)",
+        delta_pct=variance(bh.get("unsubscribe_rate"), pri["bh"].get("unsubscribe_rate")),
+        delta_inverse=True,
     )
 
     # 5. Total Revenue
@@ -224,15 +312,19 @@ with tab_overview:
         value=fmt_money(stripe_m.get("gross_usd", 0)),
         tooltip="Stripe • gross volume = sum of all successful charge amounts (pre-refund) in window.",
         df=rev_df, y_col="total", color="#16A34A", y_title="Revenue ($)",
+        delta_pct=variance(stripe_m.get("gross_usd"), pri["stripe_m"].get("gross_usd")),
     )
 
-    # 6. MRR
+    # 6. MRR — compare current snapshot to MRR at end of prior period (from prior period's history)
     mrr_df = pd.DataFrame(mrr_history) if mrr_history else pd.DataFrame(columns=["date", "mrr"])
+    prior_mrr_history = pri["mrr_history"]
+    prior_mrr_end = prior_mrr_history[-1]["mrr"] if prior_mrr_history else None
     metric_section(
         label="📈 MRR",
         value=fmt_money(current_mrr),
-        tooltip="Stripe • Monthly Recurring Revenue. KPI is current snapshot. Curve reconstructs daily MRR from active+canceled subscription history.",
+        tooltip="Stripe • Monthly Recurring Revenue. KPI is current snapshot. Curve reconstructs daily MRR from active+canceled subscription history. Δ compares current MRR to MRR at the end of the prior window.",
         df=mrr_df, y_col="mrr", color="#4F8BF9", y_title="MRR ($)",
+        delta_pct=variance(current_mrr, prior_mrr_end),
     )
 
     # 7. Cognitive Assessment Sales
@@ -242,6 +334,7 @@ with tab_overview:
         value=fmt_int(cog_sales.get("total")),
         tooltip="Stripe • count of successful charges with amount $35.00 or $17.50 in window.",
         df=cog_df, y_col="count", color="#F5A524", y_title="Sales / day",
+        delta_pct=variance(cog_sales.get("total"), pri["cog_sales"].get("total")),
     )
 
     # 8. Personality Test PDF Sales
@@ -249,8 +342,23 @@ with tab_overview:
     metric_section(
         label="📄 Personality Test PDF Sales",
         value=fmt_int(pdf_sales.get("total")),
-        tooltip="Stripe • count of successful charges with amount $9.00, EXCLUDING subscription charges. Detection: charges from a subscription invoice or with description starting with 'Subscription' are skipped (a $9 sub tier exists, so without this filter we'd count subscription renewals as PDF sales).",
+        tooltip="Stripe • count of successful charges with amount $9.00, EXCLUDING subscription charges. Detection: charges from a subscription invoice or with description starting with 'Subscription' are skipped.",
         df=pdf_df, y_col="count", color="#A855F7", y_title="Sales / day",
+        delta_pct=variance(pdf_sales.get("total"), pri["pdf_sales"].get("total")),
+    )
+
+    # 9. Spent on Ads (NEW)
+    ads_df = pd.DataFrame(date_idx, columns=["date"]).merge(
+        pd.DataFrame(ads.get("daily", [])),
+        on="date", how="left",
+    ).fillna(0)
+    metric_section(
+        label="💰 Spent on Ads",
+        value=fmt_money(ads.get("spend_usd", 0)),
+        tooltip="Google Ads • sum of cost_micros / 1M for window. Δ compares spend in current window to prior window.",
+        df=ads_df, y_col="spend", color="#DC2626", y_title="Spend ($)",
+        delta_pct=variance(ads.get("spend_usd"), pri["ads"].get("spend_usd")),
+        delta_inverse=False,  # increased spend is "good" for trend tracking; use inverse if ROAS-focused
     )
 
     # ------------------------------------------------------------------------
@@ -372,12 +480,34 @@ with tab_channels:
             )
             st.plotly_chart(fig, use_container_width=True)
 
-        st.markdown("#### Detail")
+        st.markdown("#### Detail by channel")
         st.dataframe(
             ch_df.rename(columns={"count": "Submissions", "channel": "Channel", "%": "% of total"}),
             hide_index=True,
             use_container_width=True,
         )
 
+    # ------------------------------------------------------------------------
+    # Campaign breakdown
+    # ------------------------------------------------------------------------
+    st.markdown("---")
+    st.markdown("### 📢 Modules Finished by Campaign  ·  *Source: GA4*")
+    st.caption(
+        f'Count of `Submitted Email` events grouped by `sessionCampaignName` in {start} → {end}. '
+        "Campaign attribution comes from GA4's session-level UTM `utm_campaign` (or auto-tagged Google Ads campaign)."
+    )
+    if not modules_by_campaign:
+        st.info("No campaign-attributed 'Submitted Email' events in this window.")
+    else:
+        camp_df = pd.DataFrame(modules_by_campaign)
+        camp_total = camp_df["count"].sum()
+        camp_df["%"] = (camp_df["count"] / camp_total * 100).round(1)
+        st.caption(f"Total campaign-attributed submissions: **{camp_total:,}** across **{len(camp_df)}** campaigns")
+        st.dataframe(
+            camp_df.rename(columns={"campaign": "Campaign", "count": "Submissions", "%": "% of total"}),
+            hide_index=True,
+            use_container_width=True,
+        )
 
-st.caption("Sources: GA4 · Stripe · beehiiv · Search Console  •  10-min cache  •  All times in UTC.")
+
+st.caption("Sources: GA4 · Stripe · beehiiv · Search Console · Google Ads  •  10-min cache  •  All times in UTC.")
