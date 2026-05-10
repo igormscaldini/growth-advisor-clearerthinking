@@ -290,6 +290,54 @@ def stripe_mrr_history(start: date, end: date) -> list[dict]:
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def stripe_current_mrr() -> float:
+    """Current MRR snapshot summed across all active subscriptions, normalized to monthly."""
+    from stripe_client import get_client
+
+    s = get_client()
+    mrr = 0.0
+    for sub in s.Subscription.list(status="active", limit=100).auto_paging_iter():
+        for item in sub["items"]["data"]:
+            price = item.price
+            recurring = getattr(price, "recurring", None)
+            interval = getattr(recurring, "interval", "month") if recurring else "month"
+            interval_count = getattr(recurring, "interval_count", 1) if recurring else 1
+            unit_amount = getattr(price, "unit_amount", 0) or 0
+            quantity = getattr(item, "quantity", 1) or 1
+            mrr += _to_monthly(unit_amount, interval, interval_count, quantity)
+    return round(mrr, 2)
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def stripe_charges_daily_by_amounts(start: date, end: date, amounts_cents: tuple[int, ...]) -> dict:
+    """Total + per-day count of successful charges whose `amount` matches any target (in cents)."""
+    from stripe_client import get_client
+
+    s = get_client()
+    start_ts = _date_to_ts(start)
+    end_ts = _date_to_ts(end) + 86400
+    targets = set(amounts_cents)
+
+    daily: dict[str, int] = defaultdict(int)
+    total = 0
+    for ch in s.Charge.list(created={"gte": start_ts, "lt": end_ts}, limit=100).auto_paging_iter():
+        if ch.status != "succeeded":
+            continue
+        if (ch.amount or 0) in targets:
+            d = datetime.fromtimestamp(ch.created, tz=timezone.utc).date().isoformat()
+            daily[d] += 1
+            total += 1
+
+    rows = []
+    cur = start
+    while cur <= end:
+        di = cur.isoformat()
+        rows.append({"date": di, "count": daily.get(di, 0)})
+        cur += timedelta(days=1)
+    return {"total": total, "daily": rows}
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def stripe_revenue_by_product(start: date, end: date) -> list[dict]:
     """Sum invoice line items by product over the date range."""
     from stripe_client import get_client
@@ -516,6 +564,94 @@ def beehiiv_metrics(start: date, end: date) -> dict:
         "per_campaign": per_campaign,
         "period_used_for_new_subs": period_used,  # surfaced so the UI can show a footnote
     }
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
+    """Daily count of new beehiiv subscriptions created in the window."""
+    api_key = os.getenv("BEEHIIV_API_KEY", "").strip()
+    pub_id = os.getenv("BEEHIIV_PUB_CLEARER_THINKING", "").strip()
+    if not api_key or not pub_id:
+        return {"total": 0, "daily": [], "error": "BEEHIIV_API_KEY missing"}
+
+    headers = {"Authorization": f"Bearer {api_key}"}
+    start_ts = _date_to_ts(start)
+    end_ts = _date_to_ts(end) + 86400
+
+    daily: dict[str, int] = defaultdict(int)
+    page = 1
+    while True:
+        r = requests.get(
+            f"{BEEHIIV_BASE}/publications/{pub_id}/subscriptions",
+            headers=headers,
+            params={
+                "limit": 100,
+                "page": page,
+                "created_after": start_ts,
+                "created_before": end_ts,
+            },
+        )
+        if r.status_code != 200:
+            break
+        data = r.json()
+        for sub in data.get("data", []):
+            ts = sub.get("created")
+            if isinstance(ts, int):
+                d = datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()
+                daily[d] += 1
+            elif isinstance(ts, str):
+                try:
+                    d = datetime.fromisoformat(ts.replace("Z", "+00:00")).date().isoformat()
+                    daily[d] += 1
+                except ValueError:
+                    pass
+        if page >= data.get("total_pages", 1):
+            break
+        page += 1
+
+    rows = []
+    cur = start
+    while cur <= end:
+        di = cur.isoformat()
+        rows.append({"date": di, "count": daily.get(di, 0)})
+        cur += timedelta(days=1)
+    return {"total": sum(daily.values()), "daily": rows, "error": None}
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def beehiiv_engaged_readers() -> dict:
+    """Subscriber count from the beehiiv segment 'Engaged Reades - Open > 40%' (their existing segment)."""
+    api_key = os.getenv("BEEHIIV_API_KEY", "").strip()
+    pub_id = os.getenv("BEEHIIV_PUB_CLEARER_THINKING", "").strip()
+    if not api_key or not pub_id:
+        return {"engaged": 0, "segment_name": None, "error": "BEEHIIV_API_KEY missing"}
+
+    headers = {"Authorization": f"Bearer {api_key}"}
+    target = "engaged reades - open > 40%"  # note: existing segment has typo "Reades"
+
+    page = 1
+    while True:
+        r = requests.get(
+            f"{BEEHIIV_BASE}/publications/{pub_id}/segments",
+            headers=headers,
+            params={"limit": 100, "page": page},
+        )
+        if r.status_code != 200:
+            return {"engaged": 0, "segment_name": None, "error": f"HTTP {r.status_code}"}
+        data = r.json()
+        for seg in data.get("data", []):
+            if seg.get("name", "").strip().lower() == target:
+                return {
+                    "engaged": int(seg.get("total_results", 0) or 0),
+                    "segment_name": seg.get("name"),
+                    "last_calculated": seg.get("last_calculated"),
+                    "error": None,
+                }
+        if page >= data.get("total_pages", 1):
+            break
+        page += 1
+
+    return {"engaged": 0, "segment_name": None, "error": "Segment 'Engaged Reades - Open > 40%' not found"}
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
