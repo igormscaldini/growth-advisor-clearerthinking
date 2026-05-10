@@ -309,6 +309,79 @@ def stripe_current_mrr() -> float:
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def stripe_active_subscriber_count() -> int:
+    """Count of Stripe subscriptions with status='active' (live snapshot)."""
+    from stripe_client import get_client
+
+    s = get_client()
+    return sum(1 for _ in s.Subscription.list(status="active", limit=100).auto_paging_iter())
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def gsc_keyword_position(keyword: str) -> dict:
+    """Average GSC position for a specific keyword, last 28 days (with GSC's 3-day lag)."""
+    from gsc_client import SITE_URL, get_client
+
+    end = date.today() - timedelta(days=3)
+    start = end - timedelta(days=27)
+    resp = get_client().searchanalytics().query(
+        siteUrl=SITE_URL,
+        body={
+            "startDate": str(start),
+            "endDate": str(end),
+            "dimensions": ["query"],
+            "rowLimit": 1,
+            "dimensionFilterGroups": [{
+                "filters": [{
+                    "dimension": "query",
+                    "operator": "equals",
+                    "expression": keyword,
+                }],
+            }],
+        },
+    ).execute()
+    rows = resp.get("rows", [])
+    if not rows:
+        return {"position": None, "clicks": 0, "impressions": 0, "keyword": keyword}
+    return {
+        "position": rows[0]["position"],
+        "clicks": int(rows[0]["clicks"]),
+        "impressions": int(rows[0]["impressions"]),
+        "keyword": keyword,
+    }
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def ga4_modules_finished_by_channel(start: date, end: date) -> list[dict]:
+    """Count of 'Submitted Email' events grouped by sessionDefaultChannelGroup."""
+    from google.analytics.data_v1beta.types import (
+        DateRange,
+        Dimension,
+        Filter,
+        FilterExpression,
+        Metric,
+        OrderBy,
+        RunReportRequest,
+    )
+    from ga4_client import get_client, property_path
+
+    resp = get_client().run_report(RunReportRequest(
+        property=property_path(),
+        date_ranges=[DateRange(start_date=str(start), end_date=str(end))],
+        dimensions=[Dimension(name="sessionDefaultChannelGroup")],
+        metrics=[Metric(name="eventCount")],
+        dimension_filter=FilterExpression(
+            filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="Submitted Email")),
+        ),
+        order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="eventCount"), desc=True)],
+    ))
+    return [
+        {"channel": row.dimension_values[0].value or "(not set)", "count": int(row.metric_values[0].value)}
+        for row in resp.rows
+    ]
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def stripe_charges_daily_by_amounts(start: date, end: date, amounts_cents: tuple[int, ...]) -> dict:
     """Total + per-day count of successful charges whose `amount` matches any target (in cents)."""
     from stripe_client import get_client
@@ -568,7 +641,12 @@ def beehiiv_metrics(start: date, end: date) -> dict:
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
-    """Daily count of new beehiiv subscriptions created in the window."""
+    """Daily count of new beehiiv subscriptions created in the window.
+
+    beehiiv's subscriptions endpoint doesn't support date filters. Strategy:
+    page through subscriptions sorted by `created desc`, stop once we cross
+    below `start_ts`.
+    """
     api_key = os.getenv("BEEHIIV_API_KEY", "").strip()
     pub_id = os.getenv("BEEHIIV_PUB_CLEARER_THINKING", "").strip()
     if not api_key or not pub_id:
@@ -576,37 +654,53 @@ def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
 
     headers = {"Authorization": f"Bearer {api_key}"}
     start_ts = _date_to_ts(start)
-    end_ts = _date_to_ts(end) + 86400
+    # max() handles the case where `end` is "today" but UTC has already rolled over
+    # (e.g., Brazil local 2026-05-09 23:30 = UTC 2026-05-10 02:30). Without this,
+    # subs created in the in-progress UTC day after end-of-end-date get excluded.
+    end_ts = max(_date_to_ts(end) + 86400, int(datetime.now(timezone.utc).timestamp()))
 
     daily: dict[str, int] = defaultdict(int)
     page = 1
-    while True:
+    PAGE_CAP = 500  # safety: max ~50K subs scanned per call
+    while page <= PAGE_CAP:
         r = requests.get(
             f"{BEEHIIV_BASE}/publications/{pub_id}/subscriptions",
             headers=headers,
             params={
                 "limit": 100,
                 "page": page,
-                "created_after": start_ts,
-                "created_before": end_ts,
+                "order_by": "created",
+                "direction": "desc",
             },
         )
         if r.status_code != 200:
+            # beehiiv caps pagination around page 100; once we hit that, return what
+            # we've collected rather than throwing it away.
             break
-        data = r.json()
-        for sub in data.get("data", []):
+        subs = r.json().get("data", [])
+        if not subs:
+            break
+
+        all_below_start = True
+        for sub in subs:
             ts = sub.get("created")
-            if isinstance(ts, int):
-                d = datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()
-                daily[d] += 1
-            elif isinstance(ts, str):
+            if isinstance(ts, str):
                 try:
-                    d = datetime.fromisoformat(ts.replace("Z", "+00:00")).date().isoformat()
-                    daily[d] += 1
+                    ts = int(datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp())
                 except ValueError:
-                    pass
-        if page >= data.get("total_pages", 1):
-            break
+                    continue
+            if not isinstance(ts, int):
+                continue
+            if ts < start_ts:
+                continue  # too old; will trigger break after the loop
+            all_below_start = False
+            if ts >= end_ts:
+                continue  # newer than the window (rare)
+            d = datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()
+            daily[d] += 1
+
+        if all_below_start:
+            break  # we're past the window — no need to paginate further
         page += 1
 
     rows = []
