@@ -198,52 +198,61 @@ def _date_to_ts(d: date) -> int:
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def stripe_metrics(start: date, end: date) -> dict:
-    """Total + daily revenue, split by subscription vs one-time charges."""
+    """Total + daily revenue, split by subscription (paid invoices) vs one-time (charges - invoices)."""
     from stripe_client import get_client
 
     s = get_client()
     start_ts = _date_to_ts(start)
     end_ts = _date_to_ts(end) + 86400
 
+    # Total revenue from all successful charges (both subscription + one-time)
     gross = 0
     refunded = 0
-    sub_total = 0
-    nonsub_total = 0
-    daily: dict[str, dict[str, int]] = defaultdict(lambda: {"sub": 0, "non_sub": 0})
-
+    daily_total: dict[str, int] = defaultdict(int)
     for ch in s.Charge.list(created={"gte": start_ts, "lt": end_ts}, limit=100).auto_paging_iter():
         if ch.status != "succeeded":
             continue
-        gross += ch.amount
-        refunded += ch.amount_refunded or 0
-        net = ch.amount - (ch.amount_refunded or 0)
+        amt = ch.amount or 0
+        refund = getattr(ch, "amount_refunded", 0) or 0
+        gross += amt
+        refunded += refund
+        net = amt - refund
         d = datetime.fromtimestamp(ch.created, tz=timezone.utc).date().isoformat()
-        if ch.invoice:
-            daily[d]["sub"] += net
-            sub_total += net
-        else:
-            daily[d]["non_sub"] += net
-            nonsub_total += net
+        daily_total[d] += net
+
+    # Subscription revenue from paid invoices
+    sub_total = 0
+    daily_sub: dict[str, int] = defaultdict(int)
+    for inv in s.Invoice.list(created={"gte": start_ts, "lt": end_ts}, limit=100, status="paid").auto_paging_iter():
+        amt = getattr(inv, "amount_paid", 0) or 0
+        sub_total += amt
+        d = datetime.fromtimestamp(inv.created, tz=timezone.utc).date().isoformat()
+        daily_sub[d] += amt
 
     daily_rows = []
     cur = start
     while cur <= end:
         di = cur.isoformat()
-        v = daily.get(di, {"sub": 0, "non_sub": 0})
+        total_d = daily_total.get(di, 0)
+        sub_d = min(daily_sub.get(di, 0), total_d)  # cap so non_sub never goes negative
+        non_sub_d = total_d - sub_d
         daily_rows.append({
             "date": di,
-            "subscription": v["sub"] / 100,
-            "non_subscription": v["non_sub"] / 100,
-            "total": (v["sub"] + v["non_sub"]) / 100,
+            "subscription": sub_d / 100,
+            "non_subscription": non_sub_d / 100,
+            "total": total_d / 100,
         })
         cur += timedelta(days=1)
 
+    net_total = gross - refunded
+    sub_net = min(sub_total, net_total)
+
     return {
-        "revenue_usd": (gross - refunded) / 100,
+        "revenue_usd": net_total / 100,
         "gross_usd": gross / 100,
         "refunded_usd": refunded / 100,
-        "subscription_usd": sub_total / 100,
-        "non_subscription_usd": nonsub_total / 100,
+        "subscription_usd": sub_net / 100,
+        "non_subscription_usd": (net_total - sub_net) / 100,
         "daily": [{"date": r["date"], "revenue": r["total"]} for r in daily_rows],
         "daily_split": daily_rows,
     }
@@ -261,11 +270,13 @@ def stripe_mrr_history(start: date, end: date) -> list[dict]:
             for item in sub["items"]["data"]:
                 price = item.price
                 recurring = getattr(price, "recurring", None)
-                interval = recurring.interval if recurring else "month"
-                interval_count = recurring.interval_count if recurring else 1
-                monthly = _to_monthly(price.unit_amount or 0, interval, interval_count, item.quantity or 1)
+                interval = getattr(recurring, "interval", "month") if recurring else "month"
+                interval_count = getattr(recurring, "interval_count", 1) if recurring else 1
+                unit_amount = getattr(price, "unit_amount", 0) or 0
+                quantity = getattr(item, "quantity", 1) or 1
+                monthly = _to_monthly(unit_amount, interval, interval_count, quantity)
                 created = datetime.fromtimestamp(sub.created, tz=timezone.utc).date()
-                ended_ts = sub.ended_at or sub.canceled_at
+                ended_ts = getattr(sub, "ended_at", None) or getattr(sub, "canceled_at", None)
                 ended = datetime.fromtimestamp(ended_ts, tz=timezone.utc).date() if ended_ts else None
                 subs.append({"created": created, "ended": ended, "mrr": monthly})
 
@@ -287,25 +298,29 @@ def stripe_revenue_by_product(start: date, end: date) -> list[dict]:
     start_ts = _date_to_ts(start)
     end_ts = _date_to_ts(end) + 86400
 
-    by_product: dict[str, float] = defaultdict(float)
-    for inv in s.Invoice.list(created={"gte": start_ts, "lt": end_ts}, limit=100, status="paid").auto_paging_iter():
-        for line in inv.lines.data:
-            price = getattr(line, "price", None)
-            if not price:
-                continue
-            product_id = price.product if isinstance(price.product, str) else None
-            if not product_id:
-                continue
-            amt = (line.amount or 0) / 100
-            by_product[product_id] += amt
+    # Group by line item description (e.g. "Clearer Thinking Plus - Navigator").
+    # Stripe's invoice line items have inconsistent price.product population across
+    # SDK versions, but the description field is reliably present and human-readable.
+    import re
 
-    out = []
-    for pid, amount in by_product.items():
-        try:
-            name = s.Product.retrieve(pid).name
-        except Exception:
-            name = pid
-        out.append({"product": name, "revenue": round(amount, 2)})
+    by_label: dict[str, float] = defaultdict(float)
+    for inv in s.Invoice.list(
+        created={"gte": start_ts, "lt": end_ts},
+        limit=100,
+        status="paid",
+    ).auto_paging_iter():
+        for line in inv.lines.auto_paging_iter():
+            desc = getattr(line, "description", None) or "(unlabeled)"
+            # Normalize to just the product name. Stripe descriptions are like:
+            #   "1 × Clearer Thinking Plus - Navigator (at $99.00 / month)"
+            # Strip leading "N × " quantity prefix and trailing "(at $... / interval)" pricing suffix.
+            label = re.sub(r"^\d+\s*[×x]\s*", "", desc)
+            label = re.sub(r"\s*\(at\s+\$.+?\)\s*$", "", label).strip() or desc
+            line_amt = getattr(line, "amount", None) or 0
+            if line_amt > 0:  # skip $0 lines (proration credits, etc.)
+                by_label[label] += line_amt / 100
+
+    out = [{"product": k, "revenue": round(v, 2)} for k, v in by_label.items()]
     out.sort(key=lambda r: r["revenue"], reverse=True)
     return out
 
