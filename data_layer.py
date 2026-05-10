@@ -90,34 +90,224 @@ def ga4_daily_users(start: date, end: date) -> list[dict]:
     return out
 
 
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def ga4_daily_users_and_events(start: date, end: date) -> list[dict]:
+    """Daily users + Modules Started (Viewed Privacy Policy) + Modules Finished (Submitted Email)."""
+    from google.analytics.data_v1beta.types import (
+        DateRange,
+        Dimension,
+        Filter,
+        FilterExpression,
+        FilterExpressionList,
+        Metric,
+        OrderBy,
+        RunReportRequest,
+    )
+    from ga4_client import get_client, property_path
+
+    client = get_client()
+    rng = DateRange(start_date=str(start), end_date=str(end))
+
+    users = client.run_report(RunReportRequest(
+        property=property_path(),
+        date_ranges=[rng],
+        dimensions=[Dimension(name="date")],
+        metrics=[Metric(name="totalUsers")],
+        order_bys=[OrderBy(dimension=OrderBy.DimensionOrderBy(dimension_name="date"))],
+    ))
+    users_by_date = {r.dimension_values[0].value: int(r.metric_values[0].value) for r in users.rows}
+
+    evts = client.run_report(RunReportRequest(
+        property=property_path(),
+        date_ranges=[rng],
+        dimensions=[Dimension(name="date"), Dimension(name="eventName")],
+        metrics=[Metric(name="eventCount")],
+        dimension_filter=FilterExpression(or_group=FilterExpressionList(expressions=[
+            FilterExpression(filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="Viewed Privacy Policy"))),
+            FilterExpression(filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="Submitted Email"))),
+        ])),
+    ))
+    events_by_date: dict[str, dict[str, int]] = {}
+    for r in evts.rows:
+        d = r.dimension_values[0].value
+        e = r.dimension_values[1].value
+        events_by_date.setdefault(d, {})[e] = int(r.metric_values[0].value)
+
+    out = []
+    all_dates = sorted(set(users_by_date) | set(events_by_date))
+    for d in all_dates:
+        out.append({
+            "date": f"{d[:4]}-{d[4:6]}-{d[6:8]}",
+            "users": users_by_date.get(d, 0),
+            "modules_started": events_by_date.get(d, {}).get("Viewed Privacy Policy", 0),
+            "modules_finished": events_by_date.get(d, {}).get("Submitted Email", 0),
+        })
+    return out
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def ga4_funnel_events(start: date, end: date) -> dict:
+    """Counts for the 3-step funnel."""
+    from google.analytics.data_v1beta.types import (
+        DateRange,
+        Dimension,
+        Filter,
+        FilterExpression,
+        Metric,
+        RunReportRequest,
+    )
+    from ga4_client import get_client, property_path
+
+    client = get_client()
+    rng = DateRange(start_date=str(start), end_date=str(end))
+
+    def count(event: str) -> int:
+        resp = client.run_report(RunReportRequest(
+            property=property_path(),
+            date_ranges=[rng],
+            dimensions=[Dimension(name="eventName")],
+            metrics=[Metric(name="eventCount")],
+            dimension_filter=FilterExpression(
+                filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value=event)),
+            ),
+        ))
+        return int(resp.rows[0].metric_values[0].value) if resp.rows else 0
+
+    return {
+        "viewed_privacy": count("Viewed Privacy Policy"),
+        "accepted_privacy": count("Accepted Privacy Policy"),
+        "submitted_email": count("Submitted Email"),
+    }
+
+
 # =============================================================================
 # Stripe
 # =============================================================================
+def _to_monthly(unit_amount: int, interval: str, interval_count: int, quantity: int) -> float:
+    """Normalize a Stripe price interval to a monthly USD figure."""
+    months_in_period = {"day": 1 / 30.4, "week": 1 / 4.33, "month": 1, "year": 12}.get(interval, 1)
+    period_months = months_in_period * (interval_count or 1)
+    if period_months == 0:
+        return 0.0
+    return (unit_amount / 100.0) * quantity / period_months
+
+
+def _date_to_ts(d: date) -> int:
+    return int(datetime(d.year, d.month, d.day, tzinfo=timezone.utc).timestamp())
+
+
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def stripe_metrics(start: date, end: date) -> dict:
+    """Total + daily revenue, split by subscription vs one-time charges."""
     from stripe_client import get_client
 
     s = get_client()
-    start_ts = int(datetime(start.year, start.month, start.day, tzinfo=timezone.utc).timestamp())
-    end_ts = int(datetime(end.year, end.month, end.day, tzinfo=timezone.utc).timestamp()) + 86400  # inclusive
+    start_ts = _date_to_ts(start)
+    end_ts = _date_to_ts(end) + 86400
 
     gross = 0
     refunded = 0
-    daily = defaultdict(int)
+    sub_total = 0
+    nonsub_total = 0
+    daily: dict[str, dict[str, int]] = defaultdict(lambda: {"sub": 0, "non_sub": 0})
+
     for ch in s.Charge.list(created={"gte": start_ts, "lt": end_ts}, limit=100).auto_paging_iter():
         if ch.status != "succeeded":
             continue
         gross += ch.amount
         refunded += ch.amount_refunded or 0
-        d = datetime.fromtimestamp(ch.created, tz=timezone.utc).date()
-        daily[d.isoformat()] += (ch.amount - (ch.amount_refunded or 0))
+        net = ch.amount - (ch.amount_refunded or 0)
+        d = datetime.fromtimestamp(ch.created, tz=timezone.utc).date().isoformat()
+        if ch.invoice:
+            daily[d]["sub"] += net
+            sub_total += net
+        else:
+            daily[d]["non_sub"] += net
+            nonsub_total += net
+
+    daily_rows = []
+    cur = start
+    while cur <= end:
+        di = cur.isoformat()
+        v = daily.get(di, {"sub": 0, "non_sub": 0})
+        daily_rows.append({
+            "date": di,
+            "subscription": v["sub"] / 100,
+            "non_subscription": v["non_sub"] / 100,
+            "total": (v["sub"] + v["non_sub"]) / 100,
+        })
+        cur += timedelta(days=1)
 
     return {
         "revenue_usd": (gross - refunded) / 100,
         "gross_usd": gross / 100,
         "refunded_usd": refunded / 100,
-        "daily": [{"date": d, "revenue": v / 100} for d, v in sorted(daily.items())],
+        "subscription_usd": sub_total / 100,
+        "non_subscription_usd": nonsub_total / 100,
+        "daily": [{"date": r["date"], "revenue": r["total"]} for r in daily_rows],
+        "daily_split": daily_rows,
     }
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def stripe_mrr_history(start: date, end: date) -> list[dict]:
+    """Daily MRR snapshot computed from current + canceled subscriptions."""
+    from stripe_client import get_client
+
+    s = get_client()
+    subs: list[dict] = []
+    for status in ("active", "canceled"):
+        for sub in s.Subscription.list(status=status, limit=100).auto_paging_iter():
+            for item in sub["items"]["data"]:
+                price = item.price
+                recurring = getattr(price, "recurring", None)
+                interval = recurring.interval if recurring else "month"
+                interval_count = recurring.interval_count if recurring else 1
+                monthly = _to_monthly(price.unit_amount or 0, interval, interval_count, item.quantity or 1)
+                created = datetime.fromtimestamp(sub.created, tz=timezone.utc).date()
+                ended_ts = sub.ended_at or sub.canceled_at
+                ended = datetime.fromtimestamp(ended_ts, tz=timezone.utc).date() if ended_ts else None
+                subs.append({"created": created, "ended": ended, "mrr": monthly})
+
+    rows = []
+    cur = start
+    while cur <= end:
+        mrr = sum(x["mrr"] for x in subs if x["created"] <= cur and (x["ended"] is None or x["ended"] >= cur))
+        rows.append({"date": cur.isoformat(), "mrr": round(mrr, 2)})
+        cur += timedelta(days=1)
+    return rows
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def stripe_revenue_by_product(start: date, end: date) -> list[dict]:
+    """Sum invoice line items by product over the date range."""
+    from stripe_client import get_client
+
+    s = get_client()
+    start_ts = _date_to_ts(start)
+    end_ts = _date_to_ts(end) + 86400
+
+    by_product: dict[str, float] = defaultdict(float)
+    for inv in s.Invoice.list(created={"gte": start_ts, "lt": end_ts}, limit=100, status="paid").auto_paging_iter():
+        for line in inv.lines.data:
+            price = getattr(line, "price", None)
+            if not price:
+                continue
+            product_id = price.product if isinstance(price.product, str) else None
+            if not product_id:
+                continue
+            amt = (line.amount or 0) / 100
+            by_product[product_id] += amt
+
+    out = []
+    for pid, amount in by_product.items():
+        try:
+            name = s.Product.retrieve(pid).name
+        except Exception:
+            name = pid
+        out.append({"product": name, "revenue": round(amount, 2)})
+    out.sort(key=lambda r: r["revenue"], reverse=True)
+    return out
 
 
 # =============================================================================
@@ -143,7 +333,7 @@ def google_ads_metrics(start: date, end: date) -> dict:
         impr = 0
         clicks = 0
         conv = 0.0
-        daily: dict[str, float] = defaultdict(float)
+        daily: dict[str, dict] = defaultdict(lambda: {"spend": 0.0, "impressions": 0, "clicks": 0, "conversions": 0.0})
         for batch in svc.search_stream(customer_id=CUSTOMER_ID, query=query):
             for row in batch.results:
                 d_cost = row.metrics.cost_micros / 1_000_000
@@ -151,14 +341,18 @@ def google_ads_metrics(start: date, end: date) -> dict:
                 impr += row.metrics.impressions
                 clicks += row.metrics.clicks
                 conv += row.metrics.conversions
-                daily[row.segments.date] += d_cost
+                d = row.segments.date
+                daily[d]["spend"] += d_cost
+                daily[d]["impressions"] += row.metrics.impressions
+                daily[d]["clicks"] += row.metrics.clicks
+                daily[d]["conversions"] += row.metrics.conversions
 
         return {
             "spend_usd": cost,
             "impressions": impr,
             "clicks": clicks,
             "conversions": conv,
-            "daily": [{"date": d, "spend": v} for d, v in sorted(daily.items())],
+            "daily": [{"date": d, **v} for d, v in sorted(daily.items())],
             "error": None,
         }
     except Exception as e:
@@ -307,3 +501,66 @@ def beehiiv_metrics(start: date, end: date) -> dict:
         "per_campaign": per_campaign,
         "period_used_for_new_subs": period_used,  # surfaced so the UI can show a footnote
     }
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def beehiiv_daily_rates(start: date, end: date) -> list[dict]:
+    """Daily aggregated email rates (open / click / unsubscribe) computed from posts in the window."""
+    api_key = os.getenv("BEEHIIV_API_KEY", "").strip()
+    pub_id = os.getenv("BEEHIIV_PUB_CLEARER_THINKING", "").strip()
+    if not api_key or not pub_id:
+        return []
+
+    headers = {"Authorization": f"Bearer {api_key}"}
+    posts = []
+    page = 1
+    while True:
+        r = requests.get(
+            f"{BEEHIIV_BASE}/publications/{pub_id}/posts",
+            headers=headers,
+            params={"page": page, "limit": 100, "expand[]": "stats", "platform": "email", "status": "confirmed"},
+        )
+        if r.status_code != 200:
+            return []
+        data = r.json()
+        posts.extend(data.get("data", []))
+        if page >= data.get("total_pages", 1):
+            break
+        page += 1
+
+    by_day: dict[str, dict[str, int]] = {}
+    for p in posts:
+        ts = p.get("publish_date")
+        d: Optional[date] = None
+        if isinstance(ts, int):
+            d = datetime.fromtimestamp(ts, tz=timezone.utc).date()
+        elif isinstance(ts, str):
+            try:
+                d = datetime.fromisoformat(ts.replace("Z", "+00:00")).date()
+            except ValueError:
+                pass
+        if d is None or not (start <= d <= end):
+            continue
+        em = (p.get("stats", {}) or {}).get("email", {}) or {}
+        sent = em.get("recipients", 0) or 0
+        opens = em.get("opens", 0) or 0
+        clicks = em.get("clicks", 0) or 0
+        unsubs = em.get("unsubscribes", 0) or 0
+        di = d.isoformat()
+        bucket = by_day.setdefault(di, {"sent": 0, "opens": 0, "clicks": 0, "unsubs": 0})
+        bucket["sent"] += sent
+        bucket["opens"] += opens
+        bucket["clicks"] += clicks
+        bucket["unsubs"] += unsubs
+
+    out = []
+    for di in sorted(by_day):
+        b = by_day[di]
+        sent = b["sent"]
+        out.append({
+            "date": di,
+            "open_rate": (b["opens"] / sent) if sent else 0,
+            "click_rate": (b["clicks"] / sent) if sent else 0,
+            "unsubscribe_rate": (b["unsubs"] / sent) if sent else 0,
+        })
+    return out
