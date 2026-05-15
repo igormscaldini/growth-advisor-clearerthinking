@@ -351,6 +351,60 @@ def gsc_keyword_position(keyword: str) -> dict:
     }
 
 
+@st.cache_data(ttl=3600, show_spinner=False)
+def gsc_keyword_position_daily(keyword: str, start: date, end: date) -> dict:
+    """Daily avg GSC position for `keyword` in [start, end]. Returns daily series + impression-weighted window avg.
+
+    End date is clamped to today-3d (GSC's data lag). Returns empty if window is fully inside the lag.
+    """
+    from gsc_client import SITE_URL, get_client
+
+    max_end = date.today() - timedelta(days=3)
+    eff_end = min(end, max_end)
+    if start > eff_end:
+        return {"daily": [], "avg_position": None, "clicks": 0, "impressions": 0, "keyword": keyword}
+
+    resp = get_client().searchanalytics().query(
+        siteUrl=SITE_URL,
+        body={
+            "startDate": str(start),
+            "endDate": str(eff_end),
+            "dimensions": ["date"],
+            "rowLimit": 25000,
+            "dimensionFilterGroups": [{
+                "filters": [{
+                    "dimension": "query",
+                    "operator": "equals",
+                    "expression": keyword,
+                }],
+            }],
+        },
+    ).execute()
+    rows = resp.get("rows", [])
+    if not rows:
+        return {"daily": [], "avg_position": None, "clicks": 0, "impressions": 0, "keyword": keyword}
+
+    daily = [
+        {
+            "date": r["keys"][0],
+            "position": r["position"],
+            "clicks": int(r["clicks"]),
+            "impressions": int(r["impressions"]),
+        }
+        for r in rows
+    ]
+    total_imps = sum(d["impressions"] for d in daily)
+    total_clicks = sum(d["clicks"] for d in daily)
+    avg = (sum(d["position"] * d["impressions"] for d in daily) / total_imps) if total_imps else None
+    return {
+        "daily": daily,
+        "avg_position": avg,
+        "clicks": total_clicks,
+        "impressions": total_imps,
+        "keyword": keyword,
+    }
+
+
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def ga4_modules_finished_by_campaign(start: date, end: date) -> list[dict]:
     """Count of 'Submitted Email' events grouped by sessionCampaignName."""
@@ -462,6 +516,51 @@ def stripe_charges_daily_by_amounts(
         rows.append({"date": di, "count": daily.get(di, 0)})
         cur += timedelta(days=1)
     return {"total": total, "daily": rows}
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def stripe_revenue_by_category(start: date, end: date) -> dict:
+    """Single-pass bucketing of successful charge revenue (USD) in [start, end] into:
+
+    - subscriptions: charges originated from a subscription invoice
+      (detected by `invoice` set OR description starting with "Subscription")
+    - pdf: $9.00 charges that are NOT subscriptions (Personality Test PDF)
+    - cognitive: $35.00 or $17.50 charges that are NOT subscriptions (Cognitive Assessment)
+    - other: everything else successful and non-subscription
+
+    Net of refunds (uses amount - amount_refunded).
+    """
+    from stripe_client import get_client
+
+    s = get_client()
+    start_ts = _date_to_ts(start)
+    end_ts = _date_to_ts(end) + 86400
+
+    subs_c = pdf_c = cog_c = other_c = 0
+    for ch in s.Charge.list(
+        created={"gte": start_ts, "lt": end_ts}, limit=100, expand=["data.invoice"]
+    ).auto_paging_iter():
+        if ch.status != "succeeded":
+            continue
+        net = (ch.amount or 0) - (getattr(ch, "amount_refunded", 0) or 0)
+        if net <= 0:
+            continue
+        desc = (getattr(ch, "description", "") or "").lower().strip()
+        is_sub = bool(getattr(ch, "invoice", None)) or desc.startswith("subscription")
+        if is_sub:
+            subs_c += net
+        elif (ch.amount or 0) == 900:
+            pdf_c += net
+        elif (ch.amount or 0) in (3500, 1750):
+            cog_c += net
+        else:
+            other_c += net
+    return {
+        "subscriptions": subs_c / 100,
+        "pdf": pdf_c / 100,
+        "cognitive": cog_c / 100,
+        "other": other_c / 100,
+    }
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)

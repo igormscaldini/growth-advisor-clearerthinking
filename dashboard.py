@@ -23,6 +23,8 @@ from data_layer import (
     ga4_modules_finished_by_channel,
     google_ads_metrics,
     gsc_keyword_position,
+    gsc_keyword_position_daily,
+    stripe_revenue_by_category,
     stripe_active_subscriber_count,
     stripe_charges_daily_by_amounts,
     stripe_current_mrr,
@@ -96,6 +98,16 @@ st.caption(f"**{start}** → **{end}**  •  {(end - start).days + 1} days")
 COG_AMOUNTS = (3500, 1750)
 PERSONALITY_AMOUNTS = (900,)
 
+# Manually-tracked revenue lines for the Monetization Summary table.
+# Update both the line items and the date below when revenue is reported.
+MANUAL_REVENUE_LAST_UPDATED = "2026-05-15"
+MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
+    "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00)],
+    "Affiliates": [("Kitted Decks", 2_529.53)],
+    "Newsletter Sponsorships": [("80,000 Hours", 4_200.00)],
+    "Beehiiv Ad Network": [("Beehiiv", 431.85)],
+}
+
 # Compute the prior comparison window: same length, immediately before `start`
 period_days = (end - start).days + 1
 prior_end = start - timedelta(days=1)
@@ -119,6 +131,8 @@ def _fetch_period(ex, start_, end_) -> dict:
         "ads": ex.submit(google_ads_metrics, start_, end_),
         "modules_by_channel": ex.submit(ga4_modules_finished_by_channel, start_, end_),
         "modules_by_campaign": ex.submit(ga4_modules_finished_by_campaign, start_, end_),
+        "kw_pos": ex.submit(gsc_keyword_position_daily, "personality test", start_, end_),
+        "revenue_cat": ex.submit(stripe_revenue_by_category, start_, end_),
     }
 
 
@@ -153,6 +167,8 @@ pdf_sales = cur["pdf_sales"]
 ads = cur["ads"]
 modules_by_channel = cur["modules_by_channel"]
 modules_by_campaign = cur["modules_by_campaign"]
+kw_pos = cur["kw_pos"]
+revenue_cat = cur["revenue_cat"]
 
 st.sidebar.caption(f"⏱ Last fetch: {_elapsed:.1f}s")
 st.sidebar.caption(f"Comparing vs prior {period_days}d ({prior_start} → {prior_end})")
@@ -245,7 +261,11 @@ date_idx = pd.date_range(start=start, end=end, freq="D").strftime("%Y-%m-%d")
 # ============================================================================
 # Tabs
 # ============================================================================
-tab_overview, tab_channels = st.tabs(["📊 Overview", "🎯 Modules by Channel"])
+tab_overview, tab_channels, tab_monetization = st.tabs([
+    "📊 Overview",
+    "🎯 Modules by Channel",
+    "💰 Monetization Breakdown",
+])
 
 
 # ============================================================================
@@ -359,6 +379,28 @@ with tab_overview:
         df=ads_df, y_col="spend", color="#DC2626", y_title="Spend ($)",
         delta_pct=variance(ads.get("spend_usd"), pri["ads"].get("spend_usd")),
         delta_inverse=False,  # increased spend is "good" for trend tracking; use inverse if ROAS-focused
+    )
+
+    # 10. GSC Ranking — "personality test" (Goal #3 tracker)
+    # Gaps are meaningful here (no impressions that day → no position), so do NOT fillna.
+    kw_daily_raw = pd.DataFrame(kw_pos.get("daily", []))
+    kw_df = pd.DataFrame(date_idx, columns=["date"]).merge(
+        kw_daily_raw if not kw_daily_raw.empty else pd.DataFrame(columns=["date", "position"]),
+        on="date", how="left",
+    )
+    kw_avg = kw_pos.get("avg_position")
+    prior_kw_avg = pri["kw_pos"].get("avg_position")
+    metric_section(
+        label='🔍 GSC Ranking — "personality test"',
+        value=f"#{kw_avg:.1f}" if kw_avg else "—",
+        tooltip=(
+            'Search Console • impression-weighted average position for the query "personality test" in window. '
+            "Lower is better (#1 = top of page 1). GSC has a 3-day data lag — recent days may be missing. "
+            "Tracks Goal #3 from GOALS.md."
+        ),
+        df=kw_df, y_col="position", color="#8B5CF6", y_title="Avg position (lower = better)",
+        delta_pct=variance(kw_avg, prior_kw_avg),
+        delta_inverse=True,  # position number going up = ranking got worse
     )
 
     # ------------------------------------------------------------------------
@@ -508,6 +550,52 @@ with tab_channels:
             hide_index=True,
             use_container_width=True,
         )
+
+
+# ============================================================================
+# Tab 3: Monetization Breakdown
+# ============================================================================
+with tab_monetization:
+    st.markdown("### 💰 Monetization Breakdown")
+    st.caption(
+        f"Stripe lines scoped to **{start} → {end}** (controlled by the sidebar date filter). "
+        "Manual lines are absolute totals (not window-scoped)."
+    )
+
+    rev_subs = revenue_cat.get("subscriptions", 0.0)
+    rev_pdf = revenue_cat.get("pdf", 0.0)
+    rev_cog = revenue_cat.get("cognitive", 0.0)
+
+    mon_rows = [
+        {"Source": "Revenue from Subscriptions", "Detail": "Stripe — invoice-attached charges + descriptions starting with 'Subscription'", "Revenue": rev_subs},
+        {"Source": "Revenue from Personality Test PDF", "Detail": "Stripe — $9.00 charges (excl. subscriptions)", "Revenue": rev_pdf},
+        {"Source": "Revenue from Cognitive Assessment", "Detail": "Stripe — $35.00 or $17.50 charges (excl. subscriptions)", "Revenue": rev_cog},
+    ]
+    for label, items in MANUAL_REVENUE.items():
+        detail = "; ".join(f"{src}: {fmt_money(amt)}" for src, amt in items)
+        mon_rows.append({"Source": label, "Detail": f"Manual — {detail}", "Revenue": sum(a for _, a in items)})
+    total_rev = sum(r["Revenue"] for r in mon_rows)
+    mon_rows.append({"Source": "Total revenue", "Detail": "", "Revenue": total_rev})
+
+    mon_df = pd.DataFrame(mon_rows)
+    mon_df["Revenue"] = mon_df["Revenue"].apply(fmt_money)
+
+    st.dataframe(
+        mon_df,
+        column_config={
+            "Source": st.column_config.TextColumn("Source", width="medium"),
+            "Detail": st.column_config.TextColumn("Detail", width="large"),
+            "Revenue": st.column_config.TextColumn("Revenue", width="small"),
+        },
+        hide_index=True,
+        use_container_width=True,
+    )
+
+    manual_sources = ", ".join(MANUAL_REVENUE.keys())
+    st.caption(
+        f"📝 Manual values (**{manual_sources}**) last updated by Igor: **{MANUAL_REVENUE_LAST_UPDATED}**. "
+        "Update via the `MANUAL_REVENUE` constant near the top of `dashboard.py`."
+    )
 
 
 st.caption("Sources: GA4 · Stripe · beehiiv · Search Console · Google Ads  •  10-min cache  •  All times in UTC.")
