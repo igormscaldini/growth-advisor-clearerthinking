@@ -30,6 +30,7 @@ from data_layer import (
     stripe_current_mrr,
     stripe_metrics,
     stripe_mrr_history,
+    stripe_new_subscribers_monthly,
 )
 
 st.set_page_config(
@@ -142,6 +143,7 @@ with st.spinner("Loading data (current + prior period in parallel)..."):
         # Period-independent fetches once
         f_current_mrr = ex.submit(stripe_current_mrr)
         f_active_subs = ex.submit(stripe_active_subscriber_count)
+        f_new_subs_monthly = ex.submit(stripe_new_subscribers_monthly)
         f_engaged = ex.submit(beehiiv_engaged_readers)
         f_keyword = ex.submit(gsc_keyword_position, "personality test")
         # Per-period fetches
@@ -151,6 +153,7 @@ with st.spinner("Loading data (current + prior period in parallel)..."):
         pri = {k: f.result() for k, f in f_prior.items()}
         current_mrr = f_current_mrr.result()
         active_subs = f_active_subs.result()
+        new_subs_monthly_all = f_new_subs_monthly.result()
         engaged = f_engaged.result()
         keyword_pos = f_keyword.result()
     _elapsed = (datetime.now() - _t0).total_seconds()
@@ -347,7 +350,43 @@ with tab_overview:
         delta_pct=variance(current_mrr, prior_mrr_end),
     )
 
-    # 7. Cognitive Assessment Sales
+    # 7. New Subscribers — all time (Stripe, not scoped to date filter)
+    st.markdown(
+        "### 🆕 New Stripe Subscribers — all time",
+        help="Stripe • count of subscriptions (any status, including canceled) bucketed by `created` month. Ignores the sidebar date filter — this is the full history.",
+    )
+    nsm_df = pd.DataFrame(new_subs_monthly_all or [], columns=["month", "count"])
+    if nsm_df.empty:
+        st.info("No Stripe subscription history available.")
+    else:
+        total_all_time = int(nsm_df["count"].sum())
+        latest_month = nsm_df.iloc[-1]
+        c_left, c_right = st.columns([1, 4])
+        c_left.markdown(
+            f"<div style='font-size: 2.4em; font-weight: 700; line-height: 1.1;'>{total_all_time:,}</div>",
+            unsafe_allow_html=True,
+        )
+        c_left.markdown(
+            f"<div style='color:#666; font-size:0.85em; margin-top:0.25em;'>{int(latest_month['count'])} new in {latest_month['month']}</div>",
+            unsafe_allow_html=True,
+        )
+        c_left.caption(f"Spans {nsm_df.iloc[0]['month']} → {nsm_df.iloc[-1]['month']}")
+        with c_right:
+            fig = go.Figure()
+            fig.add_trace(go.Bar(
+                x=nsm_df["month"], y=nsm_df["count"],
+                marker_color="#4F8BF9",
+                hovertemplate="%{x}<br>%{y} new subs<extra></extra>",
+            ))
+            fig.update_layout(
+                height=240, margin=dict(l=0, r=0, t=10, b=0), showlegend=False,
+                xaxis_title=None, yaxis_title="New subs / month",
+                xaxis=dict(type="category"),
+            )
+            st.plotly_chart(fig, use_container_width=True)
+    st.markdown("---")
+
+    # 8. Cognitive Assessment Sales
     cog_df = pd.DataFrame(cog_sales.get("daily", []))
     metric_section(
         label="🧠 Cognitive Assessment Sales",
@@ -357,7 +396,7 @@ with tab_overview:
         delta_pct=variance(cog_sales.get("total"), pri["cog_sales"].get("total")),
     )
 
-    # 8. Personality Test PDF Sales
+    # 9. Personality Test PDF Sales
     pdf_df = pd.DataFrame(pdf_sales.get("daily", []))
     metric_section(
         label="📄 Personality Test PDF Sales",
@@ -367,7 +406,7 @@ with tab_overview:
         delta_pct=variance(pdf_sales.get("total"), pri["pdf_sales"].get("total")),
     )
 
-    # 9. Spent on Ads (NEW)
+    # 10. Spent on Ads
     ads_df = pd.DataFrame(date_idx, columns=["date"]).merge(
         pd.DataFrame(ads.get("daily", [])),
         on="date", how="left",
@@ -381,7 +420,7 @@ with tab_overview:
         delta_inverse=False,  # increased spend is "good" for trend tracking; use inverse if ROAS-focused
     )
 
-    # 10. GSC Ranking — "personality test" (Goal #3 tracker)
+    # 11. GSC Ranking — "personality test" (Goal #3 tracker)
     # Gaps are meaningful here (no impressions that day → no position), so do NOT fillna.
     kw_daily_raw = pd.DataFrame(kw_pos.get("daily", []))
     kw_df = pd.DataFrame(date_idx, columns=["date"]).merge(

@@ -317,6 +317,41 @@ def stripe_active_subscriber_count() -> int:
     return sum(1 for _ in s.Subscription.list(status="active", limit=100).auto_paging_iter())
 
 
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def stripe_new_subscribers_monthly() -> list[dict]:
+    """All-time monthly new-subscriber counts from Stripe.
+
+    Pulls every subscription regardless of status, buckets by creation month,
+    and returns a chronologically sorted list of {month, count} dicts with
+    zero-fills for any gap months between the earliest sub and today.
+    """
+    from stripe_client import get_client
+
+    s = get_client()
+    counts: dict[str, int] = defaultdict(int)
+    for sub in s.Subscription.list(status="all", limit=100).auto_paging_iter():
+        created = getattr(sub, "created", None)
+        if not created:
+            continue
+        dt = datetime.fromtimestamp(created, tz=timezone.utc)
+        counts[f"{dt.year:04d}-{dt.month:02d}"] += 1
+
+    if not counts:
+        return []
+
+    first_y, first_m = map(int, sorted(counts.keys())[0].split("-"))
+    now = datetime.now(tz=timezone.utc)
+    out = []
+    y, m = first_y, first_m
+    while (y, m) <= (now.year, now.month):
+        key = f"{y:04d}-{m:02d}"
+        out.append({"month": key, "count": counts.get(key, 0)})
+        m += 1
+        if m > 12:
+            m, y = 1, y + 1
+    return out
+
+
 @st.cache_data(ttl=3600, show_spinner=False)  # GSC has 3-day lag — refreshing more often is wasted
 def gsc_keyword_position(keyword: str) -> dict:
     """Average GSC position for a specific keyword, last 28 days (with GSC's 3-day lag)."""
