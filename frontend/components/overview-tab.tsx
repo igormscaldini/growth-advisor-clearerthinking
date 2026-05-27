@@ -163,18 +163,23 @@ export function OverviewTab({ snapshot, period }: Props) {
           </span>
         </h3>
         {(() => {
-          const monthly = snapshot.snapshots.new_subscribers_monthly_alltime;
+          // Hardcoded floor: chart always starts from Jan 2026 regardless of the date filter.
+          const monthly = snapshot.snapshots.new_subscribers_monthly_alltime.filter((m) => m.month >= "2026-01");
           if (!monthly.length) {
-            return <div className="text-sm text-zinc-500 dark:text-zinc-400">No Stripe subscription history.</div>;
+            return <div className="text-sm text-zinc-500 dark:text-zinc-400">No Stripe subscription history since Jan 2026.</div>;
           }
-          const totalAllTime = monthly.reduce((s, m) => s + m.count, 0);
+          const totalNew = monthly.reduce((s, m) => s + m.new, 0);
+          const totalCancelled = monthly.reduce((s, m) => s + m.cancelled, 0);
           const latest = monthly[monthly.length - 1];
           return (
             <div className="grid grid-cols-1 md:grid-cols-[1fr_3fr] gap-4 items-center">
               <div>
-                <div className="text-3xl font-bold leading-none">{totalAllTime.toLocaleString("en-US")}</div>
+                <div className="text-3xl font-bold leading-none">{totalNew.toLocaleString("en-US")}</div>
+                <div className="mt-1 text-sm font-medium text-red-600 dark:text-red-400">
+                  −{totalCancelled.toLocaleString("en-US")} cancelled
+                </div>
                 <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                  {latest.count} new in {latest.month}
+                  {latest.new} new / {latest.cancelled} cancelled in {latest.month}
                 </div>
                 <div className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
                   Spans {monthly[0].month} → {latest.month}

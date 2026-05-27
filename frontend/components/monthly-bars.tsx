@@ -1,15 +1,16 @@
 "use client";
 
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 interface Props {
-  data: { month: string; count: number }[];
+  data: { month: string; new: number; cancelled: number }[];
 }
 
 export function MonthlyBars({ data }: Props) {
   return (
-    <ResponsiveContainer width="100%" height={240}>
+    <ResponsiveContainer width="100%" height={260}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: 4, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(127,127,127,0.15)" />
         <XAxis
           dataKey="month"
           tick={{ fontSize: 11, fill: "currentColor" }}
@@ -30,9 +31,15 @@ export function MonthlyBars({ data }: Props) {
             borderRadius: 6,
             fontSize: 12,
           }}
-          formatter={(v) => [`${typeof v === "number" ? v : 0} new subs`, ""]}
+          formatter={(v, name) => [`${typeof v === "number" ? v : 0}`, name === "new" ? "New" : "Cancelled"]}
         />
-        <Bar dataKey="count" fill="#4F8BF9" radius={[4, 4, 0, 0]} />
+        <Legend
+          wrapperStyle={{ fontSize: 12, paddingTop: 8 }}
+          iconType="circle"
+          formatter={(value) => (value === "new" ? "New" : "Cancelled")}
+        />
+        <Bar dataKey="new" fill="#4F8BF9" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="cancelled" fill="#DC2626" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

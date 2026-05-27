@@ -117,7 +117,7 @@ export interface Snapshot {
       impressions: number;
       keyword: string;
     };
-    new_subscribers_monthly_alltime: { month: string; count: number }[];
+    new_subscribers_monthly_alltime: { month: string; new: number; cancelled: number }[];
   };
   periods: Record<"7d" | "30d" | "90d", PeriodEntry>;
   daily_90d: {

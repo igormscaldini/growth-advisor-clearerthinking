@@ -319,33 +319,43 @@ def stripe_active_subscriber_count() -> int:
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def stripe_new_subscribers_monthly() -> list[dict]:
-    """All-time monthly new-subscriber counts from Stripe.
+    """All-time monthly counts of new + cancelled subscriptions from Stripe.
 
-    Pulls every subscription regardless of status, buckets by creation month,
-    and returns a chronologically sorted list of {month, count} dicts with
-    zero-fills for any gap months between the earliest sub and today.
+    Pulls every subscription regardless of status. New subs are bucketed by `created`
+    month; cancellations by `canceled_at` month (when user requested cancel).
+    Returns a chronologically sorted list of {month, new, cancelled} dicts with
+    zero-fills for any gap months between the earliest event and today.
     """
     from stripe_client import get_client
 
     s = get_client()
-    counts: dict[str, int] = defaultdict(int)
+    new_counts: dict[str, int] = defaultdict(int)
+    cancelled_counts: dict[str, int] = defaultdict(int)
     for sub in s.Subscription.list(status="all", limit=100).auto_paging_iter():
         created = getattr(sub, "created", None)
-        if not created:
-            continue
-        dt = datetime.fromtimestamp(created, tz=timezone.utc)
-        counts[f"{dt.year:04d}-{dt.month:02d}"] += 1
+        if created:
+            dt = datetime.fromtimestamp(created, tz=timezone.utc)
+            new_counts[f"{dt.year:04d}-{dt.month:02d}"] += 1
+        cancel_ts = getattr(sub, "canceled_at", None)
+        if cancel_ts:
+            dt = datetime.fromtimestamp(cancel_ts, tz=timezone.utc)
+            cancelled_counts[f"{dt.year:04d}-{dt.month:02d}"] += 1
 
-    if not counts:
+    all_months = set(new_counts) | set(cancelled_counts)
+    if not all_months:
         return []
 
-    first_y, first_m = map(int, sorted(counts.keys())[0].split("-"))
+    first_y, first_m = map(int, sorted(all_months)[0].split("-"))
     now = datetime.now(tz=timezone.utc)
     out = []
     y, m = first_y, first_m
     while (y, m) <= (now.year, now.month):
         key = f"{y:04d}-{m:02d}"
-        out.append({"month": key, "count": counts.get(key, 0)})
+        out.append({
+            "month": key,
+            "new": new_counts.get(key, 0),
+            "cancelled": cancelled_counts.get(key, 0),
+        })
         m += 1
         if m > 12:
             m, y = 1, y + 1

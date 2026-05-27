@@ -101,10 +101,11 @@ PERSONALITY_AMOUNTS = (900,)
 
 # Manually-tracked revenue lines for the Monetization Summary table.
 # Update both the line items and the date below when revenue is reported.
-MANUAL_REVENUE_LAST_UPDATED = "2026-05-15"
+MANUAL_REVENUE_LAST_UPDATED = "2026-05-26"
 MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
     "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00)],
-    "Affiliates": [("Kitted Decks", 2_529.53)],
+    "Affiliates": [("Kitted Decks", 230.00)],
+    "Podcast sponsorships": [("ACE", 800.00)],
     "Newsletter Sponsorships": [("80,000 Hours", 4_200.00)],
     "Beehiiv Ad Network": [("Beehiiv", 431.85)],
 }
@@ -355,33 +356,46 @@ with tab_overview:
         "### 🆕 New Stripe Subscribers — all time",
         help="Stripe • count of subscriptions (any status, including canceled) bucketed by `created` month. Ignores the sidebar date filter — this is the full history.",
     )
-    nsm_df = pd.DataFrame(new_subs_monthly_all or [], columns=["month", "count"])
+    nsm_df = pd.DataFrame(new_subs_monthly_all or [], columns=["month", "new", "cancelled"])
+    # Limit the chart to Jan 2026 onwards
+    if not nsm_df.empty:
+        nsm_df = nsm_df[nsm_df["month"] >= "2026-01"].reset_index(drop=True)
     if nsm_df.empty:
         st.info("No Stripe subscription history available.")
     else:
-        total_all_time = int(nsm_df["count"].sum())
+        total_new = int(nsm_df["new"].sum())
+        total_cancelled = int(nsm_df["cancelled"].sum())
         latest_month = nsm_df.iloc[-1]
         c_left, c_right = st.columns([1, 4])
         c_left.markdown(
-            f"<div style='font-size: 2.4em; font-weight: 700; line-height: 1.1;'>{total_all_time:,}</div>",
+            f"<div style='font-size: 2.4em; font-weight: 700; line-height: 1.1;'>{total_new:,}</div>",
             unsafe_allow_html=True,
         )
         c_left.markdown(
-            f"<div style='color:#666; font-size:0.85em; margin-top:0.25em;'>{int(latest_month['count'])} new in {latest_month['month']}</div>",
+            f"<div style='color:#DC2626; font-size:0.95em; margin-top:0.25em;'>−{total_cancelled:,} cancelled</div>",
+            unsafe_allow_html=True,
+        )
+        c_left.markdown(
+            f"<div style='color:#666; font-size:0.85em; margin-top:0.5em;'>{int(latest_month['new'])} new / {int(latest_month['cancelled'])} cancelled in {latest_month['month']}</div>",
             unsafe_allow_html=True,
         )
         c_left.caption(f"Spans {nsm_df.iloc[0]['month']} → {nsm_df.iloc[-1]['month']}")
         with c_right:
             fig = go.Figure()
             fig.add_trace(go.Bar(
-                x=nsm_df["month"], y=nsm_df["count"],
-                marker_color="#4F8BF9",
-                hovertemplate="%{x}<br>%{y} new subs<extra></extra>",
+                x=nsm_df["month"], y=nsm_df["new"],
+                marker_color="#4F8BF9", name="New",
+                hovertemplate="%{x}<br>%{y} new<extra></extra>",
+            ))
+            fig.add_trace(go.Bar(
+                x=nsm_df["month"], y=nsm_df["cancelled"],
+                marker_color="#DC2626", name="Cancelled",
+                hovertemplate="%{x}<br>%{y} cancelled<extra></extra>",
             ))
             fig.update_layout(
-                height=240, margin=dict(l=0, r=0, t=10, b=0), showlegend=False,
-                xaxis_title=None, yaxis_title="New subs / month",
-                xaxis=dict(type="category"),
+                height=240, margin=dict(l=0, r=0, t=10, b=0), showlegend=True,
+                xaxis_title=None, yaxis_title="Subscriptions / month",
+                xaxis=dict(type="category"), barmode="group",
             )
             st.plotly_chart(fig, use_container_width=True)
     st.markdown("---")
