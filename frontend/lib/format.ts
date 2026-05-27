@@ -22,10 +22,23 @@ export function variance(curr: number | null | undefined, prev: number | null | 
   return ((c - p) / p) * 100;
 }
 
-export function presetLabel(key: "7d" | "30d" | "90d"): string {
-  return key === "7d" ? "Last 7 days" : key === "30d" ? "Last 30 days" : "Last 90 days";
+export function presetLabel(key: "7d" | "30d" | "90d" | "custom"): string {
+  if (key === "7d") return "Last 7 days";
+  if (key === "30d") return "Last 30 days";
+  if (key === "90d") return "Last 90 days";
+  return "Custom";
 }
 
 export function presetDays(key: "7d" | "30d" | "90d"): number {
   return key === "7d" ? 7 : key === "30d" ? 30 : 90;
+}
+
+export function isoDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+export function daysBetween(start: string, end: string): number {
+  const s = new Date(start);
+  const e = new Date(end);
+  return Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 }

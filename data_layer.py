@@ -502,6 +502,127 @@ def ga4_modules_finished_by_channel(start: date, end: date) -> list[dict]:
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def ga4_modules_finished_by_channel_daily(start: date, end: date) -> list[dict]:
+    """Daily count of 'Submitted Email' events grouped by (date, sessionDefaultChannelGroup).
+
+    Returns rows like [{"date": "YYYY-MM-DD", "channel": "Organic Search", "count": 42}, ...].
+    Used by the frontend to aggregate channel breakdowns for any custom date range.
+    """
+    from google.analytics.data_v1beta.types import (
+        DateRange,
+        Dimension,
+        Filter,
+        FilterExpression,
+        Metric,
+        OrderBy,
+        RunReportRequest,
+    )
+    from ga4_client import get_client, property_path
+
+    resp = get_client().run_report(RunReportRequest(
+        property=property_path(),
+        date_ranges=[DateRange(start_date=str(start), end_date=str(end))],
+        dimensions=[Dimension(name="date"), Dimension(name="sessionDefaultChannelGroup")],
+        metrics=[Metric(name="eventCount")],
+        dimension_filter=FilterExpression(
+            filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="Submitted Email")),
+        ),
+        order_bys=[OrderBy(dimension=OrderBy.DimensionOrderBy(dimension_name="date"))],
+        limit=100000,
+    ))
+    out = []
+    for row in resp.rows:
+        d = row.dimension_values[0].value  # YYYYMMDD
+        out.append({
+            "date": f"{d[:4]}-{d[4:6]}-{d[6:8]}",
+            "channel": row.dimension_values[1].value or "(not set)",
+            "count": int(row.metric_values[0].value),
+        })
+    return out
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def ga4_modules_finished_by_campaign_daily(start: date, end: date) -> list[dict]:
+    """Daily count of 'Submitted Email' events grouped by (date, sessionCampaignName)."""
+    from google.analytics.data_v1beta.types import (
+        DateRange,
+        Dimension,
+        Filter,
+        FilterExpression,
+        Metric,
+        OrderBy,
+        RunReportRequest,
+    )
+    from ga4_client import get_client, property_path
+
+    resp = get_client().run_report(RunReportRequest(
+        property=property_path(),
+        date_ranges=[DateRange(start_date=str(start), end_date=str(end))],
+        dimensions=[Dimension(name="date"), Dimension(name="sessionCampaignName")],
+        metrics=[Metric(name="eventCount")],
+        dimension_filter=FilterExpression(
+            filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="Submitted Email")),
+        ),
+        order_bys=[OrderBy(dimension=OrderBy.DimensionOrderBy(dimension_name="date"))],
+        limit=100000,
+    ))
+    out = []
+    for row in resp.rows:
+        d = row.dimension_values[0].value
+        out.append({
+            "date": f"{d[:4]}-{d[4:6]}-{d[6:8]}",
+            "campaign": row.dimension_values[1].value or "(not set)",
+            "count": int(row.metric_values[0].value),
+        })
+    return out
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def stripe_revenue_by_category_daily(start: date, end: date) -> list[dict]:
+    """Daily revenue (USD) bucketed by category (subscriptions / pdf / cognitive / other), net of refunds.
+
+    Same logic as stripe_revenue_by_category but with a per-day breakdown. One pass through charges.
+    """
+    from stripe_client import get_client
+
+    s = get_client()
+    start_ts = _date_to_ts(start)
+    end_ts = _date_to_ts(end) + 86400
+
+    daily: dict[str, dict[str, float]] = defaultdict(lambda: {"subscriptions": 0.0, "pdf": 0.0, "cognitive": 0.0, "other": 0.0})
+    for ch in s.Charge.list(
+        created={"gte": start_ts, "lt": end_ts}, limit=100, expand=["data.invoice"]
+    ).auto_paging_iter():
+        if ch.status != "succeeded":
+            continue
+        net = (ch.amount or 0) - (getattr(ch, "amount_refunded", 0) or 0)
+        if net <= 0:
+            continue
+        desc = (getattr(ch, "description", "") or "").lower().strip()
+        is_sub = bool(getattr(ch, "invoice", None)) or desc.startswith("subscription")
+        d_iso = datetime.fromtimestamp(ch.created, tz=timezone.utc).date().isoformat()
+        bucket = daily[d_iso]
+        if is_sub:
+            bucket["subscriptions"] += net / 100
+        elif (ch.amount or 0) == 900:
+            bucket["pdf"] += net / 100
+        elif (ch.amount or 0) in (3500, 1750):
+            bucket["cognitive"] += net / 100
+        else:
+            bucket["other"] += net / 100
+
+    # Zero-fill the range so the client gets a complete daily series
+    out = []
+    cur = start
+    while cur <= end:
+        di = cur.isoformat()
+        b = daily.get(di, {"subscriptions": 0.0, "pdf": 0.0, "cognitive": 0.0, "other": 0.0})
+        out.append({"date": di, **b})
+        cur += timedelta(days=1)
+    return out
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def stripe_charges_daily_by_amounts(
     start: date,
     end: date,

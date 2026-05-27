@@ -1,4 +1,4 @@
-export type PresetKey = "7d" | "30d" | "90d";
+export type PresetKey = "7d" | "30d" | "90d" | "custom";
 
 export interface DailyPoint {
   date: string;
@@ -119,7 +119,14 @@ export interface Snapshot {
     };
     new_subscribers_monthly_alltime: { month: string; count: number }[];
   };
-  periods: Record<PresetKey, PeriodEntry>;
+  periods: Record<"7d" | "30d" | "90d", PeriodEntry>;
+  daily_90d: {
+    start: string;
+    end: string;
+    channel: { date: string; channel: string; count: number }[];
+    campaign: { date: string; campaign: string; count: number }[];
+    revenue_category: { date: string; subscriptions: number; pdf: number; cognitive: number; other: number }[];
+  };
   manual_revenue: {
     last_updated: string;
     lines: Record<string, { source: string; amount: number }[]>;

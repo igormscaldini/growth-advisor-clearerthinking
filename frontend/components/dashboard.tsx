@@ -5,7 +5,8 @@ import { OverviewTab } from "./overview-tab";
 import { ChannelsTab } from "./channels-tab";
 import { MonetizationTab } from "./monetization-tab";
 import { presetLabel } from "@/lib/format";
-import { PresetKey, Snapshot } from "@/lib/snapshot";
+import { buildCustomPeriod } from "@/lib/aggregate";
+import { PeriodEntry, PresetKey, Snapshot } from "@/lib/snapshot";
 
 interface Props {
   snapshot: Snapshot;
@@ -19,27 +20,52 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "monetization", label: "💰 Monetization" },
 ];
 
-const PRESETS: PresetKey[] = ["7d", "30d", "90d"];
+const PRESETS: PresetKey[] = ["7d", "30d", "90d", "custom"];
 
 export function Dashboard({ snapshot }: Props) {
   const [preset, setPreset] = useState<PresetKey>("30d");
+
+  // Custom range state — default to the last 14 days (something different from any preset)
+  const [customStart, setCustomStart] = useState<string>(() => {
+    const d = new Date(snapshot.today);
+    d.setDate(d.getDate() - 13);
+    return d.toISOString().slice(0, 10);
+  });
+  const [customEnd, setCustomEnd] = useState<string>(snapshot.today);
+
   const [tab, setTab] = useState<TabKey>("overview");
 
-  const period = snapshot.periods[preset];
+  // Derive the active period
+  const period: PeriodEntry = useMemo(() => {
+    if (preset === "custom") {
+      // Clamp the custom range to the available 90d daily window
+      const min = snapshot.daily_90d.start;
+      const max = snapshot.daily_90d.end;
+      const start = customStart < min ? min : customStart > max ? max : customStart;
+      const end = customEnd < min ? min : customEnd > max ? max : customEnd;
+      const finalStart = start > end ? end : start;
+      return buildCustomPeriod(snapshot, finalStart, end);
+    }
+    return snapshot.periods[preset];
+  }, [preset, customStart, customEnd, snapshot]);
+
   const generated = useMemo(() => new Date(snapshot.generated_at), [snapshot.generated_at]);
   const generatedLocal = generated.toLocaleString();
+
+  const dailyMin = snapshot.daily_90d.start;
+  const dailyMax = snapshot.daily_90d.end;
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
       <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-bold">📊 ClearerThinking Growth Dashboard</h1>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
               {period.start} → {period.end} · {period.days} days · Last refreshed: {generatedLocal}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col items-end gap-2">
             <div role="tablist" className="inline-flex rounded-lg border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-100 dark:bg-zinc-900">
               {PRESETS.map((p) => (
                 <button
@@ -57,6 +83,28 @@ export function Dashboard({ snapshot }: Props) {
                 </button>
               ))}
             </div>
+            {preset === "custom" && (
+              <div className="flex items-center gap-2 text-sm">
+                <label className="text-zinc-500 dark:text-zinc-400">From</label>
+                <input
+                  type="date"
+                  value={customStart}
+                  min={dailyMin}
+                  max={dailyMax}
+                  onChange={(e) => setCustomStart(e.target.value)}
+                  className="border border-zinc-200 dark:border-zinc-800 rounded-md px-2 py-1 bg-white dark:bg-zinc-900"
+                />
+                <label className="text-zinc-500 dark:text-zinc-400">to</label>
+                <input
+                  type="date"
+                  value={customEnd}
+                  min={dailyMin}
+                  max={dailyMax}
+                  onChange={(e) => setCustomEnd(e.target.value)}
+                  className="border border-zinc-200 dark:border-zinc-800 rounded-md px-2 py-1 bg-white dark:bg-zinc-900"
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -82,6 +130,12 @@ export function Dashboard({ snapshot }: Props) {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-6">
+        {preset === "custom" && (
+          <p className="mb-4 text-xs text-zinc-500 dark:text-zinc-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-md px-3 py-2">
+            Custom ranges are limited to the last 90 days (snapshot window: {dailyMin} → {dailyMax}). Prior-period
+            comparison only shown when the prior window also fits inside this range.
+          </p>
+        )}
         {tab === "overview" && <OverviewTab snapshot={snapshot} period={period} />}
         {tab === "channels" && <ChannelsTab period={period} />}
         {tab === "monetization" && <MonetizationTab snapshot={snapshot} period={period} />}
