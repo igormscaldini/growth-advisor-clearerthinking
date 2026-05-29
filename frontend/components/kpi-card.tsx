@@ -1,6 +1,6 @@
 "use client";
 
-import { AreaSpark } from "./area-spark";
+import { AreaSpark, ExtraSeries } from "./area-spark";
 
 interface Props {
   label: string;
@@ -9,11 +9,13 @@ interface Props {
   delta: number | null;
   deltaInverse?: boolean;
   comparisonNote?: string;
-  data: { date: string; value: number | null }[];
+  data: ({ date: string; value: number | null } & Record<string, number | null | string>)[];
   color: string;
   yLabel?: string;
   isPercent?: boolean;
   footer?: React.ReactNode;
+  series?: ExtraSeries[];
+  primaryLabel?: string;
 }
 
 export function KpiCard({
@@ -28,6 +30,8 @@ export function KpiCard({
   yLabel,
   isPercent,
   footer,
+  series,
+  primaryLabel,
 }: Props) {
   return (
     <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-5 shadow-sm">
@@ -55,7 +59,18 @@ export function KpiCard({
           {footer ? <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">{footer}</div> : null}
         </div>
         <div>
-          <AreaSpark data={data} color={color} yLabel={yLabel} isPercent={isPercent} />
+          {series && series.length > 0 ? (
+            <AreaSpark
+              data={data}
+              color={color}
+              yLabel={yLabel}
+              isPercent={isPercent}
+              series={series}
+              primaryLabel={primaryLabel}
+            />
+          ) : (
+            <AreaSpark data={data} color={color} yLabel={yLabel} isPercent={isPercent} />
+          )}
         </div>
       </div>
     </div>

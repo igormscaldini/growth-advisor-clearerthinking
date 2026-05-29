@@ -1,4 +1,4 @@
-export type PresetKey = "7d" | "30d" | "90d" | "custom";
+export type PresetKey = "7d" | "30d" | "90d" | "thisMonth" | "custom";
 
 export interface DailyPoint {
   date: string;
@@ -23,6 +23,17 @@ export interface StripeMetrics {
   daily_split: { date: string; subscription: number; non_subscription: number; total: number }[];
 }
 
+export interface BeehiivCampaign {
+  title: string;
+  date: string;
+  sent: number;
+  opens: number;
+  clicks: number;
+  open_rate: number;
+  click_rate: number;
+  unsubs: number;
+}
+
 export interface BeehiivMetrics {
   error: string | null;
   total_subscribers: number;
@@ -37,7 +48,7 @@ export interface BeehiivMetrics {
   unsubscribe_rate: number;
   engaged_readers: number;
   opens_per_campaign: number;
-  per_campaign: unknown[];
+  per_campaign: BeehiivCampaign[];
   period_used_for_new_subs: string;
 }
 
@@ -120,6 +131,8 @@ export interface Snapshot {
     new_subscribers_monthly_alltime: { month: string; new: number; cancelled: number }[];
   };
   periods: Record<"7d" | "30d" | "90d", PeriodEntry>;
+  // "thisMonth" and "custom" are built client-side in dashboard.tsx; only the three fixed presets are pre-baked.
+
   daily_90d: {
     start: string;
     end: string;

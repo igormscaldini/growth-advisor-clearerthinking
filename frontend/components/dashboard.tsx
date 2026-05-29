@@ -20,7 +20,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "monetization", label: "💰 Monetization" },
 ];
 
-const PRESETS: PresetKey[] = ["7d", "30d", "90d", "custom"];
+const PRESETS: PresetKey[] = ["7d", "30d", "90d", "thisMonth", "custom"];
 
 export function Dashboard({ snapshot }: Props) {
   const [preset, setPreset] = useState<PresetKey>("30d");
@@ -45,6 +45,16 @@ export function Dashboard({ snapshot }: Props) {
       const end = customEnd < min ? min : customEnd > max ? max : customEnd;
       const finalStart = start > end ? end : start;
       return buildCustomPeriod(snapshot, finalStart, end);
+    }
+    if (preset === "thisMonth") {
+      // First-of-month → today (clamped to the 90d daily window).
+      const min = snapshot.daily_90d.start;
+      const max = snapshot.daily_90d.end;
+      const todayStr = snapshot.today;
+      const monthStart = `${todayStr.slice(0, 7)}-01`;
+      const start = monthStart < min ? min : monthStart;
+      const end = todayStr > max ? max : todayStr;
+      return buildCustomPeriod(snapshot, start, end);
     }
     return snapshot.periods[preset];
   }, [preset, customStart, customEnd, snapshot]);

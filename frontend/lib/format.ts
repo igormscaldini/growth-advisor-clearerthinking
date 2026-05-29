@@ -22,10 +22,11 @@ export function variance(curr: number | null | undefined, prev: number | null | 
   return ((c - p) / p) * 100;
 }
 
-export function presetLabel(key: "7d" | "30d" | "90d" | "custom"): string {
+export function presetLabel(key: "7d" | "30d" | "90d" | "thisMonth" | "custom"): string {
   if (key === "7d") return "Last 7 days";
   if (key === "30d") return "Last 30 days";
   if (key === "90d") return "Last 90 days";
+  if (key === "thisMonth") return "This Month";
   return "Custom";
 }
 

@@ -38,10 +38,41 @@ export function OverviewTab({ snapshot, period }: Props) {
   const modulesFinishedDaily = fillRange(cur.ga4_daily || [], "modules_finished");
   const modulesFinished = cur.ga4.modules_finished;
 
-  // 2. New Subscribers (beehiiv daily)
-  const newSubsDaily = (cur.new_subs_daily.daily || []).map((d) => ({ date: d.date, value: d.count }));
+  // 2. New Subscribers (beehiiv daily) + Unsubscribers (derived from per_campaign by date)
+  const unsubsByDate = new Map<string, number>();
+  for (const c of cur.bh.per_campaign || []) {
+    unsubsByDate.set(c.date, (unsubsByDate.get(c.date) || 0) + (c.unsubs || 0));
+  }
+  const newSubsDaily = (cur.new_subs_daily.daily || []).map((d) => ({
+    date: d.date,
+    value: d.count,
+    unsubs: unsubsByDate.get(d.date) || 0,
+  }));
   const newSubsTotal = cur.new_subs_daily.total;
   const newSubsCapped = cur.new_subs_daily.capped;
+  const unsubsTotal = [...unsubsByDate.values()].reduce((s, v) => s + v, 0);
+
+  // 2b. Total Subscribers — derived. Anchor at current beehiiv total (snapshot only — same value
+  // across all periods), walk backward day-by-day using (new − unsubs) deltas.
+  const totalSubsAnchor = cur.bh.total_subscribers || 0;
+  const totalSubsDaily = (() => {
+    const days = (cur.new_subs_daily.daily || []).map((d) => d.date);
+    if (!days.length || !totalSubsAnchor) return [];
+    const newByDate = new Map<string, number>();
+    for (const d of cur.new_subs_daily.daily || []) newByDate.set(d.date, d.count || 0);
+    // Walk forward from the earliest day. Start so that the last day equals the anchor.
+    const sorted = [...days].sort();
+    const netChanges = sorted.map((d) => (newByDate.get(d) || 0) - (unsubsByDate.get(d) || 0));
+    const totalNet = netChanges.reduce((s, v) => s + v, 0);
+    let running = totalSubsAnchor - totalNet;
+    const out: { date: string; value: number }[] = [];
+    for (let i = 0; i < sorted.length; i++) {
+      running += netChanges[i];
+      out.push({ date: sorted[i], value: running });
+    }
+    return out;
+  })();
+  const priorTotalSubs = totalSubsDaily.length ? totalSubsDaily[0].value : null;
 
   // 3. Engaged Readers (snapshot — flat line)
   const engagedSnap = snapshot.snapshots.engaged_readers;
@@ -89,14 +120,27 @@ export function OverviewTab({ snapshot, period }: Props) {
         value={`${fmtInt(newSubsTotal)}${newSubsCapped ? "+" : ""}`}
         helpText={
           newSubsCapped
-            ? "beehiiv • capped at pagination limit; actual may be higher."
-            : "beehiiv • subscriptions created in window, deduped by id."
+            ? "beehiiv • capped at pagination limit; actual may be higher. Unsubscribers = sum of campaign unsubs by send date."
+            : "beehiiv • subscriptions created in window, deduped by id. Unsubscribers = sum of campaign unsubs by send date."
         }
         data={newSubsDaily}
         color="#4F8BF9"
-        yLabel="New subs / day"
+        yLabel="Count / day"
+        primaryLabel="New subscribers"
+        series={[{ key: "unsubs", color: "#DC2626", label: "Unsubscribers" }]}
         delta={variance(newSubsTotal, pri.new_subs_daily.total)}
-        comparisonNote={`vs prior ${period.days}d`}
+        comparisonNote={`vs prior ${period.days}d · ${fmtInt(unsubsTotal)} unsubscribers`}
+      />
+
+      <KpiCard
+        label="👥 Total Subscribers"
+        value={fmtInt(totalSubsAnchor)}
+        helpText="beehiiv • current active subscribers (snapshot). Daily curve reconstructed from (new − unsubscribers) deltas, anchored at the latest snapshot value."
+        data={totalSubsDaily.map((d) => ({ date: d.date, value: d.value }))}
+        color="#0EA5E9"
+        yLabel="Total subscribers"
+        delta={variance(totalSubsAnchor, priorTotalSubs)}
+        comparisonNote={`vs start of window`}
       />
 
       <KpiCard
