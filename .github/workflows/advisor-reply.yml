@@ -1,20 +1,19 @@
-name: Weekly growth-advisor email
+name: Growth-advisor reply handler
 
 on:
   schedule:
-    - cron: "0 11 * * 5"  # Fridays 11:00 UTC = 08:00 America/Sao_Paulo
-  workflow_dispatch:        # allow manual runs from the Actions UI
+    - cron: "*/5 * * * *"  # check for replies every ~5 minutes
+  workflow_dispatch:
 
-# No contents:write needed — this job is stateless and commits nothing
-# (so it never touches the paused Vercel deploys).
+# Stateless; commits nothing.
 concurrency:
-  group: weekly-advisor-email
+  group: advisor-reply
   cancel-in-progress: false
 
 jobs:
-  send:
+  reply:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -26,9 +25,8 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Send weekly advisor email
+      - name: Answer any pending replies
         env:
-          # data sources (same secrets the snapshot workflow uses)
           GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
           GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
@@ -36,14 +34,7 @@ jobs:
           GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
           BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
           BEEHIIV_PUB_CLEARER_THINKING: ${{ secrets.BEEHIIV_PUB_CLEARER_THINKING }}
-          # advisor narrative
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ADVISOR_MODEL: ${{ secrets.ADVISOR_MODEL }}
-          # email transport
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
-          ADVISOR_EMAIL_TO: ${{ secrets.ADVISOR_EMAIL_TO }}
-          # optional Slack fallback when email transport is down
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_DEFAULT_CHANNEL: ${{ secrets.SLACK_DEFAULT_CHANNEL }}
-        run: python weekly_advisor.py
+        run: python advisor_reply.py

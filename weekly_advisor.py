@@ -2,12 +2,13 @@
 
 Every Friday this:
   1. Builds the current 7-day period plus several prior 7-day buckets (the "track record").
-  2. Computes the exact metrics Igor asked for (traffic + email submits by source,
-     total / subscription / non-subscription revenue, PDF sales, cognitive-assessment
-     sales, new subscribers, cancelled subscribers, GSC clicks/impressions).
-  3. Asks Claude (acting as a growth advisor) to write the analysis: anomalies vs the
-     prior weeks, plus insights / tips / concerns.
-  4. Sends it as a plain-text email via Gmail SMTP.
+  2. Computes Section 1 KPIs: tools finished (GA4 Submitted Email), total + subscription
+     revenue (Stripe), personality-PDF and cognitive-assessment sale counts + revenue
+     (Stripe), new + unsubscribed newsletter subscribers and unsub rate (beehiiv), and the
+     two GA4 funnel conversion rates (Viewed→Accepted, Accepted→Submitted privacy policy).
+  3. Asks Claude (acting as a growth advisor) to write Section 2 (anomalies vs prior weeks)
+     and Section 3 (the three most important insights).
+  4. Sends it as a plain-text email via the Gmail API (SMTP fallback locally).
 
 Robustness ("just send it if everything works, otherwise tell me why"):
   - Every data source is wrapped so one failure can't kill the run; failed sources are
@@ -55,10 +56,12 @@ _materialize_ci_secrets()
 
 # Imports that touch credentials happen after materialization.
 from data_layer import (  # noqa: E402
-    ga4_audience_metrics,
-    ga4_modules_finished_by_channel,
+    beehiiv_daily_new_subscribers,
+    beehiiv_metrics,
+    ga4_funnel_events,
     stripe_charges_daily_by_amounts,
     stripe_metrics,
+    stripe_revenue_by_category,
 )
 
 # --- config -----------------------------------------------------------------
@@ -76,18 +79,18 @@ GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "").replace(" ", "").strip(
 FIX_INSTRUCTIONS = {
     "ga4": "GA4 auth likely expired. Re-run `python auth_ga4.py` locally and update the "
            "GOOGLE_TOKEN_JSON GitHub secret with the new secrets/ga4-token.json.",
-    "submits_by_channel": "GA4 auth likely expired (see GOOGLE_TOKEN_JSON secret / `python auth_ga4.py`).",
     "stripe": "Check STRIPE_SECRET_KEY (rotated or revoked?) in .env and the GitHub secret.",
     "pdf_sales": "Stripe charge query failed — check STRIPE_SECRET_KEY.",
     "cog_sales": "Stripe charge query failed — check STRIPE_SECRET_KEY.",
-    "subs": "Stripe subscription query failed — check STRIPE_SECRET_KEY.",
-    "gsc": "Search Console auth likely expired — refresh the GOOGLE_TOKEN_JSON secret "
-           "(same OAuth token as GA4) or confirm GSC_SITE_URL.",
+    "beehiiv": "beehiiv API failed — check BEEHIIV_API_KEY and BEEHIIV_PUB_CLEARER_THINKING "
+               "in .env and the GitHub secrets.",
+    "beehiiv_new_subs": "beehiiv subscriptions query failed — check BEEHIIV_API_KEY / "
+                        "BEEHIIV_PUB_CLEARER_THINKING.",
     "narrative": "Claude API call failed — check ANTHROPIC_API_KEY and account credits, "
                  f"and that the model id '{ADVISOR_MODEL}' is available (override with ADVISOR_MODEL).",
-    "transport": "Gmail SMTP rejected the login — the App Password may be wrong, revoked, or "
-                 "missing. Regenerate it (Google Account → Security → App passwords) and update "
-                 "GMAIL_APP_PASSWORD. ",
+    "transport": "Email send failed. The Gmail API needs the gmail.send scope on the shared "
+                 "Google token — re-run `python auth_ga4.py` to re-consent, then update the "
+                 "GOOGLE_TOKEN_JSON secret. (SMTP fallback only works from your local IP.) ",
 }
 
 
@@ -105,71 +108,21 @@ def _is_err(v) -> bool:
     return isinstance(v, tuple) and len(v) == 2 and v[0] == "__error__"
 
 
-# --- direct-client helpers not in data_layer --------------------------------
-def ga4_sessions_by_channel(start: date, end: date) -> list[dict]:
-    """Sessions grouped by default channel group — i.e. sources of traffic."""
-    from google.analytics.data_v1beta.types import (
-        DateRange,
-        Dimension,
-        Metric,
-        OrderBy,
-        RunReportRequest,
-    )
-    from ga4_client import get_client, property_path
-
-    resp = get_client().run_report(RunReportRequest(
-        property=property_path(),
-        date_ranges=[DateRange(start_date=str(start), end_date=str(end))],
-        dimensions=[Dimension(name="sessionDefaultChannelGroup")],
-        metrics=[Metric(name="sessions")],
-        order_bys=[OrderBy(metric=OrderBy.MetricOrderBy(metric_name="sessions"), desc=True)],
-    ))
-    return [
-        {"channel": r.dimension_values[0].value or "(not set)", "sessions": int(r.metric_values[0].value)}
-        for r in resp.rows
-    ]
-
-
-def stripe_sub_changes(start: date, end: date) -> dict:
-    """New and cancelled subscription counts within [start, end] (UTC)."""
-    from stripe_client import get_client
-
-    s = get_client()
-    start_ts = int(datetime(start.year, start.month, start.day, tzinfo=timezone.utc).timestamp())
-    end_ts = int(datetime(end.year, end.month, end.day, tzinfo=timezone.utc).timestamp()) + 86400
-
-    new = cancelled = 0
-    for sub in s.Subscription.list(status="all", limit=100).auto_paging_iter():
-        created = getattr(sub, "created", None)
-        if created and start_ts <= created < end_ts:
-            new += 1
-        cancel_ts = getattr(sub, "canceled_at", None)
-        if cancel_ts and start_ts <= cancel_ts < end_ts:
-            cancelled += 1
-    return {"new": new, "cancelled": cancelled}
-
-
-def gsc_weekly_totals(start: date, end: date) -> dict:
-    """Total clicks + impressions from Search Console for the window."""
-    from gsc_client import SITE_URL, get_client
-
-    if not SITE_URL:
-        raise RuntimeError("GSC_SITE_URL not set")
-    svc = get_client()
-    resp = svc.searchanalytics().query(
-        siteUrl=SITE_URL,
-        body={"startDate": start.isoformat(), "endDate": end.isoformat(), "dimensions": []},
-    ).execute()
-    rows = resp.get("rows", [])
-    if not rows:
-        return {"clicks": 0, "impressions": 0}
-    r = rows[0]
-    return {"clicks": int(r.get("clicks", 0)), "impressions": int(round(r.get("impressions", 0)))}
+# --- small math helper ------------------------------------------------------
+def _ratio(num, den):
+    """num/den as a float, or None if either is missing / den is 0."""
+    if isinstance(num, (int, float)) and isinstance(den, (int, float)) and den:
+        return num / den
+    return None
 
 
 # --- gathering --------------------------------------------------------------
-def gather_week(start: date, end: date) -> dict:
-    """All metrics for one 7-day window. Records per-source errors instead of raising."""
+def gather_week(start: date, end: date, new_subscribers) -> dict:
+    """All KPIs for one 7-day window. Records per-source errors instead of raising.
+
+    `new_subscribers` is computed once across the whole span (see gather_history) and
+    passed in, because beehiiv's subscriptions endpoint has no date filter.
+    """
     errors: dict[str, str] = {}
 
     def grab(label, fn, *a, **k):
@@ -179,43 +132,74 @@ def gather_week(start: date, end: date) -> dict:
             return None
         return v
 
-    audience = grab("ga4", ga4_audience_metrics, start, end)
-    traffic = grab("ga4", ga4_sessions_by_channel, start, end)
-    submits = grab("submits_by_channel", ga4_modules_finished_by_channel, start, end)
+    funnel = grab("ga4", ga4_funnel_events, start, end)
     revenue = grab("stripe", stripe_metrics, start, end)
+    rev_cat = grab("stripe", stripe_revenue_by_category, start, end)
     pdf = grab("pdf_sales", stripe_charges_daily_by_amounts, start, end, PDF_AMOUNTS, True)
     cog = grab("cog_sales", stripe_charges_daily_by_amounts, start, end, COG_AMOUNTS, False)
-    subs = grab("subs", stripe_sub_changes, start, end)
-    gsc = grab("gsc", gsc_weekly_totals, start, end)
+    bh = grab("beehiiv", beehiiv_metrics, start, end)
+    # beehiiv_metrics returns {"error": "..."} instead of raising on auth/config problems.
+    if isinstance(bh, dict) and bh.get("error"):
+        errors["beehiiv"] = bh["error"]
+
+    viewed = (funnel or {}).get("viewed_privacy")
+    accepted = (funnel or {}).get("accepted_privacy")
+    submitted = (funnel or {}).get("submitted_email")
 
     return {
         "start": start.isoformat(),
         "end": end.isoformat(),
-        "users": (audience or {}).get("users"),
-        "sessions": (audience or {}).get("sessions"),
-        "email_submits": (audience or {}).get("modules_finished"),
-        "traffic_by_channel": traffic,
-        "submits_by_channel": submits,
+        # GA4
+        "tools_finished": submitted,            # "Submitted Email" event
+        "viewed_privacy": viewed,
+        "accepted_privacy": accepted,
+        "conv_view_to_accept": _ratio(accepted, viewed),
+        "conv_accept_to_submit": _ratio(submitted, accepted),
+        # Stripe
         "revenue_total": (revenue or {}).get("revenue_usd"),
         "revenue_subscription": (revenue or {}).get("subscription_usd"),
-        "revenue_non_subscription": (revenue or {}).get("non_subscription_usd"),
         "pdf_sales": (pdf or {}).get("total"),
+        "pdf_revenue": (rev_cat or {}).get("pdf"),
         "cognitive_sales": (cog or {}).get("total"),
-        "new_subscribers": (subs or {}).get("new"),
-        "cancelled_subscribers": (subs or {}).get("cancelled"),
-        "gsc_clicks": (gsc or {}).get("clicks"),
-        "gsc_impressions": (gsc or {}).get("impressions"),
+        "cognitive_revenue": (rev_cat or {}).get("cognitive"),
+        # beehiiv newsletter
+        "new_subscribers": new_subscribers,
+        "unsubscribers": (bh or {}).get("unsubscribes"),
+        "unsubscribe_rate": (bh or {}).get("unsubscribe_rate"),
+        "emails_sent": (bh or {}).get("emails_sent"),
         "errors": errors,
     }
 
 
 def gather_history(num_weeks: int, ref: date) -> list[dict]:
     """Most-recent-first list of week dicts. Current week = 7 days ending `ref` (yesterday)."""
+    oldest_start = (ref - timedelta(days=7 * (num_weeks - 1))) - timedelta(days=6)
+
+    # New subscribers: fetch the whole span ONCE (beehiiv subs endpoint has no date filter),
+    # then bucket per week.
+    daily_map: dict[str, int] = {}
+    new_subs_err = None
+    bh_daily = _safe("beehiiv_new_subs", beehiiv_daily_new_subscribers, oldest_start, ref)
+    if _is_err(bh_daily):
+        new_subs_err = bh_daily[1]
+    elif isinstance(bh_daily, dict):
+        if bh_daily.get("error"):
+            new_subs_err = bh_daily["error"]
+        for row in bh_daily.get("daily", []):
+            daily_map[row["date"]] = row["count"]
+
     weeks = []
     for i in range(num_weeks):
         end = ref - timedelta(days=7 * i)
         start = end - timedelta(days=6)
-        weeks.append(gather_week(start, end))
+        if new_subs_err:
+            wk_new = None
+        else:
+            wk_new = sum(daily_map.get((start + timedelta(days=d)).isoformat(), 0) for d in range(7))
+        wk = gather_week(start, end, wk_new)
+        if new_subs_err:
+            wk["errors"]["beehiiv_new_subs"] = new_subs_err
+        weeks.append(wk)
     return weeks
 
 
@@ -250,39 +234,35 @@ def _money_delta(cur, prev) -> str:
     return f" ({diff:+,.0f} USD WoW)"
 
 
-def build_glance(cur: dict, prev: dict) -> str:
-    """Deterministic, always-accurate metrics block."""
+def _pct(v) -> str:
+    return f"{v * 100:.1f}%" if isinstance(v, (int, float)) else "n/a"
+
+
+def _pct_delta(cur, prev) -> str:
+    """Percentage-point change for rate metrics."""
+    if not isinstance(cur, (int, float)) or not isinstance(prev, (int, float)):
+        return ""
+    pp = (cur - prev) * 100
+    arrow = "▲" if pp > 0 else ("▼" if pp < 0 else "—")
+    return f" ({arrow} {pp:+.1f}pp WoW)"
+
+
+def build_kpis(cur: dict, prev: dict) -> str:
+    """Section 1 — deterministic, always-accurate KPI block."""
     L = []
-    L.append("— THIS WEEK AT A GLANCE —")
+    L.append("SECTION 1: MAIN KPIs")
     L.append(f"Period: {cur['start']} → {cur['end']} (vs prior 7 days {prev.get('start','?')} → {prev.get('end','?')})")
     L.append("")
-    L.append("TRAFFIC & ENGAGEMENT (GA4)")
-    L.append(f"  Users:          {_num(cur['users'])}{_delta(cur['users'], prev.get('users'))}")
-    L.append(f"  Sessions:       {_num(cur['sessions'])}{_delta(cur['sessions'], prev.get('sessions'))}")
-    L.append(f"  Email submits:  {_num(cur['email_submits'])}{_delta(cur['email_submits'], prev.get('email_submits'))}")
-    if cur.get("traffic_by_channel"):
-        L.append("  Traffic sources (sessions):")
-        for r in cur["traffic_by_channel"][:6]:
-            L.append(f"    - {r['channel']}: {_num(r['sessions'])}")
-    if cur.get("submits_by_channel"):
-        L.append("  Email submits by source:")
-        for r in cur["submits_by_channel"][:6]:
-            L.append(f"    - {r['channel']}: {_num(r['count'])}")
-    L.append("")
-    L.append("REVENUE (Stripe)")
-    L.append(f"  Total:              {_money(cur['revenue_total'])}{_money_delta(cur['revenue_total'], prev.get('revenue_total'))}")
-    L.append(f"  Subscription:       {_money(cur['revenue_subscription'])}{_money_delta(cur['revenue_subscription'], prev.get('revenue_subscription'))}")
-    L.append(f"  Non-subscription:   {_money(cur['revenue_non_subscription'])}{_money_delta(cur['revenue_non_subscription'], prev.get('revenue_non_subscription'))}")
-    L.append("")
-    L.append("SALES & SUBSCRIBERS (Stripe)")
-    L.append(f"  Personality PDF sales ($9):        {_num(cur['pdf_sales'])}{_delta(cur['pdf_sales'], prev.get('pdf_sales'))}")
-    L.append(f"  Cognitive assessment sales ($35/$17.50): {_num(cur['cognitive_sales'])}{_delta(cur['cognitive_sales'], prev.get('cognitive_sales'))}")
-    L.append(f"  New subscribers:                   {_num(cur['new_subscribers'])}{_delta(cur['new_subscribers'], prev.get('new_subscribers'))}")
-    L.append(f"  Cancelled subscribers (churn):     {_num(cur['cancelled_subscribers'])}{_delta(cur['cancelled_subscribers'], prev.get('cancelled_subscribers'))}")
-    L.append("")
-    L.append("SEARCH (Google Search Console)")
-    L.append(f"  Clicks:       {_num(cur['gsc_clicks'])}{_delta(cur['gsc_clicks'], prev.get('gsc_clicks'))}")
-    L.append(f"  Impressions:  {_num(cur['gsc_impressions'])}{_delta(cur['gsc_impressions'], prev.get('gsc_impressions'))}")
+    L.append(f"  Tools Finished (Submitted Email):   {_num(cur['tools_finished'])}{_delta(cur['tools_finished'], prev.get('tools_finished'))}")
+    L.append(f"  Total Revenue:                      {_money(cur['revenue_total'])}{_money_delta(cur['revenue_total'], prev.get('revenue_total'))}")
+    L.append(f"  Revenue from Subscriptions:         {_money(cur['revenue_subscription'])}{_money_delta(cur['revenue_subscription'], prev.get('revenue_subscription'))}")
+    L.append(f"  Personality PDF ($9):               {_num(cur['pdf_sales'])} sales · {_money(cur['pdf_revenue'])}{_delta(cur['pdf_sales'], prev.get('pdf_sales'))}")
+    L.append(f"  Cognitive Assessment ($35/$17.50):  {_num(cur['cognitive_sales'])} sales · {_money(cur['cognitive_revenue'])}{_delta(cur['cognitive_sales'], prev.get('cognitive_sales'))}")
+    L.append(f"  New Newsletter Subscribers:         {_num(cur['new_subscribers'])}{_delta(cur['new_subscribers'], prev.get('new_subscribers'))}")
+    L.append(f"  Newsletter Unsubscribers:           {_num(cur['unsubscribers'])}{_delta(cur['unsubscribers'], prev.get('unsubscribers'))}")
+    L.append(f"  Unsubscription Rate:                {_pct(cur['unsubscribe_rate'])}{_pct_delta(cur['unsubscribe_rate'], prev.get('unsubscribe_rate'))}")
+    L.append(f"  Viewed → Accepted Privacy Policy:   {_pct(cur['conv_view_to_accept'])}{_pct_delta(cur['conv_view_to_accept'], prev.get('conv_view_to_accept'))}")
+    L.append(f"  Accepted Privacy → Email Submitted: {_pct(cur['conv_accept_to_submit'])}{_pct_delta(cur['conv_accept_to_submit'], prev.get('conv_accept_to_submit'))}")
     return "\n".join(L)
 
 
@@ -297,19 +277,20 @@ def build_narrative(history: list[dict], goals_text: str) -> str:
     system = (
         "You are a seasoned growth advisor for Clearer Thinking (clearerthinking.org), a "
         "publisher of free interactive self-insight tools that monetizes via a paid "
-        "subscription, a $9 personality-test PDF, and a $35/$17.50 cognitive assessment. "
-        "You are writing the analysis section of a weekly email to Igor, who runs growth. "
-        "You are given the current 7-day period and several prior 7-day periods (most recent "
-        "first) as JSON. The exact numbers are already shown to Igor in a separate table, so "
-        "do NOT just restate every figure. Instead:\n"
-        "1) ANOMALIES: call out anything that looks abnormal or unexpected vs the prior weeks' "
-        "track record (sharp moves, reversals, new zero values, suspicious spikes). If nothing "
-        "is abnormal, say so plainly.\n"
-        "2) INSIGHTS / TIPS / CONCERNS: 3-6 crisp, specific, actionable points a sharp advisor "
-        "overseeing this business would raise this week, grounded in the data and the goals.\n"
-        "Write PLAIN TEXT only — no markdown, no asterisks, no headers with '#'. Use short "
-        "paragraphs or simple dashes. Be direct and concise. Note explicitly if some data was "
-        "missing this week (fields will be null)."
+        "subscription, a $9 personality-test PDF, and a $35/$17.50 cognitive assessment, plus "
+        "a beehiiv newsletter. You are writing two sections of a weekly email to Igor, who runs "
+        "growth. You are given the current 7-day period and several prior 7-day periods (most "
+        "recent first) as JSON. Section 1 (the KPI table) is already shown to Igor, so do NOT "
+        "restate every figure. Output EXACTLY these two sections, with these exact headers:\n\n"
+        "SECTION 2: ANOMALIES\n"
+        "Call out anything abnormal or unexpected versus the prior weeks' track record (sharp "
+        "moves, reversals, new zero values, suspicious spikes). Reference concrete numbers. If "
+        "nothing is abnormal, say so in one line.\n\n"
+        "SECTION 3: INSIGHTS\n"
+        "Exactly THREE insights — the three most important this week. Number them 1-3. Each one "
+        "very straightforward: one or two sentences, specific and actionable. No preamble.\n\n"
+        "Write PLAIN TEXT only — no markdown, no asterisks, no '#'. Be direct and concise. If "
+        "some data is missing (null fields), note it briefly rather than inventing numbers."
     )
     user = (
         f"GOALS.md:\n{goals_text}\n\n"
@@ -340,10 +321,16 @@ def build_email(history: list[dict], narrative: str, errors: dict[str, str]) -> 
     subject = f"Weekly Growth Report — week of {cur['start']} {flag}".strip()
 
     parts = [f"Clearer Thinking — Weekly Growth Report", f"Week of {cur['start']} to {cur['end']}", ""]
-    parts.append(build_glance(cur, prev))
+    parts.append(build_kpis(cur, prev))
     parts.append("")
-    parts.append("— ADVISOR NOTES —")
-    parts.append(narrative if narrative else "(Advisor analysis unavailable this week — see data issues below.)")
+    if narrative:
+        parts.append(narrative)
+    else:
+        parts.append("SECTION 2: ANOMALIES")
+        parts.append("(Unavailable this week — see data issues below.)")
+        parts.append("")
+        parts.append("SECTION 3: INSIGHTS")
+        parts.append("(Unavailable this week — see data issues below.)")
 
     if errors:
         parts.append("")
@@ -357,25 +344,63 @@ def build_email(history: list[dict], narrative: str, errors: dict[str, str]) -> 
 
     parts.append("")
     parts.append("— end of report —")
-    parts.append("Sent automatically by your AI growth advisor (weekly_advisor.py).")
+    parts.append("Reply to this email with any question and your AI growth advisor will answer.")
     return subject, "\n".join(parts)
 
 
-def send_email(subject: str, body: str) -> None:
-    if not GMAIL_APP_PASSWORD:
-        raise RuntimeError(
-            "GMAIL_APP_PASSWORD is not set. Create a Gmail App Password "
-            "(Google Account → Security → 2-Step Verification → App passwords) and add it as "
-            "the GMAIL_APP_PASSWORD env var / GitHub secret."
-        )
+def _build_mime(subject: str, body: str) -> MIMEText:
     msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"] = subject
     msg["From"] = f"CT Growth Advisor <{EMAIL_FROM}>"
     msg["To"] = EMAIL_TO
+    # Marks this as advisor-sent so the reply poller never tries to "answer" our own report.
+    msg["X-CT-Advisor"] = "report"
+    return msg
+
+
+def send_via_gmail_api(subject: str, body: str) -> None:
+    """Send through the Gmail API using the shared Google OAuth token (needs gmail.send scope).
+
+    This is the primary transport: it works from cloud IPs (GitHub Actions), unlike Gmail
+    SMTP app-password login, which Google blocks from datacenter ranges.
+    """
+    import base64
+
+    from google.oauth2.credentials import Credentials
+    from googleapiclient.discovery import build
+
+    from ga4_client import TOKEN_FILE
+
+    creds = Credentials.from_authorized_user_file(str(TOKEN_FILE))
+    svc = build("gmail", "v1", credentials=creds, cache_discovery=False)
+    raw = base64.urlsafe_b64encode(_build_mime(subject, body).as_bytes()).decode()
+    svc.users().messages().send(userId="me", body={"raw": raw}).execute()
+
+
+def send_via_smtp(subject: str, body: str) -> None:
+    """Fallback transport (works locally; Google blocks it from cloud IPs)."""
+    if not GMAIL_APP_PASSWORD:
+        raise RuntimeError("GMAIL_APP_PASSWORD not set")
     ctx = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx) as server:
         server.login(EMAIL_FROM, GMAIL_APP_PASSWORD)
-        server.sendmail(EMAIL_FROM, [EMAIL_TO], msg.as_string())
+        server.sendmail(EMAIL_FROM, [EMAIL_TO], _build_mime(subject, body).as_string())
+
+
+def send_email(subject: str, body: str) -> None:
+    """Try the Gmail API first, then SMTP. Raise with both errors if both fail."""
+    try:
+        send_via_gmail_api(subject, body)
+        return
+    except Exception as api_err:  # noqa: BLE001
+        print(f"[warn] Gmail API send failed: {api_err}", file=sys.stderr)
+        try:
+            send_via_smtp(subject, body)
+            return
+        except Exception as smtp_err:  # noqa: BLE001
+            raise RuntimeError(
+                f"Gmail API failed ({api_err}); SMTP fallback failed ({smtp_err})"
+            ) from smtp_err
 
 
 def slack_fallback(reason: str) -> bool:
