@@ -69,8 +69,10 @@ PDF_AMOUNTS = (900,)            # $9.00 Personality Test PDF (non-subscription)
 COG_AMOUNTS = (3500, 1750)      # $35.00 / $17.50 Cognitive Assessment
 ADVISOR_MODEL = os.getenv("ADVISOR_MODEL") or os.getenv("ANTHROPIC_MODEL") or "claude-opus-4-8"
 
-EMAIL_FROM = os.getenv("GMAIL_ADDRESS", "igormscaldini@gmail.com")
-EMAIL_TO = os.getenv("ADVISOR_EMAIL_TO", EMAIL_FROM)
+# Use `or` (not getenv defaults): CI passes these as empty strings when the secret is
+# unset, and an empty string is not the same as an absent key.
+EMAIL_FROM = os.getenv("GMAIL_ADDRESS") or "igormscaldini@gmail.com"
+EMAIL_TO = os.getenv("ADVISOR_EMAIL_TO") or EMAIL_FROM
 # Gmail app passwords are 16 chars; Google displays them in 4 space-separated groups.
 # Strip spaces so the secret works whether pasted with or without them.
 GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "").replace(" ", "").strip()
