@@ -85,9 +85,9 @@ FIX_INSTRUCTIONS = {
            "(same OAuth token as GA4) or confirm GSC_SITE_URL.",
     "narrative": "Claude API call failed — check ANTHROPIC_API_KEY and account credits, "
                  f"and that the model id '{ADVISOR_MODEL}' is available (override with ADVISOR_MODEL).",
-    "transport": "Gmail SMTP rejected the login — the App Password may be wrong, revoked, or "
-                 "missing. Regenerate it (Google Account → Security → App passwords) and update "
-                 "GMAIL_APP_PASSWORD. ",
+    "transport": "Email send failed. The Gmail API needs the gmail.send scope on the shared "
+                 "Google token — re-run `python auth_ga4.py` to re-consent, then update the "
+                 "GOOGLE_TOKEN_JSON secret. (SMTP fallback only works from your local IP.) ",
 }
 
 
@@ -361,21 +361,57 @@ def build_email(history: list[dict], narrative: str, errors: dict[str, str]) -> 
     return subject, "\n".join(parts)
 
 
-def send_email(subject: str, body: str) -> None:
-    if not GMAIL_APP_PASSWORD:
-        raise RuntimeError(
-            "GMAIL_APP_PASSWORD is not set. Create a Gmail App Password "
-            "(Google Account → Security → 2-Step Verification → App passwords) and add it as "
-            "the GMAIL_APP_PASSWORD env var / GitHub secret."
-        )
+def _build_mime(subject: str, body: str) -> MIMEText:
     msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"] = subject
     msg["From"] = f"CT Growth Advisor <{EMAIL_FROM}>"
     msg["To"] = EMAIL_TO
+    return msg
+
+
+def send_via_gmail_api(subject: str, body: str) -> None:
+    """Send through the Gmail API using the shared Google OAuth token (needs gmail.send scope).
+
+    This is the primary transport: it works from cloud IPs (GitHub Actions), unlike Gmail
+    SMTP app-password login, which Google blocks from datacenter ranges.
+    """
+    import base64
+
+    from google.oauth2.credentials import Credentials
+    from googleapiclient.discovery import build
+
+    from ga4_client import TOKEN_FILE
+
+    creds = Credentials.from_authorized_user_file(str(TOKEN_FILE))
+    svc = build("gmail", "v1", credentials=creds, cache_discovery=False)
+    raw = base64.urlsafe_b64encode(_build_mime(subject, body).as_bytes()).decode()
+    svc.users().messages().send(userId="me", body={"raw": raw}).execute()
+
+
+def send_via_smtp(subject: str, body: str) -> None:
+    """Fallback transport (works locally; Google blocks it from cloud IPs)."""
+    if not GMAIL_APP_PASSWORD:
+        raise RuntimeError("GMAIL_APP_PASSWORD not set")
     ctx = ssl.create_default_context()
     with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=ctx) as server:
         server.login(EMAIL_FROM, GMAIL_APP_PASSWORD)
-        server.sendmail(EMAIL_FROM, [EMAIL_TO], msg.as_string())
+        server.sendmail(EMAIL_FROM, [EMAIL_TO], _build_mime(subject, body).as_string())
+
+
+def send_email(subject: str, body: str) -> None:
+    """Try the Gmail API first, then SMTP. Raise with both errors if both fail."""
+    try:
+        send_via_gmail_api(subject, body)
+        return
+    except Exception as api_err:  # noqa: BLE001
+        print(f"[warn] Gmail API send failed: {api_err}", file=sys.stderr)
+        try:
+            send_via_smtp(subject, body)
+            return
+        except Exception as smtp_err:  # noqa: BLE001
+            raise RuntimeError(
+                f"Gmail API failed ({api_err}); SMTP fallback failed ({smtp_err})"
+            ) from smtp_err
 
 
 def slack_fallback(reason: str) -> bool:

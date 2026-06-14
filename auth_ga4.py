@@ -17,6 +17,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/webmasters.readonly",
     "https://www.googleapis.com/auth/adwords",
     "https://www.googleapis.com/auth/spreadsheets.readonly",
+    "https://www.googleapis.com/auth/gmail.send",  # weekly advisor email (Gmail API send)
 ]
 CLIENT_FILE = Path(__file__).parent / "secrets" / "oauth-client.json"
 TOKEN_FILE = Path(__file__).parent / "secrets" / "ga4-token.json"
