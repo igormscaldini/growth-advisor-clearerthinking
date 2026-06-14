@@ -353,6 +353,8 @@ def _build_mime(subject: str, body: str) -> MIMEText:
     msg["Subject"] = subject
     msg["From"] = f"CT Growth Advisor <{EMAIL_FROM}>"
     msg["To"] = EMAIL_TO
+    # Marks this as advisor-sent so the reply poller never tries to "answer" our own report.
+    msg["X-CT-Advisor"] = "report"
     return msg
 
 
