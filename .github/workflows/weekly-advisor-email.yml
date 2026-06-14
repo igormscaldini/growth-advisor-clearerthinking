@@ -1,0 +1,47 @@
+name: Weekly growth-advisor email
+
+on:
+  schedule:
+    - cron: "0 11 * * 5"  # Fridays 11:00 UTC = 08:00 America/Sao_Paulo
+  workflow_dispatch:        # allow manual runs from the Actions UI
+
+# No contents:write needed — this job is stateless and commits nothing
+# (so it never touches the paused Vercel deploys).
+concurrency:
+  group: weekly-advisor-email
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Send weekly advisor email
+        env:
+          # data sources (same secrets the snapshot workflow uses)
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          OAUTH_CLIENT_JSON: ${{ secrets.OAUTH_CLIENT_JSON }}
+          GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+          # advisor narrative
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ADVISOR_MODEL: ${{ secrets.ADVISOR_MODEL }}
+          # email transport
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ADVISOR_EMAIL_TO: ${{ secrets.ADVISOR_EMAIL_TO }}
+          # optional Slack fallback when email transport is down
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_DEFAULT_CHANNEL: ${{ secrets.SLACK_DEFAULT_CHANNEL }}
+        run: python weekly_advisor.py
