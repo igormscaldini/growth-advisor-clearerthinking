@@ -246,8 +246,13 @@ def _extract_plain(payload: dict) -> str:
 
 
 def find_pending(svc) -> list[dict]:
-    """Unread replies from the account owner in Weekly Growth Report threads (skip our own sends)."""
-    q = f'is:unread in:inbox newer_than:14d subject:"{SUBJECT_MATCH}"'
+    """Unread replies from the account owner in Weekly Growth Report threads (skip our own sends).
+
+    Note: the advisor sends from Igor's own address to himself, so his replies land under
+    SENT (no INBOX label). We therefore do NOT filter `in:inbox` — the X-CT-Advisor header
+    is what distinguishes our own outgoing mail from a genuine question.
+    """
+    q = f'is:unread newer_than:14d subject:"{SUBJECT_MATCH}"'
     listing = svc.users().messages().list(userId="me", q=q, maxResults=20).execute()
     pending = []
     for ref in listing.get("messages", []):
