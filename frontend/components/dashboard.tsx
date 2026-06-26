@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { OverviewTab } from "./overview-tab";
 import { ChannelsTab } from "./channels-tab";
 import { MonetizationTab } from "./monetization-tab";
+import { FunnelTab } from "./funnel-tab";
 import { presetLabel } from "@/lib/format";
 import { buildCustomPeriod } from "@/lib/aggregate";
 import { PeriodEntry, PresetKey, Snapshot } from "@/lib/snapshot";
@@ -12,12 +13,13 @@ interface Props {
   snapshot: Snapshot;
 }
 
-type TabKey = "overview" | "channels" | "monetization";
+type TabKey = "overview" | "funnel" | "channels" | "monetization";
 
 const TABS: { key: TabKey; label: string }[] = [
-  { key: "overview", label: "📊 Overview" },
-  { key: "channels", label: "🎯 Modules by Channel" },
-  { key: "monetization", label: "💰 Monetization" },
+  { key: "overview", label: "Overview" },
+  { key: "funnel", label: "Funnel" },
+  { key: "channels", label: "Modules by Channel" },
+  { key: "monetization", label: "Monetization" },
 ];
 
 const PRESETS: PresetKey[] = ["7d", "30d", "90d", "thisMonth", "custom"];
@@ -70,7 +72,7 @@ export function Dashboard({ snapshot }: Props) {
       <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <h1 className="text-xl md:text-2xl font-bold">📊 ClearerThinking Growth Dashboard</h1>
+            <h1 className="text-xl md:text-2xl font-bold">ClearerThinking Growth Dashboard</h1>
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
               {period.start} → {period.end} · {period.days} days · Last refreshed: {generatedLocal}
             </p>
@@ -147,6 +149,7 @@ export function Dashboard({ snapshot }: Props) {
           </p>
         )}
         {tab === "overview" && <OverviewTab snapshot={snapshot} period={period} />}
+        {tab === "funnel" && <FunnelTab period={period} />}
         {tab === "channels" && <ChannelsTab period={period} />}
         {tab === "monetization" && <MonetizationTab snapshot={snapshot} period={period} />}
       </main>

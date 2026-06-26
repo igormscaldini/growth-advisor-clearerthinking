@@ -65,9 +65,9 @@ PRESETS = {"7d": 7, "30d": 30, "90d": 90}
 COG_AMOUNTS = (3500, 1750)
 PERSONALITY_AMOUNTS = (900,)
 
-MANUAL_REVENUE_LAST_UPDATED = "2026-05-26"
+MANUAL_REVENUE_LAST_UPDATED = "2026-06-26"
 MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
-    "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00)],
+    "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00), ("Hive", 2_500.00)],
     "Affiliates": [("Kitted Decks", 230.00)],
     "Podcast sponsorships": [("ACE", 800.00)],
     "Newsletter Sponsorships": [("80,000 Hours", 4_200.00)],
