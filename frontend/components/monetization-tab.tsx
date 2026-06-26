@@ -27,6 +27,11 @@ export function MonetizationTab({ snapshot, period }: Props) {
       detail: "Stripe — $35.00 or $17.50 charges (excl. subscriptions)",
       revenue: cat.cognitive,
     },
+    {
+      source: "Other",
+      detail: "Stripe — all other successful charges (excl. subscriptions, $9 PDF, $35/$17.50 cognitive), net of refunds",
+      revenue: cat.other,
+    },
   ];
 
   const manualRows = Object.entries(snapshot.manual_revenue.lines).map(([label, items]) => ({
@@ -35,7 +40,7 @@ export function MonetizationTab({ snapshot, period }: Props) {
     revenue: items.reduce((s, i) => s + i.amount, 0),
   }));
 
-  const all = [...stripeRows, ...manualRows];
+  const all = [...stripeRows, ...manualRows].sort((a, b) => b.revenue - a.revenue);
   const total = all.reduce((s, r) => s + r.revenue, 0);
   const sources = Object.keys(snapshot.manual_revenue.lines).join(", ");
 

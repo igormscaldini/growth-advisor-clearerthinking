@@ -41,8 +41,8 @@ export function Dashboard({ snapshot }: Props) {
   const period: PeriodEntry = useMemo(() => {
     if (preset === "custom") {
       // Clamp the custom range to the available 90d daily window
-      const min = snapshot.daily_90d.start;
-      const max = snapshot.daily_90d.end;
+      const min = snapshot.daily_window.start;
+      const max = snapshot.daily_window.end;
       const start = customStart < min ? min : customStart > max ? max : customStart;
       const end = customEnd < min ? min : customEnd > max ? max : customEnd;
       const finalStart = start > end ? end : start;
@@ -50,8 +50,8 @@ export function Dashboard({ snapshot }: Props) {
     }
     if (preset === "thisMonth") {
       // First-of-month → today (clamped to the 90d daily window).
-      const min = snapshot.daily_90d.start;
-      const max = snapshot.daily_90d.end;
+      const min = snapshot.daily_window.start;
+      const max = snapshot.daily_window.end;
       const todayStr = snapshot.today;
       const monthStart = `${todayStr.slice(0, 7)}-01`;
       const start = monthStart < min ? min : monthStart;
@@ -64,8 +64,8 @@ export function Dashboard({ snapshot }: Props) {
   const generated = useMemo(() => new Date(snapshot.generated_at), [snapshot.generated_at]);
   const generatedLocal = generated.toLocaleString();
 
-  const dailyMin = snapshot.daily_90d.start;
-  const dailyMax = snapshot.daily_90d.end;
+  const dailyMin = snapshot.daily_window.start;
+  const dailyMax = snapshot.daily_window.end;
 
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
@@ -144,12 +144,12 @@ export function Dashboard({ snapshot }: Props) {
       <main className="max-w-7xl mx-auto px-6 py-6">
         {preset === "custom" && (
           <p className="mb-4 text-xs text-zinc-500 dark:text-zinc-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-md px-3 py-2">
-            Custom ranges are limited to the last 90 days (snapshot window: {dailyMin} → {dailyMax}). Prior-period
+            Custom ranges are limited to the snapshot window: {dailyMin} → {dailyMax}. Prior-period
             comparison only shown when the prior window also fits inside this range.
           </p>
         )}
         {tab === "overview" && <OverviewTab snapshot={snapshot} period={period} />}
-        {tab === "funnel" && <FunnelTab period={period} />}
+        {tab === "funnel" && <FunnelTab period={period} snapshot={snapshot} />}
         {tab === "channels" && <ChannelsTab period={period} />}
         {tab === "monetization" && <MonetizationTab snapshot={snapshot} period={period} />}
       </main>

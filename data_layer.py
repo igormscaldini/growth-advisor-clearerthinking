@@ -184,6 +184,67 @@ def ga4_funnel_events(start: date, end: date) -> dict:
     }
 
 
+def ga4_funnel_by_page_daily(start: date, end: date) -> list[dict]:
+    """Daily funnel-event counts per tool page, restricted to programs.clearerthinking.org.
+
+    Returns rows: {date, page, first_visit, viewed_privacy, accepted_privacy, submitted_email}
+    where `page` is the GA4 pagePath (e.g. "/personality-test.html"). The frontend slices
+    these to the active date range to build a per-tool funnel.
+    """
+    from google.analytics.data_v1beta.types import (
+        DateRange,
+        Dimension,
+        Filter,
+        FilterExpression,
+        FilterExpressionList,
+        Metric,
+        RunReportRequest,
+    )
+    from ga4_client import get_client, property_path
+
+    client = get_client()
+    rng = DateRange(start_date=str(start), end_date=str(end))
+    step_key = {
+        "first_visit": "first_visit",
+        "Viewed Privacy Policy": "viewed_privacy",
+        "Accepted Privacy Policy": "accepted_privacy",
+        "Submitted Email": "submitted_email",
+    }
+
+    resp = client.run_report(RunReportRequest(
+        property=property_path(),
+        date_ranges=[rng],
+        dimensions=[Dimension(name="date"), Dimension(name="pagePath"), Dimension(name="eventName")],
+        metrics=[Metric(name="eventCount")],
+        dimension_filter=FilterExpression(and_group=FilterExpressionList(expressions=[
+            FilterExpression(filter=Filter(
+                field_name="hostName",
+                string_filter=Filter.StringFilter(value="programs.clearerthinking.org"),
+            )),
+            FilterExpression(or_group=FilterExpressionList(expressions=[
+                FilterExpression(filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value=ev)))
+                for ev in step_key
+            ])),
+        ])),
+        limit=250000,
+    ))
+
+    by: dict[tuple[str, str], dict[str, int]] = {}
+    for r in resp.rows:
+        d = r.dimension_values[0].value
+        page = r.dimension_values[1].value
+        ev = r.dimension_values[2].value
+        cnt = int(r.metric_values[0].value)
+        key = (f"{d[:4]}-{d[4:6]}-{d[6:8]}", page)
+        bucket = by.setdefault(key, {"first_visit": 0, "viewed_privacy": 0, "accepted_privacy": 0, "submitted_email": 0})
+        bucket[step_key[ev]] += cnt
+
+    return [
+        {"date": d, "page": page, **counts}
+        for (d, page), counts in by.items()
+    ]
+
+
 # =============================================================================
 # Stripe
 # =============================================================================
