@@ -123,6 +123,7 @@ export interface Snapshot {
   snapshots: {
     current_mrr: number;
     active_subscribers: number;
+    total_subscribers: number;
     engaged_readers: {
       engaged: number;
       segment_name: string | null;
