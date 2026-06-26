@@ -123,7 +123,9 @@ def ga4_daily_users_and_events(start: date, end: date) -> list[dict]:
         dimensions=[Dimension(name="date"), Dimension(name="eventName")],
         metrics=[Metric(name="eventCount")],
         dimension_filter=FilterExpression(or_group=FilterExpressionList(expressions=[
+            FilterExpression(filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="first_visit"))),
             FilterExpression(filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="Viewed Privacy Policy"))),
+            FilterExpression(filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="Accepted Privacy Policy"))),
             FilterExpression(filter=Filter(field_name="eventName", string_filter=Filter.StringFilter(value="Submitted Email"))),
         ])),
     ))
@@ -139,7 +141,9 @@ def ga4_daily_users_and_events(start: date, end: date) -> list[dict]:
         out.append({
             "date": f"{d[:4]}-{d[4:6]}-{d[6:8]}",
             "users": users_by_date.get(d, 0),
+            "first_visit": events_by_date.get(d, {}).get("first_visit", 0),
             "modules_started": events_by_date.get(d, {}).get("Viewed Privacy Policy", 0),
+            "accepted_privacy": events_by_date.get(d, {}).get("Accepted Privacy Policy", 0),
             "modules_finished": events_by_date.get(d, {}).get("Submitted Email", 0),
         })
     return out

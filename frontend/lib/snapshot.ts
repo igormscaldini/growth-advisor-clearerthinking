@@ -85,7 +85,14 @@ export interface RevenueByCategory {
 
 export interface RangeSlice {
   ga4: Ga4Aggregates;
-  ga4_daily: { date: string; users: number; modules_started: number; modules_finished: number }[];
+  ga4_daily: {
+    date: string;
+    users: number;
+    first_visit?: number;
+    modules_started: number;
+    accepted_privacy?: number;
+    modules_finished: number;
+  }[];
   stripe_m: StripeMetrics;
   mrr_history: { date: string; mrr: number }[];
   bh: BeehiivMetrics;

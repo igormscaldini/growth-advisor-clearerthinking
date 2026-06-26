@@ -24,6 +24,11 @@ The current growth targets I'm working toward. Updated by Igor; referenced by th
    - Source: beehiiv segments API
    - Tracked on dashboard: *Engaged Readers* card
 
+5. **$5,000 MRR** _(provisional)_
+   - Source: Stripe current MRR snapshot
+   - Tracked on dashboard: *MRR* card + Progress-against-goals row
+   - Note: derived target — ~revenue-per-active-subscriber × the 100-subscriber goal. Replace with Igor's real figure when set. Also hard-coded as `MRR_TARGET` in `frontend/components/goals-table.tsx`; update both together.
+
 ## Notes
 
 - Timeframes for each goal aren't specified yet — annual? end of 2026? Add when known.

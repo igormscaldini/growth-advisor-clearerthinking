@@ -41,7 +41,7 @@ export function MonetizationTab({ snapshot, period }: Props) {
 
   return (
     <div className="space-y-3">
-      <h3 className="text-lg font-semibold">💰 Monetization Breakdown</h3>
+      <h3 className="text-lg font-semibold">Monetization Breakdown</h3>
       <p className="text-sm text-zinc-500 dark:text-zinc-400">
         Stripe lines scoped to <strong>{period.start} → {period.end}</strong>. Manual lines are absolute totals (not
         window-scoped).
@@ -74,7 +74,7 @@ export function MonetizationTab({ snapshot, period }: Props) {
       </div>
 
       <p className="text-xs text-zinc-500 dark:text-zinc-400">
-        📝 Manual values (<strong>{sources}</strong>) last updated by Igor:{" "}
+        Manual values (<strong>{sources}</strong>) last updated by Igor:{" "}
         <strong>{snapshot.manual_revenue.last_updated}</strong>. Update via the <code>MANUAL_REVENUE</code> constant in{" "}
         <code>fetch_snapshot.py</code>.
       </p>

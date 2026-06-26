@@ -17,7 +17,7 @@ export function ChannelsTab({ period }: Props) {
     <div className="space-y-8">
       <section>
         <h3 className="text-lg font-semibold">
-          🎯 Modules Finished by Channel <span className="font-normal text-zinc-500">· Source: GA4</span>
+          Modules Finished by Channel <span className="font-normal text-zinc-500">· Source: GA4</span>
         </h3>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
           Count of <code>Submitted Email</code> events grouped by <code>sessionDefaultChannelGroup</code> in{" "}
@@ -51,7 +51,7 @@ export function ChannelsTab({ period }: Props) {
 
       <section>
         <h3 className="text-lg font-semibold">
-          📢 Modules Finished by Campaign <span className="font-normal text-zinc-500">· Source: GA4</span>
+          Modules Finished by Campaign <span className="font-normal text-zinc-500">· Source: GA4</span>
         </h3>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
           Count of <code>Submitted Email</code> events grouped by <code>sessionCampaignName</code> in {period.start}{" "}

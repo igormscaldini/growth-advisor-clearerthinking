@@ -3,6 +3,7 @@
 import { KpiCard } from "./kpi-card";
 import { GoalsTable } from "./goals-table";
 import { MonthlyBars } from "./monthly-bars";
+import { DailyBars } from "./daily-bars";
 import { fmtInt, fmtMoney, fmtPct, variance } from "@/lib/format";
 import { PeriodEntry, Snapshot } from "@/lib/snapshot";
 
@@ -84,6 +85,9 @@ export function OverviewTab({ snapshot, period }: Props) {
   // 5. Total Revenue
   const revDaily = (cur.stripe_m.daily || []).map((d) => ({ date: d.date, value: d.revenue }));
   const grossRev = cur.stripe_m.gross_usd;
+  const manualRevenueTotal = Object.values(snapshot.manual_revenue.lines)
+    .flat()
+    .reduce((s, i) => s + i.amount, 0);
 
   // 6. MRR
   const mrrDaily = (cur.mrr_history || []).map((d) => ({ date: d.date, value: d.mrr }));
@@ -105,7 +109,7 @@ export function OverviewTab({ snapshot, period }: Props) {
   return (
     <div className="space-y-5">
       <KpiCard
-        label="🎯 Modules Finished"
+        label="Modules Finished"
         value={fmtInt(modulesFinished)}
         helpText={'GA4 • count of "Submitted Email" event in window.'}
         data={modulesFinishedDaily}
@@ -115,25 +119,64 @@ export function OverviewTab({ snapshot, period }: Props) {
         comparisonNote={`vs prior ${period.days}d`}
       />
 
-      <KpiCard
-        label="📨 New Subscribers"
-        value={`${fmtInt(newSubsTotal)}${newSubsCapped ? "+" : ""}`}
-        helpText={
-          newSubsCapped
-            ? "beehiiv • capped at pagination limit; actual may be higher. Unsubscribers = sum of campaign unsubs by send date."
-            : "beehiiv • subscriptions created in window, deduped by id. Unsubscribers = sum of campaign unsubs by send date."
-        }
-        data={newSubsDaily}
-        color="#4F8BF9"
-        yLabel="Count / day"
-        primaryLabel="New subscribers"
-        series={[{ key: "unsubs", color: "#DC2626", label: "Unsubscribers" }]}
-        delta={variance(newSubsTotal, pri.new_subs_daily.total)}
-        comparisonNote={`vs prior ${period.days}d · ${fmtInt(unsubsTotal)} unsubscribers`}
-      />
+      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-5 shadow-sm">
+        <div className="flex items-baseline justify-between mb-3">
+          <h3
+            className="text-sm font-semibold text-zinc-700 dark:text-zinc-300"
+            title="beehiiv • new subscriptions created in window vs unsubscribers (sum of campaign unsubs by send date)."
+          >
+            New Subscribers
+          </h3>
+          <span
+            className="text-[10px] text-zinc-400 dark:text-zinc-500 cursor-help"
+            title={
+              newSubsCapped
+                ? "beehiiv • capped at pagination limit; actual may be higher. Unsubscribers = sum of campaign unsubs by send date."
+                : "beehiiv • subscriptions created in window, deduped by id. Unsubscribers = sum of campaign unsubs by send date."
+            }
+          >
+            ⓘ
+          </span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_3fr] gap-4 items-center">
+          <div>
+            <div className="text-3xl font-bold leading-none">
+              {fmtInt(newSubsTotal)}
+              {newSubsCapped ? "+" : ""}
+            </div>
+            <div className="mt-1 text-sm font-medium text-red-600 dark:text-red-400">
+              −{fmtInt(unsubsTotal)} unsubscribers
+            </div>
+            {(() => {
+              const delta = variance(newSubsTotal, pri.new_subs_daily.total);
+              if (delta == null) {
+                return (
+                  <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+                    vs prior {period.days}d
+                  </div>
+                );
+              }
+              const sign = delta > 0 ? "▲" : "▼";
+              const isFlat = Math.abs(delta) < 0.05;
+              const color = isFlat
+                ? "text-zinc-500 dark:text-zinc-400"
+                : delta > 0
+                  ? "text-green-600 dark:text-green-400"
+                  : "text-red-600 dark:text-red-400";
+              return (
+                <div className={`mt-2 text-sm font-medium ${color}`}>
+                  {sign} {Math.abs(delta).toFixed(1)}%{" "}
+                  <span className="font-normal text-zinc-500 dark:text-zinc-400">vs prior {period.days}d</span>
+                </div>
+              );
+            })()}
+          </div>
+          <DailyBars data={newSubsDaily.map((d) => ({ date: d.date, new: d.value, unsubs: d.unsubs }))} />
+        </div>
+      </div>
 
       <KpiCard
-        label="👥 Total Subscribers"
+        label="Total Subscribers"
         value={fmtInt(totalSubsAnchor)}
         helpText="beehiiv • current active subscribers (snapshot). Daily curve reconstructed from (new − unsubscribers) deltas, anchored at the latest snapshot value."
         data={totalSubsDaily.map((d) => ({ date: d.date, value: d.value }))}
@@ -144,7 +187,7 @@ export function OverviewTab({ snapshot, period }: Props) {
       />
 
       <KpiCard
-        label="💚 Engaged Readers"
+        label="Engaged Readers"
         value={fmtInt(engagedSnap.engaged)}
         helpText={`beehiiv segment "${engagedSnap.segment_name ?? "Engaged Reades - Open > 40%"}". Snapshot only — no historical series.`}
         data={engagedFlat}
@@ -154,15 +197,15 @@ export function OverviewTab({ snapshot, period }: Props) {
         comparisonNote="(snapshot — no historical comparison)"
         footer={
           engagedSnap.error ? (
-            <span className="text-red-600 dark:text-red-400">⚠ {engagedSnap.error}</span>
+            <span className="text-red-600 dark:text-red-400">{engagedSnap.error}</span>
           ) : (
-            <span>⚠ Curve is flat — beehiiv only exposes a current count.</span>
+            <span>Curve is flat — beehiiv only exposes a current count.</span>
           )
         }
       />
 
       <KpiCard
-        label="🚪 Unsubscribe Rate"
+        label="Unsubscribe Rate"
         value={fmtPct(cur.bh.unsubscribe_rate)}
         helpText="beehiiv • total unsubscribes / total recipients in window."
         data={unsubDaily}
@@ -175,7 +218,7 @@ export function OverviewTab({ snapshot, period }: Props) {
       />
 
       <KpiCard
-        label="💵 Total Revenue (Gross)"
+        label="Total Revenue (Gross)"
         value={fmtMoney(grossRev)}
         helpText="Stripe • gross volume = sum of all successful charge amounts (pre-refund) in window."
         data={revDaily}
@@ -186,7 +229,7 @@ export function OverviewTab({ snapshot, period }: Props) {
       />
 
       <KpiCard
-        label="📈 MRR"
+        label="MRR"
         value={fmtMoney(currentMrr)}
         helpText="Stripe • current MRR snapshot. Curve reconstructs daily MRR from active+canceled subscription history."
         data={mrrDaily}
@@ -198,7 +241,7 @@ export function OverviewTab({ snapshot, period }: Props) {
 
       <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
-          🆕 New Stripe Subscribers — all time
+          New Stripe Subscribers — all time
           <span
             className="ml-2 text-[10px] text-zinc-400 dark:text-zinc-500 font-normal"
             title="Stripe • count of subscriptions (any status) bucketed by `created` month. Ignores the date filter — full history."
@@ -236,7 +279,7 @@ export function OverviewTab({ snapshot, period }: Props) {
       </div>
 
       <KpiCard
-        label="🧠 Cognitive Assessment Sales"
+        label="Cognitive Assessment Sales"
         value={fmtInt(cur.cog_sales.total)}
         helpText="Stripe • count of successful charges with amount $35.00 or $17.50 in window."
         data={cogDaily}
@@ -247,7 +290,7 @@ export function OverviewTab({ snapshot, period }: Props) {
       />
 
       <KpiCard
-        label="📄 Personality Test PDF Sales"
+        label="Personality Test PDF Sales"
         value={fmtInt(cur.pdf_sales.total)}
         helpText="Stripe • count of $9.00 charges, excluding subscriptions."
         data={pdfDaily}
@@ -258,7 +301,7 @@ export function OverviewTab({ snapshot, period }: Props) {
       />
 
       <KpiCard
-        label="💰 Spent on Ads"
+        label="Spent on Ads"
         value={fmtMoney(cur.ads.spend_usd)}
         helpText="Google Ads • sum of cost_micros / 1M for window."
         data={adsDaily}
@@ -269,7 +312,7 @@ export function OverviewTab({ snapshot, period }: Props) {
       />
 
       <KpiCard
-        label='🔍 GSC Ranking — "personality test"'
+        label='GSC Ranking — "personality test"'
         value={cur.kw_pos.avg_position ? `#${cur.kw_pos.avg_position.toFixed(1)}` : "—"}
         helpText='Search Console • impression-weighted avg position. Lower = better. GSC has a 3-day data lag.'
         data={kwDailyRaw}
@@ -281,7 +324,7 @@ export function OverviewTab({ snapshot, period }: Props) {
       />
 
       <section className="pt-4">
-        <h2 className="text-lg font-semibold mb-2">🎯 Progress against goals</h2>
+        <h2 className="text-lg font-semibold mb-2">Progress against goals</h2>
         <p className="text-sm text-zinc-500 dark:text-zinc-400 mb-3">
           Goals defined in{" "}
           <a
@@ -292,9 +335,9 @@ export function OverviewTab({ snapshot, period }: Props) {
           </a>
           . Update that file to change targets.
         </p>
-        <GoalsTable snapshot={snapshot} currentRevenueUsd={grossRev} />
+        <GoalsTable snapshot={snapshot} stripeGrossUsd={grossRev} manualRevenueUsd={manualRevenueTotal} />
         <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
-          ℹ️ Ranking % uses the formula <code>1 / current_position × 100</code> (position 1 → 100%, position 2 →
+          Ranking % uses the formula <code>1 / current_position × 100</code> (position 1 → 100%, position 2 →
           50%). Other metrics use <code>current / target × 100</code>.
         </p>
       </section>

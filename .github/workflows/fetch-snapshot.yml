@@ -1,10 +1,8 @@
 name: Fetch dashboard snapshot
 
 on:
-  # Cron paused while Vercel deploys are failing — re-enable once the
-  # Root Directory / Next.js build config is fixed.
-  # schedule:
-  #   - cron: "*/30 * * * *"  # every 30 minutes
+  schedule:
+    - cron: "*/30 * * * *"  # every 30 minutes
   workflow_dispatch:  # allow manual runs from the Actions UI
 
 permissions:
