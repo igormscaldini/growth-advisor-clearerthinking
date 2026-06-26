@@ -1023,45 +1023,53 @@ def beehiiv_metrics(start: date, end: date) -> dict:
     }
 
 
-@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
-def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
-    """Daily count of new beehiiv subscriptions created in the window.
+# Earliest day we page beehiiv subscriptions back to. Must be <= the earliest start any
+# window asks for (the 90d prior-period start and the Jan-1 daily window). Paged once,
+# cached, then sliced — so all windows reuse a single pass.
+NEW_SUBS_FLOOR = date(2025, 12, 1)
 
-    beehiiv's subscriptions endpoint doesn't support date filters. Strategy:
-    page through subscriptions sorted by `created desc`, stop once we cross
-    below `start_ts`.
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def _beehiiv_new_subs_by_day() -> dict:
+    """Cursor-page ALL beehiiv subscriptions created since NEW_SUBS_FLOOR, bucketed by created date.
+
+    beehiiv offset pagination is hard-capped at page 100 (10k records); the list is far larger,
+    so we use cursor pagination (sorted `created desc`) and stop once a full page predates the
+    floor. Returns {"daily": {iso_date: count}, "capped": bool, "error": str|None}.
     """
     api_key = os.getenv("BEEHIIV_API_KEY", "").strip()
     pub_id = os.getenv("BEEHIIV_PUB_CLEARER_THINKING", "").strip()
     if not api_key or not pub_id:
-        return {"total": 0, "daily": [], "error": "BEEHIIV_API_KEY missing"}
+        return {"daily": {}, "capped": True, "error": "BEEHIIV_API_KEY missing"}
 
     headers = {"Authorization": f"Bearer {api_key}"}
-    start_ts = _date_to_ts(start)
-    # max() handles the case where `end` is "today" but UTC has already rolled over
-    # (e.g., Brazil local 2026-05-09 23:30 = UTC 2026-05-10 02:30). Without this,
-    # subs created in the in-progress UTC day after end-of-end-date get excluded.
-    end_ts = max(_date_to_ts(end) + 86400, int(datetime.now(timezone.utc).timestamp()))
+    floor_ts = _date_to_ts(NEW_SUBS_FLOOR)
 
     daily: dict[str, int] = defaultdict(int)
-    seen_ids: set = set()  # dedupe across page boundaries (beehiiv overlaps a sub between pages)
-    page = 1
-    PAGE_CAP = 100  # beehiiv hard-caps pagination around here
+    seen_ids: set = set()
+    cursor = ""
     capped = False
-    while page <= PAGE_CAP:
+    pages = 0
+    PAGE_CAP = 6000  # safety ceiling (~600k records); the floor stop fires long before this
+    while True:
+        if pages >= PAGE_CAP:
+            capped = True
+            break
         r = requests.get(
             f"{BEEHIIV_BASE}/publications/{pub_id}/subscriptions",
             headers=headers,
-            params={"limit": 100, "page": page, "order_by": "created", "direction": "desc"},
+            params={"limit": 100, "order_by": "created", "direction": "desc", "cursor": cursor},
         )
         if r.status_code != 200:
             capped = True
             break
-        subs = r.json().get("data", [])
+        body = r.json()
+        subs = body.get("data", [])
         if not subs:
             break
+        pages += 1
 
-        all_below_start = True
+        all_below_floor = True
         for sub in subs:
             sid = sub.get("id")
             if sid in seen_ids:
@@ -1075,28 +1083,43 @@ def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
                     continue
             if not isinstance(ts, int):
                 continue
-            if ts < start_ts:
+            if ts < floor_ts:
                 continue
-            all_below_start = False
-            if ts >= end_ts:
-                continue
+            all_below_floor = False
             d = datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()
             daily[d] += 1
 
-        if all_below_start:
+        # Sorted created desc: once a whole page predates the floor, everything after is older.
+        if all_below_floor or not body.get("has_more"):
             break
-        page += 1
-    else:
-        # while-else: ran the full PAGE_CAP without breaking — likely capped
-        capped = True
+        cursor = body.get("next_cursor") or ""
+        if not cursor:
+            break
 
+    return {"daily": dict(daily), "capped": capped, "error": None}
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def beehiiv_daily_new_subscribers(start: date, end: date) -> dict:
+    """Daily count of new beehiiv subscriptions created in [start, end].
+
+    Slices the cached full pass (`_beehiiv_new_subs_by_day`), so it's accurate beyond the old
+    10k offset-pagination cap.
+    """
+    full = _beehiiv_new_subs_by_day()
+    daily = full["daily"]
     rows = []
+    total = 0
     cur = start
     while cur <= end:
         di = cur.isoformat()
-        rows.append({"date": di, "count": daily.get(di, 0)})
+        c = daily.get(di, 0)
+        rows.append({"date": di, "count": c})
+        total += c
         cur += timedelta(days=1)
-    return {"total": sum(daily.values()), "daily": rows, "error": None, "capped": capped}
+    # Only flag capped if pagination actually truncated, or the window reaches before our floor.
+    capped = bool(full.get("capped")) or start < NEW_SUBS_FLOOR
+    return {"total": total, "daily": rows, "error": full.get("error"), "capped": capped}
 
 
 @st.cache_data(ttl=3600, show_spinner=False)  # segments don't change minute-to-minute

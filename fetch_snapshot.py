@@ -173,12 +173,18 @@ def main() -> None:
         "funnel_by_page": fp_res if isinstance(fp_res, list) else [],
     }
 
+    # Current beehiiv list size — a snapshot value (same across all windows). Used as the anchor
+    # for the Total Subscribers curve, so custom ranges (which zero out per-window bh) still render.
+    win_bh = win_kpi.get("bh") if isinstance(win_kpi.get("bh"), dict) else {}
+    total_subscribers = int(win_bh.get("total_subscribers", 0) or 0)
+
     snapshot = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "today": today.isoformat(),
         "snapshots": {
             "current_mrr": current_mrr,
             "active_subscribers": active_subs,
+            "total_subscribers": total_subscribers,
             "engaged_readers": engaged,
             "keyword_overall": keyword_overall,
             "new_subscribers_monthly_alltime": new_subs_monthly if isinstance(new_subs_monthly, list) else [],

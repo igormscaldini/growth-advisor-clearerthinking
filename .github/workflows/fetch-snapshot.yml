@@ -15,7 +15,9 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Higher than the default: the beehiiv subscriber pass cursor-pages the full list
+    # (offset pagination is capped at 10k), which adds a few minutes. Cron is every 30 min.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 

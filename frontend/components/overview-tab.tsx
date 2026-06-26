@@ -55,7 +55,7 @@ export function OverviewTab({ snapshot, period }: Props) {
 
   // 2b. Total Subscribers — derived. Anchor at current beehiiv total (snapshot only — same value
   // across all periods), walk backward day-by-day using (new − unsubs) deltas.
-  const totalSubsAnchor = cur.bh.total_subscribers || 0;
+  const totalSubsAnchor = snapshot.snapshots.total_subscribers || cur.bh.total_subscribers || 0;
   const totalSubsDaily = (() => {
     const days = (cur.new_subs_daily.daily || []).map((d) => d.date);
     if (!days.length || !totalSubsAnchor) return [];
@@ -226,6 +226,7 @@ export function OverviewTab({ snapshot, period }: Props) {
         yLabel="Revenue ($)"
         delta={variance(grossRev, pri.stripe_m.gross_usd)}
         comparisonNote={`vs prior ${period.days}d`}
+        footer={<span>Note: Stripe revenue only — excludes manual lines (MLA, sponsorships, affiliates).</span>}
       />
 
       <KpiCard
@@ -309,6 +310,7 @@ export function OverviewTab({ snapshot, period }: Props) {
         yLabel="Spend ($)"
         delta={variance(cur.ads.spend_usd, pri.ads.spend_usd)}
         comparisonNote={`vs prior ${period.days}d`}
+        footer={<span>Note: also includes ad spend on MLA partner project campaigns.</span>}
       />
 
       <KpiCard
