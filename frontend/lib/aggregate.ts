@@ -1,7 +1,7 @@
 /**
  * Build a synthetic PeriodEntry for a user-picked [start, end] range, using:
- *   - the 90d period's daily KPI series (sliced to the range)
- *   - the daily_90d block's channel / campaign / revenue_category breakdowns
+ *   - the daily_window KPI series (sliced to the range)
+ *   - the daily_window channel / campaign / revenue_category breakdowns
  *
  * Output matches the shape the tab components expect, so they don't need to know
  * whether the period came from a preset or a custom selection.
@@ -36,20 +36,20 @@ function impressionWeightedAvgPosition(
 }
 
 function buildSlice(snapshot: Snapshot, start: string, end: string): RangeSlice {
-  const p90 = snapshot.periods["90d"].current;
-  const daily90 = snapshot.daily_90d;
+  const win = snapshot.daily_window.kpi;
+  const daily90 = snapshot.daily_window;
 
   // --- Daily KPI series sliced to [start, end] ---
-  const ga4Daily = filterDaily(p90.ga4_daily, start, end);
-  const stripeDailyAll = filterDaily(p90.stripe_m.daily, start, end);
-  const stripeDailySplit = filterDaily(p90.stripe_m.daily_split, start, end);
-  const mrrHistory = filterDaily(p90.mrr_history, start, end);
-  const bhDailyRates = filterDaily(p90.bh_daily_rates, start, end);
-  const newSubsDaily = filterDaily(p90.new_subs_daily.daily, start, end);
-  const cogDaily = filterDaily(p90.cog_sales.daily, start, end);
-  const pdfDaily = filterDaily(p90.pdf_sales.daily, start, end);
-  const adsDaily = filterDaily(p90.ads.daily, start, end);
-  const kwDaily = filterDaily(p90.kw_pos.daily, start, end);
+  const ga4Daily = filterDaily(win.ga4_daily, start, end);
+  const stripeDailyAll = filterDaily(win.stripe_m.daily, start, end);
+  const stripeDailySplit = filterDaily(win.stripe_m.daily_split, start, end);
+  const mrrHistory = filterDaily(win.mrr_history, start, end);
+  const bhDailyRates = filterDaily(win.bh_daily_rates, start, end);
+  const newSubsDaily = filterDaily(win.new_subs_daily.daily, start, end);
+  const cogDaily = filterDaily(win.cog_sales.daily, start, end);
+  const pdfDaily = filterDaily(win.pdf_sales.daily, start, end);
+  const adsDaily = filterDaily(win.ads.daily, start, end);
+  const kwDaily = filterDaily(win.kw_pos.daily, start, end);
 
   // --- Aggregate GA4 audience metrics from daily ---
   const usersTotal = sumKey(ga4Daily, "users");
@@ -171,14 +171,14 @@ function buildSlice(snapshot: Snapshot, start: string, end: string): RangeSlice 
     },
     modules_by_channel: modulesByChannel,
     modules_by_campaign: modulesByCampaign,
-    kw_pos: { daily: kwDaily, avg_position: kwAvg, clicks: kwClicks, impressions: kwImps, keyword: p90.kw_pos.keyword },
+    kw_pos: { daily: kwDaily, avg_position: kwAvg, clicks: kwClicks, impressions: kwImps, keyword: win.kw_pos.keyword },
     revenue_cat: cat,
   };
 }
 
 /**
  * Build a PeriodEntry for a custom [start, end] range.
- * Prior period = same length, immediately before start, if it fits inside the 90d daily window.
+ * Prior period = same length, immediately before start, if it fits inside the daily window.
  */
 export function buildCustomPeriod(snapshot: Snapshot, start: string, end: string): PeriodEntry {
   const days = daysBetween(start, end);
@@ -190,7 +190,7 @@ export function buildCustomPeriod(snapshot: Snapshot, start: string, end: string
 
   const priorStartIso = priorStart.toISOString().slice(0, 10);
   const priorEndIso = priorEnd.toISOString().slice(0, 10);
-  const dailyMin = snapshot.daily_90d.start;
+  const dailyMin = snapshot.daily_window.start;
 
   const priorFits = priorStartIso >= dailyMin;
   const priorSlice = priorFits

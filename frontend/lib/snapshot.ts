@@ -140,12 +140,21 @@ export interface Snapshot {
   periods: Record<"7d" | "30d" | "90d", PeriodEntry>;
   // "thisMonth" and "custom" are built client-side in dashboard.tsx; only the three fixed presets are pre-baked.
 
-  daily_90d: {
+  daily_window: {
     start: string;
     end: string;
+    kpi: RangeSlice;
     channel: { date: string; channel: string; count: number }[];
     campaign: { date: string; campaign: string; count: number }[];
     revenue_category: { date: string; subscriptions: number; pdf: number; cognitive: number; other: number }[];
+    funnel_by_page: {
+      date: string;
+      page: string;
+      first_visit: number;
+      viewed_privacy: number;
+      accepted_privacy: number;
+      submitted_email: number;
+    }[];
   };
   manual_revenue: {
     last_updated: string;

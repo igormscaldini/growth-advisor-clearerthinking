@@ -44,6 +44,7 @@ from data_layer import (  # noqa: E402
     ga4_daily_users_and_events,
     ga4_modules_finished_by_campaign,
     ga4_modules_finished_by_campaign_daily,
+    ga4_funnel_by_page_daily,
     ga4_modules_finished_by_channel,
     ga4_modules_finished_by_channel_daily,
     google_ads_metrics,
@@ -62,6 +63,8 @@ from data_layer import (  # noqa: E402
 OUT = ROOT / "frontend" / "public" / "snapshot.json"
 
 PRESETS = {"7d": 7, "30d": 30, "90d": 90}
+# Earliest day the daily-granular series go back to. Bounds how far the Custom date filter can reach.
+DAILY_WINDOW_FLOOR = date(2026, 1, 1)
 COG_AMOUNTS = (3500, 1750)
 PERSONALITY_AMOUNTS = (900,)
 
@@ -145,25 +148,30 @@ def main() -> None:
             "prior": fetch_range(prior_start, prior_end),
         }
 
-    # Daily-granular breakdowns for the last 90 days. Used by the frontend to aggregate
-    # Channels / Campaigns / Revenue Category for any custom date range.
-    daily_start = today - timedelta(days=89)
-    daily_end = today
-    print(f"[snapshot] daily granular: {daily_start} → {daily_end}")
+    # Daily-granular series for the whole selectable window (Jan 1, 2026 → today). The frontend
+    # slices these to build any custom date range, so this bounds how far back Custom can reach.
+    win_start = DAILY_WINDOW_FLOOR
+    win_end = today
+    print(f"[snapshot] daily window: {win_start} → {win_end}")
+    win_kpi = fetch_range(win_start, win_end)  # full daily KPI series (ga4/stripe/mrr/beehiiv/ads/kw)
     with concurrent.futures.ThreadPoolExecutor(max_workers=6) as ex:
-        f_ch = ex.submit(_safe, ga4_modules_finished_by_channel_daily, daily_start, daily_end)
-        f_cm = ex.submit(_safe, ga4_modules_finished_by_campaign_daily, daily_start, daily_end)
-        f_rc = ex.submit(_safe, stripe_revenue_by_category_daily, daily_start, daily_end)
+        f_ch = ex.submit(_safe, ga4_modules_finished_by_channel_daily, win_start, win_end)
+        f_cm = ex.submit(_safe, ga4_modules_finished_by_campaign_daily, win_start, win_end)
+        f_rc = ex.submit(_safe, stripe_revenue_by_category_daily, win_start, win_end)
+        f_fp = ex.submit(_safe, ga4_funnel_by_page_daily, win_start, win_end)
         ch_res = f_ch.result()
         cm_res = f_cm.result()
         rc_res = f_rc.result()
-        daily_90d = {
-            "start": daily_start.isoformat(),
-            "end": daily_end.isoformat(),
-            "channel": ch_res if isinstance(ch_res, list) else [],
-            "campaign": cm_res if isinstance(cm_res, list) else [],
-            "revenue_category": rc_res if isinstance(rc_res, list) else [],
-        }
+        fp_res = f_fp.result()
+    daily_window = {
+        "start": win_start.isoformat(),
+        "end": win_end.isoformat(),
+        "kpi": win_kpi,
+        "channel": ch_res if isinstance(ch_res, list) else [],
+        "campaign": cm_res if isinstance(cm_res, list) else [],
+        "revenue_category": rc_res if isinstance(rc_res, list) else [],
+        "funnel_by_page": fp_res if isinstance(fp_res, list) else [],
+    }
 
     snapshot = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -176,7 +184,7 @@ def main() -> None:
             "new_subscribers_monthly_alltime": new_subs_monthly if isinstance(new_subs_monthly, list) else [],
         },
         "periods": periods,
-        "daily_90d": daily_90d,
+        "daily_window": daily_window,
         "manual_revenue": {
             "last_updated": MANUAL_REVENUE_LAST_UPDATED,
             "lines": {
