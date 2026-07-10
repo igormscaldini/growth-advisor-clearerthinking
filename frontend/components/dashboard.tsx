@@ -5,7 +5,6 @@ import { OverviewTab } from "./overview-tab";
 import { ChannelsTab } from "./channels-tab";
 import { MonetizationTab } from "./monetization-tab";
 import { FunnelTab } from "./funnel-tab";
-import { RefreshButton } from "./refresh-button";
 import { presetLabel } from "@/lib/format";
 import { buildCustomPeriod } from "@/lib/aggregate";
 import { PeriodEntry, PresetKey, Snapshot } from "@/lib/snapshot";
@@ -23,7 +22,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "monetization", label: "Monetization" },
 ];
 
-const PRESETS: PresetKey[] = ["7d", "30d", "90d", "thisMonth", "custom"];
+const PRESETS: PresetKey[] = ["7d", "30d", "90d", "thisMonth", "yearToDate", "custom"];
 
 export function Dashboard({ snapshot }: Props) {
   const [preset, setPreset] = useState<PresetKey>("30d");
@@ -59,6 +58,16 @@ export function Dashboard({ snapshot }: Props) {
       const end = todayStr > max ? max : todayStr;
       return buildCustomPeriod(snapshot, start, end);
     }
+    if (preset === "yearToDate") {
+      // Jan 1 of the current year → today (clamped to the daily window).
+      const min = snapshot.daily_window.start;
+      const max = snapshot.daily_window.end;
+      const todayStr = snapshot.today;
+      const yearStart = `${todayStr.slice(0, 4)}-01-01`;
+      const start = yearStart < min ? min : yearStart;
+      const end = todayStr > max ? max : todayStr;
+      return buildCustomPeriod(snapshot, start, end);
+    }
     return snapshot.periods[preset];
   }, [preset, customStart, customEnd, snapshot]);
 
@@ -77,7 +86,6 @@ export function Dashboard({ snapshot }: Props) {
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
               {period.start} → {period.end} · {period.days} days · Last refreshed: {generatedLocal}
             </p>
-            <RefreshButton />
           </div>
           <div className="flex flex-col items-end gap-2">
             <div role="tablist" className="inline-flex rounded-lg border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-100 dark:bg-zinc-900">

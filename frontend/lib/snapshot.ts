@@ -1,4 +1,4 @@
-export type PresetKey = "7d" | "30d" | "90d" | "thisMonth" | "custom";
+export type PresetKey = "7d" | "30d" | "90d" | "thisMonth" | "yearToDate" | "custom";
 
 export interface DailyPoint {
   date: string;
