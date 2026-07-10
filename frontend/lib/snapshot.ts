@@ -100,6 +100,7 @@ export interface RangeSlice {
   new_subs_daily: NewSubsDaily;
   cog_sales: { total: number; daily: { date: string; count: number }[] };
   pdf_sales: { total: number; daily: { date: string; count: number }[] };
+  new_stripe_subs?: { total: number; daily: { date: string; count: number }[]; error: string | null };
   ads: AdsMetrics;
   modules_by_channel: { channel: string; count: number }[];
   modules_by_campaign: { campaign: string; count: number }[];

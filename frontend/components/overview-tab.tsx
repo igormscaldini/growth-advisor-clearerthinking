@@ -2,7 +2,6 @@
 
 import { KpiCard } from "./kpi-card";
 import { GoalsTable } from "./goals-table";
-import { MonthlyBars } from "./monthly-bars";
 import { DailyBars } from "./daily-bars";
 import { fmtInt, fmtMoney, fmtPct, variance } from "@/lib/format";
 import { PeriodEntry, Snapshot } from "@/lib/snapshot";
@@ -75,9 +74,9 @@ export function OverviewTab({ snapshot, period }: Props) {
   })();
   const priorTotalSubs = totalSubsDaily.length ? totalSubsDaily[0].value : null;
 
-  // 3. Engaged Readers (snapshot — flat line)
-  const engagedSnap = snapshot.snapshots.engaged_readers;
-  const engagedFlat = (cur.ga4_daily || []).map((d) => ({ date: d.date, value: engagedSnap.engaged }));
+  // 3. New (paid) Stripe subscribers — window-scoped
+  const newStripeSubsDaily = (cur.new_stripe_subs?.daily || []).map((d) => ({ date: d.date, value: d.count }));
+  const newStripeSubsTotal = cur.new_stripe_subs?.total ?? 0;
 
   // 4. Unsubscribe Rate
   const unsubDaily = (cur.bh_daily_rates || []).map((d) => ({ date: d.date, value: d.unsubscribe_rate }));
@@ -99,9 +98,6 @@ export function OverviewTab({ snapshot, period }: Props) {
 
   // 9. PDF Sales
   const pdfDaily = (cur.pdf_sales.daily || []).map((d) => ({ date: d.date, value: d.count }));
-
-  // 10. Ads spend
-  const adsDaily = fillRange((cur.ads.daily || []) as { date: string; spend: number }[], "spend");
 
   // 11. GSC keyword position (do NOT fill gaps — missing = no impressions)
   const kwDailyRaw = (cur.kw_pos.daily || []).map((d) => ({ date: d.date, value: d.position }));
@@ -187,24 +183,6 @@ export function OverviewTab({ snapshot, period }: Props) {
       />
 
       <KpiCard
-        label="Engaged Readers"
-        value={fmtInt(engagedSnap.engaged)}
-        helpText={`beehiiv segment "${engagedSnap.segment_name ?? "Engaged Reades - Open > 40%"}". Snapshot only — no historical series.`}
-        data={engagedFlat}
-        color="#10B981"
-        yLabel="Subs in segment (current)"
-        delta={null}
-        comparisonNote="(snapshot — no historical comparison)"
-        footer={
-          engagedSnap.error ? (
-            <span className="text-red-600 dark:text-red-400">{engagedSnap.error}</span>
-          ) : (
-            <span>Curve is flat — beehiiv only exposes a current count.</span>
-          )
-        }
-      />
-
-      <KpiCard
         label="Unsubscribe Rate"
         value={fmtPct(cur.bh.unsubscribe_rate)}
         helpText="beehiiv • total unsubscribes / total recipients in window."
@@ -240,44 +218,16 @@ export function OverviewTab({ snapshot, period }: Props) {
         comparisonNote="vs MRR at end of prior window"
       />
 
-      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-5 shadow-sm">
-        <h3 className="text-sm font-semibold text-zinc-700 dark:text-zinc-300 mb-3">
-          New Stripe Subscribers — all time
-          <span
-            className="ml-2 text-[10px] text-zinc-400 dark:text-zinc-500 font-normal"
-            title="Stripe • count of subscriptions (any status) bucketed by `created` month. Ignores the date filter — full history."
-          >
-            ⓘ
-          </span>
-        </h3>
-        {(() => {
-          // Hardcoded floor: chart always starts from Jan 2026 regardless of the date filter.
-          const monthly = snapshot.snapshots.new_subscribers_monthly_alltime.filter((m) => m.month >= "2026-01");
-          if (!monthly.length) {
-            return <div className="text-sm text-zinc-500 dark:text-zinc-400">No Stripe subscription history since Jan 2026.</div>;
-          }
-          const totalNew = monthly.reduce((s, m) => s + m.new, 0);
-          const totalCancelled = monthly.reduce((s, m) => s + m.cancelled, 0);
-          const latest = monthly[monthly.length - 1];
-          return (
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_3fr] gap-4 items-center">
-              <div>
-                <div className="text-3xl font-bold leading-none">{totalNew.toLocaleString("en-US")}</div>
-                <div className="mt-1 text-sm font-medium text-red-600 dark:text-red-400">
-                  −{totalCancelled.toLocaleString("en-US")} cancelled
-                </div>
-                <div className="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-                  {latest.new} new / {latest.cancelled} cancelled in {latest.month}
-                </div>
-                <div className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">
-                  Spans {monthly[0].month} → {latest.month}
-                </div>
-              </div>
-              <MonthlyBars data={monthly} />
-            </div>
-          );
-        })()}
-      </div>
+      <KpiCard
+        label="New Subscribers"
+        value={fmtInt(newStripeSubsTotal)}
+        helpText="Stripe • new paid subscriptions created in the selected window (by subscription created date). Excludes churn/cancellations."
+        data={newStripeSubsDaily}
+        color="#0EA5E9"
+        yLabel="New subs / day"
+        delta={variance(newStripeSubsTotal, pri.new_stripe_subs?.total ?? null)}
+        comparisonNote={`vs prior ${period.days}d`}
+      />
 
       <KpiCard
         label="Cognitive Assessment Sales"
@@ -299,18 +249,6 @@ export function OverviewTab({ snapshot, period }: Props) {
         yLabel="Sales / day"
         delta={variance(cur.pdf_sales.total, pri.pdf_sales.total)}
         comparisonNote={`vs prior ${period.days}d`}
-      />
-
-      <KpiCard
-        label="Spent on Ads"
-        value={fmtMoney(cur.ads.spend_usd)}
-        helpText="Google Ads • sum of cost_micros / 1M for window."
-        data={adsDaily}
-        color="#DC2626"
-        yLabel="Spend ($)"
-        delta={variance(cur.ads.spend_usd, pri.ads.spend_usd)}
-        comparisonNote={`vs prior ${period.days}d`}
-        footer={<span>Note: also includes ad spend on MLA partner project campaigns.</span>}
       />
 
       <KpiCard
