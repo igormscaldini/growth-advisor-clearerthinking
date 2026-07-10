@@ -23,8 +23,8 @@ interface GoalRow {
 // revenue-per-subscriber. Recorded in GOALS.md; adjust there and here together.
 const MRR_TARGET = 5_000;
 
-// Provisional target for average unique opens per large (100k+) campaign. Current
-// baseline is ~86k. Recorded in GOALS.md; set Igor's real target there and here together.
+// Target for average unique opens per large (100k+) campaign, confirmed by Igor 2026-07-10.
+// Baseline at time of setting was ~86k. Recorded in GOALS.md; adjust there and here together.
 const AVG_OPENS_TARGET = 100_000;
 
 export function GoalsTable({ snapshot, stripeGrossUsd, manualRevenueUsd }: Props) {
