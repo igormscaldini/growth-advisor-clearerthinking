@@ -23,9 +23,15 @@ interface GoalRow {
 // revenue-per-subscriber. Recorded in GOALS.md; adjust there and here together.
 const MRR_TARGET = 5_000;
 
+// Target for average unique opens per large (100k+) campaign, confirmed by Igor 2026-07-10.
+// Baseline at time of setting was ~86k. Recorded in GOALS.md; adjust there and here together.
+const AVG_OPENS_TARGET = 100_000;
+
 export function GoalsTable({ snapshot, stripeGrossUsd, manualRevenueUsd }: Props) {
   const activeSubs = snapshot.snapshots.active_subscribers;
-  const engaged = snapshot.snapshots.engaged_readers.engaged;
+  const avgOpensData = snapshot.snapshots.avg_unique_opens_per_campaign;
+  const avgOpens = avgOpensData?.avg_unique_opens ?? 0;
+  const avgOpensCampaigns = avgOpensData?.campaigns_count ?? 0;
   const rankPos = snapshot.snapshots.keyword_overall.position;
   const mrr = snapshot.snapshots.current_mrr;
   const totalRevenue = stripeGrossUsd + manualRevenueUsd;
@@ -59,10 +65,13 @@ export function GoalsTable({ snapshot, stripeGrossUsd, manualRevenueUsd }: Props
       pct: rankPos ? Math.min(100, (1 / rankPos) * 100) : 0,
     },
     {
-      goal: "Engaged subscribers (>40% open rate)",
-      current: fmtInt(engaged),
-      target: "200,000",
-      pct: (engaged / 200_000) * 100,
+      goal: "Average Unique Opens Per Campaign",
+      current: fmtInt(avgOpens),
+      sub: avgOpensCampaigns
+        ? `avg over ${avgOpensCampaigns} campaigns sent to 100k+ subscribers`
+        : "awaiting next data refresh",
+      target: fmtInt(AVG_OPENS_TARGET),
+      pct: (avgOpens / AVG_OPENS_TARGET) * 100,
     },
   ];
 
@@ -110,7 +119,7 @@ export function GoalsTable({ snapshot, stripeGrossUsd, manualRevenueUsd }: Props
       </table>
       <div className="px-4 py-2 text-xs text-zinc-500 dark:text-zinc-400 border-t border-zinc-100 dark:border-zinc-800/60 bg-zinc-50/50 dark:bg-zinc-900/30">
         As of {generated.toLocaleString()} · revenue scoped to the active window; subscribers, MRR, ranking, and
-        engaged readers are current snapshot values.
+        average unique opens are current snapshot values.
       </div>
     </div>
   );

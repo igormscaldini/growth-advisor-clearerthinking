@@ -5,6 +5,7 @@ import { OverviewTab } from "./overview-tab";
 import { ChannelsTab } from "./channels-tab";
 import { MonetizationTab } from "./monetization-tab";
 import { FunnelTab } from "./funnel-tab";
+import { RefreshButton } from "./refresh-button";
 import { presetLabel } from "@/lib/format";
 import { buildCustomPeriod } from "@/lib/aggregate";
 import { PeriodEntry, PresetKey, Snapshot } from "@/lib/snapshot";
@@ -76,6 +77,7 @@ export function Dashboard({ snapshot }: Props) {
             <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
               {period.start} → {period.end} · {period.days} days · Last refreshed: {generatedLocal}
             </p>
+            <RefreshButton />
           </div>
           <div className="flex flex-col items-end gap-2">
             <div role="tablist" className="inline-flex rounded-lg border border-zinc-200 dark:border-zinc-800 p-0.5 bg-zinc-100 dark:bg-zinc-900">

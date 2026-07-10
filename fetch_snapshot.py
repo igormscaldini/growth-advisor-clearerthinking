@@ -36,6 +36,7 @@ _materialize_ci_secrets()
 
 # Imports happen after secret materialization so client modules see the files at import time.
 from data_layer import (  # noqa: E402
+    beehiiv_avg_unique_opens_per_campaign,
     beehiiv_daily_new_subscribers,
     beehiiv_daily_rates,
     beehiiv_engaged_readers,
@@ -68,13 +69,13 @@ DAILY_WINDOW_FLOOR = date(2026, 1, 1)
 COG_AMOUNTS = (3500, 1750)
 PERSONALITY_AMOUNTS = (900,)
 
-MANUAL_REVENUE_LAST_UPDATED = "2026-06-26"
+MANUAL_REVENUE_LAST_UPDATED = "2026-07-10"
 MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
     "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00), ("Hive", 2_500.00)],
     "Affiliates": [("Kitted Decks", 230.00)],
     "Podcast sponsorships": [("ACE", 800.00)],
     "Newsletter Sponsorships": [("80,000 Hours", 4_200.00)],
-    "Beehiiv Ad Network": [("Beehiiv", 431.85)],
+    "Beehiiv Ad Network": [("Beehiiv", 945.41)],
 }
 
 
@@ -124,11 +125,13 @@ def main() -> None:
         f_active_subs = ex.submit(_safe, stripe_active_subscriber_count)
         f_new_subs_monthly = ex.submit(_safe, stripe_new_subscribers_monthly)
         f_engaged = ex.submit(_safe, beehiiv_engaged_readers)
+        f_avg_opens = ex.submit(_safe, beehiiv_avg_unique_opens_per_campaign)
         f_keyword_overall = ex.submit(_safe, gsc_keyword_position, "personality test")
         current_mrr = _scalar_or_default(f_current_mrr.result(), 0.0)
         active_subs = _scalar_or_default(f_active_subs.result(), 0)
         new_subs_monthly = _scalar_or_default(f_new_subs_monthly.result(), [])
         engaged = f_engaged.result()
+        avg_unique_opens = f_avg_opens.result()
         keyword_overall = f_keyword_overall.result()
 
     periods = {}
@@ -186,6 +189,7 @@ def main() -> None:
             "active_subscribers": active_subs,
             "total_subscribers": total_subscribers,
             "engaged_readers": engaged,
+            "avg_unique_opens_per_campaign": avg_unique_opens,
             "keyword_overall": keyword_overall,
             "new_subscribers_monthly_alltime": new_subs_monthly if isinstance(new_subs_monthly, list) else [],
         },
