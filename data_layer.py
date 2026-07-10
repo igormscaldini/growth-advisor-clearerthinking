@@ -1159,6 +1159,49 @@ def beehiiv_engaged_readers() -> dict:
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def beehiiv_avg_unique_opens_per_campaign(min_recipients: int = 100_000) -> dict:
+    """Average unique email opens across confirmed email campaigns sent to MORE than
+    `min_recipients` subscribers. Powers the 'Average Unique Opens Per Campaign' goal.
+
+    Only campaigns whose email `recipients` exceed the threshold are counted, so small
+    or segment-only sends don't drag the average down.
+    """
+    api_key = os.getenv("BEEHIIV_API_KEY", "").strip()
+    pub_id = os.getenv("BEEHIIV_PUB_CLEARER_THINKING", "").strip()
+    empty = {"avg_unique_opens": 0, "campaigns_count": 0, "min_recipients": min_recipients}
+    if not api_key or not pub_id:
+        return {**empty, "error": "BEEHIIV_API_KEY missing"}
+
+    headers = {"Authorization": f"Bearer {api_key}", "Accept": "application/json"}
+    posts: list[dict] = []
+    page = 1
+    while True:
+        r = requests.get(
+            f"{BEEHIIV_BASE}/publications/{pub_id}/posts",
+            headers=headers,
+            params={"page": page, "limit": 100, "expand[]": "stats", "platform": "email", "status": "confirmed"},
+        )
+        if r.status_code != 200:
+            return {**empty, "error": f"HTTP {r.status_code}"}
+        data = r.json()
+        posts.extend(data.get("data", []))
+        if page >= data.get("total_pages", 1):
+            break
+        page += 1
+
+    unique_opens: list[int] = []
+    for p in posts:
+        em = (p.get("stats") or {}).get("email") or {}
+        recipients = em.get("recipients", 0) or 0
+        if recipients > min_recipients:
+            unique_opens.append(int(em.get("unique_opens", em.get("opens", 0)) or 0))
+
+    n = len(unique_opens)
+    avg = round(sum(unique_opens) / n) if n else 0
+    return {"avg_unique_opens": avg, "campaigns_count": n, "min_recipients": min_recipients, "error": None}
+
+
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def beehiiv_daily_rates(start: date, end: date) -> list[dict]:
     """Daily aggregated email rates (open / click / unsubscribe) computed from posts in the window."""
     api_key = os.getenv("BEEHIIV_API_KEY", "").strip()

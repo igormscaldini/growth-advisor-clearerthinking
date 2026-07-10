@@ -19,10 +19,12 @@ The current growth targets I'm working toward. Updated by Igor; referenced by th
    - Source: Google Search Console (average position for the query)
    - Tracked: GSC (not on dashboard yet)
 
-4. **200,000 engaged subscribers**
-   - Definition: subscribers in the beehiiv segment **"Engaged Reades - Open > 40%"** (open rate > 40%)
-   - Source: beehiiv segments API
-   - Tracked on dashboard: *Engaged Readers* card
+4. **Average Unique Opens Per Campaign** _(target provisional: 100,000)_
+   - Definition: average `unique_opens` across confirmed email campaigns sent to **more than 100,000 subscribers** (small/segment sends excluded)
+   - Source: beehiiv posts API (`stats.email.unique_opens` / `recipients`), computed in `beehiiv_avg_unique_opens_per_campaign()` in `data_layer.py`
+   - Current baseline (Jul 2026): ~86,000 across ~78 qualifying campaigns
+   - Tracked on dashboard: *Progress against goals* row. Target is hard-coded as `AVG_OPENS_TARGET` in `frontend/components/goals-table.tsx`; set the real target there and here together.
+   - _(Replaced the former "200,000 engaged subscribers" goal, which used the beehiiv "Engaged Reades - Open > 40%" segment.)_
 
 5. **$5,000 MRR** _(provisional)_
    - Source: Stripe current MRR snapshot

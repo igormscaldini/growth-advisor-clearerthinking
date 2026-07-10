@@ -130,6 +130,13 @@ export interface Snapshot {
       last_calculated?: number;
       error: string | null;
     };
+    // Optional: only present in snapshots generated after the goal switch (2026-07).
+    avg_unique_opens_per_campaign?: {
+      avg_unique_opens: number;
+      campaigns_count: number;
+      min_recipients: number;
+      error: string | null;
+    };
     keyword_overall: {
       position: number | null;
       clicks: number;
