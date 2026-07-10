@@ -56,6 +56,7 @@ from data_layer import (  # noqa: E402
     stripe_current_mrr,
     stripe_metrics,
     stripe_mrr_history,
+    stripe_new_subscribers_daily,
     stripe_new_subscribers_monthly,
     stripe_revenue_by_category,
     stripe_revenue_by_category_daily,
@@ -105,6 +106,7 @@ def fetch_range(start: date, end: date) -> dict:
             "modules_by_campaign": ex.submit(_safe, ga4_modules_finished_by_campaign, start, end),
             "kw_pos": ex.submit(_safe, gsc_keyword_position_daily, "personality test", start, end),
             "revenue_cat": ex.submit(_safe, stripe_revenue_by_category, start, end),
+            "new_stripe_subs": ex.submit(_safe, stripe_new_subscribers_daily, start, end),
         }
         return {k: fut.result() for k, fut in f.items()}
 

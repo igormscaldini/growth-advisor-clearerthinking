@@ -427,6 +427,34 @@ def stripe_new_subscribers_monthly() -> list[dict]:
     return out
 
 
+@st.cache_data(ttl=CACHE_TTL, show_spinner=False)
+def stripe_new_subscribers_daily(start: date, end: date) -> dict:
+    """New Stripe subscriptions created within [start, end], bucketed by day.
+
+    Counts new subscriptions only (by `created`); no churn/cancellation. Returns
+    {"total", "daily": [{date, count}], "error"} — shaped like the other daily cards.
+    """
+    from stripe_client import get_client
+
+    s = get_client()
+    start_ts = int(datetime(start.year, start.month, start.day, tzinfo=timezone.utc).timestamp())
+    end_ts = int(datetime(end.year, end.month, end.day, 23, 59, 59, tzinfo=timezone.utc).timestamp())
+    daily: dict[str, int] = defaultdict(int)
+    total = 0
+    for sub in s.Subscription.list(
+        status="all", limit=100, created={"gte": start_ts, "lte": end_ts}
+    ).auto_paging_iter():
+        created = getattr(sub, "created", None)
+        if created is None:
+            continue
+        d = datetime.fromtimestamp(created, tz=timezone.utc).date()
+        if start <= d <= end:
+            daily[d.isoformat()] += 1
+            total += 1
+    rows = [{"date": k, "count": v} for k, v in sorted(daily.items())]
+    return {"total": total, "daily": rows, "error": None}
+
+
 @st.cache_data(ttl=3600, show_spinner=False)  # GSC has 3-day lag — refreshing more often is wasted
 def gsc_keyword_position(keyword: str) -> dict:
     """Average GSC position for a specific keyword, last 28 days (with GSC's 3-day lag)."""
