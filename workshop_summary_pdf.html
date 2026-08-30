@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Spencer's #1 Self-Help Technique — Clearer Thinking Workshop</title>
+<style>
+  /* Clearer Thinking — Digital Style Guide palette & Avenir typography */
+  @page {
+    size: A4;
+    margin: 22mm 20mm 18mm 20mm;
+    @bottom-center { content: counter(page); }
+  }
+
+  :root {
+    --blue: #0885f8;       /* MAIN BLUE   */
+    --dark: #233b47;       /* DARK ACCENT */
+    --gold: #fecb02;       /* GOLD        */
+    --orange: #f8911b;     /* ORANGE      */
+    --cream: #f9f1e3;      /* LIGHT ACCENT*/
+    --grey-bg: #f5f5f5;    /* MAIN GREY   */
+    --ink: #303030;        /* MAIN DARK / text light */
+    --text-dark: #737373;  /* text DARK   */
+    --text-mid: #a6a6a6;   /* text MIDDLE */
+    --rule: #e6e2da;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  body {
+    font-family: "Avenir Next", "Avenir", "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    margin: 0;
+    font-size: 10.5pt;
+    line-height: 1.62;
+    font-weight: 400;
+  }
+
+  p { margin: 0 0 10px; }
+  em { font-style: italic; }
+  strong { font-weight: 600; }
+  a { color: var(--blue); text-decoration: none; }
+
+  /* ---------- Cover ---------- */
+  .cover {
+    page-break-after: always;
+    min-height: 248mm;
+    display: flex;
+    flex-direction: column;
+  }
+  .cover-logo { width: 230px; height: auto; margin-bottom: 6px; }
+
+  .cover-mid { margin-top: auto; margin-bottom: auto; }
+  .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 8.5pt;
+    font-weight: 700;
+    color: var(--blue);
+    margin-bottom: 16px;
+  }
+  .cover h1 {
+    font-size: 33pt;
+    line-height: 1.08;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 18px;
+    color: var(--dark);
+    max-width: 96%;
+  }
+  .cover .lede {
+    font-size: 12.5pt;
+    color: var(--text-dark);
+    line-height: 1.5;
+    max-width: 93%;
+    margin: 0;
+  }
+  .accent-rule {
+    width: 56px; height: 4px;
+    background: var(--gold);
+    margin: 26px 0;
+    border: 0;
+  }
+  .research-note {
+    font-size: 10.5pt;
+    color: var(--text-dark);
+    max-width: 93%;
+  }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 30px;
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+    margin-top: 8px;
+  }
+  .meta-grid .label {
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.13em;
+    color: var(--text-mid);
+    margin-bottom: 2px;
+  }
+  .meta-grid .val { font-size: 10pt; color: var(--ink); font-weight: 500; }
+
+  .ai-note {
+    background: var(--grey-bg);
+    border-left: 3px solid var(--text-mid);
+    border-radius: 0 4px 4px 0;
+    padding: 9px 14px;
+    margin: 22px 0 0;
+    font-size: 8.8pt;
+    line-height: 1.5;
+    color: var(--text-dark);
+    font-style: italic;
+    max-width: 93%;
+  }
+
+  /* ---------- Content ---------- */
+  h2 {
+    font-size: 15.5pt;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 26px 0 4px;
+    padding-top: 4px;
+    color: var(--dark);
+  }
+  h2 .num { color: var(--blue); }
+  h3 {
+    font-size: 11pt;
+    font-weight: 600;
+    margin: 16px 0 5px;
+    color: var(--dark);
+  }
+  .section-rule {
+    border: 0;
+    border-top: 3px solid var(--gold);
+    margin: 6px 0 0;
+    width: 30px;
+  }
+
+  ul { margin: 0 0 12px; padding-left: 18px; }
+  li { margin-bottom: 6px; }
+  li::marker { color: var(--blue); }
+
+  .box {
+    background: var(--cream);
+    border-left: 3px solid var(--blue);
+    padding: 11px 15px;
+    margin: 12px 0;
+    font-size: 10pt;
+    border-radius: 0 4px 4px 0;
+  }
+  .box .h {
+    font-weight: 700;
+    color: var(--dark);
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+  }
+  .box p:last-child { margin-bottom: 0; }
+
+  .exercise {
+    border: 1px solid var(--rule);
+    border-radius: 5px;
+    padding: 11px 15px;
+    margin: 12px 0;
+    font-size: 10pt;
+    background: #fff;
+  }
+  .exercise .h {
+    font-weight: 700;
+    color: var(--blue);
+    font-size: 8.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 9.5pt;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-mid);
+    font-weight: 700;
+    border-bottom: 2px solid var(--dark);
+  }
+  td .tool { font-weight: 600; color: var(--dark); }
+
+  .avoid-break { page-break-inside: avoid; }
+
+  .qa { page-break-inside: avoid; margin-bottom: 12px; }
+  .qa .q { font-weight: 600; color: var(--dark); margin-bottom: 3px; }
+
+  .learn {
+    background: var(--dark);
+    color: #fff;
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin-top: 26px;
+    page-break-inside: avoid;
+  }
+  .learn h2 { color: #fff; margin: 0 0 8px; padding: 0; }
+  .learn p { color: #cdd8de; margin-bottom: 8px; }
+  .learn .links { margin-top: 13px; font-size: 10pt; }
+  .learn .links div { margin-bottom: 5px; color: #fff; }
+  .learn .links .lbl { color: var(--gold); font-weight: 600; }
+
+  .closing {
+    font-style: italic;
+    color: var(--text-dark);
+    border-top: 1px solid var(--rule);
+    padding-top: 14px;
+    margin-top: 22px;
+    font-size: 10pt;
+  }
+
+  .about {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--rule);
+    font-size: 9pt;
+    color: var(--text-dark);
+    page-break-inside: avoid;
+  }
+  .about img { width: 34px; height: 34px; flex-shrink: 0; margin-top: 2px; }
+  .about strong { color: var(--dark); }
+</style>
+</head>
+<body>
+
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <img class="cover-logo" src="__LOGO__" alt="Clearer Thinking">
+
+  <div class="cover-mid">
+    <div class="eyebrow">Free Workshop · Recap</div>
+    <h1>Spencer's #1 Self-Help Technique</h1>
+    <p class="lede">If Spencer Greenberg could choose just one self-help technique to improve his life, what would it be? This is a written recap of the live workshop where he shares it — and walks you through how to apply it to your own life.</p>
+    <hr class="accent-rule">
+    <p class="research-note">
+      The technique comes out of the research for Spencer's upcoming book <em>The 12 Levers</em>,
+      which reviewed nearly <strong>500 techniques</strong> from <strong>106 self-help books</strong>
+      and <strong>23 therapies</strong>.
+    </p>
+    <p class="ai-note">This recap was generated with AI based on the workshop recording and transcript. Please keep that in mind when using this material.</p>
+  </div>
+
+  <div class="meta-grid">
+    <div><div class="label">Presenter</div><div class="val">Spencer Greenberg</div></div>
+    <div><div class="label">Host</div><div class="val">ClearerThinking.org</div></div>
+    <div><div class="label">Date</div><div class="val">June 11, 2026</div></div>
+    <div><div class="label">Format</div><div class="val">Online · 60–90 minutes</div></div>
+  </div>
+</section>
+
+<!-- ===================== BODY ===================== -->
+
+<h2>Why this workshop exists</h2>
+<hr class="section-rule">
+<p style="margin-top:12px;">For his forthcoming book <em>The 12 Levers</em> (co-authored with Jeremy Stevenson), Spencer studied more than 100 self-improvement books and over 20 types of therapy, extracting nearly 500 distinct techniques into a single database. The guiding question: <em>What are all the psychological strategies that really work to improve your life?</em></p>
+<p>The surprising answer: almost everything boils down to just <strong>12 high-level psychological strategies</strong> — the "levers." This workshop focused on <strong>Lever 1: unraveling the causes</strong> (fittingly, its icon is a magnifying glass) — the technique Spencer picked when asked, "If you could recommend only one approach to improve people's lives, what would it be?"</p>
+<p>His answer: <strong>it's very hard to solve a problem you don't deeply understand.</strong> Most of us understand our problems only at the surface level, and going deeper unlocks far better solutions.</p>
+
+<h2>The core idea: surface vs. deep understanding</h2>
+<hr class="section-rule">
+<p style="margin-top:12px;"><strong>The broken-down car.</strong> If you're not a car expert and your car won't start, you start guessing — check the gas, replace the battery, throw random fixes at it. You can waste months and a lot of money. An expert runs diagnostics, finds the real cause, and fixes it in one stroke. Your life problems often work the same way.</p>
+<p><strong>The "Five Whys."</strong> A technique borrowed from business: keep asking "why" to move past the surface cause to the deeper one.</p>
+<div class="box">
+  <p>"Why do we keep fighting?" → <em>She wants X, I want Y.</em><br>
+  "Why does that lead to fighting instead of a compromise?" → <em>We tried to make a plan once and couldn't agree.</em><br>
+  "Why couldn't we agree?" → <em>She thought I was being selfish.</em></p>
+</div>
+<p>Two couples can face the identical disagreement — one fights endlessly, the other calmly works out a balance. The disagreement isn't the real cause. Keep digging.</p>
+
+<h2><span class="num">1.</span> Look for alternate causes</h2>
+<hr class="section-rule">
+<p style="margin-top:12px;">We often latch onto a cause too quickly — and anchor on the wrong one. Three stories show the danger:</p>
+<ul>
+  <li><strong>Depression that was actually anxiety.</strong> A friend was convinced he was depressed. His symptoms sounded more like anxiety, so he took standardized questionnaires for both — and scored low on depression, high on anxiety. The problem wasn't solved instantly, but it was completely reframed.</li>
+  <li><strong>The mysterious cough (Spencer's own story).</strong> After moving into a new home, Spencer developed a cough that worsened for weeks until he struggled to breathe. Doctors found nothing; environmental fixes did nothing. Almost as an afterthought, a mold inspector ran an air test and found a large patch of mold hidden behind the wall, three feet from where he slept. He has a mold allergy. Once it was removed, he recovered in three weeks.</li>
+  <li><strong>Carrie Poppy's "haunting."</strong> She felt a wrongness, heard whooshing sounds, and feared she was cursed or going insane. A skeptically minded group asked: <em>could it be carbon monoxide?</em> It was — a gas leak was poisoning her. The wrong explanation could have cost her life.</li>
+</ul>
+<div class="exercise">
+  <div class="h">Try it</div>
+  Write down three challenges you're facing (mental health, relationships, work — anything with a psychological element). For each, spend about 20 seconds asking: <em>Could there be a different cause than the one I've anchored on?</em>
+</div>
+
+<h2><span class="num">2.</span> Emotions as a source of information</h2>
+<hr class="section-rule">
+<p style="margin-top:12px;">Think of each emotion as a <strong>smoke detector</strong> — except each one detects something different: <strong>fear</strong> detects danger, <strong>disgust</strong> detects contamination, <strong>sadness</strong> detects loss.</p>
+<p>Like a smoke detector, the useful question is: <em>is it working properly?</em> An alarm that goes off every time you cook isn't helping. Your emotions carry real information — so when one fires, it's worth asking what it's responding to.</p>
+<h3>Three types of emotional response</h3>
+<ul>
+  <li><strong>Proportionate</strong> — your dog dies and you feel deep sadness. The emotion matches the situation.</li>
+  <li><strong>Useful but not proportionate</strong> — a creepy dark alley makes you leave. The actual risk may be low, but the instinct is still a good strategy.</li>
+  <li><strong>Dysregulated</strong> — neither proportionate nor useful, such as flying into anger over something minor in a way that damages your relationships.</li>
+</ul>
+
+<h2><span class="num">3.</span> The "Inner Why"</h2>
+<hr class="section-rule">
+<p style="margin-top:12px;">You have thousands of fleeting thoughts a day and remember almost none. So when an emotion shifts, the triggering thought is often already lost — leaving you saying <em>"I felt stressed at work but I don't know why."</em></p>
+<p><strong>The method:</strong> notice the <em>moment</em> your emotion changes, and immediately ask <strong>why</strong> — as close to real time as possible. The faster you catch it, the more likely you'll identify the true trigger.</p>
+<div class="box">
+  <div class="h">Example</div>
+  <p>You watch for the moment stress hits at work. You arrive — no stress. You meet your boss — no stress. You bump into a particular colleague — <em>stress spikes.</em> Now you've learned something concrete to explore.</p>
+</div>
+<div class="exercise">
+  <div class="h">Try it</div>
+  Where in your life could you apply the Inner Why — noticing an emotional shift and asking why? (Participants offered: avoiding people, resisting decluttering, sudden anger at a child who isn't listening.)
+</div>
+
+<h2><span class="num">4.</span> The ABC Analysis</h2>
+<hr class="section-rule">
+<p style="margin-top:12px;">A structured version of the Inner Why, drawn from cognitive behavioral therapy. It works best for <strong>recurring situations</strong> where things reliably go badly or you feel upset.</p>
+<ul>
+  <li><strong>A — Activating event:</strong> what actually happens right before things go wrong?</li>
+  <li><strong>B — Belief / interpretation:</strong> the thoughts, interpretations, or judgments running through your mind in that moment.</li>
+  <li><strong>C — Consequences:</strong> how you feel and how you act — plus what results.</li>
+</ul>
+<div class="box avoid-break">
+  <div class="h">Example — getting angry at your child</div>
+  <p><strong>A:</strong> You ask your child to do something and they seem to completely ignore you.<br>
+  <strong>B:</strong> "They're purposely ignoring me." / "They never listen to me."<br>
+  <strong>C:</strong> You feel angry → you start yelling → your child gets upset → now everyone is upset.</p>
+</div>
+<p>The key insight: between an event and your reaction sits a layer of interpretation — often so fast you don't notice it. Those interpretations may be <strong>inaccurate</strong>, or even if accurate, <strong>unhelpful</strong>. Mapping the chain lets you see and question them.</p>
+<div class="exercise">
+  <div class="h">Try it</div>
+  Pick a recurring situation that goes badly. Write out its A, B, and C in detail.
+</div>
+
+<h2><span class="num">5.</span> The Bright Spot Analysis</h2>
+<hr class="section-rule">
+<p style="margin-top:12px;">This one is especially powerful for problems that feel <strong>intractable</strong> — "I'm always depressed," "I hate my job," "I can never make friends." These feel like flat, unchanging facts with nowhere to start.</p>
+<p><strong>The move:</strong> look for the variation. Surely <em>some</em> days are less bad than others. Zoom in on those.</p>
+<ul>
+  <li>On the days you felt <em>less</em> depressed — what was different? Exercise, a walk outside, time with family, a creative project?</li>
+  <li>When did making a friendship come <em>closest</em> to working?</li>
+  <li>When does work go <em>smoother</em> than usual?</li>
+</ul>
+<p>Any variation — even within something that feels constantly bad — is a clue to the underlying causes you may have missed. Days that go better than expected point you toward what actually helps.</p>
+<div class="exercise">
+  <div class="h">Try it</div>
+  Find a challenge where this applies. Ask: <em>When does it go better than normal, and what's different on those occasions?</em> If nothing comes to mind, start noticing it going forward.
+</div>
+
+<h2>The one principle to take away</h2>
+<hr class="section-rule">
+<p style="margin-top:12px;"><strong>Better understanding leads to better solutions</strong> — and you have many tools to reach that understanding.</p>
+<table class="avoid-break">
+  <thead><tr><th style="width:34%">Tool</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td><span class="tool">Look for alternate causes</span></td><td>Don't anchor too fast; stay open to a cause you haven't considered.</td></tr>
+    <tr><td><span class="tool">Emotions as information</span></td><td>Treat your emotions as smoke detectors signaling something real.</td></tr>
+    <tr><td><span class="tool">The Inner Why</span></td><td>Catch the moment an emotion shifts and ask why, in real time.</td></tr>
+    <tr><td><span class="tool">ABC Analysis</span></td><td>Map Activating event → Beliefs → Consequences in recurring situations.</td></tr>
+    <tr><td><span class="tool">Bright Spot Analysis</span></td><td>Study the times things go <em>better</em> to find hidden causes.</td></tr>
+  </tbody>
+</table>
+
+<div class="learn">
+  <h2>Learn more</h2>
+  <p>This workshop covered <strong>Lever 1</strong> of the 12. To explore the full set of techniques, you can read <em>The 12 Levers</em> by Spencer Greenberg and Jeremy Stevenson. Pre-orders include five bonuses, among them a tool that helps you apply the methods.</p>
+  <div class="links">
+    <div><span class="lbl">Book &amp; pre-order:</span> &nbsp;clearerthinking.org/book</div>
+    <div><span class="lbl">Free interactive tools &amp; research:</span> &nbsp;ClearerThinking.org</div>
+  </div>
+</div>
+
+<p class="closing">The thread running through every technique: it's not enough to hear these ideas — the value comes from putting them into action. Pick one tool and decide how you'll bring it into your life this week.</p>
+
+<div class="about">
+  <img src="__MARK__" alt="">
+  <div><strong>About Clearer Thinking.</strong> ClearerThinking.org is a not-for-profit project founded by Spencer Greenberg — an entrepreneur and mathematician focused on improving lives — dedicated to helping you think more rationally, make better decisions, and improve your life through free, research-backed interactive tools.</div>
+</div>
+
+</body>
+</html>

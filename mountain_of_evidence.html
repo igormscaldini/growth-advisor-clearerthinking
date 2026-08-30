@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mountain of Evidence — Self-Help Techniques</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #f4ede1; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #2d2418;
+  }
+  header {
+    text-align: center;
+    padding: 24px 16px 6px;
+    background: #f4ede1;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: #3a2d1d;
+    letter-spacing: -0.01em;
+  }
+  header .subtitle {
+    margin: 8px auto 0;
+    max-width: 720px;
+    font-size: 13px;
+    color: #5e4d36;
+    line-height: 1.5;
+  }
+  .legend {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 8px 18px;
+    padding: 14px 16px 18px;
+    background: #f4ede1;
+    border-bottom: 1.5px solid #d6c8ad;
+    font-size: 12px;
+    color: #3a2d1d;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; }
+  .legend-swatch {
+    width: 22px; height: 14px;
+    border-radius: 2px;
+    border: 1.5px solid #5b3e22;
+  }
+  .legend-swatch.s-strong       { background: #e8c989; }
+  .legend-swatch.s-mod-strong   { background: #c4a06a; }
+  .legend-swatch.s-moderate     { background: #a98562; }
+  .legend-swatch.s-questionable { background: #8e6f4f; }
+  .legend-swatch.s-unsupported  { background: #6b5644; opacity: 0.85; }
+
+  .scene {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1600 / 1000;
+    overflow: hidden;
+    background: #c2dcec;
+  }
+  .scene svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+  }
+
+  /* Plaque hover */
+  .plaque {
+    cursor: help;
+    transition: transform 0.15s ease;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .plaque:hover {
+    transform: scale(1.35);
+  }
+  .plaque:hover .plaque-bg {
+    filter: brightness(1.12);
+  }
+
+  /* Tier labels */
+  .tier-label {
+    position: absolute;
+    left: 12px;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #3a2d1d;
+    font-weight: 700;
+    background: rgba(244, 237, 225, 0.88);
+    padding: 3px 8px;
+    border-radius: 3px;
+    pointer-events: none;
+    border: 1px solid rgba(58, 45, 29, 0.2);
+  }
+
+  /* Tooltip */
+  #tooltip {
+    position: fixed;
+    display: none;
+    max-width: 340px;
+    background: #2d2418;
+    color: #f4ede1;
+    padding: 13px 15px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    z-index: 1000;
+    pointer-events: none;
+  }
+  #tooltip .tt-meta {
+    font-size: 10px;
+    color: #c9b58e;
+    margin-bottom: 5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  #tooltip .tt-name {
+    font-weight: 700;
+    font-size: 14.5px;
+    color: #fff5dc;
+    margin-bottom: 6px;
+  }
+  #tooltip .tt-howto { color: #e3d4c0; }
+
+  footer {
+    text-align: center;
+    padding: 14px 16px 22px;
+    background: #f4ede1;
+    color: #856e4e;
+    font-size: 11px;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+  <header>
+    <h1>The Mountain of Evidence</h1>
+    <p class="subtitle">84 self-help techniques carved on wooden markers, placed across a mountain — from the foggy swamp at the base (unsupported) to the solid summit (strong evidence). Hover any plaque for the how-to.</p>
+  </header>
+
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch s-strong"></span>Summit · Strong Evidence</div>
+    <div class="legend-item"><span class="legend-swatch s-mod-strong"></span>Bridged Trail · Mod-to-Strong</div>
+    <div class="legend-item"><span class="legend-swatch s-moderate"></span>Marked Trail · Moderate</div>
+    <div class="legend-item"><span class="legend-swatch s-questionable"></span>Loose Scree · Questionable</div>
+    <div class="legend-item"><span class="legend-swatch s-unsupported"></span>Swamp Lowlands · Unsupported</div>
+  </div>
+
+  <div class="scene" id="scene">
+    <svg viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+
+      <defs>
+        <!-- Sky gradient -->
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#cfe4f0"/>
+          <stop offset="60%" stop-color="#a8c7da"/>
+          <stop offset="100%" stop-color="#8aa9bf"/>
+        </linearGradient>
+        <!-- Mountain gradient -->
+        <linearGradient id="mtnGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#b09e80"/>
+          <stop offset="100%" stop-color="#7a6850"/>
+        </linearGradient>
+        <!-- Mountain shading (right side darker) -->
+        <linearGradient id="mtnShade" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"  stop-color="rgba(0,0,0,0)"/>
+          <stop offset="50%" stop-color="rgba(0,0,0,0)"/>
+          <stop offset="100%" stop-color="rgba(0,0,0,0.18)"/>
+        </linearGradient>
+
+        <!-- Wood plaque gradients per tier -->
+        <linearGradient id="wood-strong" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#f0d6a8"/>
+          <stop offset="100%" stop-color="#d0a872"/>
+        </linearGradient>
+        <linearGradient id="wood-mod-strong" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#d4ad77"/>
+          <stop offset="100%" stop-color="#a8835a"/>
+        </linearGradient>
+        <linearGradient id="wood-moderate" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#b89070"/>
+          <stop offset="100%" stop-color="#8b6a4c"/>
+        </linearGradient>
+        <linearGradient id="wood-questionable" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#9a7858"/>
+          <stop offset="100%" stop-color="#6e5238"/>
+        </linearGradient>
+        <linearGradient id="wood-unsupported" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"  stop-color="#776550"/>
+          <stop offset="100%" stop-color="#4a3d2e"/>
+        </linearGradient>
+      </defs>
+
+      <!-- SKY -->
+      <rect width="1600" height="1000" fill="url(#sky)"/>
+
+      <!-- Sun -->
+      <circle cx="1340" cy="140" r="46" fill="#fbe89d" stroke="#d6b95f" stroke-width="2.5"/>
+
+      <!-- Clouds -->
+      <g fill="#ffffff" stroke="#a8c2d4" stroke-width="2">
+        <path d="M 180 180 Q 200 160 225 165 Q 245 148 270 162 Q 295 152 308 175 Q 320 195 300 205 L 200 205 Q 175 205 180 180 Z"/>
+        <path d="M 940 95 Q 960 78 985 83 Q 1005 68 1030 82 Q 1050 72 1063 92 Q 1075 110 1055 122 L 960 122 Q 935 122 940 95 Z"/>
+      </g>
+
+      <!-- Birds -->
+      <g stroke="#3a2d1d" stroke-width="2" fill="none" stroke-linecap="round">
+        <path d="M 480 135 Q 488 128 496 135 M 496 135 Q 504 128 512 135"/>
+        <path d="M 1120 200 Q 1128 193 1136 200 M 1136 200 Q 1144 193 1152 200"/>
+      </g>
+
+      <!-- DISTANT MOUNTAINS -->
+      <path d="M -50 480 L 80 410 L 220 460 L 380 380 L 540 430 L 700 360 L 900 400 L 1080 340 L 1240 390 L 1400 350 L 1560 420 L 1700 380 L 1700 700 L -50 700 Z"
+            fill="#9eb7c7" stroke="#7592a5" stroke-width="2" stroke-linejoin="round"/>
+      <!-- Snow on distant peaks -->
+      <g fill="#ecf1f4" stroke="#a8b8c5" stroke-width="1.5">
+        <path d="M 380 380 L 408 400 L 354 410 Z"/>
+        <path d="M 700 360 L 728 386 L 670 395 Z"/>
+        <path d="M 1080 340 L 1112 366 L 1052 375 Z"/>
+      </g>
+
+      <!-- MAIN MOUNTAIN BODY -->
+      <!-- Designed so each terrace y is contained within the mountain shape -->
+      <path id="mountain" d="
+        M -50 1000
+        L -50 770
+        Q 30 745, 100 720
+        Q 200 685, 280 640
+        Q 340 590, 365 530
+        Q 380 480, 365 410
+        Q 350 360, 340 320
+        Q 335 280, 360 240
+        Q 380 200, 420 175
+        L 600 175
+        L 720 105
+        L 800 70
+        L 880 105
+        L 1000 175
+        L 1180 175
+        Q 1220 200, 1240 240
+        Q 1265 280, 1260 320
+        Q 1250 360, 1235 410
+        Q 1220 480, 1235 530
+        Q 1260 590, 1320 640
+        Q 1400 685, 1500 720
+        Q 1570 745, 1650 770
+        L 1700 770
+        L 1700 1000
+        Z" fill="url(#mtnGrad)" stroke="#5d4f3a" stroke-width="2.5" stroke-linejoin="round"/>
+
+      <!-- Shading overlay on right -->
+      <path d="
+        M 800 70 L 880 105 L 1000 175 L 1180 175
+        Q 1220 200, 1240 240
+        Q 1265 280, 1260 320
+        Q 1250 360, 1235 410
+        Q 1220 480, 1235 530
+        Q 1260 590, 1320 640
+        Q 1400 685, 1500 720
+        Q 1570 745, 1650 770
+        L 1700 770 L 1700 1000 L 800 1000 Z"
+        fill="url(#mtnShade)"/>
+
+      <!-- SNOW CAP on peak (above summit terrace) -->
+      <path d="
+        M 600 175
+        L 720 105
+        L 800 70
+        L 880 105
+        L 1000 175
+        L 980 180
+        L 880 130
+        L 800 100
+        L 720 130
+        L 620 180
+        Z" fill="#ffffff" stroke="#8aa9bf" stroke-width="2" stroke-linejoin="round"/>
+      <!-- Snow shadow -->
+      <path d="M 800 70 L 880 105 L 1000 175 L 980 180 L 880 130 L 800 100 Z"
+            fill="#dfe7ed" opacity="0.7"/>
+
+      <!-- FLAG AT PEAK -->
+      <g>
+        <line x1="800" y1="70" x2="800" y2="30" stroke="#3d3d3d" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M 800 32 L 840 40 L 800 52 Z" fill="#d14f4f" stroke="#7e2e2e" stroke-width="2" stroke-linejoin="round"/>
+      </g>
+
+      <!-- ============================================ -->
+      <!-- TERRACE PLATFORMS (drawn at each tier y)     -->
+      <!-- ============================================ -->
+
+      <!-- SUMMIT TERRACE — snow-covered plateau (Strong, y 160-282) -->
+      <path d="M 410 160 L 1190 160 L 1220 286 L 380 286 Z"
+            fill="#f8fafc" stroke="#7e8fa0" stroke-width="2" stroke-linejoin="round"/>
+      <!-- Snow texture: small bumps/sparkle -->
+      <g fill="#e0e8ef" opacity="0.7">
+        <circle cx="450" cy="200" r="2"/>
+        <circle cx="510" cy="240" r="1.5"/>
+        <circle cx="640" cy="195" r="2"/>
+        <circle cx="730" cy="260" r="1.5"/>
+        <circle cx="820" cy="195" r="2"/>
+        <circle cx="900" cy="245" r="1.5"/>
+        <circle cx="1010" cy="200" r="2"/>
+        <circle cx="1100" cy="255" r="1.5"/>
+      </g>
+      <!-- Tiny tent at summit base camp (right corner) -->
+      <g transform="translate(1140, 268)">
+        <polygon points="0,0 30,0 15,-18" fill="#d14f4f" stroke="#7e2e2e" stroke-width="2" stroke-linejoin="round"/>
+        <polygon points="12,0 18,0 15,-10" fill="#2d2418"/>
+      </g>
+
+      <!-- Slope between Summit and Bridged -->
+      <path d="M 380 286 L 1220 286 L 1240 348 L 360 348 Z"
+            fill="#9d8c70" stroke="#5d4f3a" stroke-width="1.5" stroke-linejoin="round" opacity="0.85"/>
+      <!-- Some rocks on slope -->
+      <g fill="#7a6850" stroke="#4a3d2e" stroke-width="1.5">
+        <ellipse cx="430" cy="320" rx="8" ry="5"/>
+        <ellipse cx="720" cy="325" rx="9" ry="5"/>
+        <ellipse cx="1010" cy="320" rx="8" ry="5"/>
+        <ellipse cx="1180" cy="318" rx="9" ry="5"/>
+      </g>
+
+      <!-- BRIDGED TERRACE — stone-paved with railings (Mod-Strong, y 350-446) -->
+      <rect x="357" y="350" width="886" height="96" fill="#c5b9a4" stroke="#5d4f3a" stroke-width="2" rx="4"/>
+      <!-- Stone tiles pattern (subtle lines) -->
+      <g stroke="#9a8e78" stroke-width="1" opacity="0.5">
+        <line x1="357" y1="380" x2="1243" y2="380"/>
+        <line x1="357" y1="416" x2="1243" y2="416"/>
+        <line x1="500" y1="350" x2="500" y2="446"/>
+        <line x1="700" y1="350" x2="700" y2="446"/>
+        <line x1="900" y1="350" x2="900" y2="446"/>
+        <line x1="1100" y1="350" x2="1100" y2="446"/>
+      </g>
+      <!-- Railings along terrace edges -->
+      <g stroke="#5d4f3a" stroke-width="2.5" stroke-linecap="round" fill="none">
+        <line x1="357" y1="346" x2="1243" y2="346"/>
+        <line x1="380" y1="346" x2="380" y2="338"/>
+        <line x1="500" y1="346" x2="500" y2="338"/>
+        <line x1="620" y1="346" x2="620" y2="338"/>
+        <line x1="740" y1="346" x2="740" y2="338"/>
+        <line x1="860" y1="346" x2="860" y2="338"/>
+        <line x1="980" y1="346" x2="980" y2="338"/>
+        <line x1="1100" y1="346" x2="1100" y2="338"/>
+        <line x1="1220" y1="346" x2="1220" y2="338"/>
+      </g>
+      <!-- A bridge graphic on the slope below (suggests connection) -->
+      <g transform="translate(380, 462)">
+        <rect x="0" y="0" width="80" height="9" fill="#8a5e36" stroke="#3a2818" stroke-width="2"/>
+        <line x1="16" y1="0" x2="16" y2="9" stroke="#3a2818" stroke-width="1"/>
+        <line x1="32" y1="0" x2="32" y2="9" stroke="#3a2818" stroke-width="1"/>
+        <line x1="48" y1="0" x2="48" y2="9" stroke="#3a2818" stroke-width="1"/>
+        <line x1="64" y1="0" x2="64" y2="9" stroke="#3a2818" stroke-width="1"/>
+        <line x1="0" y1="-14" x2="80" y2="-14" stroke="#5b4527" stroke-width="2.5"/>
+        <line x1="0" y1="-14" x2="0" y2="0" stroke="#5b4527" stroke-width="2.5"/>
+        <line x1="80" y1="-14" x2="80" y2="0" stroke="#5b4527" stroke-width="2.5"/>
+        <line x1="26" y1="-14" x2="26" y2="0" stroke="#5b4527" stroke-width="2"/>
+        <line x1="54" y1="-14" x2="54" y2="0" stroke="#5b4527" stroke-width="2"/>
+      </g>
+      <g transform="translate(1140, 462)">
+        <rect x="0" y="0" width="80" height="9" fill="#8a5e36" stroke="#3a2818" stroke-width="2"/>
+        <line x1="16" y1="0" x2="16" y2="9" stroke="#3a2818" stroke-width="1"/>
+        <line x1="32" y1="0" x2="32" y2="9" stroke="#3a2818" stroke-width="1"/>
+        <line x1="48" y1="0" x2="48" y2="9" stroke="#3a2818" stroke-width="1"/>
+        <line x1="64" y1="0" x2="64" y2="9" stroke="#3a2818" stroke-width="1"/>
+        <line x1="0" y1="-14" x2="80" y2="-14" stroke="#5b4527" stroke-width="2.5"/>
+        <line x1="0" y1="-14" x2="0" y2="0" stroke="#5b4527" stroke-width="2.5"/>
+        <line x1="80" y1="-14" x2="80" y2="0" stroke="#5b4527" stroke-width="2.5"/>
+        <line x1="26" y1="-14" x2="26" y2="0" stroke="#5b4527" stroke-width="2"/>
+        <line x1="54" y1="-14" x2="54" y2="0" stroke="#5b4527" stroke-width="2"/>
+      </g>
+
+      <!-- Slope between Bridged and Marked -->
+      <path d="M 295 480 L 1305 480 L 1330 530 L 270 530 Z"
+            fill="#998866" stroke="#5d4f3a" stroke-width="1.5" stroke-linejoin="round" opacity="0.6"/>
+      <!-- Small trees on this slope -->
+      <g stroke="#2f5b30" stroke-width="1.5" stroke-linejoin="round" fill="#5a8f5a">
+        <polygon points="305,505 314,485 323,505"/>
+        <polygon points="340,510 349,490 358,510"/>
+        <polygon points="1245,510 1254,490 1263,510"/>
+        <polygon points="1280,505 1289,485 1298,505"/>
+      </g>
+
+      <!-- MARKED TRAIL TERRACE — dirt path (Moderate, y 510-568) -->
+      <rect x="260" y="510" width="1080" height="58" fill="#b09060" stroke="#5d4f3a" stroke-width="2" rx="3"/>
+      <!-- Dashed trail line down the center -->
+      <line x1="270" y1="539" x2="1330" y2="539" stroke="#7a5c3e" stroke-width="2" stroke-dasharray="12 7" stroke-linecap="round" opacity="0.65"/>
+      <!-- Trail signposts at edges -->
+      <g stroke="#3a2818" stroke-width="2" fill="#c4a06a" stroke-linejoin="round">
+        <g transform="translate(285, 514)">
+          <line x1="0" y1="0" x2="0" y2="-18" stroke="#5b3e22" stroke-width="3"/>
+          <polygon points="0,-18 14,-14 0,-10" fill="#c4a06a"/>
+        </g>
+        <g transform="translate(1315, 514)">
+          <line x1="0" y1="0" x2="0" y2="-18" stroke="#5b3e22" stroke-width="3"/>
+          <polygon points="0,-18 -14,-14 0,-10" fill="#c4a06a"/>
+        </g>
+      </g>
+
+      <!-- Slope between Marked and Scree -->
+      <path d="M 200 580 L 1400 580 L 1430 632 L 170 632 Z"
+            fill="#8a7860" stroke="#5d4f3a" stroke-width="1.5" stroke-linejoin="round" opacity="0.7"/>
+
+      <!-- SCREE SHELF — loose rocky ledge (Questionable, y 635-700) -->
+      <!-- Shelf base -->
+      <path d="M 510 635 L 1090 635 L 1110 700 L 490 700 Z"
+            fill="#8b7c66" stroke="#5d4f3a" stroke-width="2" stroke-linejoin="round"/>
+      <!-- Scattered rocks ON the shelf (around the plaque area) -->
+      <g stroke="#3d322c" stroke-width="1.5" stroke-linejoin="round">
+        <ellipse cx="530" cy="690" rx="12" ry="7" fill="#7d6f5b"/>
+        <ellipse cx="580" cy="695" rx="9" ry="5" fill="#90826c"/>
+        <circle cx="625" cy="688" r="6" fill="#88796a"/>
+        <ellipse cx="715" cy="693" rx="11" ry="6" fill="#7d6f5b"/>
+        <polygon points="800,695 812,684 822,694" fill="#90826c"/>
+        <circle cx="870" cy="690" r="6" fill="#88796a"/>
+        <ellipse cx="940" cy="694" rx="11" ry="6" fill="#7d6f5b"/>
+        <circle cx="1010" cy="688" r="6" fill="#88796a"/>
+        <ellipse cx="1075" cy="694" rx="9" ry="5" fill="#90826c"/>
+      </g>
+      <!-- Tipped "LOOSE!" warning sign -->
+      <g transform="translate(1070, 690) rotate(18)">
+        <rect x="0" y="0" width="50" height="20" fill="#c4a06a" stroke="#3a2818" stroke-width="2" rx="2"/>
+        <text x="25" y="13" font-size="9" fill="#7e2e2e" text-anchor="middle" font-weight="700" font-family="sans-serif">! LOOSE !</text>
+        <line x1="0" y1="20" x2="-8" y2="36" stroke="#5b3e22" stroke-width="3"/>
+      </g>
+
+      <!-- Slope between Scree and Swamp (rocky descent) -->
+      <path d="M 70 720 L 1530 720 L 1620 780 L -20 780 Z"
+            fill="#76664f" stroke="#4a3d2e" stroke-width="1.5" stroke-linejoin="round" opacity="0.7"/>
+
+      <!-- SWAMP / FOGGY LOWLANDS (Unsupported, y 780-1000, plaques at ~870) -->
+      <!-- Water -->
+      <rect x="-50" y="780" width="1700" height="220" fill="#4a6b62" stroke="#2f4d44" stroke-width="2.5"/>
+      <!-- Darker depth tone -->
+      <rect x="-50" y="920" width="1700" height="80" fill="#2f4d44" opacity="0.4"/>
+      <!-- Wavy water surface lines -->
+      <g stroke="#6e9388" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.65">
+        <path d="M 40 810 Q 100 805 160 810 Q 220 815 280 810 Q 340 805 400 810"/>
+        <path d="M 500 820 Q 560 815 620 820 Q 680 825 740 820 Q 800 815 860 820"/>
+        <path d="M 1000 805 Q 1060 800 1120 805 Q 1180 810 1240 805 Q 1300 800 1360 805"/>
+        <path d="M 1450 820 Q 1510 815 1570 820"/>
+      </g>
+      <!-- Lily pads -->
+      <g stroke="#234d3e" stroke-width="2" stroke-linejoin="round">
+        <g transform="translate(140, 935)">
+          <ellipse cx="0" cy="0" rx="28" ry="11" fill="#6ba070"/>
+          <path d="M 0 0 L 4 -10" stroke="#234d3e" stroke-width="1.5"/>
+        </g>
+        <g transform="translate(460, 945)">
+          <ellipse cx="0" cy="0" rx="32" ry="12" fill="#7ab078"/>
+          <path d="M 0 0 L 4 -11" stroke="#234d3e" stroke-width="1.5"/>
+        </g>
+        <g transform="translate(780, 940)">
+          <ellipse cx="0" cy="0" rx="26" ry="10" fill="#6ba070"/>
+          <path d="M 0 0 L 4 -10" stroke="#234d3e" stroke-width="1.5"/>
+        </g>
+        <g transform="translate(1100, 950)">
+          <ellipse cx="0" cy="0" rx="30" ry="11" fill="#7ab078"/>
+          <path d="M 0 0 L 4 -10" stroke="#234d3e" stroke-width="1.5"/>
+        </g>
+        <g transform="translate(1430, 935)">
+          <ellipse cx="0" cy="0" rx="28" ry="11" fill="#6ba070"/>
+          <path d="M 0 0 L 4 -10" stroke="#234d3e" stroke-width="1.5"/>
+        </g>
+      </g>
+      <!-- Reeds clusters -->
+      <g stroke="#2f5240" stroke-width="2.5" stroke-linecap="round">
+        <g transform="translate(55, 810)">
+          <line x1="0" y1="0" x2="-2" y2="-32"/>
+          <line x1="10" y1="-2" x2="12" y2="-30"/>
+          <line x1="22" y1="0" x2="20" y2="-34"/>
+          <ellipse cx="-2" cy="-32" rx="2.5" ry="6" fill="#5b3e22" stroke="#3a2818" stroke-width="1"/>
+          <ellipse cx="12" cy="-30" rx="2.5" ry="6" fill="#5b3e22" stroke="#3a2818" stroke-width="1"/>
+          <ellipse cx="20" cy="-34" rx="2.5" ry="6" fill="#5b3e22" stroke="#3a2818" stroke-width="1"/>
+        </g>
+        <g transform="translate(1530, 810)">
+          <line x1="0" y1="0" x2="-2" y2="-32"/>
+          <line x1="10" y1="-2" x2="12" y2="-30"/>
+          <line x1="22" y1="0" x2="20" y2="-34"/>
+          <ellipse cx="-2" cy="-32" rx="2.5" ry="6" fill="#5b3e22" stroke="#3a2818" stroke-width="1"/>
+          <ellipse cx="12" cy="-30" rx="2.5" ry="6" fill="#5b3e22" stroke="#3a2818" stroke-width="1"/>
+          <ellipse cx="20" cy="-34" rx="2.5" ry="6" fill="#5b3e22" stroke="#3a2818" stroke-width="1"/>
+        </g>
+      </g>
+      <!-- Half-sunk log -->
+      <g transform="translate(900, 970) rotate(-8)" stroke="#2f1f12" stroke-width="2.5" stroke-linejoin="round">
+        <rect x="0" y="0" width="140" height="18" fill="#6b4a30" rx="3"/>
+        <ellipse cx="0" cy="9" rx="8" ry="9" fill="#8a5e36"/>
+        <circle cx="0" cy="9" r="3" fill="#3a2818" stroke="none"/>
+        <ellipse cx="140" cy="9" rx="8" ry="9" fill="#8a5e36"/>
+        <line x1="30" y1="4" x2="30" y2="14" stroke="#3a2818" stroke-width="1"/>
+        <line x1="60" y1="3" x2="60" y2="15" stroke="#3a2818" stroke-width="1"/>
+        <line x1="100" y1="4" x2="100" y2="14" stroke="#3a2818" stroke-width="1"/>
+      </g>
+      <!-- TURN BACK half-sunk sign -->
+      <g transform="translate(260, 830) rotate(10)">
+        <line x1="0" y1="0" x2="0" y2="28" stroke="#3a2818" stroke-width="3"/>
+        <rect x="-30" y="-14" width="60" height="16" fill="#c4a06a" stroke="#3a2818" stroke-width="2" rx="2"/>
+        <text x="0" y="-2" font-size="9" fill="#7e2e2e" text-anchor="middle" font-weight="700" font-family="sans-serif">TURN BACK</text>
+      </g>
+      <!-- Mist over swamp surface -->
+      <g opacity="0.35">
+        <ellipse cx="280" cy="800" rx="180" ry="14" fill="#ffffff"/>
+        <ellipse cx="700" cy="795" rx="200" ry="14" fill="#ffffff"/>
+        <ellipse cx="1180" cy="800" rx="200" ry="14" fill="#ffffff"/>
+      </g>
+
+      <!-- ========================================== -->
+      <!-- PLAQUES (generated by JS into this group) -->
+      <!-- ========================================== -->
+      <g id="plaques"></g>
+    </svg>
+
+    <!-- Tier labels -->
+    <div class="tier-label" style="top: 18%;">Summit</div>
+    <div class="tier-label" style="top: 40%;">Bridged Trail</div>
+    <div class="tier-label" style="top: 54%;">Marked Trail</div>
+    <div class="tier-label" style="top: 67%;">Loose Scree</div>
+    <div class="tier-label" style="top: 84%;">Swamp Lowlands</div>
+  </div>
+
+  <div id="tooltip">
+    <div class="tt-meta"></div>
+    <div class="tt-name"></div>
+    <div class="tt-howto"></div>
+  </div>
+
+  <footer>The lower the marker, the shakier the ground beneath it.</footer>
+
+<script>
+const TIER_META = {
+  strong:        { label: "Strong Evidence",      terrain: "Summit" },
+  "mod-strong":  { label: "Moderate-to-Strong",   terrain: "Bridged Trail" },
+  moderate:      { label: "Moderate Evidence",    terrain: "Marked Trail" },
+  questionable:  { label: "Questionable",         terrain: "Loose Scree" },
+  unsupported:   { label: "Unsupported",          terrain: "Swamp Lowlands" },
+};
+
+// Grid configs per tier (SVG units, viewBox 1600x1000)
+// PW=plaque width, PH=plaque height, GX=gap-x, GY=gap-y
+const PW = 100, PH = 26, GX = 6, GY = 6;
+const GRIDS = {
+  strong:       { cols: 6,  rows: 4, cx: 800, cy: 221 },  // (160..282)
+  "mod-strong": { cols: 7,  rows: 3, cx: 800, cy: 395 },  // (350..440)
+  moderate:     { cols: 10, rows: 2, cx: 800, cy: 539 },  // (510..568)
+  questionable: { cols: 5,  rows: 2, cx: 800, cy: 664 },  // (635..693)
+  unsupported:  { cols: 9,  rows: 1, cx: 800, cy: 870 },  // (857..883)
+};
+
+// Per-tier plaque styling (wood gradient + accent stroke)
+const STYLES = {
+  strong:        { fill: "url(#wood-strong)",       stroke: "#6b4e1f", textFill: "#3a2818", tilt: 0    },
+  "mod-strong":  { fill: "url(#wood-mod-strong)",   stroke: "#5b3e22", textFill: "#2d1f10", tilt: 0    },
+  moderate:      { fill: "url(#wood-moderate)",     stroke: "#4a3a25", textFill: "#fff5dc", tilt: 1.2  },
+  questionable:  { fill: "url(#wood-questionable)", stroke: "#3a2d1d", textFill: "#fff5dc", tilt: 3.5  },
+  unsupported:   { fill: "url(#wood-unsupported)",  stroke: "#2d2418", textFill: "#d6c8ad", tilt: 7    },
+};
+
+// Carved-on-wood names: shortened where needed to fit 100px plaques at 9px font
+const TECHNIQUES = [
+  // STRONG (24)
+  { num:  1, ev: "strong", name: "CBT Thought Record",          short: "CBT Thought Rec.",  howto: "Write the situation, emotion, automatic thought, evidence for and against it, a balanced thought, and the next action." },
+  { num:  2, ev: "strong", name: "ABC Technique",               short: "ABC Technique",     howto: "Record the Activating event, Belief, and Consequence, then dispute the belief and choose a more useful response." },
+  { num:  3, ev: "strong", name: "Cognitive restructuring",     short: "Cog. restructuring",howto: "Identify a distorted thought, test it against evidence, and replace it with a more accurate belief." },
+  { num:  4, ev: "strong", name: "Problem-solving therapy",     short: "Problem-solving",   howto: "Define the problem, generate options, choose one, act, and review the result." },
+  { num:  5, ev: "strong", name: "Mindfulness meditation",      short: "Mindfulness",       howto: "Focus on breath, body, or sound, and gently return attention whenever the mind wanders." },
+  { num:  6, ev: "strong", name: "Savoring",                    short: "Savoring",          howto: "Slow down, attend to pleasant details, and deliberately extend the positive experience." },
+  { num:  7, ev: "strong", name: "Worry time",                  short: "Worry time",        howto: "Postpone worries to a scheduled 10–20 minute window and redirect attention when they arise outside it." },
+  { num:  8, ev: "strong", name: "Behavioral activation",       short: "Beh. activation",   howto: "Schedule small rewarding or valued actions before motivation appears, then track mood afterward." },
+  { num:  9, ev: "strong", name: "Graded exposure",             short: "Graded exposure",   howto: "Build a fear hierarchy and repeatedly face the easiest feared situation until anxiety drops before advancing." },
+  { num: 10, ev: "strong", name: "ERP (exposure + prevention)", short: "ERP",               howto: "Trigger the obsession or fear while deliberately not doing the compulsion, reassurance, avoidance, or escape behavior." },
+  { num: 11, ev: "strong", name: "Stable-cue habits",           short: "Stable-cue habits", howto: "Repeat one small behavior after the same cue in the same context until it becomes automatic." },
+  { num: 12, ev: "strong", name: "Habit stacking",              short: "Habit stacking",    howto: "Attach a new behavior immediately after an existing reliable routine." },
+  { num: 13, ev: "strong", name: "Implementation intentions",   short: "If-then plans",     howto: "Write a specific 'If situation X happens, then I will do behavior Y' plan." },
+  { num: 14, ev: "strong", name: "Specific goal + feedback",    short: "Specific goals",    howto: "Set a hard but reachable target and compare progress against it regularly." },
+  { num: 15, ev: "strong", name: "Self-monitoring",             short: "Self-monitoring",   howto: "Record the target behavior or outcome daily so patterns become visible." },
+  { num: 16, ev: "strong", name: "Feedback loops",              short: "Feedback loops",    howto: "Review tracked data, identify the next bottleneck, and change one variable at a time." },
+  { num: 17, ev: "strong", name: "Social support",              short: "Social support",    howto: "Join or build a group where the desired behavior is normal, visible, and reinforced." },
+  { num: 18, ev: "strong", name: "Aerobic exercise",            short: "Aerobic exercise",  howto: "Do brisk walking, jogging, cycling, swimming, or similar moderate-to-vigorous movement for 20–45 minutes on most days." },
+  { num: 19, ev: "strong", name: "Resistance training",         short: "Resistance trng.",  howto: "Train major muscle groups 2–3 times per week with progressive overload and enough recovery." },
+  { num: 20, ev: "strong", name: "Progressive relaxation",      short: "Prog. relaxation",  howto: "Tense and release each major muscle group in sequence while noticing the contrast." },
+  { num: 21, ev: "strong", name: "Sleep restriction",           short: "Sleep restriction", howto: "Limit time in bed to actual sleep time, then gradually expand the window as sleep efficiency improves." },
+  { num: 22, ev: "strong", name: "Commitment device",           short: "Commitment device", howto: "Stake money, reputation, or access so quitting has a real cost." },
+  { num: 23, ev: "strong", name: "Default design",              short: "Default design",    howto: "Make the good option the default and add extra steps to the bad option." },
+  { num: 24, ev: "strong", name: "Nature exposure",             short: "Nature exposure",   howto: "Spend regular time walking, sitting, or exercising in green or blue spaces." },
+
+  // MOD-TO-STRONG (21)
+  { num: 25, ev: "mod-strong", name: "Cognitive defusion",      short: "Cog. defusion",     howto: "Label thoughts as thoughts, such as 'I'm having the thought that…,' instead of treating them as commands." },
+  { num: 26, ev: "mod-strong", name: "Gratitude journaling",    short: "Gratitude journal", howto: "Write three specific things you feel grateful for each day." },
+  { num: 27, ev: "mod-strong", name: "Three Good Things",       short: "Three Good Things", howto: "Each evening, list three good events from the day and your role in them (or why they happened)." },
+  { num: 28, ev: "mod-strong", name: "Tiny Habits",             short: "Tiny Habits",       howto: "Shrink the behavior until it feels easy, perform it after a cue, and briefly celebrate completion." },
+  { num: 29, ev: "mod-strong", name: "GTD capture",             short: "GTD capture",       howto: "Put every open loop into one trusted inbox, clarify the next action, and review it regularly." },
+  { num: 30, ev: "mod-strong", name: "Deep Work",               short: "Deep Work",         howto: "Schedule distraction-free blocks for cognitively demanding work and remove communication channels." },
+  { num: 31, ev: "mod-strong", name: "Action planning",         short: "Action planning",   howto: "Specify exactly when, where, how, and with what materials you will act." },
+  { num: 32, ev: "mod-strong", name: "Process visualization",   short: "Process visualiz.", howto: "Mentally rehearse the steps, obstacles, and responses rather than only the desired outcome." },
+  { num: 33, ev: "mod-strong", name: "Values clarification",    short: "Values clarif.",    howto: "Write the life domains that matter most and choose actions aligned with them." },
+  { num: 34, ev: "mod-strong", name: "Daily review",            short: "Daily review",      howto: "At day's end, note what happened, what worked, what failed, and tomorrow's priority." },
+  { num: 35, ev: "mod-strong", name: "Personal mission",        short: "Personal mission",  howto: "Draft a short statement of principles, roles, and long-term aims and revisit it regularly." },
+  { num: 36, ev: "mod-strong", name: "Life audit",              short: "Life audit",        howto: "Rate major life domains, choose the lowest-rated high-value domain, and set one action." },
+  { num: 37, ev: "mod-strong", name: "Assertiveness scripts",   short: "Assertiveness",     howto: "State the facts, your feeling, your request, and your boundary in calm direct language." },
+  { num: 38, ev: "mod-strong", name: "Active listening",        short: "Active listening",  howto: "Reflect the other person's point and emotion before offering advice or disagreement." },
+  { num: 39, ev: "mod-strong", name: "Step-count target",       short: "Step-count target", howto: "Pick a realistic daily step target, track it, and increase it gradually when it becomes easy." },
+  { num: 40, ev: "mod-strong", name: "Diaphragmatic breathing", short: "Diaph. breathing",  howto: "Breathe low into the belly at roughly 5–6 breaths per minute for several minutes." },
+  { num: 41, ev: "mod-strong", name: "Sleep stimulus control",  short: "Sleep stim. ctrl",  howto: "Use bed only for sleep and sex, leave if awake too long, and keep a consistent wake time." },
+  { num: 42, ev: "mod-strong", name: "Fixed wake time",         short: "Fixed wake time",   howto: "Wake at the same time every day, including weekends, to stabilize the sleep-wake rhythm." },
+  { num: 43, ev: "mod-strong", name: "Temptation bundling",     short: "Temptation bndl.",  howto: "Pair a beneficial task with an indulgence you only allow during that task." },
+  { num: 44, ev: "mod-strong", name: "Environmental design",    short: "Env. design",       howto: "Change your surroundings so the desired behavior is easy and the undesired behavior is inconvenient." },
+  { num: 45, ev: "mod-strong", name: "Morning light",           short: "Morning light",     howto: "Get outdoor light soon after waking, ideally while moving and without sunglasses." },
+
+  // MODERATE (20)
+  { num: 46, ev: "moderate", name: "Self-compassion break",     short: "Self-compassion",   howto: "Notice suffering, remind yourself it is human, and speak to yourself as a good coach would." },
+  { num: 47, ev: "moderate", name: "Expressive writing",        short: "Expressive writ.",  howto: "Privately write for 15–20 minutes about a stressful event and what it means." },
+  { num: 48, ev: "moderate", name: "Urge surfing",              short: "Urge surfing",      howto: "Notice craving sensations as waves, breathe, and wait without acting until they crest and fall." },
+  { num: 49, ev: "moderate", name: "Eat the Frog",              short: "Eat the Frog",      howto: "Do the most aversive high-value task first in the workday." },
+  { num: 50, ev: "moderate", name: "No Zero Days",              short: "No Zero Days",      howto: "Do at least one tiny action toward the goal every day, even on bad days." },
+  { num: 51, ev: "moderate", name: "Identity-based habits",     short: "Identity habits",   howto: "Treat each small behavior as evidence for the identity you want to strengthen." },
+  { num: 52, ev: "moderate", name: "Keystone habit",            short: "Keystone habit",    howto: "Pick one habit likely to improve other behaviors or make other habits easier and work on developing that habit first." },
+  { num: 53, ev: "moderate", name: "Don't Break the Chain",     short: "Streak chain",      howto: "Mark each day you complete the habit and try to preserve the streak." },
+  { num: 54, ev: "moderate", name: "Pomodoro Technique",        short: "Pomodoro",          howto: "Work on one task for about 25 minutes, take a short break, and repeat." },
+  { num: 55, ev: "moderate", name: "Time blocking",             short: "Time blocking",     howto: "Reserve calendar blocks in advance for specific work you want to do during them, for time to rest, for time to exercise, etc." },
+  { num: 56, ev: "moderate", name: "SMART goals",               short: "SMART goals",       howto: "Convert a vague aim into a Specific, Measurable, Achievable, Relevant, and Time-bound target." },
+  { num: 57, ev: "moderate", name: "WOOP",                      short: "WOOP",              howto: "Name the Wish, Outcome, Obstacle, and Plan an if-then response to the obstacle." },
+  { num: 58, ev: "moderate", name: "Best Possible Self",        short: "Best Possible Self",howto: "Write vividly about a realistic future in which important goals have gone well." },
+  { num: 59, ev: "moderate", name: "Strengths use",             short: "Strengths use",     howto: "Identify a character strength and use it in a new way each day." },
+  { num: 60, ev: "moderate", name: "Daily journaling",          short: "Daily journaling",  howto: "Write a brief uncensored account of thoughts, decisions, and lessons each day." },
+  { num: 61, ev: "moderate", name: "Accountability partner",    short: "Accountability",    howto: "Tell someone the exact commitment and report completion on a fixed schedule." },
+  { num: 62, ev: "moderate", name: "Acts of kindness",          short: "Acts of kindness",  howto: "Perform small concrete helpful acts and notice their effects on others and yourself." },
+  { num: 63, ev: "moderate", name: "Cold exposure",             short: "Cold exposure",     howto: "Expose yourself briefly to cold water, starting mild and short, and observe stress or mood effects." },
+  { num: 64, ev: "moderate", name: "Breathwork systems",        short: "Breathwork",        howto: "Follow a fixed pattern such as box breathing, 4-7-8 breathing, or cyclic hyperventilation with recovery." },
+  { num: 65, ev: "moderate", name: "Dopamine fast",             short: "Dopamine fast",     howto: "Take a planned break from compulsive high-reward behaviors and replace them with low-stimulation activities." },
+
+  // QUESTIONABLE (10)
+  { num: 66, ev: "questionable", name: "EFT / tapping",         short: "EFT / tapping",     howto: "While naming a distressing issue, tap through the standard point sequence and re-rate emotional intensity." },
+  { num: 67, ev: "questionable", name: "Binaural beats",        short: "Binaural beats",    howto: "Listen to two slightly different tones through headphones to try to induce a target mental state." },
+  { num: 68, ev: "questionable", name: "10,000-hour rule",      short: "10,000-hour rule",  howto: "Accumulate practice hours, but do not expect hours alone to overcome feedback quality, genetics, timing, and domain constraints." },
+  { num: 69, ev: "questionable", name: "Brain training games",  short: "Brain training",    howto: "Play cognitive games daily, but expect improvement mainly on trained or nearby tasks rather than broad intelligence." },
+  { num: 70, ev: "questionable", name: "Vision board",          short: "Vision board",      howto: "Create a collage of goal-related images or words." },
+  { num: 71, ev: "questionable", name: "Lucky Girl Syndrome",   short: "Lucky Girl Synd.",  howto: "Repeat that things tend to work out for you and look for opportunities that match the expectation." },
+  { num: 72, ev: "questionable", name: "Scripting manifestation",short:"Scripting",         howto: "Write a future scene as if the desired outcome has already happened." },
+  { num: 73, ev: "questionable", name: "Power posing",          short: "Power posing",      howto: "Stand or sit expansively for a minute or two before a challenging interaction." },
+  { num: 74, ev: "questionable", name: "Positive affirmations", short: "Positive affirms",  howto: "Repeat short positive statements about yourself (e.g., 'I am strong and capable.')." },
+  { num: 75, ev: "questionable", name: "Polyphasic sleep",      short: "Polyphasic sleep",  howto: "Split sleep into many short naps to reduce total sleep." },
+
+  // UNSUPPORTED (9)
+  { num: 76, ev: "unsupported", name: "Subliminal audio",       short: "Subliminal audio",  howto: "Play affirming messages below conscious audibility while relaxing or sleeping." },
+  { num: 77, ev: "unsupported", name: "Solfeggio frequencies",  short: "Solfeggio freq.",   howto: "Play tracks marketed as specific healing frequencies during meditation, rest, or work." },
+  { num: 78, ev: "unsupported", name: "Multitasking hack",      short: "Multitasking",      howto: "Rapidly switch between tasks or media streams to get multiple things done at once." },
+  { num: 79, ev: "unsupported", name: "369 method",             short: "369 method",        howto: "Write a desired outcome 3 times in the morning, 6 times midday, and 9 times at night." },
+  { num: 80, ev: "unsupported", name: "Crystals for healing",   short: "Crystals",          howto: "Hold or display a crystal to balance energy or heal yourself." },
+  { num: 81, ev: "unsupported", name: "Astrology planning",     short: "Astrology",         howto: "Choose goals or timing based on horoscopes, signs, or transits." },
+  { num: 82, ev: "unsupported", name: "Numerology goals",       short: "Numerology",        howto: "Select goals, dates, or habits based on personally meaningful numbers." },
+  { num: 83, ev: "unsupported", name: "Law of Attraction",      short: "Law of Attract.",   howto: "Think, visualize, or 'vibrate' as if the desired outcome is inevitable or has already happened." },
+  { num: 84, ev: "unsupported", name: "Detox cleanses",         short: "Detox cleanses",    howto: "Use juices, teas, fasting, or colon cleanses to 'flush toxins' from the body." },
+];
+
+const NS = "http://www.w3.org/2000/svg";
+const plaquesGroup = document.getElementById("plaques");
+
+// Deterministic per-marker jitter (for tilt variation in lower tiers)
+function hashJitter(n) {
+  const v = Math.sin(n * 12.9898) * 43758.5453;
+  return (v - Math.floor(v)) - 0.5;
+}
+
+// Render all plaques in tight aligned grids
+const byTier = {};
+TECHNIQUES.forEach(t => (byTier[t.ev] = byTier[t.ev] || []).push(t));
+
+Object.entries(byTier).forEach(([ev, items]) => {
+  const grid = GRIDS[ev];
+  const style = STYLES[ev];
+  const cellW = PW + GX;
+  const cellH = PH + GY;
+  const gridW = grid.cols * PW + (grid.cols - 1) * GX;
+  const gridH = grid.rows * PH + (grid.rows - 1) * GY;
+  const startX = grid.cx - gridW / 2;
+  const startY = grid.cy - gridH / 2;
+
+  items.forEach((t, i) => {
+    const row = Math.floor(i / grid.cols);
+    const col = i % grid.cols;
+    const x = startX + col * cellW;
+    const y = startY + row * cellH;
+    const cx = x + PW / 2;
+    const cy = y + PH / 2;
+
+    // Deterministic tilt for visual instability (lower tiers wobble more)
+    const tiltDeg = style.tilt * (hashJitter(t.num) * 2);
+
+    const g = document.createElementNS(NS, "g");
+    g.setAttribute("class", "plaque");
+    g.setAttribute("transform", `rotate(${tiltDeg.toFixed(2)} ${cx} ${cy})`);
+    g.dataset.num = t.num;
+    g.dataset.name = t.name;
+    g.dataset.howto = t.howto;
+    g.dataset.ev = t.ev;
+
+    // Plaque background (wooden plank)
+    const bg = document.createElementNS(NS, "rect");
+    bg.setAttribute("class", "plaque-bg");
+    bg.setAttribute("x", x);
+    bg.setAttribute("y", y);
+    bg.setAttribute("width", PW);
+    bg.setAttribute("height", PH);
+    bg.setAttribute("rx", 3);
+    bg.setAttribute("fill", style.fill);
+    bg.setAttribute("stroke", style.stroke);
+    bg.setAttribute("stroke-width", 1.5);
+    g.appendChild(bg);
+
+    // Inner inset (subtle wood-grain divider)
+    const grain = document.createElementNS(NS, "line");
+    grain.setAttribute("x1", x + 4);
+    grain.setAttribute("y1", y + PH - 5);
+    grain.setAttribute("x2", x + PW - 4);
+    grain.setAttribute("y2", y + PH - 5);
+    grain.setAttribute("stroke", style.stroke);
+    grain.setAttribute("stroke-width", 0.5);
+    grain.setAttribute("opacity", "0.35");
+    g.appendChild(grain);
+
+    // Tiny "nail" dots at the corners
+    [[x + 4, y + 4], [x + PW - 4, y + 4]].forEach(([nx, ny]) => {
+      const nail = document.createElementNS(NS, "circle");
+      nail.setAttribute("cx", nx);
+      nail.setAttribute("cy", ny);
+      nail.setAttribute("r", 0.9);
+      nail.setAttribute("fill", style.stroke);
+      g.appendChild(nail);
+    });
+
+    // Carved name (text)
+    const text = document.createElementNS(NS, "text");
+    text.setAttribute("x", cx);
+    text.setAttribute("y", cy + 3);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("font-family", "Georgia, 'Times New Roman', serif");
+    text.setAttribute("font-size", "9.5");
+    text.setAttribute("font-weight", "700");
+    text.setAttribute("fill", style.textFill);
+    text.setAttribute("pointer-events", "none");
+    text.textContent = t.short;
+    g.appendChild(text);
+
+    plaquesGroup.appendChild(g);
+  });
+});
+
+// Tooltip behavior
+const tooltip = document.getElementById("tooltip");
+const ttMeta  = tooltip.querySelector(".tt-meta");
+const ttName  = tooltip.querySelector(".tt-name");
+const ttHowto = tooltip.querySelector(".tt-howto");
+
+document.querySelectorAll(".plaque").forEach(p => {
+  p.addEventListener("mouseenter", e => {
+    const meta = TIER_META[p.dataset.ev];
+    ttMeta.textContent  = `#${p.dataset.num} · ${meta.terrain} · ${meta.label}`;
+    ttName.textContent  = p.dataset.name;
+    ttHowto.textContent = p.dataset.howto;
+    tooltip.style.display = "block";
+    positionTooltip(e);
+  });
+  p.addEventListener("mousemove", positionTooltip);
+  p.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+});
+
+function positionTooltip(e) {
+  const padding = 14;
+  const rect = tooltip.getBoundingClientRect();
+  let x = e.clientX + padding;
+  let y = e.clientY + padding;
+  if (x + rect.width > window.innerWidth - 8) x = e.clientX - rect.width - padding;
+  if (y + rect.height > window.innerHeight - 8) y = e.clientY - rect.height - padding;
+  tooltip.style.left = x + "px";
+  tooltip.style.top  = y + "px";
+}
+</script>
+</body>
+</html>

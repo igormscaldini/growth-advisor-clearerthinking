@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clearer Thinking Audience Survey – March 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f4f0; color: #1a1a18; line-height: 1.6; }
+.page { max-width: 860px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+h1 { font-size: 26px; font-weight: 600; margin-bottom: 4px; }
+.report-meta { font-size: 13px; color: #73726c; margin-bottom: 2.5rem; }
+.section-title { font-size: 17px; font-weight: 600; color: #1a1a18; border-bottom: 1px solid #d3d1c7; padding-bottom: 6px; margin: 2.5rem 0 4px; }
+.question-wording { font-size: 12px; color: #888780; font-style: italic; margin-bottom: 4px; line-height: 1.5; }
+.section-subtitle { font-size: 12px; color: #73726c; margin-bottom: 1rem; }
+.chart-wrap { position: relative; width: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 12px; color: #73726c; }
+.legend span { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.divider { height: 1px; background: #d3d1c7; margin: 2rem 0; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.col-label { font-size: 12px; font-weight: 600; color: #73726c; margin-bottom: 8px; }
+.qual-section { margin-top: 12px; }
+.qual-item { background: #fff; border: 1px solid #d3d1c7; border-radius: 8px; padding: 10px 14px; margin-bottom: 6px; font-size: 13px; line-height: 1.65; color: #1a1a18; }
+.qual-item.t1 { border-left: 3px solid #3B8BD4; }
+.qual-item.t2 { border-left: 3px solid #9FE1CB; }
+.qual-title { font-size: 15px; font-weight: 600; margin: 2rem 0 4px; color: #1a1a18; }
+.qual-question { font-size: 12px; color: #888780; font-style: italic; margin-bottom: 10px; }
+@media (max-width: 580px) { .two-col { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Clearer Thinking Audience Survey</h1>
+<div class="report-meta">March 2026 · 539 respondents · Audience profile · Response counts vary by question (shown per chart)</div>
+
+<!-- PRIORITIES -->
+<div class="section-title">Top life priorities right now (n=153)</div>
+<div class="question-wording">"Which of these are high priorities for you right now in your life?"</div>
+<div class="section-subtitle">Multi-select · Structured options only</div>
+<div class="chart-wrap" style="height:200px;"><canvas id="prioritiesChart"></canvas></div>
+
+<div class="divider"></div>
+
+<!-- PROBLEMS -->
+<div class="section-title">Biggest challenges right now (n=153)</div>
+<div class="question-wording">"Which of these problems is a big challenge for you right now?"</div>
+<div class="section-subtitle">Multi-select</div>
+<div class="chart-wrap" style="height:200px;"><canvas id="problemsChart"></canvas></div>
+
+<div class="divider"></div>
+
+<!-- GOALS -->
+<div class="section-title">Personal goals (n=155)</div>
+<div class="question-wording">"Which of these goals are major objectives of yours right now?"</div>
+<div class="section-subtitle">Multi-select · All structured options shown (write-in responses with n=1 excluded)</div>
+<div class="chart-wrap" style="height:1100px;"><canvas id="goalsChart"></canvas></div>
+
+<div class="divider"></div>
+
+<!-- SELF-CATEGORIES -->
+<div class="section-title">How respondents self-identify (n=154)</div>
+<div class="question-wording">"Do any of the following categories apply to you?"</div>
+<div class="section-subtitle">Multi-select</div>
+<div class="chart-wrap" style="height:265px;"><canvas id="categoryChart"></canvas></div>
+
+<div class="divider"></div>
+
+<!-- EMPLOYMENT + INDUSTRY -->
+<div class="two-col">
+  <div>
+    <div class="section-title" style="margin-top:0;">Employment status (n=148)</div>
+    <div class="question-wording">"Which of the following best describes your current primary role?"</div>
+    <div style="margin-bottom:8px;"></div>
+    <div class="chart-wrap" style="height:270px;"><canvas id="empChart"></canvas></div>
+  </div>
+  <div>
+    <div class="section-title" style="margin-top:0;">Industry (n=145, top 11 structured options)</div>
+    <div class="question-wording">"Which field or industry best describes your work?"</div>
+    <div style="margin-bottom:8px;"></div>
+    <div class="chart-wrap" style="height:270px;"><canvas id="industryChart"></canvas></div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<!-- POLITICAL -->
+<div class="section-title">Political self-position (n=152)</div>
+<div class="question-wording">"In political matters, where do your views generally fall on the scale from 'left' (progressive) to 'right' (conservative)?"</div>
+<div class="section-subtitle">Scale: −5 = completely progressive · 0 = center · +5 = completely conservative</div>
+<div class="chart-wrap" style="height:150px;"><canvas id="polChart"></canvas></div>
+<div class="legend"><span><span class="legend-dot" style="background:#3B8BD4"></span>Progressive (−1 to −5)</span><span><span class="legend-dot" style="background:#888780"></span>Center (0)</span><span><span class="legend-dot" style="background:#D85A30"></span>Conservative (+1 to +5)</span></div>
+
+<div class="divider"></div>
+
+<!-- WORLD CONCERNS -->
+<div class="section-title">World trends that concern respondents most (n=151)</div>
+<div class="question-wording">"Last question... What trends or changes in the world concern you the most right now?"</div>
+<div class="section-subtitle">Multi-select</div>
+<div class="chart-wrap" style="height:310px;"><canvas id="concernsChart"></canvas></div>
+
+<div class="divider"></div>
+
+<!-- ===== QUALITATIVE ===== -->
+<h2 style="font-size:20px;font-weight:600;margin:2.5rem 0 1.5rem;">Qualitative responses</h2>
+
+<div class="qual-title">Other big challenges not listed (n=67)</div>
+<div class="qual-question">"What other big challenges have you been facing in your life that were NOT listed on the prior page?"</div>
+<div class="qual-section">
+  <div class="qual-item t1">"Sudden and unexpected death of spouse, facing life alone at 60."</div>
+  <div class="qual-item t1">"Learning how to build a life as an expat. Reconciling past dreams with today's day-to-day life. Getting over an abusive ex."</div>
+  <div class="qual-item t1">"Autism and understanding how it applies to my life. What is caused by autism and what is not. (I'm diagnosed.)"</div>
+  <div class="qual-item t1">"Life purpose / existential dread / nihilism and actualizing subjective meaning."</div>
+  <div class="qual-item t1">"I feel a lot of external pressure — the world around me is changing too quickly — requiring quick recalibration of my goals, plans, and worldviews."</div>
+  <div class="qual-item t1">"At age 77 I deeply fear the prospect of losing my physical and mental capacity for a full and productive life."</div>
+  <div class="qual-item t1">"The amount of care and attention my ailing wife needs."</div>
+  <div class="qual-item t1">"Chronic health issues — helping assess priorities when I'm often not working at 100% capacity."</div>
+  <div class="qual-item t2">"Menopause, overeating, binge eating, high blood pressure, social anxiety, autism, neurodivergence, emotionally immature parents."</div>
+  <div class="qual-item t2">"Financial — the need to work. Transitioning from one career to another."</div>
+  <div class="qual-item t2">"Planning for retirement. Aging and health issues."</div>
+  <div class="qual-item t2">"Building and sustaining deep relationships."</div>
+  <div class="qual-item t2">"Grief."</div>
+  <div class="qual-item t2">"Childhood trauma / abuse, neglect, injustice."</div>
+  <div class="qual-item t2">"Bullying, homophobia, and depression."</div>
+  <div class="qual-item t2">"My job eats up too much of my otherwise wonderful life."</div>
+</div>
+
+</div><!-- end .page -->
+
+<script>
+const tc = '#73726c';
+const gc = 'rgba(0,0,0,0.06)';
+
+function hBar(id, labels, data, total, color) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const colors = Array.isArray(color) ? color : Array(data.length).fill(color);
+  new Chart(el, {
+    type:'bar', data:{ labels, datasets:[{ data, backgroundColor:colors, borderRadius:3, borderSkipped:false }] },
+    options:{ responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{ legend:{display:false}, tooltip:{callbacks:{label: ctx=>`${ctx.parsed.x} responses (${(ctx.parsed.x/total*100).toFixed(1)}%)`}} },
+      scales:{ x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}}, y:{ticks:{color:tc,font:{size:10}},grid:{display:false}} }
+    }
+  });
+}
+
+hBar('prioritiesChart',['Communication & relationships','Productivity & effectiveness','Rationality & critical thinking','Better decision-making','Improving mood / happiness','Goal-setting & planning'],[84,77,65,63,63,60],153,'#1D9E75');
+hBar('problemsChart',['Procrastination','Uncertainty about career','Poor focus / attention span','Trouble with time management','Lack of motivation','Feeling anxious / stressed','Not enough self-control','Feeling depressed / sad'],[80,63,61,60,60,57,47,46],153,'#D85A30');
+hBar('goalsChart',[
+  'Become a better version of myself',
+  'Improve my physical fitness or strength',
+  'Have a greater positive impact on the world',
+  'Get better at figuring out the truth on complex issues',
+  'Learn a new skill',
+  'Improve my mental health',
+  'Improve my communication or social skills',
+  'Become more productive',
+  'Become happier',
+  'Become a better decision maker',
+  'Write more',
+  'Become more mindful or meditate regularly',
+  'Improve my relationships with my friends',
+  'Eat healthier',
+  'Learn to manage my emotions better',
+  'Improve my self-control or willpower',
+  'Learn a language',
+  'Find more meaning or purpose in my work',
+  'Join / create / strengthen ties to a community',
+  'Become better at making and sticking to plans',
+  'Earn more income',
+  'Lose weight',
+  'Get a job, change jobs, or change my career',
+  'Achieve financial independence',
+  'Take good care of my family',
+  'Improve a medical condition',
+  'Make more friends',
+  'Share my ideas with the world / get published',
+  'Volunteer to help charitable causes',
+  'Save more money',
+  'Improve my relationships with family',
+  'Manage my savings or finances better',
+  'Educate others or become a teacher',
+  'Better invest my current savings',
+  'Graduate from school',
+  'Improve a current romantic relationship',
+  'Start a company, non-profit, or business',
+  'Donate more to charitable causes',
+  'Get a promotion or advance in my career',
+  'Start a new altruistic project',
+  'Find a life partner or start a romantic relationship',
+  'Change to a more altruistic career',
+  'Enroll in an educational / degree program',
+  'Pay off debt',
+  'Buy a house',
+  'Have children'
+],[85,73,71,69,65,61,60,57,57,54,53,51,50,49,49,48,47,45,44,43,43,42,40,39,39,38,38,36,36,34,31,30,30,25,24,23,22,22,20,18,18,16,14,12,10,9],155,'#185FA5');
+hBar('categoryChart',['Lifelong learner','Science enthusiast','Self-improvement enthusiast','Rationalist (or aspiring)','Writer (or aspiring)','Health / exercise enthusiast','Effective Altruist (or aspiring)','Retiree','Student','Philosopher (or aspiring)','Career focused','Entrepreneur (or aspiring)','Academic / professor'],[124,70,57,53,50,49,40,37,31,31,31,26,15],154,'#7F77DD');
+hBar('empChart',['Not employed','Mid-career (6–15y)','Undergrad student','Freelancer','Senior / exec','Grad / PhD student','Academic / researcher','Founder','Early-career (0–5y)'],[44,30,21,12,12,9,8,6,6],148,'#5F5E5A');
+hBar('industryChart',['Education','Academia / Research','Technology / AI / Data','Healthcare / Medicine','Creative fields (writing, design, etc.)','Consulting','Engineering','Finance / Investing','Nonprofit / Social impact','Government / Policy','Marketing / Media'],[18,15,14,14,12,11,10,7,5,5,3],145,'#0F6E56');
+
+new Chart(document.getElementById('polChart'), {
+  type:'bar',
+  data:{ labels:['-5','-4','-3','-2','-1','0','+1','+2','+3','+4','+5'],
+    datasets:[{ data:[9,16,31,21,19,27,9,8,5,6,1],
+      backgroundColor:['#3B8BD4','#3B8BD4','#3B8BD4','#3B8BD4','#3B8BD4','#888780','#D85A30','#D85A30','#D85A30','#D85A30','#D85A30'],
+      borderRadius:3, borderSkipped:false }] },
+  options:{ responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label: ctx=>`${ctx.parsed.y} (${(ctx.parsed.y/152*100).toFixed(1)}%)`}} },
+    scales:{ x:{ticks:{color:tc,font:{size:11}},grid:{color:gc}}, y:{ticks:{color:tc,font:{size:11}},grid:{color:gc}} }
+  }
+});
+
+hBar('concernsChart',['Misinformation / declining trust','Political polarization','Economic inequality','Climate change','Global conflict','AI impacts on society','Cultural fragmentation','Loss of meaning / shared values','Tech change outpacing regulation','Mental health & loneliness','Job security / future of work','Public health / pandemics'],[96,91,88,82,81,77,68,65,59,55,51,47],151,'#D85A30');
+</script>
+</body>
+</html>

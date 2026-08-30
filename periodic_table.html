@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Periodic Table of Self-Help Techniques</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    margin: 0; padding: 28px 12px 56px;
+    background: #fafaf9; color: #1c1917;
+  }
+  h1 {
+    text-align: center; margin: 0 0 6px;
+    font-size: 24px; font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    text-align: center; color: #57534e;
+    font-size: 13px; margin: 0 auto 14px; max-width: 760px;
+    line-height: 1.5;
+  }
+  .legend {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 6px 18px; margin: 0 auto 20px;
+    font-size: 11px; color: #44403c;
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; }
+  .legend-swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0.1);
+  }
+  .table-wrap {
+    overflow-x: auto; padding-bottom: 10px;
+  }
+  .ptable {
+    display: grid;
+    grid-template-columns: repeat(12, 64px);
+    grid-template-rows:
+      34px                  /* row 1: column headers */
+      repeat(4, 68px)       /* rows 2-5: Strong */
+      12px                  /* row 6: spacer */
+      repeat(4, 68px)       /* rows 7-10: Mod-to-Strong */
+      12px                  /* row 11: spacer */
+      repeat(4, 68px)       /* rows 12-15: Moderate */
+      12px                  /* row 16: spacer */
+      repeat(3, 68px)       /* rows 17-19: Questionable */
+      12px                  /* row 20: spacer */
+      repeat(5, 68px);      /* rows 21-25: Unsupported */
+    gap: 3px;
+    margin: 0 auto;
+    width: max-content;
+  }
+  .col-header {
+    text-align: center;
+    padding: 6px 2px;
+    border-bottom: 1px solid #d6d3d1;
+    font-size: 11px;
+    font-weight: 700;
+    color: #44403c;
+    letter-spacing: 0.05em;
+    cursor: help;
+  }
+  .tile {
+    border-radius: 5px;
+    border: 1px solid rgba(0,0,0,0.08);
+    padding: 3px 2px;
+    cursor: help;
+    position: relative;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    transition: transform 0.12s, box-shadow 0.12s;
+  }
+  .tile:hover {
+    transform: translateY(-2px) scale(1.1);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+    z-index: 10;
+  }
+  .tile .num {
+    position: absolute; top: 2px; left: 4px;
+    font-size: 8px; color: rgba(0,0,0,0.45);
+    font-weight: 500;
+  }
+  .tile .sym {
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    margin-top: 4px;
+  }
+  .tile .nm {
+    text-align: center;
+    font-size: 7.5px;
+    line-height: 1.1;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    color: rgba(0,0,0,0.7);
+    margin-top: 3px;
+    padding: 0 1px;
+  }
+  /* Evidence colors */
+  .strong         { background: #d1fae5; }
+  .strong .sym    { color: #047857; }
+  .mod-strong     { background: #ecfccb; }
+  .mod-strong .sym { color: #4d7c0f; }
+  .moderate       { background: #fef3c7; }
+  .moderate .sym  { color: #a16207; }
+  .questionable   { background: #fed7aa; }
+  .questionable .sym { color: #c2410c; }
+  .unsupported    { background: #fecaca; }
+  .unsupported .sym { color: #b91c1c; }
+  /* Band side labels */
+  .band-label {
+    position: absolute;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(0,0,0,0.4);
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+  }
+  /* Tooltip */
+  #tooltip {
+    position: fixed; display: none;
+    max-width: 320px;
+    background: #1c1917; color: #fafaf9;
+    padding: 12px 14px; border-radius: 8px;
+    font-size: 13px; line-height: 1.5;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+    z-index: 1000; pointer-events: none;
+  }
+  #tooltip .tt-meta {
+    font-size: 11px; color: #a8a29e; margin-bottom: 4px;
+  }
+  #tooltip .tt-name {
+    font-weight: 700; font-size: 14px; color: white; margin-bottom: 6px;
+  }
+  #tooltip .tt-howto { color: #d6d3d1; }
+</style>
+</head>
+<body>
+  <h1>Periodic Table of Self-Help Techniques</h1>
+  <p class="subtitle">84 techniques organized by <strong>mechanism</strong> (columns: what the technique acts on) and <strong>evidence</strong> (color and vertical position: strongest evidence at top, weakest toward bottom). Hover any tile for how to do it.</p>
+  <div class="legend">
+    <div class="legend-item"><span class="legend-swatch" style="background:#d1fae5"></span>Strong Evidence</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#ecfccb"></span>Moderate-to-Strong</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#fef3c7"></span>Moderate</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#fed7aa"></span>Questionable</div>
+    <div class="legend-item"><span class="legend-swatch" style="background:#fecaca"></span>Unsupported</div>
+  </div>
+  <div class="table-wrap">
+    <div class="ptable" id="ptable"></div>
+  </div>
+  <div id="tooltip">
+    <div class="tt-meta"></div>
+    <div class="tt-name"></div>
+    <div class="tt-howto"></div>
+  </div>
+
+<script>
+const COLUMNS = [
+  { id: "COG", full: "Cognitive",     desc: "Modify thoughts and beliefs" },
+  { id: "EMT", full: "Emotion",       desc: "Regulate feelings and presence" },
+  { id: "BEH", full: "Behavioral",    desc: "Change actions, exposure to feared things" },
+  { id: "HAB", full: "Habit",         desc: "Build or break routines" },
+  { id: "ATT", full: "Attention",     desc: "Manage focus and time" },
+  { id: "GOL", full: "Goal",          desc: "Set direction, plan, visualize outcomes" },
+  { id: "MAN", full: "Manifestation", desc: "Belief- and symbol-based direction setting" },
+  { id: "IDT", full: "Identity",      desc: "Shape self-concept and values" },
+  { id: "SOC", full: "Social",        desc: "Shape relationships and interactions" },
+  { id: "BDY", full: "Body",          desc: "Change physiology (movement, breath, temperature, intake)" },
+  { id: "SLP", full: "Sleep",         desc: "Optimize sleep specifically" },
+  { id: "ENV", full: "Environment",   desc: "Change physical surroundings" },
+];
+
+const BAND_OFFSET = {
+  strong:        2,
+  "mod-strong":  7,
+  moderate:     12,
+  questionable: 17,
+  unsupported:  21,
+};
+
+const EVIDENCE_LABEL = {
+  strong: "Strong Evidence",
+  "mod-strong": "Moderate-to-Strong",
+  moderate: "Moderate Evidence",
+  questionable: "Questionable",
+  unsupported: "Unsupported",
+};
+
+const TECHNIQUES = [
+  // STRONG (1-24)
+  { num:  1, sym: "Cbt", col: "COG", ev: "strong", name: "CBT Thought Record", howto: "Write the situation, emotion, automatic thought, evidence for and against it, a balanced thought, and the next action." },
+  { num:  2, sym: "Abc", col: "COG", ev: "strong", name: "ABC Technique", howto: "Record the Activating event, Belief, and Consequence, then dispute the belief and choose a more useful response." },
+  { num:  3, sym: "Crs", col: "COG", ev: "strong", name: "Cognitive restructuring", howto: "Identify a distorted thought, test it against evidence, and replace it with a more accurate belief." },
+  { num:  4, sym: "Pst", col: "COG", ev: "strong", name: "Problem-solving therapy", howto: "Define the problem, generate options, choose one, act, and review the result." },
+  { num:  5, sym: "Mdt", col: "EMT", ev: "strong", name: "Mindfulness meditation", howto: "Focus on breath, body, or sound, and gently return attention whenever the mind wanders." },
+  { num:  6, sym: "Sav", col: "EMT", ev: "strong", name: "Savoring", howto: "Slow down, attend to pleasant details, and deliberately extend the positive experience." },
+  { num:  7, sym: "Wry", col: "EMT", ev: "strong", name: "Worry time", howto: "Postpone worries to a scheduled 10–20 minute window and redirect attention when they arise outside it." },
+  { num:  8, sym: "BAc", col: "BEH", ev: "strong", name: "Behavioral activation", howto: "Schedule small rewarding or valued actions before motivation appears, then track mood afterward." },
+  { num:  9, sym: "GxE", col: "BEH", ev: "strong", name: "Graded exposure", howto: "Build a fear hierarchy and repeatedly face the easiest feared situation until anxiety drops before advancing." },
+  { num: 10, sym: "Erp", col: "BEH", ev: "strong", name: "ERP (exposure + prevention)", howto: "Trigger the obsession or fear while deliberately not doing the compulsion, reassurance, avoidance, or escape behavior." },
+  { num: 11, sym: "Cue", col: "HAB", ev: "strong", name: "Stable-cue habits", howto: "Repeat one small behavior after the same cue in the same context until it becomes automatic." },
+  { num: 12, sym: "HSt", col: "HAB", ev: "strong", name: "Habit stacking", howto: "Attach a new behavior immediately after an existing reliable routine." },
+  { num: 13, sym: "IIn", col: "GOL", ev: "strong", name: "Implementation intentions", howto: "Write a specific 'If situation X happens, then I will do behavior Y' plan." },
+  { num: 14, sym: "SGl", col: "GOL", ev: "strong", name: "Specific goal + feedback", howto: "Set a hard but reachable target and compare progress against it regularly." },
+  { num: 15, sym: "Smn", col: "GOL", ev: "strong", name: "Self-monitoring", howto: "Record the target behavior or outcome daily so patterns become visible." },
+  { num: 16, sym: "Flp", col: "GOL", ev: "strong", name: "Feedback loops", howto: "Review tracked data, identify the next bottleneck, and change one variable at a time." },
+  { num: 17, sym: "SSp", col: "SOC", ev: "strong", name: "Social support", howto: "Join or build a group where the desired behavior is normal, visible, and reinforced." },
+  { num: 18, sym: "Aer", col: "BDY", ev: "strong", name: "Aerobic exercise", howto: "Do brisk walking, jogging, cycling, swimming, or similar moderate-to-vigorous movement for 20–45 minutes on most days." },
+  { num: 19, sym: "Res", col: "BDY", ev: "strong", name: "Resistance training", howto: "Train major muscle groups 2–3 times per week with progressive overload and enough recovery." },
+  { num: 20, sym: "Pmr", col: "BDY", ev: "strong", name: "Progressive relaxation", howto: "Tense and release each major muscle group in sequence while noticing the contrast." },
+  { num: 21, sym: "SRx", col: "SLP", ev: "strong", name: "Sleep restriction", howto: "Limit time in bed to actual sleep time, then gradually expand the window as sleep efficiency improves." },
+  { num: 22, sym: "Cmt", col: "ENV", ev: "strong", name: "Commitment device", howto: "Stake money, reputation, or access so quitting has a real cost." },
+  { num: 23, sym: "Dft", col: "ENV", ev: "strong", name: "Default design", howto: "Make the good option the default and add extra steps to the bad option." },
+  { num: 24, sym: "Nat", col: "ENV", ev: "strong", name: "Nature exposure", howto: "Spend regular time walking, sitting, or exercising in green or blue spaces." },
+
+  // MODERATE-TO-STRONG (25-45)
+  { num: 25, sym: "Dfs", col: "COG", ev: "mod-strong", name: "Cognitive defusion", howto: "Label thoughts as thoughts, such as 'I'm having the thought that…,' instead of treating them as commands." },
+  { num: 26, sym: "Grt", col: "EMT", ev: "mod-strong", name: "Gratitude journaling", howto: "Write three specific things you feel grateful for each day." },
+  { num: 27, sym: "3GT", col: "EMT", ev: "mod-strong", name: "Three Good Things", howto: "Each evening, list three good events from the day and your role in them (or why they happened)." },
+  { num: 28, sym: "THa", col: "HAB", ev: "mod-strong", name: "Tiny Habits", howto: "Shrink the behavior until it feels easy, perform it after a cue, and briefly celebrate completion." },
+  { num: 29, sym: "GTD", col: "ATT", ev: "mod-strong", name: "GTD capture", howto: "Put every open loop into one trusted inbox, clarify the next action, and review it regularly." },
+  { num: 30, sym: "DpW", col: "ATT", ev: "mod-strong", name: "Deep Work", howto: "Schedule distraction-free blocks for cognitively demanding work and remove communication channels." },
+  { num: 31, sym: "APl", col: "GOL", ev: "mod-strong", name: "Action planning", howto: "Specify exactly when, where, how, and with what materials you will act." },
+  { num: 32, sym: "PrV", col: "GOL", ev: "mod-strong", name: "Process visualization", howto: "Mentally rehearse the steps, obstacles, and responses rather than only the desired outcome." },
+  { num: 33, sym: "Val", col: "IDT", ev: "mod-strong", name: "Values clarification", howto: "Write the life domains that matter most and choose actions aligned with them." },
+  { num: 34, sym: "DRv", col: "IDT", ev: "mod-strong", name: "Daily review", howto: "At day's end, note what happened, what worked, what failed, and tomorrow's priority." },
+  { num: 35, sym: "PMs", col: "IDT", ev: "mod-strong", name: "Personal mission", howto: "Draft a short statement of principles, roles, and long-term aims and revisit it regularly." },
+  { num: 36, sym: "LAu", col: "IDT", ev: "mod-strong", name: "Life audit", howto: "Rate major life domains, choose the lowest-rated high-value domain, and set one action." },
+  { num: 37, sym: "Asr", col: "SOC", ev: "mod-strong", name: "Assertiveness scripts", howto: "State the facts, your feeling, your request, and your boundary in calm direct language." },
+  { num: 38, sym: "ALi", col: "SOC", ev: "mod-strong", name: "Active listening", howto: "Reflect the other person's point and emotion before offering advice or disagreement." },
+  { num: 39, sym: "Stp", col: "BDY", ev: "mod-strong", name: "Step-count target", howto: "Pick a realistic daily step target, track it, and increase it gradually when it becomes easy." },
+  { num: 40, sym: "DBr", col: "BDY", ev: "mod-strong", name: "Diaphragmatic breathing", howto: "Breathe low into the belly at roughly 5–6 breaths per minute for several minutes." },
+  { num: 41, sym: "Stm", col: "SLP", ev: "mod-strong", name: "Sleep stimulus control", howto: "Use bed only for sleep and sex, leave if awake too long, and keep a consistent wake time." },
+  { num: 42, sym: "FxW", col: "SLP", ev: "mod-strong", name: "Fixed wake time", howto: "Wake at the same time every day, including weekends, to stabilize the sleep-wake rhythm." },
+  { num: 43, sym: "TBu", col: "ENV", ev: "mod-strong", name: "Temptation bundling", howto: "Pair a beneficial task with an indulgence you only allow during that task." },
+  { num: 44, sym: "EnD", col: "ENV", ev: "mod-strong", name: "Environmental design", howto: "Change your surroundings so the desired behavior is easy and the undesired behavior is inconvenient." },
+  { num: 45, sym: "MrL", col: "ENV", ev: "mod-strong", name: "Morning light", howto: "Get outdoor light soon after waking, ideally while moving and without sunglasses." },
+
+  // MODERATE (46-65)
+  { num: 46, sym: "ScB", col: "EMT", ev: "moderate", name: "Self-compassion break", howto: "Notice suffering, remind yourself it is human, and speak to yourself as a good coach would." },
+  { num: 47, sym: "ExW", col: "EMT", ev: "moderate", name: "Expressive writing", howto: "Privately write for 15–20 minutes about a stressful event and what it means." },
+  { num: 48, sym: "UrS", col: "BEH", ev: "moderate", name: "Urge surfing", howto: "Notice craving sensations as waves, breathe, and wait without acting until they crest and fall." },
+  { num: 49, sym: "Frg", col: "BEH", ev: "moderate", name: "Eat the Frog", howto: "Do the most aversive high-value task first in the workday." },
+  { num: 50, sym: "NZD", col: "HAB", ev: "moderate", name: "No Zero Days", howto: "Do at least one tiny action toward the goal every day, even on bad days." },
+  { num: 51, sym: "IdH", col: "HAB", ev: "moderate", name: "Identity-based habits", howto: "Treat each small behavior as evidence for the identity you want to strengthen." },
+  { num: 52, sym: "Key", col: "HAB", ev: "moderate", name: "Keystone habit", howto: "Pick one habit likely to improve other behaviors or make other habits easier and work on developing that habit first." },
+  { num: 53, sym: "Chn", col: "HAB", ev: "moderate", name: "Don't Break the Chain", howto: "Mark each day you complete the habit and try to preserve the streak." },
+  { num: 54, sym: "Pom", col: "ATT", ev: "moderate", name: "Pomodoro Technique", howto: "Work on one task for about 25 minutes, take a short break, and repeat." },
+  { num: 55, sym: "TBl", col: "ATT", ev: "moderate", name: "Time blocking", howto: "Reserve calendar blocks in advance for specific work you want to do during them, for time to rest, for time to exercise, etc." },
+  { num: 56, sym: "SMt", col: "GOL", ev: "moderate", name: "SMART goals", howto: "Convert a vague aim into a Specific, Measurable, Achievable, Relevant, and Time-bound target." },
+  { num: 57, sym: "Wop", col: "GOL", ev: "moderate", name: "WOOP", howto: "Name the Wish, Outcome, Obstacle, and Plan an if-then response to the obstacle." },
+  { num: 58, sym: "BPS", col: "GOL", ev: "moderate", name: "Best Possible Self", howto: "Write vividly about a realistic future in which important goals have gone well." },
+  { num: 59, sym: "Str", col: "IDT", ev: "moderate", name: "Strengths use", howto: "Identify a character strength and use it in a new way each day." },
+  { num: 60, sym: "DJl", col: "IDT", ev: "moderate", name: "Daily journaling", howto: "Write a brief uncensored account of thoughts, decisions, and lessons each day." },
+  { num: 61, sym: "Acc", col: "SOC", ev: "moderate", name: "Accountability partner", howto: "Tell someone the exact commitment and report completion on a fixed schedule." },
+  { num: 62, sym: "AoK", col: "SOC", ev: "moderate", name: "Acts of kindness", howto: "Perform small concrete helpful acts and notice their effects on others and yourself." },
+  { num: 63, sym: "Cld", col: "BDY", ev: "moderate", name: "Cold exposure", howto: "Expose yourself briefly to cold water, starting mild and short, and observe stress or mood effects." },
+  { num: 64, sym: "Brw", col: "BDY", ev: "moderate", name: "Breathwork systems", howto: "Follow a fixed pattern such as box breathing, 4-7-8 breathing, or cyclic hyperventilation with recovery." },
+  { num: 65, sym: "Dop", col: "BDY", ev: "moderate", name: "Dopamine fast", howto: "Take a planned break from compulsive high-reward behaviors and replace them with low-stimulation activities." },
+
+  // QUESTIONABLE (66-75)
+  { num: 66, sym: "EFT", col: "EMT", ev: "questionable", name: "EFT / tapping", howto: "While naming a distressing issue, tap through the standard point sequence and re-rate emotional intensity." },
+  { num: 67, sym: "BBt", col: "EMT", ev: "questionable", name: "Binaural beats", howto: "Listen to two slightly different tones through headphones to try to induce a target mental state." },
+  { num: 68, sym: "10k", col: "BEH", ev: "questionable", name: "10,000-hour rule", howto: "Accumulate practice hours, but do not expect hours alone to overcome feedback quality, genetics, timing, and domain constraints." },
+  { num: 69, sym: "BTG", col: "ATT", ev: "questionable", name: "Brain training games", howto: "Play cognitive games daily, but expect improvement mainly on trained or nearby tasks rather than broad intelligence." },
+  { num: 70, sym: "VBd", col: "MAN", ev: "questionable", name: "Vision board", howto: "Create a collage of goal-related images or words." },
+  { num: 71, sym: "LGS", col: "MAN", ev: "questionable", name: "Lucky Girl Syndrome", howto: "Repeat that things tend to work out for you and look for opportunities that match the expectation." },
+  { num: 72, sym: "Scr", col: "MAN", ev: "questionable", name: "Scripting manifestation", howto: "Write a future scene as if the desired outcome has already happened." },
+  { num: 73, sym: "PoP", col: "IDT", ev: "questionable", name: "Power posing", howto: "Stand or sit expansively for a minute or two before a challenging interaction." },
+  { num: 74, sym: "Aff", col: "IDT", ev: "questionable", name: "Positive affirmations", howto: "Repeat short positive statements about yourself (e.g., 'I am strong and capable.')." },
+  { num: 75, sym: "Pol", col: "SLP", ev: "questionable", name: "Polyphasic sleep", howto: "Split sleep into many short naps to reduce total sleep." },
+
+  // UNSUPPORTED (76-84)
+  { num: 76, sym: "Sub", col: "EMT", ev: "unsupported", name: "Subliminal audio", howto: "Play affirming messages below conscious audibility while relaxing or sleeping." },
+  { num: 77, sym: "Sol", col: "EMT", ev: "unsupported", name: "Solfeggio frequencies", howto: "Play tracks marketed as specific healing frequencies during meditation, rest, or work." },
+  { num: 78, sym: "MT",  col: "ATT", ev: "unsupported", name: "Multitasking hack", howto: "Rapidly switch between tasks or media streams to get multiple things done at once." },
+  { num: 79, sym: "369", col: "MAN", ev: "unsupported", name: "369 method", howto: "Write a desired outcome 3 times in the morning, 6 times midday, and 9 times at night." },
+  { num: 80, sym: "Cry", col: "MAN", ev: "unsupported", name: "Crystals for healing", howto: "Hold or display a crystal to balance energy or heal yourself." },
+  { num: 81, sym: "Ast", col: "MAN", ev: "unsupported", name: "Astrology planning", howto: "Choose goals or timing based on horoscopes, signs, or transits." },
+  { num: 82, sym: "Num", col: "MAN", ev: "unsupported", name: "Numerology goals", howto: "Select goals, dates, or habits based on personally meaningful numbers." },
+  { num: 83, sym: "LoA", col: "MAN", ev: "unsupported", name: "Law of Attraction", howto: "Think, visualize, or 'vibrate' as if the desired outcome is inevitable or has already happened." },
+  { num: 84, sym: "Det", col: "BDY", ev: "unsupported", name: "Detox cleanses", howto: "Use juices, teas, fasting, or colon cleanses to 'flush toxins' from the body." },
+];
+
+const ptable = document.getElementById("ptable");
+const colIndex = (id) => COLUMNS.findIndex(c => c.id === id) + 1;
+
+// Headers (row 1)
+COLUMNS.forEach((c, i) => {
+  const h = document.createElement("div");
+  h.className = "col-header";
+  h.style.gridColumn = (i + 1);
+  h.style.gridRow = 1;
+  h.title = `${c.full} — ${c.desc}`;
+  h.textContent = c.id;
+  ptable.appendChild(h);
+});
+
+// Tiles
+const counters = {};
+TECHNIQUES.forEach(t => {
+  if (!counters[t.col]) counters[t.col] = {};
+  const idx = counters[t.col][t.ev] || 0;
+  counters[t.col][t.ev] = idx + 1;
+  const row = BAND_OFFSET[t.ev] + idx;
+  const col = colIndex(t.col);
+  const tile = document.createElement("div");
+  tile.className = `tile ${t.ev}`;
+  tile.style.gridColumn = col;
+  tile.style.gridRow = row;
+  tile.dataset.num = t.num;
+  tile.dataset.name = t.name;
+  tile.dataset.howto = t.howto;
+  tile.dataset.ev = t.ev;
+  tile.innerHTML = `
+    <div class="num">${t.num}</div>
+    <div class="sym">${t.sym}</div>
+    <div class="nm">${t.name}</div>`;
+  ptable.appendChild(tile);
+});
+
+// Tooltip
+const tooltip = document.getElementById("tooltip");
+const ttMeta = tooltip.querySelector(".tt-meta");
+const ttName = tooltip.querySelector(".tt-name");
+const ttHowto = tooltip.querySelector(".tt-howto");
+
+document.querySelectorAll(".tile").forEach(tile => {
+  tile.addEventListener("mouseenter", e => {
+    const colId = COLUMNS[parseInt(tile.style.gridColumn, 10) - 1].id;
+    const colFull = COLUMNS[parseInt(tile.style.gridColumn, 10) - 1].full;
+    ttMeta.textContent = `#${tile.dataset.num} · ${colFull} · ${EVIDENCE_LABEL[tile.dataset.ev]}`;
+    ttName.textContent = tile.dataset.name;
+    ttHowto.textContent = tile.dataset.howto;
+    tooltip.style.display = "block";
+    positionTooltip(e);
+  });
+  tile.addEventListener("mousemove", positionTooltip);
+  tile.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+});
+function positionTooltip(e) {
+  const padding = 14;
+  const rect = tooltip.getBoundingClientRect();
+  let x = e.clientX + padding;
+  let y = e.clientY + padding;
+  if (x + rect.width > window.innerWidth - 8) x = e.clientX - rect.width - padding;
+  if (y + rect.height > window.innerHeight - 8) y = e.clientY - rect.height - padding;
+  tooltip.style.left = x + "px";
+  tooltip.style.top = y + "px";
+}
+</script>
+</body>
+</html>

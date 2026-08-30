@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clearer Thinking — Email Open Rate (beehiiv), since Jan 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+  :root { --ink:#1a1a2e; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         margin: 0; padding: 32px; color: var(--ink); background:#fafafa; }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 20px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+  .controls { display:flex; gap:18px; flex-wrap:wrap; align-items:center; margin-bottom:14px; font-size:14px; }
+  .controls label { cursor:pointer; user-select:none; }
+  .chartbox { position: relative; height: 460px; }
+  .stats { display:flex; gap:28px; flex-wrap:wrap; margin-top:18px; }
+  .stat { }
+  .stat .n { font-size:24px; font-weight:650; }
+  .stat .l { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+  .note { font-size:12.5px; color:var(--muted); margin-top:16px; line-height:1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Email open rate — Clearer Thinking (beehiiv)</h1>
+  <p class="sub">Each point is one email send, Jan 7 – May 27 2026. Bubble size ∝ recipients. Dashed line = audience-weighted trend.</p>
+
+  <div class="card">
+    <div class="controls">
+      <label><input type="checkbox" id="tFull" checked> Full-list broadcasts (≥150k)</label>
+      <label><input type="checkbox" id="tSeg" checked> Segmented sends (5k–150k)</label>
+      <label><input type="checkbox" id="tSmall"> Small / operational sends (&lt;5k)</label>
+      <label style="margin-left:auto"><input type="checkbox" id="tTrend" checked> Weighted trend</label>
+    </div>
+    <div class="chartbox"><canvas id="chart"></canvas></div>
+    <div class="stats" id="stats"></div>
+    <p class="note">
+      Open rate varies mostly by <b>send type</b>, so points are tiered by audience size rather than shown as one line.
+      “One Helpful Idea” notes and feature articles go to the full list (~250k–430k) and open at ~24–46%.
+      Small operational sends (workshop reminders, internal welcomes, 9–740 recipients) hit 55–89% open rates but are off by default — they're noise for trend purposes.
+      Weighted trend = monthly average open rate weighted by recipients across the visible tiers.
+    </p>
+  </div>
+</div>
+
+<script>
+const raw = [
+ ["2026-01-07",45.34,219612,"One Helpful Idea: It's left to you"],
+ ["2026-01-08",36.77,22027,"Get out of your head [Beta Tester Request]"],
+ ["2026-01-09",30.43,428767,"A better way to ask \"why\""],
+ ["2026-01-14",44.85,231764,"One Helpful Idea: It's left to you"],
+ ["2026-01-15",34.23,338890,"What to know about sociopaths"],
+ ["2026-01-18",20.03,430558,"Get out of your head (Launch to supporters)"],
+ ["2026-01-20",45.77,240598,"One Helpful Idea: When evidence won't budge you"],
+ ["2026-01-29",48.74,242786,"How to have conversations that don't feel boring"],
+ ["2026-01-31",10.48,1088,"BlueDot Subs - Biorisk Course Invitation"],
+ ["2026-02-04",43.85,245376,"One Helpful Idea: Successful people's advice"],
+ ["2026-02-06",42.55,243468,"What can a single data point teach you?"],
+ ["2026-02-11",27.88,405091,"One Helpful Idea: Intention and ethics"],
+ ["2026-02-11",33.05,23801,"Discover your unusual traits [Beta Tester Request]"],
+ ["2026-02-12",29.74,432475,"When to doubt your beliefs"],
+ ["2026-02-12",88.61,40445,"In case you've missed our invitation"],
+ ["2026-02-13",63.79,486,"Quick reminder about today's workshop"],
+ ["2026-02-13",54.23,485,"We're about to start"],
+ ["2026-02-13",54.96,484,"Recording of today's workshop"],
+ ["2026-02-17",19.64,432709,"Introducing Clearer Thinking Plus"],
+ ["2026-02-18",88.89,9,"Welcome To Clearer Thinking Plus"],
+ ["2026-02-20",43.63,252509,"Debunking 6 Popular Psychology Myths"],
+ ["2026-02-24",27.52,404479,"One Helpful Idea: Enjoying things more"],
+ ["2026-02-27",41.10,252086,"A Little Wiser Swap"],
+ ["2026-03-04",26.05,404116,"One Helpful Idea: Thought experiments"],
+ ["2026-03-06",40.95,252668,"Is it possible to miss the present? (nowstalgia)"],
+ ["2026-03-07",37.78,252864,"Monthly Debrief - February"],
+ ["2026-03-11",38.08,247230,"One Helpful Idea: So smart"],
+ ["2026-03-12",26.31,429962,"What's scaring people about AI?"],
+ ["2026-03-14",60.00,75,"Discover your unusual traits [launch to supporters]"],
+ ["2026-03-18",39.29,247998,"One Helpful Idea: Definition of insanity"],
+ ["2026-03-19",17.15,429402,"Discover your unusual traits with our new tool"],
+ ["2026-03-25",38.91,246688,"One Helpful Idea: Trusting experts"],
+ ["2026-03-27",36.28,251263,"Lies, Damn Lies, and Fabricated Options"],
+ ["2026-04-03",36.77,248212,"The Most Important Concept for a Healthy Relationship"],
+ ["2026-04-07",39.39,241391,"One Helpful Idea: Narcissists vs. Sociopaths"],
+ ["2026-04-10",37.20,278932,"Advice for Living in A World Being Changed by AI"],
+ ["2026-04-10",11.30,158082,"Advice for Living in A World Being Changed by AI (1)"],
+ ["2026-04-11",61.73,81,"Monthly Debrief - March"],
+ ["2026-04-14",43.47,352,"Thank-you for 2026 audience survey respondents"],
+ ["2026-04-15",38.04,245355,"One Helpful Idea: Psychics at hedge funds"],
+ ["2026-04-17",33.89,283596,"How (And When) To Learn From Crowds"],
+ ["2026-04-17",10.79,154722,"How (And When) To Learn From Crowds (1)"],
+ ["2026-04-20",23.44,287633,"The 12 Levers Book Launch - Engaged Users"],
+ ["2026-04-20",5.69,150298,"The 12 Levers Book Launch - All Subs"],
+ ["2026-04-22",25.54,400914,"One Helpful Idea: slight changes lead to different futures"],
+ ["2026-04-23",64.88,726,"12h Reminder - Forked By AI"],
+ ["2026-04-23",59.92,726,"10min Reminder - Forked By AI"],
+ ["2026-04-24",34.06,290290,"5 Things We Learned From Writing The 12 Levers"],
+ ["2026-04-24",62.89,741,"Thank you - Forked By AI"],
+ ["2026-04-24",7.00,147013,"5 Things We Learned (1)"],
+ ["2026-04-29",25.01,400695,"One Helpful Idea: Staying informed"],
+ ["2026-05-01",31.44,293651,"A Research-Based Framework For Forming Habits"],
+ ["2026-05-01",5.94,142778,"A Research-Based Framework (2)"],
+ ["2026-05-05",57.69,728,"Recording + resources: Don't Get Forked By AI"],
+ ["2026-05-06",24.18,400482,"One Helpful Idea: Helping Democracy"],
+ ["2026-05-08",28.03,290670,"How Many Traits Make Up Your Personality"],
+ ["2026-05-08",14.92,51119,"How Many Traits Make Up Your Personality (1)"],
+ ["2026-05-09",55.70,79,"Monthly Debrief - April"],
+ ["2026-05-15",23.69,291551,"How to create valuable things people want to use"],
+ ["2026-05-15",12.85,51115,"How to create valuable things (2)"],
+ ["2026-05-19",33.22,317335,"One Helpful Idea: What we want in others"],
+ ["2026-05-20",38.56,18461,"Invitation to participate in a study (moral priorities)"],
+ ["2026-05-22",22.96,297150,"Why You Should Know How to Find Academic Papers"],
+ ["2026-05-22",10.13,50103,"Why You Should Know How to Find Academic Papers (1)"],
+ ["2026-05-25",24.09,108420,"You're invited to my upcoming workshop"],
+ ["2026-05-26",18.23,102420,"[Link Fixed] Spencer's #1 Self-Help Technique"],
+ ["2026-05-27",25.12,316706,"One Helpful Idea: Belief red flags"],
+];
+
+const tierOf = r => r < 5000 ? "small" : (r < 150000 ? "seg" : "full");
+const colors = { full:"#2563eb", seg:"#0ea5e9", small:"#9ca3af" };
+const rows = raw.map(([d,o,r,t]) => ({x:d, open:o, rec:r, title:t, tier:tierOf(r)}));
+
+const rScale = rec => Math.max(4, Math.min(26, Math.sqrt(rec)/40));
+
+function ptsFor(tier){
+  return rows.filter(r=>r.tier===tier).map(r=>({
+    x:r.x, y:r.open, r:rScale(r.rec), rec:r.rec, title:r.title
+  }));
+}
+
+function weightedTrend(visibleTiers){
+  // monthly recipient-weighted avg open rate
+  const months = {};
+  rows.filter(r=>visibleTiers.has(r.tier)).forEach(r=>{
+    const m = r.x.slice(0,7)+"-15";
+    months[m] = months[m] || {num:0, den:0};
+    months[m].num += r.open * r.rec;
+    months[m].den += r.rec;
+  });
+  return Object.keys(months).sort().map(m=>({x:m, y:+(months[m].num/months[m].den).toFixed(2)}));
+}
+
+const mkBubble = (tier,label) => ({
+  type:"bubble", label, data:ptsFor(tier),
+  backgroundColor:colors[tier]+"cc", borderColor:colors[tier], borderWidth:1
+});
+
+const chart = new Chart(document.getElementById("chart"), {
+  data:{ datasets:[
+    mkBubble("full","Full-list broadcast (≥150k)"),
+    mkBubble("seg","Segmented send (5k–150k)"),
+    mkBubble("small","Small / operational (<5k)"),
+    { type:"line", label:"Weighted monthly trend", data:[],
+      borderColor:"#1a1a2e", borderDash:[6,4], borderWidth:2,
+      pointRadius:3, pointBackgroundColor:"#1a1a2e", fill:false, tension:.25 }
+  ]},
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    scales:{
+      x:{ type:"time", time:{unit:"month"}, title:{display:true,text:"Send date"},
+          grid:{color:"#f1f1f4"} },
+      y:{ title:{display:true,text:"Open rate (%)"}, suggestedMin:0, suggestedMax:70,
+          grid:{color:"#f1f1f4"} }
+    },
+    plugins:{
+      legend:{ position:"top" },
+      tooltip:{ callbacks:{
+        label:c=>{
+          const d=c.raw;
+          if(c.dataset.type==="line") return `Weighted avg: ${d.y}%`;
+          return [`${d.title}`, `Open: ${d.y}%  •  ${d.rec.toLocaleString()} recipients`];
+        }
+      }}
+    }
+  }
+});
+
+function refresh(){
+  const show = { full:tFull.checked, seg:tSeg.checked, small:tSmall.checked };
+  chart.data.datasets[0].hidden = !show.full;
+  chart.data.datasets[1].hidden = !show.seg;
+  chart.data.datasets[2].hidden = !show.small;
+  const visible = new Set(Object.keys(show).filter(k=>show[k]));
+  chart.data.datasets[3].data = tTrend.checked ? weightedTrend(visible) : [];
+  chart.data.datasets[3].hidden = !tTrend.checked;
+  chart.update();
+
+  // stats over visible tiers
+  const v = rows.filter(r=>visible.has(r.tier));
+  const num = v.reduce((s,r)=>s+r.open*r.rec,0), den=v.reduce((s,r)=>s+r.rec,0);
+  const wavg = den? (num/den):0;
+  const simple = v.length? v.reduce((s,r)=>s+r.open,0)/v.length : 0;
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><div class="n">${wavg.toFixed(1)}%</div><div class="l">Weighted open rate</div></div>
+    <div class="stat"><div class="n">${simple.toFixed(1)}%</div><div class="l">Simple avg / send</div></div>
+    <div class="stat"><div class="n">${v.length}</div><div class="l">Sends shown</div></div>
+    <div class="stat"><div class="n">${(den/1e6).toFixed(2)}M</div><div class="l">Emails delivered</div></div>`;
+}
+["tFull","tSeg","tSmall","tTrend"].forEach(id=>document.getElementById(id).addEventListener("change",refresh));
+refresh();
+</script>
+</body>
+</html>
