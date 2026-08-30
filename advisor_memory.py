@@ -197,17 +197,32 @@ def load_knowledge(max_chars: int = 60_000) -> str:
 
 # --- Claude ----------------------------------------------------------------------
 def claude_text(system: str, user: str, max_tokens: int = 4000) -> str:
-    """One streamed Claude call returning the text of the reply. Raises on refusal."""
+    """One streamed Claude call returning the text of the reply. Raises on refusal.
+
+    The SDK retries failed request setup, but a timeout or dropped connection in the middle
+    of the stream surfaces as an exception (seen live: ReadTimeout killed a weekly letter),
+    so the whole call is retried a couple of times too.
+    """
     import anthropic
 
-    client = anthropic.Anthropic(max_retries=4)
-    with client.messages.stream(
-        model=advisor_model(),
-        max_tokens=max_tokens,
-        system=system,
-        messages=[{"role": "user", "content": user}],
-    ) as stream:
-        msg = stream.get_final_message()
+    client = anthropic.Anthropic(max_retries=4, timeout=900.0)
+    msg = None
+    for attempt in range(3):
+        try:
+            with client.messages.stream(
+                model=advisor_model(),
+                max_tokens=max_tokens,
+                system=system,
+                messages=[{"role": "user", "content": user}],
+            ) as stream:
+                msg = stream.get_final_message()
+            break
+        except Exception as e:  # noqa: BLE001
+            if attempt == 2:
+                raise
+            print(f"[claude] attempt {attempt + 1} failed ({type(e).__name__}: {e}); retrying...",
+                  file=sys.stderr)
+            time.sleep(15 * (attempt + 1))
     if msg.stop_reason == "refusal":
         raise RuntimeError("Claude declined this request (stop_reason=refusal)")
     return "".join(b.text for b in msg.content if getattr(b, "type", None) == "text").strip()
