@@ -1128,6 +1128,20 @@ def _merge_new_subs(cache: Optional[dict], fresh: dict, rewalk_from: date) -> di
     return merged
 
 
+def _beehiiv_get_page(url: str, **kwargs):
+    """_beehiiv_get plus retries on rate limiting / server errors. A long cursor walk makes
+    thousands of sequential calls, so one transient 429 or 502 must not abort the whole thing
+    (that is exactly what happened when several walkers ran at once)."""
+    for attempt in range(6):
+        r = _beehiiv_get(url, **kwargs)
+        if r.status_code not in (429, 500, 502, 503, 504):
+            return r
+        retry_after = r.headers.get("Retry-After")
+        wait = float(retry_after) if retry_after and retry_after.isdigit() else 5.0 * (attempt + 1)
+        time.sleep(min(wait, 60))
+    return r
+
+
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def _beehiiv_new_subs_by_day() -> dict:
     """Daily counts of genuinely new beehiiv subscriptions (imports excluded) since NEW_SUBS_FLOOR.
@@ -1156,12 +1170,14 @@ def _beehiiv_new_subs_by_day() -> dict:
         if pages >= PAGE_CAP:
             capped = True
             break
-        r = _beehiiv_get(
+        r = _beehiiv_get_page(
             f"{BEEHIIV_BASE}/publications/{pub_id}/subscriptions",
             headers=headers,
             params={"limit": 100, "order_by": "created", "direction": "desc", "cursor": cursor},
         )
         if r.status_code != 200:
+            print(f"[warn] beehiiv subscriptions page {pages} failed with HTTP {r.status_code}; "
+                  f"new-subs counts capped at what was walked")
             capped = True
             break
         body = r.json()
