@@ -1,5 +1,7 @@
 """Data fetching layer for the dashboard. All functions are date-range scoped and cached for 10 minutes."""
 import os
+import json
+from pathlib import Path
 import time
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
@@ -1077,30 +1079,79 @@ def beehiiv_metrics(start: date, end: date) -> dict:
 # window asks for (the 90d prior-period start and the Jan-1 daily window). Paged once,
 # cached, then sliced — so all windows reuse a single pass.
 NEW_SUBS_FLOOR = date(2025, 12, 1)
+# Incremental cache of daily new-signup counts, committed next to the dashboard snapshot so
+# each CI run only walks the newest records instead of ~300k (which blew the 25-minute job
+# timeout after the Aug 2026 imports). Regenerate from scratch by deleting the file.
+NEW_SUBS_CACHE = Path(__file__).parent / "frontend" / "public" / "beehiiv_new_subs_cache.json"
+# beehiiv labels bulk-imported subscribers utm_channel="import"; they are not new signups.
+IMPORT_CHANNEL = "import"
+REWALK_DAYS = 2  # re-count the most recent days each run (late arrivals, partial days)
+
+
+def _is_import(sub: dict) -> bool:
+    return (sub.get("utm_channel") or "").lower() == IMPORT_CHANNEL
+
+
+def _sub_created_ts(sub: dict):
+    ts = sub.get("created")
+    if isinstance(ts, str):
+        try:
+            return int(datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp())
+        except ValueError:
+            return None
+    return ts if isinstance(ts, int) else None
+
+
+def _load_new_subs_cache() -> Optional[dict]:
+    try:
+        cache = json.loads(NEW_SUBS_CACHE.read_text())
+    except (OSError, ValueError):
+        return None
+    if cache.get("floor") != NEW_SUBS_FLOOR.isoformat() or not cache.get("complete_through"):
+        return None
+    return cache
+
+
+def _rewalk_start(cache: Optional[dict]) -> date:
+    """Oldest day to re-count this run: the floor on a cold start, otherwise the last
+    REWALK_DAYS days of the cache (so partial days and late arrivals get corrected)."""
+    if not cache:
+        return NEW_SUBS_FLOOR
+    return max(NEW_SUBS_FLOOR, date.fromisoformat(cache["complete_through"]) - timedelta(days=REWALK_DAYS - 1))
+
+
+def _merge_new_subs(cache: Optional[dict], fresh: dict, rewalk_from: date) -> dict:
+    """Cached counts for days before rewalk_from, fresh counts from rewalk_from onward."""
+    cutoff = rewalk_from.isoformat()
+    merged = {d: c for d, c in ((cache or {}).get("daily") or {}).items() if d < cutoff}
+    merged.update({d: c for d, c in fresh.items() if d >= cutoff})
+    return merged
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def _beehiiv_new_subs_by_day() -> dict:
-    """Cursor-page ALL beehiiv subscriptions created since NEW_SUBS_FLOOR, bucketed by created date.
+    """Daily counts of genuinely new beehiiv subscriptions (imports excluded) since NEW_SUBS_FLOOR.
 
-    beehiiv offset pagination is hard-capped at page 100 (10k records); the list is far larger,
-    so we use cursor pagination (sorted `created desc`) and stop once a full page predates the
-    floor. Returns {"daily": {iso_date: count}, "capped": bool, "error": str|None}.
+    Cursor-pages the subscription list sorted `created desc` (offset pagination is capped at
+    10k) and stops once a full page predates the re-walk start; with a warm cache that is a
+    handful of pages. Returns {"daily": {iso_date: count}, "capped": bool, "error": str|None}.
     """
     api_key = os.getenv("BEEHIIV_API_KEY", "").strip()
     pub_id = os.getenv("BEEHIIV_PUB_CLEARER_THINKING", "").strip()
     if not api_key or not pub_id:
         return {"daily": {}, "capped": True, "error": "BEEHIIV_API_KEY missing"}
 
+    cache = _load_new_subs_cache()
+    rewalk_from = _rewalk_start(cache)
+    stop_ts = _date_to_ts(rewalk_from)
     headers = {"Authorization": f"Bearer {api_key}"}
-    floor_ts = _date_to_ts(NEW_SUBS_FLOOR)
 
     daily: dict[str, int] = defaultdict(int)
     seen_ids: set = set()
     cursor = ""
     capped = False
     pages = 0
-    PAGE_CAP = 6000  # safety ceiling (~600k records); the floor stop fires long before this
+    PAGE_CAP = 6000  # safety ceiling (~600k records)
     while True:
         if pages >= PAGE_CAP:
             capped = True
@@ -1119,34 +1170,41 @@ def _beehiiv_new_subs_by_day() -> dict:
             break
         pages += 1
 
-        all_below_floor = True
+        all_below_start = True
         for sub in subs:
             sid = sub.get("id")
             if sid in seen_ids:
                 continue
             seen_ids.add(sid)
-            ts = sub.get("created")
-            if isinstance(ts, str):
-                try:
-                    ts = int(datetime.fromisoformat(ts.replace("Z", "+00:00")).timestamp())
-                except ValueError:
-                    continue
-            if not isinstance(ts, int):
+            ts = _sub_created_ts(sub)
+            if ts is None or ts < stop_ts:
                 continue
-            if ts < floor_ts:
+            all_below_start = False
+            if _is_import(sub):
                 continue
-            all_below_floor = False
-            d = datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()
-            daily[d] += 1
+            daily[datetime.fromtimestamp(ts, tz=timezone.utc).date().isoformat()] += 1
 
-        # Sorted created desc: once a whole page predates the floor, everything after is older.
-        if all_below_floor or not body.get("has_more"):
+        # Sorted created desc: once a whole page predates the start, everything after is older.
+        if all_below_start or not body.get("has_more"):
             break
         cursor = body.get("next_cursor") or ""
         if not cursor:
             break
 
-    return {"daily": dict(daily), "capped": capped, "error": None}
+    merged = _merge_new_subs(cache, dict(daily), rewalk_from)
+    if not capped:
+        try:
+            NEW_SUBS_CACHE.parent.mkdir(parents=True, exist_ok=True)
+            NEW_SUBS_CACHE.write_text(json.dumps({
+                "floor": NEW_SUBS_FLOOR.isoformat(),
+                "complete_through": (datetime.now(timezone.utc).date() - timedelta(days=1)).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+                "excludes": f"utm_channel={IMPORT_CHANNEL}",
+                "daily": dict(sorted(merged.items())),
+            }, indent=0))
+        except OSError as e:
+            print(f"[warn] could not write {NEW_SUBS_CACHE}: {e}")
+    return {"daily": merged, "capped": capped, "error": None}
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)

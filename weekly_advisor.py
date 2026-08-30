@@ -68,6 +68,7 @@ import email_transport  # noqa: E402
 
 # Imports that touch credentials happen after materialization.
 from data_layer import (  # noqa: E402
+    NEW_SUBS_CACHE,
     beehiiv_avg_unique_opens_per_campaign,
     beehiiv_daily_new_subscribers,
     beehiiv_metrics,
@@ -530,7 +531,8 @@ def refresh_dashboard_snapshot() -> str | None:
         return f"fetch_snapshot.py failed: {e.stderr[-500:] if e.stderr else e}"
     except Exception as e:  # noqa: BLE001
         return f"fetch_snapshot.py failed: {e}"
-    err = mem.git_commit_and_push([SNAPSHOT_FILE], f"snapshot: {datetime.now(timezone.utc):%Y-%m-%dT%H:%MZ}")
+    err = mem.git_commit_and_push([SNAPSHOT_FILE, NEW_SUBS_CACHE],
+                                  f"snapshot: {datetime.now(timezone.utc):%Y-%m-%dT%H:%MZ}")
     return f"couldn't publish updated snapshot: {err}" if err else None
 
 
