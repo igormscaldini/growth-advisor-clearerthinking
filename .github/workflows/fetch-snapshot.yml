@@ -53,4 +53,7 @@ jobs:
           fi
           git add frontend/public/snapshot.json frontend/public/beehiiv_new_subs_cache.json
           git commit -m "snapshot: $(date -u +%Y-%m-%dT%H:%MZ)"
+          # Another job (auto-push, the weekly advisor, the reply handler) may have
+          # pushed to main while this run was fetching, so rebase before pushing.
+          git pull --rebase --autostash origin main
           git push
