@@ -70,5 +70,8 @@ def test_should_digest_rules():
     assert ac.should_digest(None, 0, "force", now) is False
 
 
-def test_transcripts_dir_matches_claude_code_convention():
-    assert ac.TRANSCRIPTS_DIR.name == "-Users-igorscaldini-Documents-Claude-Growth-Advisor---Clearer-Thinking"
+def test_project_dir_name_matches_claude_code_convention():
+    from pathlib import Path
+    root = Path("/Users/igorscaldini/Documents/Claude/Growth Advisor - Clearer Thinking")
+    assert ac.project_dir_name(root) == "-Users-igorscaldini-Documents-Claude-Growth-Advisor---Clearer-Thinking"
+    assert ac.TRANSCRIPTS_DIR.parent.name == "projects"

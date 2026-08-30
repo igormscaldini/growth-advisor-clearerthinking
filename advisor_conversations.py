@@ -35,8 +35,14 @@ load_dotenv(ROOT / ".env")
 
 import advisor_memory as mem  # noqa: E402
 
-# Claude Code names the project transcript folder after the cwd with "/" and " " -> "-".
-TRANSCRIPTS_DIR = Path.home() / ".claude" / "projects" / re.sub(r"[/ ]", "-", str(ROOT))
+
+
+def project_dir_name(root: Path) -> str:
+    """Claude Code names the project transcript folder after the cwd with "/" and " " -> "-"."""
+    return re.sub(r"[/ ]", "-", str(root))
+
+
+TRANSCRIPTS_DIR = Path.home() / ".claude" / "projects" / project_dir_name(ROOT)
 STATE_FILE = ROOT / ".claude" / "conversation_digest_state.json"
 LOG_PREFIX = "[digest]"
 
