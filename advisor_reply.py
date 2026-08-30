@@ -4,8 +4,13 @@ When Igor replies to a "Weekly Growth Report" email with a question, this:
   1. Finds unread replies in those threads (Gmail API).
   2. Hands the question to Claude with live data tools (GA4 / Stripe / beehiiv / GSC),
      so it can pull specific, on-demand data to answer — not just reuse the weekly numbers.
+     Claude also has a `remember_this` tool it calls if the exchange contains a durable
+     preference, correction, or standing context worth carrying into future reports.
   3. Replies in the same thread with the answer (Gmail API).
   4. Marks the message read so it's never answered twice.
+  5. If any memory was saved, commits advisor_memory/durable.md.enc back to the repo so it
+     persists across runs (this workflow is otherwise stateless on GitHub Actions). Memory
+     is encrypted at rest because the repo is public (see advisor_memory.py).
 
 Runs on a short cron (.github/workflows/advisor-reply.yml). Outgoing advisor mail carries
 an `X-CT-Advisor` header so the poller never tries to "answer" its own messages.
@@ -19,12 +24,14 @@ import argparse
 import base64
 import json
 import re
+import subprocess
 import sys
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from email.mime.text import MIMEText
 
 # weekly_advisor runs load_dotenv + secret materialization at import time, and exposes
 # the config + data helpers we reuse here.
+import advisor_memory as mem
 import weekly_advisor as wa
 from data_layer import (
     beehiiv_metrics,
@@ -96,6 +103,36 @@ def _tool_gsc_keyword(keyword="personality test", **_):
     return gsc_keyword_position(keyword)
 
 
+# Entries saved this run, so main() knows whether ADVISOR_MEMORY.md needs to be committed.
+_memory_written_this_run: list[str] = []
+# --dry-run should have no side effects (see module docstring), so gate the actual file write.
+DRY_RUN = False
+
+
+def _tool_remember_this(entry=None, category="context", **_):
+    """Append a durable memory entry. `entry` should be a short, first-person-from-the-advisor
+    summary of the fact/preference/correction — written so it reads naturally when re-read as
+    context in a future prompt.
+    """
+    if not entry or not str(entry).strip():
+        return {"saved": False, "reason": "empty entry"}
+    if DRY_RUN:
+        print(f"[reply] (dry-run, not written) would remember: {entry!r} ({category})", file=sys.stderr)
+        return {"saved": True, "dry_run": True}
+    line = mem.append_durable_memory(str(entry), category)
+    _memory_written_this_run.append(line)
+    return {"saved": True}
+
+
+def _commit_memory_file() -> None:
+    """Push the durable memory back to the repo so it survives across ephemeral CI runs."""
+    err = mem.git_commit_and_push([mem.DURABLE_FILE], "advisor memory: remember new context from Igor's reply")
+    if err:
+        print(f"[warn] could not commit durable memory: {err}", file=sys.stderr)
+    else:
+        print("[reply] committed durable memory.", file=sys.stderr)
+
+
 TOOL_FNS = {
     "weekly_history": _tool_weekly_history,
     "ga4_metrics": _tool_ga4_metrics,
@@ -104,6 +141,7 @@ TOOL_FNS = {
     "stripe_sales_count": _tool_stripe_sales_count,
     "beehiiv_metrics": _tool_beehiiv,
     "gsc_keyword_position": _tool_gsc_keyword,
+    "remember_this": _tool_remember_this,
 }
 
 _DATE = {"type": "string", "description": "ISO date YYYY-MM-DD. Optional; defaults to last 7 days."}
@@ -156,6 +194,28 @@ TOOLS = [
         "description": "Google Search Console average position, clicks and impressions for a single keyword.",
         "input_schema": {"type": "object", "properties": {"keyword": {"type": "string"}}},
     },
+    {
+        "name": "remember_this",
+        "description": "Save a durable fact, preference, or correction from Igor for future weekly "
+                       "reports and Q&A — e.g. he says he doesn't want a certain metric flagged, "
+                       "explains a seasonal pattern, corrects a wrong assumption you made, or gives "
+                       "standing context about the business. Call this whenever the reply contains "
+                       "something worth carrying forward, in ADDITION to answering the question — do "
+                       "not call it for simple one-off factual questions with no lasting takeaway.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "entry": {"type": "string", "description": "One short, self-contained sentence or two "
+                                                             "capturing the durable takeaway, written so "
+                                                             "it's clear on its own when re-read weeks later."},
+                "category": {"type": "string", "enum": ["preference", "correction", "context"],
+                             "description": "preference = how he wants things weighted/flagged; "
+                                             "correction = you got something wrong and he fixed it; "
+                                             "context = a standing fact about the business."},
+            },
+            "required": ["entry"],
+        },
+    },
 ]
 
 
@@ -165,6 +225,13 @@ def answer_question(question: str) -> str:
 
     client = anthropic.Anthropic()
     today = date.today().isoformat()
+    memory_text = wa.load_memory()
+    try:
+        knowledge_text = mem.load_knowledge(max_chars=30_000)
+        conversations_text = mem.load_recent_conversations(days=14, max_chars=40_000)
+    except Exception as e:  # noqa: BLE001
+        print(f"[warn] memory unavailable: {e}", file=sys.stderr)
+        knowledge_text = conversations_text = ""
     system = (
         "You are Igor's AI growth advisor for Clearer Thinking (clearerthinking.org). Igor replied "
         "to your weekly report with a question. Answer it precisely using the data tools when you "
@@ -172,7 +239,14 @@ def answer_question(question: str) -> str:
         "personality-test PDF, a $35/$17.50 cognitive assessment, and runs a beehiiv newsletter). "
         "Pull real data rather than guessing. Reply in PLAIN TEXT (no markdown/asterisks), concise "
         "and direct, like a sharp advisor answering by email. If a question is ambiguous, state your "
-        "assumption and answer anyway. If you genuinely can't get the data, say so plainly."
+        "assumption and answer anyway. If you genuinely can't get the data, say so plainly.\n\n"
+        f"Durable memory of things Igor has told you before:\n{memory_text or '(nothing recorded yet)'}\n\n"
+        f"Knowledge base (audience and communication):\n{knowledge_text or '(none)'}\n\n"
+        f"Digests of Igor's Claude Code working sessions in the last two weeks (what he has been "
+        f"working on; use them to answer questions about his own projects):\n"
+        f"{conversations_text or '(none)'}\n\n"
+        "Never use em dashes. If THIS reply contains a new durable preference, correction, or standing context worth "
+        "carrying into future reports, call remember_this to save it (in addition to answering)."
     )
     messages = [{"role": "user", "content": question}]
 
@@ -292,9 +366,11 @@ def mark_read(svc, msg_id: str) -> None:
 
 # --- main ---------------------------------------------------------------------
 def main() -> int:
+    global DRY_RUN
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true", help="answer + print, don't send or mark read")
     args = ap.parse_args()
+    DRY_RUN = args.dry_run
 
     svc = gmail_service()
     pending = find_pending(svc)
@@ -324,6 +400,9 @@ def main() -> int:
             print(f"[reply] sent answer for {item['id']}.", file=sys.stderr)
         except Exception as e:  # noqa: BLE001
             print(f"[error] sending reply failed: {e}", file=sys.stderr)
+
+    if _memory_written_this_run and not args.dry_run:
+        _commit_memory_file()
     return 0
 
 

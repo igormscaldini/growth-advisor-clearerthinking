@@ -1,5 +1,6 @@
 """Data fetching layer for the dashboard. All functions are date-range scoped and cached for 10 minutes."""
 import os
+import time
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from typing import Optional
@@ -926,6 +927,27 @@ def _beehiiv_period(days: int) -> str:
     return "last_12_months"
 
 
+def _beehiiv_get(url: str, **kwargs):
+    """requests.get with an explicit timeout and a short retry on transient connection errors.
+
+    Without a timeout, a degraded/flaky connection (seen in practice as SSLEOFError against
+    beehiiv) can hang a call indefinitely instead of failing fast — which stalls the whole
+    weekly_advisor.py run with no error surfaced, since a hang isn't an exception _safe() can
+    catch. beehiiv's cursor-paginated endpoints (subscriptions, posts) make many sequential
+    requests in a loop, which is exactly the pattern that triggers this.
+    """
+    kwargs.setdefault("timeout", (10, 30))  # (connect, read) seconds
+    last_exc: Exception | None = None
+    for attempt in range(3):
+        try:
+            return requests.get(url, **kwargs)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
+            last_exc = e
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+    raise last_exc
+
+
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def beehiiv_metrics(start: date, end: date) -> dict:
     api_key = os.getenv("BEEHIIV_API_KEY", "").strip()
@@ -939,7 +961,7 @@ def beehiiv_metrics(start: date, end: date) -> dict:
     headers = {"Authorization": f"Bearer {api_key}", "Accept": "application/json"}
 
     # ---- Total active subscribers (current state) ----
-    r = requests.get(f"{BEEHIIV_BASE}/publications/{pub_id}", headers=headers, params={"expand[]": "stats"})
+    r = _beehiiv_get(f"{BEEHIIV_BASE}/publications/{pub_id}", headers=headers, params={"expand[]": "stats"})
     if r.status_code == 401:
         return {"error": "BEEHIIV_API_KEY rejected (401). Regenerate the key in beehiiv settings."}
     r.raise_for_status()
@@ -951,7 +973,7 @@ def beehiiv_metrics(start: date, end: date) -> dict:
     posts = []
     page = 1
     while True:
-        r = requests.get(
+        r = _beehiiv_get(
             f"{BEEHIIV_BASE}/publications/{pub_id}/posts",
             headers=headers,
             params={"page": page, "limit": 100, "expand[]": "stats", "platform": "email", "status": "confirmed"},
@@ -1015,7 +1037,7 @@ def beehiiv_metrics(start: date, end: date) -> dict:
     churned = 0
     try:
         # The stats endpoint returns publication-level period stats
-        r = requests.get(
+        r = _beehiiv_get(
             f"{BEEHIIV_BASE}/publications/{pub_id}",
             headers=headers,
             params={"expand[]": "stats", "stats_period": period_used},
@@ -1083,7 +1105,7 @@ def _beehiiv_new_subs_by_day() -> dict:
         if pages >= PAGE_CAP:
             capped = True
             break
-        r = requests.get(
+        r = _beehiiv_get(
             f"{BEEHIIV_BASE}/publications/{pub_id}/subscriptions",
             headers=headers,
             params={"limit": 100, "order_by": "created", "direction": "desc", "cursor": cursor},
@@ -1163,7 +1185,7 @@ def beehiiv_engaged_readers() -> dict:
 
     page = 1
     while True:
-        r = requests.get(
+        r = _beehiiv_get(
             f"{BEEHIIV_BASE}/publications/{pub_id}/segments",
             headers=headers,
             params={"limit": 100, "page": page},
@@ -1204,7 +1226,7 @@ def beehiiv_avg_unique_opens_per_campaign(min_recipients: int = 100_000) -> dict
     posts: list[dict] = []
     page = 1
     while True:
-        r = requests.get(
+        r = _beehiiv_get(
             f"{BEEHIIV_BASE}/publications/{pub_id}/posts",
             headers=headers,
             params={"page": page, "limit": 100, "expand[]": "stats", "platform": "email", "status": "confirmed"},
@@ -1241,7 +1263,7 @@ def beehiiv_daily_rates(start: date, end: date) -> list[dict]:
     posts = []
     page = 1
     while True:
-        r = requests.get(
+        r = _beehiiv_get(
             f"{BEEHIIV_BASE}/publications/{pub_id}/posts",
             headers=headers,
             params={"page": page, "limit": 100, "expand[]": "stats", "platform": "email", "status": "confirmed"},

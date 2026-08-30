@@ -5,8 +5,12 @@ on:
     - cron: "0 11 * * 5"  # Fridays 11:00 UTC = 08:00 America/Sao_Paulo
   workflow_dispatch:        # allow manual runs from the Actions UI
 
-# No contents:write needed — this job is stateless and commits nothing
-# (so it never touches the paused Vercel deploys).
+# Before sending, this now refreshes frontend/public/snapshot.json (same as
+# fetch-snapshot.yml) and pushes it if changed, so the dashboard linked in the email is
+# current as of send time — hence contents:write.
+permissions:
+  contents: write
+
 concurrency:
   group: weekly-advisor-email
   cancel-in-progress: false
@@ -14,7 +18,9 @@ concurrency:
 jobs:
   send:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # 15 min for the report itself + headroom for the snapshot refresh (fetch-snapshot.yml
+    # budgets 25 min alone, mainly for beehiiv's cursor-paginated subscriber pass).
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 
@@ -36,8 +42,14 @@ jobs:
           GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
           BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
           BEEHIIV_PUB_CLEARER_THINKING: ${{ secrets.BEEHIIV_PUB_CLEARER_THINKING }}
+          # needed by fetch_snapshot.py (dashboard refresh before send)
+          GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
+          GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
+          GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
           # advisor narrative
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # decrypts advisor_memory/*.enc (conversation digests + durable memory)
+          ADVISOR_MEMORY_KEY: ${{ secrets.ADVISOR_MEMORY_KEY }}
           ADVISOR_MODEL: ${{ secrets.ADVISOR_MODEL }}
           # email transport
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}

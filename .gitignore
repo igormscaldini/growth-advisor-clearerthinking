@@ -59,3 +59,10 @@ tmp/
 # ---- Streamlit local cache / secrets ----
 .streamlit/secrets.toml
 streamlit-secrets.toml
+
+# ---- Personal data / large local assets (this repo is PUBLIC on GitHub) ----
+reports/*.csv
+reports/*.jsonl
+Branding assets/
+assets/
+.claude/conversation_digest_state.json

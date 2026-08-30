@@ -5,7 +5,11 @@ on:
     - cron: "*/5 * * * *"  # check for replies every ~5 minutes
   workflow_dispatch:
 
-# Stateless; commits nothing.
+# Usually stateless, but commits ADVISOR_MEMORY.md back to the repo when a reply contains
+# something durable worth remembering (see advisor_reply.py's remember_this tool).
+permissions:
+  contents: write
+
 concurrency:
   group: advisor-reply
   cancel-in-progress: false
@@ -35,6 +39,8 @@ jobs:
           BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
           BEEHIIV_PUB_CLEARER_THINKING: ${{ secrets.BEEHIIV_PUB_CLEARER_THINKING }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # decrypts advisor_memory/*.enc (conversation digests + durable memory)
+          ADVISOR_MEMORY_KEY: ${{ secrets.ADVISOR_MEMORY_KEY }}
           ADVISOR_MODEL: ${{ secrets.ADVISOR_MODEL }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
         run: python advisor_reply.py
