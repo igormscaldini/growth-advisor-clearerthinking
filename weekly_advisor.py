@@ -67,6 +67,9 @@ import advisor_memory as mem  # noqa: E402
 import email_transport  # noqa: E402
 
 # Imports that touch credentials happen after materialization.
+# Manual (non-Stripe) revenue lines live in fetch_snapshot.py, the dashboard's source of
+# truth; the $120k goal counts them too (Igor's correction, 2026-08-30).
+from fetch_snapshot import MANUAL_REVENUE, MANUAL_REVENUE_LAST_UPDATED  # noqa: E402
 from data_layer import (  # noqa: E402
     NEW_SUBS_CACHE,
     beehiiv_avg_unique_opens_per_campaign,
@@ -306,6 +309,11 @@ def compute_goal_progress(current: dict, targets: dict = GOAL_TARGETS) -> dict:
     return out
 
 
+def manual_revenue_total() -> float:
+    """Non-Stripe revenue entered by hand on the dashboard (sponsorships, affiliates...)."""
+    return round(sum(amt for items in MANUAL_REVENUE.values() for _, amt in items), 2)
+
+
 def gather_goals(ref: date) -> tuple[dict, dict]:
     """Live goal values (each independently wrapped) and a per-goal error map."""
     errors: dict[str, str] = {}
@@ -319,7 +327,9 @@ def gather_goals(ref: date) -> tuple[dict, dict]:
         return v
 
     ytd = grab("gross_revenue_ytd_usd", stripe_metrics, date(ref.year, 1, 1), ref)
-    current["gross_revenue_ytd_usd"] = (ytd or {}).get("gross_usd")
+    stripe_ytd = (ytd or {}).get("gross_usd")
+    manual = manual_revenue_total()
+    current["gross_revenue_ytd_usd"] = round(stripe_ytd + manual, 2) if isinstance(stripe_ytd, (int, float)) else None
     current["active_subscribers"] = grab("active_subscribers", stripe_active_subscriber_count)
     current["mrr_usd"] = grab("mrr_usd", stripe_current_mrr)
     kw = grab("personality_test_google_position", gsc_keyword_position, PERSONALITY_KEYWORD)
@@ -331,7 +341,12 @@ def gather_goals(ref: date) -> tuple[dict, dict]:
     current["avg_unique_opens_per_campaign"] = (opens or {}).get("avg_unique_opens")
 
     goals = compute_goal_progress(current)
-    goals["gross_revenue_ytd_usd"]["note"] = f"gross Stripe charges from {ref.year}-01-01 to {ref.isoformat()}"
+    goals["gross_revenue_ytd_usd"]["note"] = (
+        f"Stripe gross charges {ref.year}-01-01 to {ref.isoformat()} plus ${manual:,.2f} of manually "
+        f"tracked non-Stripe revenue (sponsorships, affiliates; last updated {MANUAL_REVENUE_LAST_UPDATED}). "
+        f"Matches the dashboard's Total Revenue card; flag the manual lines as possibly stale if that "
+        f"last-updated date is more than ~6 weeks old."
+    )
     goals["personality_test_google_position"]["note"] = "GSC average position, last 28 days (lower is better)"
     if isinstance(opens, dict):
         goals["avg_unique_opens_per_campaign"]["note"] = (
@@ -403,9 +418,14 @@ LETTER_SYSTEM = (
     "commitments he made, especially anything that serves the goals. Skip routine mail and "
     "keep private details to what is needed.\n"
     "3. Next week. Three to five concrete priorities as a short numbered list (the one place "
-    "a list is allowed), each tied to a goal or to a result above, specific enough to start "
-    "on Monday morning. Prefer finishing open threads over starting new ones unless the "
-    "numbers argue otherwise.\n\n"
+    "a list is allowed), ranked by how hard they move the goal numbers, not by ease or "
+    "recency. For each, name the goal it serves and the size of the win if it works. At "
+    "least the top two must be genuine needle-movers with a plausible path to changing a "
+    "goal metric within weeks (revenue, subscribers, MRR, the ranking, opens); maintenance, "
+    "cleanup and instrumentation items come after the needle-movers or get dropped. Finish "
+    "an open thread before starting a new one when their leverage is comparable, and be "
+    "explicit when the highest-leverage move is to drop something. Each item must be "
+    "specific enough to start on Monday morning.\n\n"
     "Rules: 350 to 650 words. Cite a specific figure when it is the evidence for a point; "
     "never dump every metric. Never use em dashes. If data is missing (null fields), say so "
     "briefly and never invent numbers. Apply his standing preferences and past corrections "

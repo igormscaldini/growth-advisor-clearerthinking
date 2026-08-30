@@ -77,3 +77,10 @@ def test_collect_errors_merges_and_drops_empty():
     history = [_week("w", errors={"ga4": "expired"})]
     out = wa.collect_errors(history, {"goals_mrr_usd": "bad"}, {"narrative": None, "consolidation": ""})
     assert out == {"ga4": "expired", "goals_mrr_usd": "bad"}
+
+
+def test_manual_revenue_total_matches_dashboard_lines():
+    import fetch_snapshot as fs
+    expected = round(sum(amt for items in fs.MANUAL_REVENUE.values() for _, amt in items), 2)
+    assert wa.manual_revenue_total() == expected
+    assert expected > 0
