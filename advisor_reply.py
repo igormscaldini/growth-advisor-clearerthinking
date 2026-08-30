@@ -31,6 +31,7 @@ from email.mime.text import MIMEText
 
 # weekly_advisor runs load_dotenv + secret materialization at import time, and exposes
 # the config + data helpers we reuse here.
+import advisor_inbox
 import advisor_memory as mem
 import weekly_advisor as wa
 from data_layer import (
@@ -103,6 +104,10 @@ def _tool_gsc_keyword(keyword="personality test", **_):
     return gsc_keyword_position(keyword)
 
 
+def _tool_inbox(days=7, **_):
+    return advisor_inbox.weekly_inbox_digest(int(days))
+
+
 # Entries saved this run, so main() knows whether ADVISOR_MEMORY.md needs to be committed.
 _memory_written_this_run: list[str] = []
 # --dry-run should have no side effects (see module docstring), so gate the actual file write.
@@ -141,6 +146,7 @@ TOOL_FNS = {
     "stripe_sales_count": _tool_stripe_sales_count,
     "beehiiv_metrics": _tool_beehiiv,
     "gsc_keyword_position": _tool_gsc_keyword,
+    "inbox_recent": _tool_inbox,
     "remember_this": _tool_remember_this,
 }
 
@@ -193,6 +199,13 @@ TOOLS = [
         "name": "gsc_keyword_position",
         "description": "Google Search Console average position, clicks and impressions for a single keyword.",
         "input_schema": {"type": "object", "properties": {"keyword": {"type": "string"}}},
+    },
+    {
+        "name": "inbox_recent",
+        "description": "Igor's recent Gmail threads (what he sent and what people wrote to him; "
+                       "newsletters and automated mail removed), grouped by thread. Use it when a "
+                       "question is about his projects, partners, requests or commitments.",
+        "input_schema": {"type": "object", "properties": {"days": {"type": "integer", "description": "Look-back window in days (default 7)."}}},
     },
     {
         "name": "remember_this",
@@ -282,13 +295,7 @@ def answer_question(question: str) -> str:
 
 # --- Gmail --------------------------------------------------------------------
 def gmail_service():
-    from google.oauth2.credentials import Credentials
-    from googleapiclient.discovery import build
-
-    from ga4_client import TOKEN_FILE
-
-    creds = Credentials.from_authorized_user_file(str(TOKEN_FILE))
-    return build("gmail", "v1", credentials=creds, cache_discovery=False)
+    return advisor_inbox.gmail_service()
 
 
 def _header(headers: list[dict], name: str) -> str:
@@ -299,24 +306,7 @@ def _header(headers: list[dict], name: str) -> str:
 
 
 def _extract_plain(payload: dict) -> str:
-    """Pull the text/plain body and drop the quoted original message."""
-    def walk(p):
-        if p.get("mimeType") == "text/plain" and p.get("body", {}).get("data"):
-            return base64.urlsafe_b64decode(p["body"]["data"]).decode("utf-8", "replace")
-        for sub in p.get("parts", []) or []:
-            t = walk(sub)
-            if t:
-                return t
-        return ""
-
-    text = walk(payload) or ""
-    # Strip the quoted reply chain ("On <date>, <name> wrote:" and >-prefixed lines).
-    lines = []
-    for ln in text.splitlines():
-        if re.match(r"^\s*On .*wrote:\s*$", ln) or ln.strip().startswith(">"):
-            break
-        lines.append(ln)
-    return "\n".join(lines).strip() or text.strip()
+    return advisor_inbox.extract_plain(payload)
 
 
 def find_pending(svc) -> list[dict]:

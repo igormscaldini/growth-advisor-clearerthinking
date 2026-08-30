@@ -5,6 +5,7 @@ import { OverviewTab } from "./overview-tab";
 import { ChannelsTab } from "./channels-tab";
 import { MonetizationTab } from "./monetization-tab";
 import { FunnelTab } from "./funnel-tab";
+import { PersonasTab } from "./personas-tab";
 import { presetLabel } from "@/lib/format";
 import { buildCustomPeriod } from "@/lib/aggregate";
 import { PeriodEntry, PresetKey, Snapshot } from "@/lib/snapshot";
@@ -13,13 +14,14 @@ interface Props {
   snapshot: Snapshot;
 }
 
-type TabKey = "overview" | "funnel" | "channels" | "monetization";
+type TabKey = "overview" | "funnel" | "channels" | "monetization" | "personas";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "funnel", label: "Funnel" },
   { key: "channels", label: "Modules by Channel" },
   { key: "monetization", label: "Monetization" },
+  { key: "personas", label: "Personas" },
 ];
 
 const PRESETS: PresetKey[] = ["7d", "30d", "90d", "thisMonth", "yearToDate", "custom"];
@@ -162,6 +164,7 @@ export function Dashboard({ snapshot }: Props) {
         {tab === "funnel" && <FunnelTab period={period} snapshot={snapshot} />}
         {tab === "channels" && <ChannelsTab period={period} />}
         {tab === "monetization" && <MonetizationTab snapshot={snapshot} period={period} />}
+        {tab === "personas" && <PersonasTab />}
       </main>
 
       <footer className="max-w-7xl mx-auto px-6 pt-2 pb-10 text-xs text-zinc-500 dark:text-zinc-400">

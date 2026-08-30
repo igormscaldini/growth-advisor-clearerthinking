@@ -62,6 +62,7 @@ def _materialize_ci_secrets() -> None:
 load_dotenv()
 _materialize_ci_secrets()
 
+import advisor_inbox  # noqa: E402
 import advisor_memory as mem  # noqa: E402
 import email_transport  # noqa: E402
 
@@ -142,6 +143,8 @@ FIX_INSTRUCTIONS = {
     "memory": "The advisor memory couldn't be decrypted. Make sure the GitHub secret "
               "ADVISOR_MEMORY_KEY matches ADVISOR_MEMORY_KEY in .env.",
     "conversations": "Conversation digests couldn't be read (see memory).",
+    "inbox": "Gmail scan failed. The shared Google token needs the gmail.modify scope (re-run "
+             "`python auth_ga4.py`, then update the GOOGLE_TOKEN_JSON secret).",
     "narrative": "Claude API call failed. Check ANTHROPIC_API_KEY and account credits, "
                  f"and that the model id '{ADVISOR_MODEL}' is available (override with ADVISOR_MODEL).",
     "consolidation": "The end-of-week memory update failed (letter still sent). Same checks as narrative.",
@@ -378,9 +381,13 @@ LETTER_SYSTEM = (
     "You receive: the current 7-day period and several prior periods as JSON (most recent "
     "first); a goals snapshot with targets and progress; automatic data-quality flags; "
     "GOALS.md; durable memory of things Igor has told you; a knowledge base about the "
-    "audience and how Clearer Thinking communicates; and digests of the Claude Code working "
-    "sessions Igor had this week (what he actually worked on). Nobody else sees the raw "
-    "numbers: you are the entire email.\n\n"
+    "audience and how Clearer Thinking communicates; digests of the Claude Code working "
+    "sessions Igor had this week (what he actually worked on); and a digest of his email this "
+    "week (threads he wrote in or was addressed in, newsletters and automated mail removed). "
+    "Nobody else sees the raw numbers: you are the entire email.\n\n"
+    "Igor's stated priority for 2026 is hitting the targets in GOALS.md. Judge every result, "
+    "every hour he spent and every recommendation against those goals, and say when something "
+    "does not serve them.\n\n"
     "Write one letter of plain prose in three movements, without headers:\n"
     "1. Results. The handful of numbers that actually matter this week, each with enough "
     "context (versus prior weeks, versus his goals) to mean something on its own. Progress "
@@ -390,7 +397,10 @@ LETTER_SYSTEM = (
     "2. The week's work. From the session digests: what he spent his time on, what shipped, "
     "what is still unfinished, and whether that effort is pointed at the goals. Call out "
     "drift honestly, and credit real progress specifically. If there are no digests, say "
-    "you have no record of his work this week and move on.\n"
+    "you have no record of his work this week and move on. Then, from his email: promising "
+    "opportunities or projects worth pursuing, requests or threads left unanswered, and "
+    "commitments he made, especially anything that serves the goals. Skip routine mail and "
+    "keep private details to what is needed.\n"
     "3. Next week. Three to five concrete priorities as a short numbered list (the one place "
     "a list is allowed), each tied to a goal or to a result above, specific enough to start "
     "on Monday morning. Prefer finishing open threads over starting new ones unless the "
@@ -416,7 +426,8 @@ CONSOLIDATE_SYSTEM = (
 
 
 def build_narrative(history: list[dict], goals: dict, flags: list[str], goals_text: str,
-                    memory_text: str, knowledge_text: str, conversations_text: str) -> str:
+                    memory_text: str, knowledge_text: str, conversations_text: str,
+                    inbox_text: str = "") -> str:
     """Ask Claude to write the entire advisor letter (the whole email body)."""
     user = (
         f"Today is {date.today().isoformat()}.\n\n"
@@ -426,6 +437,8 @@ def build_narrative(history: list[dict], goals: dict, flags: list[str], goals_te
         f"Durable memory of things Igor has told you:\n{memory_text or '(nothing recorded yet)'}\n\n"
         f"Knowledge base (audience and communication):\n{knowledge_text or '(none)'}\n\n"
         f"Digests of Igor's working sessions this week:\n{conversations_text or '(no sessions recorded this week)'}\n\n"
+        f"Igor's email this week (threads he took part in or was addressed in; automated mail removed):\n"
+        f"{inbox_text or '(not available)'}\n\n"
         f"Weekly metrics (most recent first), JSON:\n{json.dumps(history, indent=1, default=str)}"
     )
     return mem.claude_text(LETTER_SYSTEM, user, max_tokens=4000)
@@ -552,9 +565,20 @@ def main() -> int:
     print(f"[advisor] memory: {len(memory_text)} chars durable, {len(knowledge_text)} chars knowledge, "
           f"{len(conversations_text)} chars of session digests", file=sys.stderr)
 
+    inbox_errors: dict[str, str] = {}
+    inbox_text = ""
+    inbox = _safe("inbox", advisor_inbox.weekly_inbox_digest, 7)
+    if _is_err(inbox):
+        inbox_errors["inbox"] = inbox[1]
+    else:
+        inbox_text = inbox["text"]
+        print(f"[advisor] inbox: scanned {inbox['scanned']}, included {inbox['included']} "
+              f"({inbox['sent']} sent, {inbox['received']} received)", file=sys.stderr)
+
     narrative, narrative_err = "", None
     try:
-        narrative = build_narrative(history, goals, flags, goals_text, memory_text, knowledge_text, conversations_text)
+        narrative = build_narrative(history, goals, flags, goals_text, memory_text, knowledge_text,
+                                    conversations_text, inbox_text)
     except Exception as e:  # noqa: BLE001
         narrative_err = f"{type(e).__name__}: {e}"
         print(f"[warn] narrative failed: {e}", file=sys.stderr)
@@ -572,7 +596,7 @@ def main() -> int:
             consolidation_err = f"{type(e).__name__}: {e}"
             print(f"[warn] consolidation failed: {e}", file=sys.stderr)
 
-    errors = collect_errors(history, goal_errors, mem_errors,
+    errors = collect_errors(history, goal_errors, mem_errors, inbox_errors,
                             {"narrative": narrative_err, "consolidation": consolidation_err})
 
     if args.dry_run:
