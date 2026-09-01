@@ -1,9 +1,9 @@
 name: Monthly SEO advisor email
 
+# Monthly schedule removed on 2026-09-01 at Igor's request (it used to run on the 1st
+# of each month, 11:00 UTC). Manual runs from the Actions UI still work.
 on:
-  schedule:
-    - cron: "0 11 1 * *"  # 1st of each month, 11:00 UTC = 08:00 America/Sao_Paulo
-  workflow_dispatch:        # allow manual runs from the Actions UI
+  workflow_dispatch:
 
 # No contents:write needed — this job is stateless and commits nothing.
 concurrency:

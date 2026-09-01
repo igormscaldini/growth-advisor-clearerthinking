@@ -17,7 +17,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   priorities). `advisor_reply.py`: answers Igor's replies with live data tools every 5 min.
   `advisor_inbox.py`: Gmail scan of the week's threads. `advisor_conversations.py`: digests
   Claude Code transcripts. `advisor_memory.py`: the encrypted memory store all of them share.
-- `seo_advisor.py`, `stripe_cancellations_report.py`: separate scheduled emails.
+- `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
+  schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
   CI runs them on every push (`tests.yml`).
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
