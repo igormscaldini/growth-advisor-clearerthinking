@@ -15,7 +15,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 SCOPES = [
     "https://www.googleapis.com/auth/analytics.readonly",
     "https://www.googleapis.com/auth/analytics.edit",  # create/edit GA4 audiences (e.g. remarketing lists for Ads)
-    "https://www.googleapis.com/auth/webmasters.readonly",
+    "https://www.googleapis.com/auth/webmasters",  # full (read+write): sitemap submission needs it; supersedes webmasters.readonly
     "https://www.googleapis.com/auth/adwords",
     "https://www.googleapis.com/auth/spreadsheets",  # create/edit sheets (upgraded from readonly)
     "https://www.googleapis.com/auth/gmail.send",  # weekly advisor email (Gmail API send)
