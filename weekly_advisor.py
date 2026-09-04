@@ -446,11 +446,12 @@ CONSOLIDATE_SYSTEM = (
 )
 
 
-def build_narrative(history: list[dict], goals: dict, flags: list[str], goals_text: str,
-                    memory_text: str, knowledge_text: str, conversations_text: str,
-                    inbox_text: str = "") -> str:
-    """Ask Claude to write the entire advisor letter (the whole email body)."""
-    user = (
+def letter_prompt(history: list[dict], goals: dict, flags: list[str], goals_text: str,
+                  memory_text: str, knowledge_text: str, conversations_text: str,
+                  inbox_text: str = "") -> str:
+    """The user turn of the letter request (LETTER_SYSTEM is the system turn). Shared by the
+    API path (build_narrative) and the routine path (--brief) so both see identical inputs."""
+    return (
         f"Today is {date.today().isoformat()}.\n\n"
         f"GOALS.md:\n{goals_text or '(missing)'}\n\n"
         f"Goals snapshot (live values vs targets), JSON:\n{json.dumps(goals, indent=1, default=str)}\n\n"
@@ -462,6 +463,14 @@ def build_narrative(history: list[dict], goals: dict, flags: list[str], goals_te
         f"{inbox_text or '(not available)'}\n\n"
         f"Weekly metrics (most recent first), JSON:\n{json.dumps(history, indent=1, default=str)}"
     )
+
+
+def build_narrative(history: list[dict], goals: dict, flags: list[str], goals_text: str,
+                    memory_text: str, knowledge_text: str, conversations_text: str,
+                    inbox_text: str = "") -> str:
+    """Ask Claude (Anthropic API) to write the entire advisor letter (the whole email body)."""
+    user = letter_prompt(history, goals, flags, goals_text, memory_text, knowledge_text,
+                         conversations_text, inbox_text)
     return mem.claude_text(LETTER_SYSTEM, user, max_tokens=4000)
 
 
@@ -477,15 +486,17 @@ def parse_json_array(text: str) -> list:
     return val if isinstance(val, list) else []
 
 
-def consolidate_memory(conversations_text: str, memory_text: str) -> list[str]:
-    """Extract new durable entries from the week's digests, append them, return the lines."""
-    if not conversations_text.strip():
-        return []
-    user = (f"Existing durable memory:\n{memory_text or '(empty)'}\n\n"
+def consolidation_prompt(conversations_text: str, memory_text: str) -> str:
+    """The user turn of the memory-consolidation request (CONSOLIDATE_SYSTEM is the system turn)."""
+    return (f"Existing durable memory:\n{memory_text or '(empty)'}\n\n"
             f"This week's session digests:\n{conversations_text}")
-    reply = mem.claude_text(CONSOLIDATE_SYSTEM, user, max_tokens=2000)
+
+
+def apply_memory_updates(items: list) -> list[str]:
+    """Append well-formed {entry, category} objects to durable memory; return the lines added.
+    Anything malformed (non-object, empty entry, unknown category) is skipped or coerced."""
     added = []
-    for item in parse_json_array(reply):
+    for item in items:
         if not isinstance(item, dict):
             continue
         cat = item.get("category") if item.get("category") in ("preference", "correction", "context") else "context"
@@ -493,6 +504,15 @@ def consolidate_memory(conversations_text: str, memory_text: str) -> list[str]:
         if line:
             added.append(line)
     return added
+
+
+def consolidate_memory(conversations_text: str, memory_text: str) -> list[str]:
+    """Extract new durable entries from the week's digests (Anthropic API), append them."""
+    if not conversations_text.strip():
+        return []
+    reply = mem.claude_text(CONSOLIDATE_SYSTEM, consolidation_prompt(conversations_text, memory_text),
+                            max_tokens=2000)
+    return apply_memory_updates(parse_json_array(reply))
 
 
 # --- compose + send ---------------------------------------------------------
@@ -557,17 +577,11 @@ def refresh_dashboard_snapshot() -> str | None:
 
 
 # --- main -------------------------------------------------------------------
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--weeks", type=int, default=8, help="weeks of history (incl. current)")
-    ap.add_argument("--dry-run", action="store_true", help="print the email instead of sending")
-    ap.add_argument("--ref", help="reference end date YYYY-MM-DD (default: yesterday)")
-    ap.add_argument("--skip-consolidate", action="store_true", help="don't update durable memory")
-    args = ap.parse_args()
-
-    ref = date.fromisoformat(args.ref) if args.ref else date.today() - timedelta(days=1)
-    print(f"[advisor] building {args.weeks} weeks ending {ref}...", file=sys.stderr)
-    history = gather_history(args.weeks, ref)
+def gather_inputs(weeks: int, ref: date) -> dict:
+    """Everything the letter needs, gathered with no Claude call. Failed sources land in
+    `errors` (source -> message) instead of raising, so one broken source never kills the run."""
+    print(f"[advisor] building {weeks} weeks ending {ref}...", file=sys.stderr)
+    history = gather_history(weeks, ref)
     print("[advisor] goals snapshot...", file=sys.stderr)
     goals, goal_errors = gather_goals(ref)
     flags = flag_data_anomalies(history)
@@ -597,31 +611,71 @@ def main() -> int:
         print(f"[advisor] inbox: scanned {inbox['scanned']}, included {inbox['included']} "
               f"({inbox['sent']} sent, {inbox['received']} received)", file=sys.stderr)
 
-    narrative, narrative_err = "", None
-    try:
-        narrative = build_narrative(history, goals, flags, goals_text, memory_text, knowledge_text,
-                                    conversations_text, inbox_text)
-    except Exception as e:  # noqa: BLE001
-        narrative_err = f"{type(e).__name__}: {e}"
-        print(f"[warn] narrative failed: {e}", file=sys.stderr)
+    return {
+        "history": history, "goals": goals, "flags": flags, "goals_text": goals_text,
+        "memory_text": memory_text, "knowledge_text": knowledge_text,
+        "conversations_text": conversations_text, "inbox_text": inbox_text,
+        "memory_ok": not mem_errors,
+        "errors": collect_errors(history, goal_errors, mem_errors, inbox_errors),
+    }
 
-    consolidation_err = None
-    if not args.dry_run and not args.skip_consolidate and not mem_errors:
-        try:
-            added = consolidate_memory(conversations_text, memory_text)
-            print(f"[advisor] durable memory: {len(added)} new entries", file=sys.stderr)
-            if added:
-                err = mem.git_commit_and_push([mem.DURABLE_FILE], "advisor memory: weekly consolidation")
-                if err:
-                    consolidation_err = err
-        except Exception as e:  # noqa: BLE001
-            consolidation_err = f"{type(e).__name__}: {e}"
-            print(f"[warn] consolidation failed: {e}", file=sys.stderr)
 
-    errors = collect_errors(history, goal_errors, mem_errors, inbox_errors,
-                            {"narrative": narrative_err, "consolidation": consolidation_err})
+# --- routine mode (Claude Code routine writes the letter; no Anthropic API credits) ------
+# Step 1 (`--brief PATH`): gather every input and write this JSON. Step 2, done by the routine
+# session itself: write the letter and, optionally, the memory updates. Step 3
+# (`--send-letter LETTER --brief PATH [--memory-updates JSON]`): apply, refresh, send.
+# See ADVISOR_ROUTINE.md for the routine's instructions.
+BRIEF_VERSION = 1
 
-    if args.dry_run:
+
+def build_brief(inputs: dict) -> dict:
+    """One JSON document with the exact prompts the API path would have sent (so the letter is
+    written from identical inputs) plus what the send step needs later: the history for the
+    subject line and the source errors for the PARTIAL flag."""
+    i = inputs
+    week = {"start": i["history"][0]["start"], "end": i["history"][0]["end"]} if i["history"] else None
+    can_consolidate = i["memory_ok"] and bool(i["conversations_text"].strip())
+    return {
+        "version": BRIEF_VERSION,
+        "generated_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "week": week,
+        "letter_system": LETTER_SYSTEM,
+        "letter_user": letter_prompt(i["history"], i["goals"], i["flags"], i["goals_text"], i["memory_text"],
+                                     i["knowledge_text"], i["conversations_text"], i["inbox_text"]),
+        "consolidate_system": CONSOLIDATE_SYSTEM,
+        "consolidate_user": consolidation_prompt(i["conversations_text"], i["memory_text"]) if can_consolidate else None,
+        "history": i["history"],
+        "goals": i["goals"],
+        "flags": i["flags"],
+        "errors": i["errors"],
+        "memory_ok": i["memory_ok"],
+    }
+
+
+def save_brief(brief: dict, path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(brief, indent=1, default=str))
+
+
+def load_brief(path: Path) -> dict:
+    brief = json.loads(path.read_text())
+    if not isinstance(brief, dict) or brief.get("version") != BRIEF_VERSION or "history" not in brief:
+        raise ValueError(f"{path} is not a weekly_advisor brief (expected version {BRIEF_VERSION})")
+    return brief
+
+
+def load_memory_updates(path: Path | None) -> list:
+    """The routine writes a JSON array of {entry, category}; a missing or empty file means none."""
+    if path is None or not path.exists():
+        return []
+    text = path.read_text().strip()
+    return parse_json_array(text) if text else []
+
+
+def finish_and_send(history: list[dict], narrative: str, errors: dict[str, str], dry_run: bool) -> int:
+    """Refresh the dashboard, compose the email and send it (or print it under --dry-run)."""
+    errors = dict(errors)
+    if dry_run:
         print("[advisor] --dry-run: skipping dashboard snapshot refresh.", file=sys.stderr)
     else:
         print("[advisor] refreshing dashboard snapshot...", file=sys.stderr)
@@ -632,7 +686,7 @@ def main() -> int:
 
     subject, body = build_email(history, narrative, errors)
 
-    if args.dry_run:
+    if dry_run:
         print(f"Subject: {subject}\n")
         print(body)
         return 0
@@ -649,6 +703,97 @@ def main() -> int:
         if email_transport.slack_fallback(reason, "Weekly growth report", extra_fix):
             print("[advisor] notified via Slack fallback.", file=sys.stderr)
         return 1
+
+
+def send_letter_mode(args) -> int:
+    """Routine step 3: the letter was written by the routine session; apply memory updates,
+    refresh the dashboard and send, flagging PARTIAL for any source that failed in step 1."""
+    brief = load_brief(Path(args.brief))
+    letter = Path(args.send_letter).read_text().strip()
+    errors: dict[str, str] = dict(brief.get("errors") or {})
+    if not letter:
+        errors["narrative"] = (f"the routine wrote no letter ({args.send_letter} is empty); "
+                               "see the run log at https://claude.ai/code/routines")
+
+    if not args.dry_run and not args.skip_consolidate and brief.get("memory_ok"):
+        try:
+            updates = load_memory_updates(Path(args.memory_updates) if args.memory_updates else None)
+            added = apply_memory_updates(updates)
+            print(f"[advisor] durable memory: {len(added)} new entries", file=sys.stderr)
+            if added:
+                err = mem.git_commit_and_push([mem.DURABLE_FILE], "advisor memory: weekly consolidation")
+                if err:
+                    errors["consolidation"] = err
+        except Exception as e:  # noqa: BLE001
+            errors["consolidation"] = f"{type(e).__name__}: {e}"
+            print(f"[warn] consolidation failed: {e}", file=sys.stderr)
+
+    return finish_and_send(brief["history"], letter, errors, args.dry_run)
+
+
+def parse_args(argv: list[str] | None = None):
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--weeks", type=int, default=8, help="weeks of history (incl. current)")
+    ap.add_argument("--dry-run", action="store_true", help="print the email instead of sending")
+    ap.add_argument("--ref", help="reference end date YYYY-MM-DD (default: yesterday)")
+    ap.add_argument("--skip-consolidate", action="store_true", help="don't update durable memory")
+    ap.add_argument("--brief", metavar="PATH",
+                    help="routine mode step 1: gather every input into PATH (JSON) without calling "
+                         "Claude; nothing is sent")
+    ap.add_argument("--send-letter", metavar="PATH",
+                    help="routine mode step 3: send the letter in PATH (plain text, the body between "
+                         "greeting and footer) using the brief from --brief")
+    ap.add_argument("--memory-updates", metavar="PATH",
+                    help="with --send-letter: JSON array of {entry, category} to append to durable memory")
+    args = ap.parse_args(argv)
+    if args.send_letter and not args.brief:
+        ap.error("--send-letter needs --brief PATH (the file written by step 1)")
+    if args.memory_updates and not args.send_letter:
+        ap.error("--memory-updates only makes sense together with --send-letter")
+    return args
+
+
+def main() -> int:
+    args = parse_args()
+    if args.send_letter:
+        return send_letter_mode(args)
+
+    ref = date.fromisoformat(args.ref) if args.ref else date.today() - timedelta(days=1)
+    inputs = gather_inputs(args.weeks, ref)
+
+    if args.brief:
+        brief = build_brief(inputs)
+        save_brief(brief, Path(args.brief))
+        print(f"[advisor] brief written to {args.brief}: {len(brief['letter_user'])} chars of letter "
+              f"input, {len(inputs['errors'])} source error(s). Nothing sent.", file=sys.stderr)
+        return 0
+
+    # API path: Claude writes the letter and the memory update through the Anthropic API.
+    narrative, narrative_err = "", None
+    try:
+        narrative = build_narrative(inputs["history"], inputs["goals"], inputs["flags"], inputs["goals_text"],
+                                    inputs["memory_text"], inputs["knowledge_text"],
+                                    inputs["conversations_text"], inputs["inbox_text"])
+    except Exception as e:  # noqa: BLE001
+        narrative_err = f"{type(e).__name__}: {e}"
+        print(f"[warn] narrative failed: {e}", file=sys.stderr)
+
+    consolidation_err = None
+    if not args.dry_run and not args.skip_consolidate and inputs["memory_ok"]:
+        try:
+            added = consolidate_memory(inputs["conversations_text"], inputs["memory_text"])
+            print(f"[advisor] durable memory: {len(added)} new entries", file=sys.stderr)
+            if added:
+                err = mem.git_commit_and_push([mem.DURABLE_FILE], "advisor memory: weekly consolidation")
+                if err:
+                    consolidation_err = err
+        except Exception as e:  # noqa: BLE001
+            consolidation_err = f"{type(e).__name__}: {e}"
+            print(f"[warn] consolidation failed: {e}", file=sys.stderr)
+
+    errors = collect_errors(inputs["history"], inputs["errors"],
+                            {"narrative": narrative_err, "consolidation": consolidation_err})
+    return finish_and_send(inputs["history"], narrative, errors, args.dry_run)
 
 
 if __name__ == "__main__":
