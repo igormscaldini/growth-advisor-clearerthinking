@@ -14,7 +14,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `frontend/public/beehiiv_new_subs_cache.json` is an incremental cache committed with the
   snapshot; delete it to force a full re-walk (takes ~25 min).
 - `weekly_advisor.py`: Friday 11:00 UTC letter (results, the week's work, next week's
-  priorities). `advisor_reply.py`: answers Igor's replies with live data tools every 5 min.
+  priorities). Two ways to produce the letter: the API path (default, needs Anthropic credits)
+  and routine mode (`--brief` then `--send-letter`, see `ADVISOR_ROUTINE.md`), where a Claude
+  Code routine on Igor's subscription writes the letter; the routine can only be saved once
+  GitHub is connected to claude.ai. `advisor_reply.py`: answers Igor's replies with live data
+  tools every 5 min.
   `advisor_inbox.py`: Gmail scan of the week's threads. `advisor_conversations.py`: digests
   Claude Code transcripts. `advisor_memory.py`: the encrypted memory store all of them share.
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
