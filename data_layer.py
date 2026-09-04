@@ -937,17 +937,43 @@ def _beehiiv_get(url: str, **kwargs):
     weekly_advisor.py run with no error surfaced, since a hang isn't an exception _safe() can
     catch. beehiiv's cursor-paginated endpoints (subscriptions, posts) make many sequential
     requests in a loop, which is exactly the pattern that triggers this.
+
+    HTTP 429 (beehiiv rate limit, seen on the weekly run when the snapshot refresh and the
+    report hit the API back to back) and transient 5xx responses are also retried with
+    exponential backoff, honouring Retry-After when beehiiv sends one. After the last
+    attempt the response is returned as-is so callers' raise_for_status() still surfaces it.
     """
     kwargs.setdefault("timeout", (10, 30))  # (connect, read) seconds
-    last_exc: Exception | None = None
-    for attempt in range(3):
+    resp = None
+    for attempt in range(BEEHIIV_MAX_ATTEMPTS):
+        last = attempt == BEEHIIV_MAX_ATTEMPTS - 1
         try:
-            return requests.get(url, **kwargs)
-        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout) as e:
-            last_exc = e
-            if attempt < 2:
-                time.sleep(1.5 * (attempt + 1))
-    raise last_exc
+            resp = requests.get(url, **kwargs)
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            if last:
+                raise
+            time.sleep(1.5 * (attempt + 1))
+            continue
+        if resp.status_code not in BEEHIIV_RETRY_STATUSES or last:
+            return resp
+        time.sleep(_beehiiv_backoff_seconds(resp, attempt))
+    return resp
+
+
+BEEHIIV_MAX_ATTEMPTS = 5
+BEEHIIV_RETRY_STATUSES = frozenset({429, 500, 502, 503, 504})
+BEEHIIV_MAX_BACKOFF_SECONDS = 60.0
+
+
+def _beehiiv_backoff_seconds(resp, attempt: int) -> float:
+    """Seconds to wait before retrying `resp`: Retry-After (seconds) if beehiiv sent a usable
+    one, else 2, 4, 8, 16... capped at BEEHIIV_MAX_BACKOFF_SECONDS."""
+    retry_after = (getattr(resp, "headers", None) or {}).get("Retry-After")
+    try:
+        wait = float(retry_after)
+    except (TypeError, ValueError):
+        wait = 2.0 * (2 ** attempt)
+    return max(0.0, min(wait, BEEHIIV_MAX_BACKOFF_SECONDS))
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
