@@ -56,6 +56,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - Gmail: SMTP app passwords are blocked from GitHub Actions; send and read through the Gmail API
   with the shared Google token (`secrets/ga4-token.json`, scopes incl. gmail.send/modify).
   To add scopes: edit SCOPES in `auth_ga4.py`, re-run it, then `gh secret set GOOGLE_TOKEN_JSON`.
+  `secrets/slides-token.json` is a separate Slides-only token (presentations scope, same OAuth
+  client) for editing Igor's Google Slides decks in place via the Slides API `replaceAllText`;
+  the Slides API was enabled on the GCP project in Sep 2026. Keep it out of the CI secret.
 - Claude model: `advisor_memory.advisor_model()` (ADVISOR_MODEL or ANTHROPIC_MODEL env, default
   claude-opus-5). CI has no override, so it uses the default.
 
