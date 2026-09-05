@@ -183,7 +183,7 @@
     border-radius:10px;padding:11px 14px;margin-top:12px;}
   .ai-error-note{font-size:13px;color:#a33;margin-top:10px;}
 
-  .btn-row{display:flex;align-items:center;gap:14px;margin-top:26px;}
+  .btn-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:26px;}
   .btn{
     font-family:inherit;
     font-size:15.5px;font-weight:600;
@@ -278,8 +278,8 @@
           <div class="not-sure-label">Not sure? Pick one:</div>
           <div class="chips" id="fearFeelingChips"></div>
           <div class="btn-row">
+            <button class="link-btn" id="fearStage1Back">← back</button>
             <button class="btn btn-primary" id="fearStage1Continue" disabled>Continue →</button>
-            <button class="link-btn" id="fearStage1Back">← choose a different cause</button>
           </div>
         </div>
 
@@ -293,8 +293,8 @@
           </div>
           <div class="ai-suggest-note" id="fearReflectionNote" style="display:none;"></div>
           <div class="btn-row">
-            <button class="btn btn-primary" id="fearStage2Continue" disabled>Okay, I'm ready →</button>
             <button class="link-btn" id="fearStage2Back">← back</button>
+            <button class="btn btn-primary" id="fearStage2Continue" disabled>Okay, I'm ready →</button>
           </div>
         </div>
 
@@ -335,8 +335,8 @@
           <label style="font-size:14px;color:var(--ct-text-mid);display:block;margin:18px 0 8px;">Optional: picture reaching the finish line. What's one small milestone in front of you right now?</label>
           <textarea id="motivationMilestoneInput" style="min-height:54px;" placeholder="e.g. getting a rough outline down..."></textarea>
           <div class="btn-row">
+            <button class="link-btn" id="motivationStage1Back">← back</button>
             <button class="btn btn-primary" id="motivationStage1Continue">Continue →</button>
-            <button class="link-btn" id="motivationStage1Back">← choose a different cause</button>
           </div>
         </div>
 
@@ -348,8 +348,8 @@
           </div>
           <div class="ai-suggest-note" id="motivationReflectionNote" style="display:none;"></div>
           <div class="btn-row">
-            <button class="btn btn-primary" id="motivationStage2Continue" disabled>Okay, I'm ready →</button>
             <button class="link-btn" id="motivationStage2Back">← back</button>
+            <button class="btn btn-primary" id="motivationStage2Continue" disabled>Okay, I'm ready →</button>
           </div>
         </div>
       </div>
@@ -400,7 +400,7 @@
         </div>
 
         <div class="btn-row" style="justify-content:center;margin-top:6px;">
-          <button class="link-btn" id="fatigueBack">← choose a different cause</button>
+          <button class="link-btn" id="fatigueBack">← back</button>
         </div>
       </div>
 
@@ -423,8 +423,8 @@
           </label>
         </div>
         <div class="btn-row">
+          <button class="link-btn" id="distractionBack">← back</button>
           <button class="btn btn-primary" id="distractionNextBtn" disabled>Next →</button>
-          <button class="link-btn" id="distractionBack">← choose a different cause</button>
         </div>
       </div>
 
@@ -436,8 +436,8 @@
         <div class="not-sure-label">Not sure? Pick one:</div>
         <div class="chips" id="taskChips"></div>
         <div class="btn-row">
-          <button class="btn btn-primary" id="taskContinue" disabled>Continue →</button>
           <button class="link-btn" id="taskBack">← back</button>
+          <button class="btn btn-primary" id="taskContinue" disabled>Continue →</button>
         </div>
       </div>
 
@@ -453,8 +453,8 @@
         <div class="ai-suggest-note" id="tooBroadNotice" style="display:none;"></div>
         <div class="ai-error-note" id="aiErrorNote" style="display:none;"></div>
         <div class="btn-row">
-          <button class="btn btn-primary" id="actionContinue" disabled>Continue →</button>
           <button class="link-btn" id="actionBack">← back</button>
+          <button class="btn btn-primary" id="actionContinue" disabled>Continue →</button>
         </div>
         <div class="completed-log" id="completedLog" style="display:none;"></div>
       </div>
@@ -468,8 +468,8 @@
           <div style="margin-top:6px;"><b>Next 10 minutes:</b> <span id="confirmAction"></span></div>
         </div>
         <div class="btn-row">
-          <button class="btn btn-primary" id="confirmStart">Yes, let's go →</button>
           <button class="link-btn" id="confirmBack">← back</button>
+          <button class="btn btn-primary" id="confirmStart">Yes, let's go →</button>
         </div>
       </div>
 
@@ -502,8 +502,8 @@
       <div class="step" id="step-cycledone">
         <div class="toast">🔔 Nice work! You did the hard part. That's one more round in the books.</div>
         <div class="btn-row">
-          <button class="btn btn-primary" id="cycleContinue">What's next? →</button>
           <button class="link-btn" id="cycleNewTask">Start a different task</button>
+          <button class="btn btn-primary" id="cycleContinue">What's next? →</button>
         </div>
       </div>
 
