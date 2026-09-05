@@ -430,7 +430,7 @@
         </div>
         <div class="btn-row">
           <button class="link-btn" id="distractionBack">← back</button>
-          <button class="btn btn-primary" id="distractionNextBtn" disabled>Next →</button>
+          <button class="btn btn-primary" id="distractionNextBtn">Next →</button>
         </div>
       </div>
 
@@ -1055,27 +1055,14 @@
   });
 
   // ---------- distractions interactive flow (precommitment checklist) ----------
-  var distractionNextBtn = document.getElementById('distractionNextBtn');
-  var distractionCheck1 = document.getElementById('distractionCheck1');
-  var distractionCheck2 = document.getElementById('distractionCheck2');
-  var distractionCheck3 = document.getElementById('distractionCheck3');
-  var distractionCheck4 = document.getElementById('distractionCheck4');
-  var distractionChecks = [distractionCheck1, distractionCheck2, distractionCheck3, distractionCheck4];
-
-  function updateDistractionNextState(){
-    distractionNextBtn.disabled = !distractionChecks.every(function(cb){ return cb.checked; });
-  }
+  // the checklist items are optional: Next is always available
+  var distractionChecks = [1, 2, 3, 4].map(function(n){ return document.getElementById('distractionCheck' + n); });
 
   function resetDistractionFlow(){
     distractionChecks.forEach(function(cb){ cb.checked = false; });
-    updateDistractionNextState();
   }
 
-  distractionChecks.forEach(function(cb){
-    cb.addEventListener('change', updateDistractionNextState);
-  });
-
-  distractionNextBtn.addEventListener('click', function(){
+  document.getElementById('distractionNextBtn').addEventListener('click', function(){
     showStep('task');
   });
 
