@@ -286,10 +286,10 @@
         <div id="fearStage2" style="display:none;">
           <div class="task-recap" id="fearFeelingRecap"></div>
           <p class="step-help" style="margin-top:16px;">Whatever it is, it's okay to feel it. No need to push it away or judge it right now.</p>
-          <p class="step-help" id="fearFactQuestion"></p>
+          <p class="step-help">Is what you're fearing or anxious about a fact, or just a subjective interpretation?</p>
           <div class="chips" id="fearFactThoughtChips">
             <button type="button" class="chip" data-choice="fact">It's a fact</button>
-            <button type="button" class="chip" data-choice="thought">It's a thought</button>
+            <button type="button" class="chip" data-choice="thought">It's an interpretation</button>
           </div>
           <div class="ai-suggest-note" id="fearReflectionNote" style="display:none;"></div>
           <div class="btn-row">
@@ -842,8 +842,6 @@
     var feeling = fearFeelingInput.value.trim().replace(/,\s*felt in my\s*$/i, '');
     document.getElementById('fearFeelingRecap').innerHTML =
       '<b>You wrote:</b> ' + escapeHtml(feeling);
-    document.getElementById('fearFactQuestion').innerHTML =
-      'Is <b>“' + escapeHtml(feeling) + '”</b> a fact about what\'s going to happen, or a thought passing through your mind?';
     showFearStage(2);
   });
   document.getElementById('fearStage1Back').addEventListener('click', function(){
@@ -856,7 +854,7 @@
       Array.prototype.forEach.call(fearFactThoughtChips.children, function(ch){ ch.classList.remove('selected'); });
       chip.classList.add('selected');
       fearReflectionNote.textContent = fearChoice === 'thought'
-        ? "Exactly. It's a thought, not a fact, and you can notice it and set it down without needing it resolved."
+        ? "Exactly. It's an interpretation, not a fact, and you can notice it and set it down without needing it resolved."
         : "It can really feel that way, but even feelings that feel like facts are usually just thoughts we haven't questioned yet, not guaranteed outcomes. You can set it down anyway.";
       fearReflectionNote.style.display = 'block';
       fearStage2Continue.disabled = false;
