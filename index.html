@@ -461,15 +461,19 @@
 
       <!-- STEP: CONFIRM -->
       <div class="step" id="step-confirm">
-        <h1 class="step-title">Ready to start?</h1>
-        <p class="step-help">A 10-minute timer will start. Leave this tab open, go do it, and you'll hear a soft chime when time's up.</p>
+        <h1 class="step-title" id="confirmTitle">Ready to start?</h1>
+        <p class="step-help" id="confirmHelp">A 10-minute timer will start. Leave this tab open, go do it, and you'll hear a soft chime when time's up.</p>
         <div class="task-recap">
           <div><b>Task:</b> <span id="confirmTask"></span></div>
           <div style="margin-top:6px;"><b>Next 10 minutes:</b> <span id="confirmAction"></span></div>
         </div>
+        <div class="ai-suggest-note" id="confirmAvoidNote" style="display:none;"></div>
         <div class="btn-row">
           <button class="link-btn" id="confirmBack">← back</button>
           <button class="btn btn-primary" id="confirmStart">Yes, let's go →</button>
+        </div>
+        <div class="btn-row" id="confirmAvoidRow" style="display:none;justify-content:center;margin-top:8px;">
+          <button class="link-btn" id="confirmAvoid">No, I'm going to keep avoiding it</button>
         </div>
       </div>
 
@@ -605,6 +609,7 @@
   var state = {
     task: '',
     action: '',
+    cause: null, // key of the cause picked this task (not persisted across reloads)
     history: [], // completed steps for the CURRENT task, most recent last
     firstCycle: true,
     timerEndsAt: null,
@@ -758,6 +763,7 @@
   });
 
   function goToTechniqueStep(cause){
+    state.cause = cause.key;
     if (cause.key === 'fear'){
       resetFearFlow();
       showStep('technique-fear');
@@ -1143,9 +1149,36 @@
   actionContinue.addEventListener('click', function(){
     state.action = actionInput.value.trim();
     localStorage.setItem(LS_ACTION, state.action);
+    showConfirm();
+  });
+
+  // ---------- confirm step (anxiety path gets a commitment framing) ----------
+  var confirmTitle = document.getElementById('confirmTitle');
+  var confirmHelp = document.getElementById('confirmHelp');
+  var confirmStartBtn = document.getElementById('confirmStart');
+  var confirmAvoidRow = document.getElementById('confirmAvoidRow');
+  var confirmAvoidNote = document.getElementById('confirmAvoidNote');
+
+  function showConfirm(){
+    var anxious = state.cause === 'fear';
+    confirmTitle.textContent = anxious
+      ? "You can start on the task even though it makes you anxious."
+      : "Ready to start?";
+    confirmHelp.textContent = anxious
+      ? "Will you work on this task now? If yes, a 10-minute timer will start. Leave this tab open, go do it, and you'll hear a soft chime when time's up."
+      : "A 10-minute timer will start. Leave this tab open, go do it, and you'll hear a soft chime when time's up.";
+    confirmStartBtn.textContent = anxious ? "Yes, start the 10-minute timer →" : "Yes, let's go →";
+    confirmAvoidRow.style.display = anxious ? 'flex' : 'none';
+    confirmAvoidNote.style.display = 'none';
     document.getElementById('confirmTask').textContent = state.task;
     document.getElementById('confirmAction').textContent = state.action;
     showStep('confirm');
+  }
+
+  document.getElementById('confirmAvoid').addEventListener('click', function(){
+    confirmAvoidRow.style.display = 'none';
+    confirmAvoidNote.textContent = "Fair enough, and no judgment. Avoiding it is a choice too, and you can come back any time. If this step feels too big, go back and pick a smaller one. The timer's here whenever you're ready.";
+    confirmAvoidNote.style.display = 'block';
   });
 
   function goToActionStep(isFirstCycleForThisTask){
@@ -1205,7 +1238,7 @@
   document.getElementById('timerBack').addEventListener('click', function(){
     if (state.tickHandle){ clearInterval(state.tickHandle); state.tickHandle = null; }
     localStorage.removeItem(LS_ENDS_AT);
-    showStep('confirm');
+    showConfirm();
   });
 
   function completeCycle(){
@@ -1234,7 +1267,7 @@
   document.getElementById('cycleNewTask').addEventListener('click', function(){
     localStorage.removeItem(LS_TASK);
     localStorage.removeItem(LS_ACTION);
-    state.task = ''; state.action = '';
+    state.task = ''; state.action = ''; state.cause = null;
     clearHistory();
     taskInput.value = '';
     taskContinue.disabled = true;
