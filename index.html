@@ -360,6 +360,7 @@
 
         <div id="fatigueTimerStage">
           <h1 class="step-title" style="font-size:19px;text-align:center;" id="fatigueMsg"></h1>
+          <p class="step-help" id="fatigueHelp" style="text-align:center;display:none;margin:4px 0 8px;"></p>
           <div class="stretch-illustrations" id="fatigueStretchIllustrations" style="display:none;">
             <figure>
               <svg viewBox="0 0 64 64"><circle cx="32" cy="10" r="6" fill="none" stroke="#233b47" stroke-width="4"/><line x1="32" y1="16" x2="32" y2="40" stroke="#233b47" stroke-width="4" stroke-linecap="round"/><line x1="32" y1="20" x2="16" y2="4" stroke="#0885f8" stroke-width="4" stroke-linecap="round"/><line x1="32" y1="20" x2="48" y2="4" stroke="#0885f8" stroke-width="4" stroke-linecap="round"/><line x1="32" y1="40" x2="20" y2="58" stroke="#233b47" stroke-width="4" stroke-linecap="round"/><line x1="32" y1="40" x2="44" y2="58" stroke="#233b47" stroke-width="4" stroke-linecap="round"/></svg>
@@ -963,21 +964,18 @@
   });
 
   // ---------- mental-fatigue interactive flow (sequential physical resets) ----------
-  var FATIGUE_STAGES = FAST
-    ? [
-        { seconds: 5, message: "Stand up, stretch for 60 seconds." },
-        { seconds: 3, message: "Take 5 deep breaths." },
-        { seconds: 5, message: "Drink some water." }
-      ]
-    : [
-        { seconds: 60, message: "Stand up, stretch for 60 seconds." },
-        { seconds: 30, message: "Take 5 deep breaths." },
-        { seconds: 60, message: "Drink some water." }
-      ];
+  // seconds are shortened in ?fast=1 mode; `help` is an optional instruction line under the message
+  var FATIGUE_STAGES = [
+    { seconds: FAST ? 5 : 60, message: "Stand up, stretch for 60 seconds." },
+    { seconds: FAST ? 3 : 30, message: "Sit down and breathe fast for 30 seconds.",
+      help: "Quick exhale, then a slower, longer inhale. Repeat. Stay seated (not standing) and never do this near water, as it can make you lightheaded. If you feel dizzy, stop and breathe normally." },
+    { seconds: FAST ? 5 : 60, message: "Drink some water." }
+  ];
   var fatigueStageIndex = 0;
   var fatigueCountdownHandle = null;
   var fatigueCurrentStageSeconds = 0;
   var fatigueMsgEl = document.getElementById('fatigueMsg');
+  var fatigueHelpEl = document.getElementById('fatigueHelp');
   var fatigueClockEl = document.getElementById('fatigueClock');
   var fatigueRingFg = document.getElementById('fatigueRingFg');
   var fatigueNextRow = document.getElementById('fatigueNextRow');
@@ -996,6 +994,8 @@
   function runFatigueStage(i){
     var stage = FATIGUE_STAGES[i];
     fatigueMsgEl.textContent = stage.message;
+    fatigueHelpEl.textContent = stage.help || '';
+    fatigueHelpEl.style.display = stage.help ? 'block' : 'none';
     fatigueStretchIllustrations.style.display = (i === 0) ? 'flex' : 'none';
     fatigueNextRow.style.display = 'none';
     fatigueCurrentStageSeconds = stage.seconds;
