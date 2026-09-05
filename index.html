@@ -208,6 +208,7 @@
     font-size:64px;font-weight:800;color:var(--ct-blue);
     letter-spacing:.02em;font-variant-numeric:tabular-nums;
   }
+  .clock.clock-mmss{font-size:38px;letter-spacing:0;} /* mm:ss must fit inside the 150px ring */
   .timer-ring{
     width:180px;height:180px;margin:10px auto 6px;position:relative;
   }
@@ -488,7 +489,7 @@
             <circle class="fg" id="ringFg" cx="90" cy="90" r="80" stroke-dasharray="502.4" stroke-dashoffset="0"></circle>
           </svg>
           <div class="clock-center">
-            <div class="clock" id="clockDisplay">10:00</div>
+            <div class="clock clock-mmss" id="clockDisplay">10:00</div>
           </div>
         </div>
         <p class="fine-print" id="timerTaskLine"></p>
