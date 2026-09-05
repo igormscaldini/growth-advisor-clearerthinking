@@ -4,7 +4,6 @@
 // See the comment at the top of suggest.js for the current (deliberately lightweight)
 // abuse-mitigation approach — same tradeoffs apply here.
 
-const ALLOWED_ORIGIN = "https://igormscaldini.github.io";
 const PROTO_TOKEN = "Vb2jxJSOSr2RwZxEy12jgJhECuYnzVsm";
 const MAX_CONTEXT_LENGTH = 300;
 const MODEL = "claude-haiku-4-5-20251001";
@@ -22,8 +21,22 @@ function rateLimited(ip) {
   return arr.length > MAX_PER_WINDOW;
 }
 
-function setCors(res) {
-  res.setHeader("Access-Control-Allow-Origin", ALLOWED_ORIGIN);
+// Origins allowed to call this endpoint from a browser: the GitHub Pages site,
+// local dev servers, and "null" (what browsers send for a page opened straight
+// from a file:// URL, which is how the team tests index.html locally).
+const ALLOWED_ORIGINS = ["https://igormscaldini.github.io", "null"];
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  if (ALLOWED_ORIGINS.includes(origin)) return true;
+  return /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+}
+
+function setCors(req, res) {
+  const origin = req.headers.origin;
+  if (isAllowedOrigin(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+  }
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Proto-Token");
 }
@@ -69,7 +82,7 @@ const CAUSES = {
 };
 
 module.exports = async function handler(req, res) {
-  setCors(res);
+  setCors(req, res);
 
   if (req.method === "OPTIONS") {
     res.status(204).end();
