@@ -254,32 +254,9 @@
   .step.active{display:block;animation:fadein .25s ease;}
   @keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
 
-  /* intro modal */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(35,59,71,.45);
-    display:flex;align-items:center;justify-content:center;padding:20px;
-    z-index:50;
-  }
-  .modal-overlay.hidden{display:none;}
-  .modal{
-    background:#fff;border-radius:20px;max-width:460px;width:100%;
-    padding:32px;text-align:left;
-  }
-  .modal h2{margin:0 0 12px;font-size:20px;color:var(--ct-dark);}
-  .modal p{color:var(--ct-text-mid);font-size:14.5px;margin:0 0 12px;}
-  .modal .btn-primary{width:100%;margin-top:10px;}
 </style>
 </head>
 <body>
-
-<div class="modal-overlay" id="introModal">
-  <div class="modal">
-    <h2>🦉 Welcome to Unstuck</h2>
-    <p>A Clearer Thinking prototype. When you're stuck on something, this tool gets you moving in a few small steps: a quick one-minute technique matched to what's holding you back, naming the task, picking one small thing you could do in the next 10 minutes, then a timer to help you go do it.</p>
-    <p>No account, no judgment. Just come back when the timer's done, and do it again. An owl keeps you company and grows a little more with every round.</p>
-    <button class="btn btn-primary" id="introDismiss">Let's go</button>
-  </div>
-</div>
 
 <div class="wrap">
   <header class="top">
@@ -631,7 +608,6 @@
   var LS_TASK = 'unstuck_task';
   var LS_ACTION = 'unstuck_action';
   var LS_HISTORY = 'unstuck_history';
-  var LS_INTRO_SEEN = 'unstuck_introSeen';
 
   var state = {
     task: '',
@@ -1267,14 +1243,6 @@
       localStorage.clear();
       location.reload();
     }
-  });
-
-  // ---------- intro modal ----------
-  var introModal = document.getElementById('introModal');
-  if (localStorage.getItem(LS_INTRO_SEEN)) introModal.classList.add('hidden');
-  document.getElementById('introDismiss').addEventListener('click', function(){
-    localStorage.setItem(LS_INTRO_SEEN, '1');
-    introModal.classList.add('hidden');
   });
 
   // ---------- boot / resume ----------
