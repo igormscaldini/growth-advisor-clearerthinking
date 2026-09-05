@@ -274,7 +274,7 @@
 
         <div id="fearStage1">
           <p class="step-help">Briefly describe what you're feeling right now, and notice where in your body you feel it.</p>
-          <input type="text" id="fearFeelingInput" placeholder="e.g. fear of messing this up...">
+          <input type="text" id="fearFeelingInput" placeholder="e.g. Fear of messing this up, felt as a knot in my stomach">
           <div class="not-sure-label">Not sure? Pick one:</div>
           <div class="chips" id="fearFeelingChips"></div>
           <div class="btn-row">
@@ -653,7 +653,9 @@
   }
 
   // ---------- chips ----------
-  function buildChips(container, list, targetInput, onPick){
+  // toValue (optional) maps the chip text to what goes in the input, e.g. a sentence
+  // for the user to complete; when given, the input is focused with the cursor at the end.
+  function buildChips(container, list, targetInput, onPick, toValue){
     container.innerHTML = '';
     list.forEach(function(text){
       var b = document.createElement('button');
@@ -661,8 +663,13 @@
       b.className = 'chip';
       b.textContent = text;
       b.addEventListener('click', function(){
-        targetInput.value = text;
+        targetInput.value = toValue ? toValue(text) : text;
         targetInput.dispatchEvent(new Event('input'));
+        if (toValue){
+          targetInput.focus();
+          var end = targetInput.value.length;
+          targetInput.setSelectionRange(end, end);
+        }
         if (onPick) onPick();
       });
       container.appendChild(b);
@@ -792,7 +799,7 @@
   ];
   buildChips(document.getElementById('fearFeelingChips'), FEAR_PRESETS, fearFeelingInput, function(){
     fearStage1Continue.disabled = false;
-  });
+  }, function(text){ return text + ', felt in my '; });
 
   function showFearStage(n){
     [1, 2, 3].forEach(function(i){
@@ -832,8 +839,9 @@
   });
 
   fearStage1Continue.addEventListener('click', function(){
+    var feeling = fearFeelingInput.value.trim().replace(/,\s*felt in my\s*$/i, '');
     document.getElementById('fearFeelingRecap').innerHTML =
-      '<b>You wrote:</b> ' + escapeHtml(fearFeelingInput.value.trim());
+      '<b>You wrote:</b> ' + escapeHtml(feeling);
     showFearStage(2);
   });
   document.getElementById('fearStage1Back').addEventListener('click', function(){
