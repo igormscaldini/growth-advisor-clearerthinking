@@ -289,7 +289,8 @@
           <p class="step-help">Is what you're fearing or anxious about a fact, or just a subjective interpretation?</p>
           <div class="chips" id="fearFactThoughtChips">
             <button type="button" class="chip" data-choice="fact">It's a fact</button>
-            <button type="button" class="chip" data-choice="thought">It's an interpretation</button>
+            <button type="button" class="chip" data-choice="thought">It's a subjective interpretation</button>
+            <button type="button" class="chip" data-choice="unsure">Not sure</button>
           </div>
           <div class="ai-suggest-note" id="fearReflectionNote" style="display:none;"></div>
           <div class="btn-row">
@@ -853,9 +854,12 @@
       fearChoice = chip.getAttribute('data-choice');
       Array.prototype.forEach.call(fearFactThoughtChips.children, function(ch){ ch.classList.remove('selected'); });
       chip.classList.add('selected');
-      fearReflectionNote.textContent = fearChoice === 'thought'
-        ? "Exactly. It's an interpretation, not a fact, and you can notice it and set it down without needing it resolved."
-        : "It can really feel that way, but even feelings that feel like facts are usually just thoughts we haven't questioned yet, not guaranteed outcomes. You can set it down anyway.";
+      var FEAR_REFLECTIONS = {
+        thought: "Exactly. It's an interpretation, not a fact, and you can notice it and set it down without needing it resolved.",
+        fact: "It can really feel that way, but even feelings that feel like facts are usually just thoughts we haven't questioned yet, not guaranteed outcomes. You can set it down anyway.",
+        unsure: "That's okay. Not being sure is itself a sign it isn't a settled fact. You don't have to resolve it now; you can hold it lightly and still take one small step."
+      };
+      fearReflectionNote.textContent = FEAR_REFLECTIONS[fearChoice];
       fearReflectionNote.style.display = 'block';
       fearStage2Continue.disabled = false;
     });
