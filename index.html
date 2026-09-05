@@ -419,9 +419,13 @@
             <input type="checkbox" id="distractionCheck2" style="margin-top:3px;width:18px;height:18px;flex:none;">
             <span>Close extra tabs and silence notifications.</span>
           </label>
-          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+          <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;cursor:pointer;">
             <input type="checkbox" id="distractionCheck3" style="margin-top:3px;width:18px;height:18px;flex:none;">
-            <span>If applicable, let people know you'll be heads-down for a few minutes.</span>
+            <span>Let people know you'll be heads-down for a few minutes.</span>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
+            <input type="checkbox" id="distractionCheck4" style="margin-top:3px;width:18px;height:18px;flex:none;">
+            <span>Put on music with no lyrics.</span>
           </label>
         </div>
         <div class="btn-row">
@@ -1054,7 +1058,8 @@
   var distractionCheck1 = document.getElementById('distractionCheck1');
   var distractionCheck2 = document.getElementById('distractionCheck2');
   var distractionCheck3 = document.getElementById('distractionCheck3');
-  var distractionChecks = [distractionCheck1, distractionCheck2, distractionCheck3];
+  var distractionCheck4 = document.getElementById('distractionCheck4');
+  var distractionChecks = [distractionCheck1, distractionCheck2, distractionCheck3, distractionCheck4];
 
   function updateDistractionNextState(){
     distractionNextBtn.disabled = !distractionChecks.every(function(cb){ return cb.checked; });
