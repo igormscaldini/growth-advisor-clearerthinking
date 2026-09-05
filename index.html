@@ -247,22 +247,6 @@
   }
   .restart-btn:hover{border-color:var(--ct-text-mid);color:var(--ct-text);}
 
-  /* about modal */
-  .modal-overlay{
-    position:fixed;inset:0;background:rgba(35,59,71,.45);
-    display:none;align-items:center;justify-content:center;padding:20px;
-    z-index:50;
-  }
-  .modal-overlay.open{display:flex;}
-  .modal{
-    background:#fff;border-radius:20px;max-width:460px;width:100%;
-    padding:32px;text-align:left;
-  }
-  .modal h2{margin:0 0 12px;font-size:20px;color:var(--ct-dark);}
-  .modal p{color:var(--ct-text-mid);font-size:14.5px;margin:0 0 12px;}
-  .modal p a{color:var(--ct-blue);}
-  .modal .btn-primary{width:100%;margin-top:10px;}
-
   .step{display:none;}
   .step.active{display:block;animation:fadein .25s ease;}
   @keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
@@ -549,20 +533,10 @@
 
   <footer class="foot">
     Clearer Thinking internal prototype. Not for public release.
-    <div style="margin-top:10px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-      <button class="restart-btn" id="aboutBtn">About</button>
+    <div style="margin-top:10px;">
       <button class="restart-btn" id="restartAll">Restart everything</button>
     </div>
   </footer>
-</div>
-
-<div class="modal-overlay" id="aboutModal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
-  <div class="modal">
-    <h2 id="aboutTitle">About Unstuck</h2>
-    <p>Unstuck was developed by <a href="https://www.clearerthinking.org" target="_blank" rel="noopener">ClearerThinking.org</a>. The techniques it uses are research-backed and adapted from Clearer Thinking's Get Going program on overcoming procrastination.</p>
-    <p>When you're stuck, it matches a quick one-minute technique to what's holding you back, helps you name the task and one small step, then runs a 10-minute timer so you go do it. No account, no judgment. Come back when the timer's done and do it again. An owl keeps you company and grows a little with every round.</p>
-    <button class="btn btn-primary" id="aboutClose">Close</button>
-  </div>
 </div>
 
 <script>
@@ -1335,19 +1309,6 @@
     }
     showStep('cause');
   }
-
-  // ---------- about modal ----------
-  var aboutModal = document.getElementById('aboutModal');
-  function openAbout(){ aboutModal.classList.add('open'); }
-  function closeAbout(){ aboutModal.classList.remove('open'); }
-  document.getElementById('aboutBtn').addEventListener('click', openAbout);
-  document.getElementById('aboutClose').addEventListener('click', closeAbout);
-  aboutModal.addEventListener('click', function(e){
-    if (e.target === aboutModal) closeAbout();
-  });
-  document.addEventListener('keydown', function(e){
-    if (e.key === 'Escape' && aboutModal.classList.contains('open')) closeAbout();
-  });
 
   boot();
 })();
