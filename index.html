@@ -444,7 +444,7 @@
       <!-- STEP: ACTION -->
       <div class="step" id="step-action">
         <div class="task-recap" id="actionTaskRecap"></div>
-        <h1 class="step-title" id="actionTitle">What's something you could do in the next 10 minutes about this?</h1>
+        <h1 class="step-title" id="actionTitle">What's one tiny step you could take right now that's on the path toward getting this done?</h1>
         <p class="step-help">Keep it small. It just needs to move things forward a little.</p>
         <textarea id="actionInput" placeholder="e.g. Open the doc and write a rough outline..."></textarea>
         <div>
@@ -1184,7 +1184,7 @@
   function goToActionStep(isFirstCycleForThisTask){
     document.getElementById('actionTaskRecap').innerHTML = '<b>Task:</b> ' + escapeHtml(state.task);
     document.getElementById('actionTitle').textContent = isFirstCycleForThisTask
-      ? "What's something you could do in the next 10 minutes about this?"
+      ? "What's one tiny step you could take right now that's on the path toward getting this done?"
       : "What's the next easy thing you can do in 10 minutes?";
     actionInput.value = '';
     actionContinue.disabled = true;
