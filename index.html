@@ -286,7 +286,7 @@
         <div id="fearStage2" style="display:none;">
           <div class="task-recap" id="fearFeelingRecap"></div>
           <p class="step-help" style="margin-top:16px;">Whatever it is, it's okay to feel it. No need to push it away or judge it right now.</p>
-          <p class="step-help">Is that a fact about what's going to happen, or a thought passing through your mind?</p>
+          <p class="step-help" id="fearFactQuestion"></p>
           <div class="chips" id="fearFactThoughtChips">
             <button type="button" class="chip" data-choice="fact">It's a fact</button>
             <button type="button" class="chip" data-choice="thought">It's a thought</button>
@@ -842,6 +842,8 @@
     var feeling = fearFeelingInput.value.trim().replace(/,\s*felt in my\s*$/i, '');
     document.getElementById('fearFeelingRecap').innerHTML =
       '<b>You wrote:</b> ' + escapeHtml(feeling);
+    document.getElementById('fearFactQuestion').innerHTML =
+      'Is <b>“' + escapeHtml(feeling) + '”</b> a fact about what\'s going to happen, or a thought passing through your mind?';
     showFearStage(2);
   });
   document.getElementById('fearStage1Back').addEventListener('click', function(){
