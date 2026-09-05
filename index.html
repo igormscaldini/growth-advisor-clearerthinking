@@ -314,7 +314,7 @@
             <button class="btn btn-primary" id="fearNextBtn">Next →</button>
           </div>
           <div class="btn-row" style="justify-content:center;margin-top:6px;">
-            <button class="link-btn" id="fearSkipTimer">Skip timer</button>
+            <button class="link-btn" id="fearSkipTimer">Skip timer →</button>
           </div>
           <div class="btn-row" style="justify-content:center;margin-top:2px;">
             <button class="link-btn" id="fearStage3Back">← back</button>
@@ -388,7 +388,7 @@
             <button class="btn btn-primary" id="fatigueNextBtn">Next →</button>
           </div>
           <div class="btn-row" style="justify-content:center;margin-top:6px;">
-            <button class="link-btn" id="fatigueSkipTimer">Skip timer</button>
+            <button class="link-btn" id="fatigueSkipTimer">Skip timer →</button>
           </div>
         </div>
 
@@ -496,7 +496,7 @@
           <button class="restart-btn" id="finishedEarly">I've finished this task</button>
         </div>
         <div class="btn-row" style="justify-content:center;margin-top:6px;">
-          <button class="link-btn" id="timerSkip">Skip timer</button>
+          <button class="link-btn" id="timerSkip">Skip timer →</button>
         </div>
         <div class="btn-row" style="justify-content:center;margin-top:2px;">
           <button class="link-btn" id="timerBack">← back</button>
@@ -893,13 +893,12 @@
     }, 1000);
   });
 
-  document.getElementById('fearNextBtn').addEventListener('click', function(){
+  function advanceFear(){
+    if (fearCountdownHandle){ clearInterval(fearCountdownHandle); fearCountdownHandle = null; }
     showStep('task');
-  });
-
-  document.getElementById('fearSkipTimer').addEventListener('click', function(){
-    finishFearBreathe();
-  });
+  }
+  document.getElementById('fearNextBtn').addEventListener('click', advanceFear);
+  document.getElementById('fearSkipTimer').addEventListener('click', advanceFear);
 
   document.getElementById('fearStage3Back').addEventListener('click', function(){
     if (fearCountdownHandle){ clearInterval(fearCountdownHandle); fearCountdownHandle = null; }
@@ -1024,7 +1023,8 @@
     runFatigueStage(0);
   }
 
-  document.getElementById('fatigueNextBtn').addEventListener('click', function(){
+  function advanceFatigue(){
+    if (fatigueCountdownHandle){ clearInterval(fatigueCountdownHandle); fatigueCountdownHandle = null; }
     fatigueStageIndex += 1;
     if (fatigueStageIndex < FATIGUE_STAGES.length){
       runFatigueStage(fatigueStageIndex);
@@ -1032,7 +1032,8 @@
       fatigueTimerStage.style.display = 'none';
       fatigueQuestionStage.style.display = 'block';
     }
-  });
+  }
+  document.getElementById('fatigueNextBtn').addEventListener('click', advanceFatigue);
 
   Array.prototype.forEach.call(fatigueFeelChips.children, function(chip){
     chip.addEventListener('click', function(){
@@ -1040,9 +1041,7 @@
     });
   });
 
-  document.getElementById('fatigueSkipTimer').addEventListener('click', function(){
-    finishFatigueStage();
-  });
+  document.getElementById('fatigueSkipTimer').addEventListener('click', advanceFatigue);
 
   document.getElementById('fatigueBack').addEventListener('click', function(){
     if (fatigueCountdownHandle){ clearInterval(fatigueCountdownHandle); fatigueCountdownHandle = null; }
