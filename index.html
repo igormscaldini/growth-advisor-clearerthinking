@@ -49,7 +49,7 @@
   }
   .layout.no-owl{grid-template-columns:1fr;}
   .layout.no-owl .owl-card{display:none;}
-  .layout.no-owl .card{max-width:640px;margin:0 auto;}
+  .layout.no-owl .card{max-width:640px;margin:0 auto;width:100%;}
 
   .card{
     background:#fff;
@@ -201,7 +201,7 @@
   .link-btn{
     background:none;border:none;font-family:inherit;
     color:var(--ct-text-mid);font-size:14.5px;cursor:pointer;text-decoration:underline;
-    padding:6px 0;
+    padding:6px 0;white-space:nowrap;
   }
   .link-btn:hover{color:var(--ct-text);}
 
@@ -248,6 +248,9 @@
   .restart-btn:hover{border-color:var(--ct-text-mid);color:var(--ct-text);}
 
   .step{display:none;}
+  .step.centered{text-align:center;}
+  .step.centered .chips{justify-content:center;}
+  #fearFeelingRecap{margin-top:14px;}
   .step.active{display:block;animation:fadein .25s ease;}
   @keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
 
@@ -358,7 +361,7 @@
       </div>
 
       <!-- STEP: TECHNIQUE — MENTAL FATIGUE (sequential physical-reset timers) -->
-      <div class="step" id="step-technique-fatigue">
+      <div class="step centered" id="step-technique-fatigue">
         <h1 class="step-title">Mental fatigue: a one-minute technique</h1>
 
         <div id="fatigueTimerStage">
@@ -486,7 +489,7 @@
       </div>
 
       <!-- STEP: TIMER -->
-      <div class="step" id="step-timer">
+      <div class="step centered" id="step-timer">
         <h1 class="step-title">Go do it.</h1>
         <p class="step-help">Come back here when the timer ends.</p>
         <div class="timer-ring">
@@ -820,6 +823,7 @@
     [1, 2, 3].forEach(function(i){
       document.getElementById('fearStage' + i).style.display = (i === n) ? 'block' : 'none';
     });
+    document.getElementById('step-technique-fear').classList.toggle('centered', n === 3);
   }
 
   function resetFearFlow(){
