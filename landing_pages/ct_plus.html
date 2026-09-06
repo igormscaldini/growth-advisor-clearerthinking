@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clearer Thinking Plus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;1,6..96,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #F8F3F6;
+    --surface: #FFFFFF;
+    --ink: #2A1323;
+    --ink-2: #6A4E61;
+    --line: #E4D7DE;
+    --line-strong: #CDB9C5;
+    --gold: #E3A70B;
+    --gold-ink: #8C6603;
+    --gold-soft: #FBF0CF;
+    --plum: #4B2242;
+    --plum-deep: #3A1834;
+    --on-plum: #F6EBF2;
+    --on-plum-2: #D9C3D2;
+    --shadow: 0 18px 50px -24px rgba(42, 19, 35, 0.35);
+    --display: "Bodoni Moda", "Bodoni 72", Didot, "Times New Roman", serif;
+    --body: "IBM Plex Sans", -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1B0E18;
+      --surface: #271523;
+      --ink: #F4EAF0;
+      --ink-2: #BFA9B7;
+      --line: #3D2838;
+      --line-strong: #5A3F53;
+      --gold: #F0BF3A;
+      --gold-ink: #F0BF3A;
+      --gold-soft: #3A2C13;
+      --plum: #31162C;
+      --plum-deep: #23101F;
+      --on-plum: #F6EBF2;
+      --on-plum-2: #CDB4C5;
+      --shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.7);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1B0E18;
+    --surface: #271523;
+    --ink: #F4EAF0;
+    --ink-2: #BFA9B7;
+    --line: #3D2838;
+    --line-strong: #5A3F53;
+    --gold: #F0BF3A;
+    --gold-ink: #F0BF3A;
+    --gold-soft: #3A2C13;
+    --plum: #31162C;
+    --plum-deep: #23101F;
+    --on-plum: #F6EBF2;
+    --on-plum-2: #CDB4C5;
+    --shadow: 0 18px 50px -24px rgba(0, 0, 0, 0.7);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; border-radius: 2px; }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(38px, 5.4vw, 62px); line-height: 1.04; }
+  h2 { font-size: clamp(30px, 3.6vw, 42px); line-height: 1.1; }
+  h3 { font-size: 25px; line-height: 1.2; }
+  h1 em, h2 em { font-style: italic; color: var(--gold-ink); }
+  p { margin: 0; }
+  .lead { font-size: 19px; line-height: 1.55; color: var(--ink-2); max-width: 34em; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12.5px; font-weight: 500; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--gold-ink);
+  }
+
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 72px 0; }
+  .section-head { display: grid; gap: 14px; max-width: 40em; margin-bottom: 44px; }
+  .section-head p { color: var(--ink-2); }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; gap: 24px; height: 68px; }
+  .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+  .brand svg { width: 34px; height: 34px; flex: none; }
+  .brand .word { font-weight: 600; font-size: 16px; letter-spacing: -0.01em; white-space: nowrap; }
+  .brand .word i { font-family: var(--display); font-style: italic; font-weight: 400; font-size: 21px; color: var(--gold-ink); margin-left: 4px; }
+  .nav-links { display: flex; align-items: center; gap: 28px; font-size: 15px; }
+  .nav-links a { text-decoration: none; color: var(--ink-2); }
+  .nav-links a:hover { color: var(--ink); }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 14px 22px; border-radius: 999px; border: 1px solid transparent;
+    font: 500 15.5px/1 var(--body); text-decoration: none; cursor: pointer;
+    transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--ink); color: var(--bg); }
+  .btn-primary:hover { background: var(--plum); }
+  .btn-gold { background: var(--gold); color: #2A1323; }
+  .btn-gold:hover { background: color-mix(in srgb, var(--gold) 88%, white); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line-strong); }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-sm { padding: 11px 18px; font-size: 14.5px; }
+  .textlink { color: var(--ink-2); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line-strong); }
+  .textlink:hover { color: var(--ink); text-decoration-color: var(--gold); }
+
+  /* Hero */
+  .hero { position: relative; overflow: hidden; padding: 76px 0 84px; }
+  .hero .wrap { display: grid; grid-template-columns: 11fr 9fr; gap: 56px; align-items: center; }
+  .hero-copy { display: grid; gap: 26px; }
+  .hero-actions { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+  .hero-visual { position: relative; }
+  .plus-glyph {
+    position: absolute; right: -300px; top: -330px; z-index: 0; pointer-events: none;
+    font-family: var(--display); font-size: 520px; line-height: 1; color: var(--gold); opacity: 0.18;
+    user-select: none;
+  }
+
+  /* Fit tool */
+  .fit {
+    position: relative; z-index: 1;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+    padding: 28px; box-shadow: var(--shadow);
+    display: grid; gap: 18px;
+  }
+  .fit-top { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .fit-top .eyebrow { color: var(--ink-2); }
+  .fit-step { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); letter-spacing: 0.06em; }
+  .fit h3 { font-size: 27px; }
+  .fit-q { font-weight: 500; font-size: 16.5px; }
+  .fit-opts { display: grid; gap: 10px; }
+  .fit-opt {
+    text-align: left; width: 100%; padding: 14px 16px; border-radius: 12px;
+    background: transparent; border: 1px solid var(--line); color: var(--ink);
+    font: 400 15.5px/1.45 var(--body); cursor: pointer;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+  .fit-opt:hover { border-color: var(--gold); background: var(--gold-soft); }
+  .fit-result { display: grid; gap: 14px; }
+  .fit-result .tier-name { font-family: var(--display); font-size: 40px; line-height: 1; }
+  .fit-result .tier-price { font-family: var(--mono); font-size: 13px; color: var(--ink-2); letter-spacing: 0.06em; }
+  .fit-result p { color: var(--ink-2); font-size: 15.5px; }
+  .fit-result .row { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin-top: 6px; }
+  .fit-reset { background: none; border: 0; padding: 0; font: 400 14px var(--body); color: var(--ink-2); cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+  [data-step][hidden] { display: none; }
+  [data-step] { animation: rise 260ms ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* Interval ornament */
+  .interval { display: flex; justify-content: center; padding: 0 0 8px; }
+  .interval svg { width: 220px; height: 22px; display: block; }
+  .interval .rule { stroke: var(--line-strong); stroke-width: 1.5; }
+  .interval .mark { fill: var(--gold); }
+
+  /* Pillars */
+  .pillars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .pillar { display: grid; gap: 12px; align-content: start; padding-top: 22px; border-top: 2px solid var(--gold); }
+  .pillar h3 { font-size: 26px; }
+  .pillar p { color: var(--ink-2); font-size: 16px; }
+  .pillar .num { font-family: var(--display); font-size: 40px; color: var(--gold-ink); line-height: 1; }
+
+  /* Mission band */
+  .band { background: var(--plum); color: var(--on-plum); }
+  .band .eyebrow { color: var(--gold); }
+  .band .wrap { display: grid; grid-template-columns: 5fr 7fr; gap: 56px; align-items: start; }
+  .band h2 { color: var(--on-plum); }
+  .band .text { display: grid; gap: 18px; color: var(--on-plum-2); max-width: 36em; }
+  .band blockquote { margin: 0; padding-left: 20px; border-left: 2px solid var(--gold); color: var(--on-plum); font-size: 17.5px; }
+  .band .figures { display: flex; gap: 40px; flex-wrap: wrap; margin-top: 8px; }
+  .band .figure b { display: block; font-family: var(--display); font-weight: 400; font-size: 44px; line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+  .band .figure span { font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-plum-2); }
+
+  /* Tiers */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: stretch; }
+  .tier {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 18px;
+    padding: 28px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 18px;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+  .tier:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .tier.featured { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-soft), var(--shadow); }
+  .tier-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .tier h3 { font-size: 30px; }
+  .tier .tag { font-family: var(--mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-ink); }
+  .price { display: flex; align-items: baseline; gap: 8px; font-variant-numeric: tabular-nums; }
+  .price b { font-family: var(--display); font-weight: 400; font-size: 50px; line-height: 1; }
+  .price span { font-family: var(--mono); font-size: 13px; color: var(--ink-2); letter-spacing: 0.06em; }
+  .tier .who { color: var(--ink-2); font-size: 15.5px; }
+  .tier ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; font-size: 15.5px; }
+  .tier li { display: flex; gap: 12px; align-items: flex-start; }
+  .tier li::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 9px; border-radius: 50%; background: var(--gold); }
+  .tier li.inherit { color: var(--ink-2); }
+  .tier li.inherit::before { background: var(--line-strong); }
+  .shared {
+    margin-top: 28px; padding: 26px 28px; border: 1px dashed var(--line-strong); border-radius: 18px;
+    display: grid; gap: 16px;
+  }
+  .shared .eyebrow { color: var(--ink-2); }
+  .shared ul { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px 24px; font-size: 15.5px; }
+  .shared li { display: flex; align-items: center; gap: 10px; }
+  .shared li::before { content: "+"; font-family: var(--display); font-size: 22px; line-height: 1; color: var(--gold-ink); }
+
+  /* Testimonials */
+  .quotes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+  .quote { margin: 0; display: grid; gap: 16px; align-content: start; padding-top: 22px; border-top: 1px solid var(--line-strong); }
+  .quote p { font-family: var(--display); font-style: italic; font-size: 22px; line-height: 1.35; text-wrap: pretty; }
+  .quote cite { font-style: normal; font-family: var(--mono); font-size: 12.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+
+  /* FAQ */
+  .faq { max-width: 44em; display: grid; }
+  .faq details { border-top: 1px solid var(--line); }
+  .faq details:last-child { border-bottom: 1px solid var(--line); }
+  .faq summary {
+    list-style: none; cursor: pointer; padding: 20px 0; font-weight: 500; font-size: 18px;
+    display: flex; justify-content: space-between; align-items: center; gap: 20px;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font-family: var(--display); font-size: 28px; line-height: 1; color: var(--gold-ink); transition: transform 160ms ease; }
+  .faq details[open] summary::after { transform: rotate(45deg); }
+  .faq .answer { padding: 0 0 22px; color: var(--ink-2); max-width: 40em; }
+  .faq .answer a { color: var(--ink); }
+
+  /* Closing */
+  .closing { text-align: center; padding: 88px 0 96px; }
+  .closing .wrap { display: grid; justify-items: center; gap: 26px; }
+  .closing h2 { max-width: 18em; }
+  .closing .choices { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .closing .note { color: var(--ink-2); font-size: 15px; }
+
+  footer { border-top: 1px solid var(--line); padding: 34px 0; color: var(--ink-2); font-size: 14px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+  footer a { color: var(--ink-2); }
+
+  @media (max-width: 900px) {
+    .hero .wrap { grid-template-columns: 1fr; gap: 44px; }
+    .plus-glyph { font-size: 380px; right: -200px; top: -250px; }
+    .band .wrap { grid-template-columns: 1fr; gap: 32px; }
+    .shared ul { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 760px) {
+    section { padding: 56px 0; }
+    .pillars, .tiers, .quotes { grid-template-columns: 1fr; }
+    .shared ul { grid-template-columns: 1fr; }
+    .nav-links a:not(.btn) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="https://www.clearerthinking.org/" aria-label="Clearer Thinking home">
+      <svg viewBox="0 0 64 64" aria-hidden="true">
+        <rect x="0" y="0" width="64" height="64" rx="12" fill="var(--gold)"></rect>
+        <path d="M53.5,39.9c-0.7,1-1.5,2-2.4,2.9c-7.8,7.8-20.4,7.8-28.2,0s-7.8-20.4,0-28.2s20.4-7.8,28.2,0c0.9,0.9,1.7,1.9,2.4,2.9" fill="none" stroke="#2A1323" stroke-width="5" stroke-linecap="round"></path>
+        <path d="M28.9,35.6c-3.5-4.2-3.3-10.5,0.6-14.4c2.6-2.6,6.2-3.6,9.6-2.9" fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"></path>
+        <line x1="22.6" y1="43.2" x2="10.5" y2="55.3" stroke="#2A1323" stroke-width="5" stroke-linecap="round"></line>
+      </svg>
+      <span class="word">Clearer Thinking<i>Plus</i></span>
+    </a>
+    <nav class="nav-links" aria-label="Page">
+      <a href="#tiers">Memberships</a>
+      <a href="#why">Why Plus exists</a>
+      <a href="#faq">Questions</a>
+      <a class="btn btn-primary btn-sm" href="#tiers">Join Plus</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-copy">
+        <p class="eyebrow">Membership · From $9 a month</p>
+        <h1>Know your own mind well enough to <em>act</em> on it.</h1>
+        <p class="lead">Clearer Thinking Plus puts our research-backed assessments, ad-free podcast, bonus content and, on the top tier, monthly one-on-one coaching into one membership. It costs less than buying each piece separately, and it helps keep our 85+ tools free for everyone.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#tiers">Compare the three memberships</a>
+          <a class="textlink" href="#faq">Cancel anytime, by email</a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="plus-glyph" aria-hidden="true">+</div>
+        <div class="fit" id="fit" aria-live="polite">
+          <div class="fit-top">
+            <p class="eyebrow">A thirty-second tool</p>
+            <span class="fit-step" id="fit-step">Question 1 of 2</span>
+          </div>
+          <h3>Which membership fits you?</h3>
+
+          <div data-step data-weight="2">
+            <p class="fit-q">What brought you here today?</p>
+            <div class="fit-opts" role="group" aria-label="What brought you here today?">
+              <button class="fit-opt" type="button" data-tier="supporter">I use the free tools and want to give something back</button>
+              <button class="fit-opt" type="button" data-tier="explorer">I want a clearer, evidence-based read on how I think</button>
+              <button class="fit-opt" type="button" data-tier="navigator">I'm working toward a specific goal and want a person in my corner</button>
+            </div>
+          </div>
+
+          <div data-step data-weight="1" hidden>
+            <p class="fit-q">How do you prefer to work on yourself?</p>
+            <div class="fit-opts" role="group" aria-label="How do you prefer to work on yourself?">
+              <button class="fit-opt" type="button" data-tier="supporter">A question a day, on my own terms</button>
+              <button class="fit-opt" type="button" data-tier="explorer">A detailed report I can sit with and revisit</button>
+              <button class="fit-opt" type="button" data-tier="navigator">Talking it through with someone who asks good questions</button>
+            </div>
+          </div>
+
+          <div data-step hidden>
+            <div class="fit-result">
+              <p class="eyebrow">Start with</p>
+              <div class="tier-name" id="fit-name">Explorer</div>
+              <div class="tier-price" id="fit-price">$29 / MONTH</div>
+              <p id="fit-why"></p>
+              <div class="row">
+                <a class="btn btn-gold" id="fit-link" href="#tiers">Join as an Explorer</a>
+                <a class="textlink" href="#tiers">See the full comparison</a>
+              </div>
+              <button class="fit-reset" type="button" id="fit-reset">Start over</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="interval" aria-hidden="true">
+    <svg viewBox="0 0 220 22"><line class="rule" x1="1" y1="11" x2="219" y2="11"></line><line class="rule" x1="1" y1="4" x2="1" y2="18"></line><line class="rule" x1="219" y1="4" x2="219" y2="18"></line><path class="mark" d="M110 4 L117 11 L110 18 L103 11 Z"></path></svg>
+  </div>
+
+  <section id="what">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">What Plus is for</p>
+        <h2>Three things a membership gives you that the free tools can't.</h2>
+      </div>
+      <div class="pillars">
+        <article class="pillar">
+          <h3>A sharper picture of yourself</h3>
+          <p>The Professional Personality PDF Report and the Advanced Cognitive Assessment go further than our free quizzes, with results you keep and can come back to. The personality report is the thing more people buy from us than anything else.</p>
+        </article>
+        <article class="pillar">
+          <h3>A person in your corner</h3>
+          <p>Navigator members get two one-on-one coaching sessions every month to work on a decision, a habit, or a goal that matters to them, with someone who asks better questions than a quiz can.</p>
+        </article>
+        <article class="pillar">
+          <h3>A stake in the free tools</h3>
+          <p>Clearer Thinking is a not-for-profit. Memberships help pay for the next round of studies and tools, and those stay free for everyone, member or not.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="why">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">Why a not-for-profit charges for anything</p>
+        <h2 style="margin-top:14px">Why Plus exists</h2>
+        <div class="figures">
+          <div class="figure"><b>50+</b><span>independent studies</span></div>
+          <div class="figure"><b>85+</b><span>free interactive tools</span></div>
+        </div>
+      </div>
+      <div class="text">
+        <blockquote>Clearer Thinking is a not-for-profit project founded by Spencer Greenberg to help people think more rationally and make better decisions using science-based tools. We've run over 50 independent studies and created 85+ interactive tools, along with a wide range of free resources.</blockquote>
+        <p>Some readers have told us that paywalls feel off-mission, and we take that seriously. So Plus works the other way round. The free tools stay free. The membership bundles the premium pieces that already cost money to make, the assessments, the coaching, the bonus content, at a lower price than buying them one by one.</p>
+        <p>If it stops being worth it to you, one email cancels it.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tiers">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Memberships</p>
+        <h2>Three memberships. One email to cancel.</h2>
+        <p>Pick by what you want from it, not by what you can afford to leave on the table. Every tier includes the shared bundle below.</p>
+      </div>
+
+      <div class="tiers">
+        <article class="tier">
+          <div class="tier-head"><h3>Supporter</h3></div>
+          <div class="price"><b>$9</b><span>/ MONTH</span></div>
+          <p class="who">For readers who get real value from the free tools and want to back the next ones.</p>
+          <ul>
+            <li>Life-Changing Questions Deck</li>
+            <li>Ad-free podcasts, bonus content, monthly wrap-up, early access</li>
+          </ul>
+          <a class="btn btn-ghost" href="https://www.guidedtrack.com/programs/1pvomgo/run?p=supporter">Join as a Supporter</a>
+        </article>
+
+        <article class="tier featured">
+          <div class="tier-head"><h3>Explorer</h3><span class="tag">For self-insight</span></div>
+          <div class="price"><b>$29</b><span>/ MONTH</span></div>
+          <p class="who">For people who want the two assessments most of our buyers come for, in one place.</p>
+          <ul>
+            <li>Advanced Cognitive Assessment</li>
+            <li>Professional Personality PDF Report</li>
+            <li class="inherit">Everything in Supporter</li>
+          </ul>
+          <a class="btn btn-gold" href="https://www.guidedtrack.com/programs/1pvomgo/run?p=explorer">Join as an Explorer</a>
+        </article>
+
+        <article class="tier">
+          <div class="tier-head"><h3>Navigator</h3></div>
+          <div class="price"><b>$99</b><span>/ MONTH</span></div>
+          <p class="who">For people working toward a specific goal who want a coach alongside the tools.</p>
+          <ul>
+            <li>Two one-on-one coaching sessions every month</li>
+            <li class="inherit">Everything in Explorer</li>
+          </ul>
+          <a class="btn btn-ghost" href="https://www.guidedtrack.com/programs/1pvomgo/run?p=navigator">Join as a Navigator</a>
+        </article>
+      </div>
+
+      <div class="shared">
+        <p class="eyebrow">Every membership includes</p>
+        <ul>
+          <li>Ad-free podcasts</li>
+          <li>Over 10 hours of bonus content</li>
+          <li>Monthly email wrap-up</li>
+          <li>Early access to future tools</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="interval" aria-hidden="true">
+    <svg viewBox="0 0 220 22"><line class="rule" x1="1" y1="11" x2="219" y2="11"></line><line class="rule" x1="1" y1="4" x2="1" y2="18"></line><line class="rule" x1="219" y1="4" x2="219" y2="18"></line><path class="mark" d="M110 4 L117 11 L110 18 L103 11 Z"></path></svg>
+  </div>
+
+  <section id="readers">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">From readers</p>
+        <h2>What people say after using the tools for a while.</h2>
+      </div>
+      <div class="quotes">
+        <figure class="quote">
+          <p>“Clearer Thinking is an absolute game-changer! Every time I dive into their material, it's like a lightning bolt of inspiration striking my brain.”</p>
+          <figcaption><cite>Julie, Finland</cite></figcaption>
+        </figure>
+        <figure class="quote">
+          <p>“Clearer Thinking has been my guide through the territory of my own beliefs and biases.”</p>
+          <figcaption><cite>Edmond, USA</cite></figcaption>
+        </figure>
+        <figure class="quote">
+          <p>“Clearer Thinking is an absolute powerhouse when it comes to improving decision-making and rationality. Using its tools is like discovering a superpower that you didn't know you have.”</p>
+          <figcaption><cite>Anup, India</cite></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Questions</p>
+        <h2>Before you decide</h2>
+      </div>
+      <div class="faq">
+        <details open>
+          <summary>How do I cancel?</summary>
+          <div class="answer">If, for any reason, you regret your decision, you can cancel your subscription by emailing <a href="mailto:info@clearerthinking.org">info@clearerthinking.org</a>. That is the whole process.</div>
+        </details>
+        <details>
+          <summary>What do all three tiers have in common?</summary>
+          <div class="answer">Ad-free podcasts, over 10 hours of bonus content, a monthly email wrap-up of everything we published, and early access to tools before they go public. The tiers differ in what sits on top: the questions deck, the two assessments, and coaching.</div>
+        </details>
+        <details>
+          <summary>Do the free tools stay free?</summary>
+          <div class="answer">Yes. Plus bundles the premium pieces that already cost money to produce. The 85+ interactive tools, the newsletter, and the rest of the free resources remain free for everyone, and memberships help fund the next ones.</div>
+        </details>
+        <details>
+          <summary>Who is behind this?</summary>
+          <div class="answer">Clearer Thinking is a not-for-profit project founded by Spencer Greenberg. The team has run over 50 independent studies and builds tools that are tested on real people before they are published.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap">
+      <p class="eyebrow">Ready when you are</p>
+      <h2>Pick the membership that fits, and change your mind by email if it doesn't.</h2>
+      <div class="choices">
+        <a class="btn btn-ghost" href="https://www.guidedtrack.com/programs/1pvomgo/run?p=supporter">Supporter, $9</a>
+        <a class="btn btn-gold" href="https://www.guidedtrack.com/programs/1pvomgo/run?p=explorer">Explorer, $29</a>
+        <a class="btn btn-ghost" href="https://www.guidedtrack.com/programs/1pvomgo/run?p=navigator">Navigator, $99</a>
+      </div>
+      <p class="note">Prices in US dollars, billed monthly. Not sure which one? <a class="textlink" href="#fit">Use the thirty-second tool.</a></p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Clearer Thinking Plus is part of <a href="https://www.clearerthinking.org/">ClearerThinking.org</a>, a not-for-profit project.</span>
+    <span><a href="https://www.clearerthinking.org/coaching">Coaching</a> · <a href="mailto:info@clearerthinking.org">info@clearerthinking.org</a></span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var TIERS = {
+    supporter: {
+      name: "Supporter", price: "$9 / MONTH", article: "a Supporter",
+      why: "You get the Life-Changing Questions Deck and the shared bundle, and your membership helps keep the free tools free.",
+      href: "https://www.guidedtrack.com/programs/1pvomgo/run?p=supporter"
+    },
+    explorer: {
+      name: "Explorer", price: "$29 / MONTH", article: "an Explorer",
+      why: "You get the Advanced Cognitive Assessment and the Professional Personality PDF Report, the two things people buy from us most, along with the deck and the shared bundle.",
+      href: "https://www.guidedtrack.com/programs/1pvomgo/run?p=explorer"
+    },
+    navigator: {
+      name: "Navigator", price: "$99 / MONTH", article: "a Navigator",
+      why: "You get two one-on-one coaching sessions every month on whatever you're working toward, plus everything in Explorer.",
+      href: "https://www.guidedtrack.com/programs/1pvomgo/run?p=navigator"
+    }
+  };
+  var steps = Array.prototype.slice.call(document.querySelectorAll("#fit [data-step]"));
+  var stepLabel = document.getElementById("fit-step");
+  var scores, step;
+
+  function reset() {
+    scores = { supporter: 0, explorer: 0, navigator: 0 };
+    step = 0;
+    show(0);
+  }
+  function show(i) {
+    steps.forEach(function (s, idx) { s.hidden = idx !== i; });
+    stepLabel.textContent = i < 2 ? "Question " + (i + 1) + " of 2" : "Your fit";
+  }
+  function render() {
+    var best = Object.keys(scores).sort(function (a, b) { return scores[b] - scores[a]; })[0];
+    var t = TIERS[best];
+    document.getElementById("fit-name").textContent = t.name;
+    document.getElementById("fit-price").textContent = t.price;
+    document.getElementById("fit-why").textContent = t.why;
+    var link = document.getElementById("fit-link");
+    link.textContent = "Join as " + t.article;
+    link.href = t.href;
+  }
+  Array.prototype.forEach.call(document.querySelectorAll("#fit .fit-opt"), function (btn) {
+    btn.addEventListener("click", function () {
+      var weight = Number(btn.closest("[data-step]").getAttribute("data-weight")) || 1;
+      scores[btn.getAttribute("data-tier")] += weight;
+      step += 1;
+      if (step < 2) { show(step); } else { render(); show(2); }
+    });
+  });
+  document.getElementById("fit-reset").addEventListener("click", reset);
+  reset();
+})();
+</script>
+</body>
+</html>
