@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Career Navigation Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #FBFAF8; --surface: #FFFFFF; --ink: #1E2530; --ink-2: #5B6472; --ink-3: #8A93A0;
+    --line: #E6E3DD; --accent: #2E6BD6; --accent-soft: #DCE7FA; --track: #EFEDE8;
+    --font: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #15181D; --surface: #1C2027; --ink: #EDEFF2; --ink-2: #AEB5BF; --ink-3: #7B8390;
+      --line: #2C323B; --accent: #7AA6F2; --accent-soft: #23324D; --track: #242932;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #15181D; --surface: #1C2027; --ink: #EDEFF2; --ink-2: #AEB5BF; --ink-3: #7B8390;
+    --line: #2C323B; --accent: #7AA6F2; --accent-soft: #23324D; --track: #242932;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 48px 24px 96px; }
+  h1 { font-size: 40px; line-height: 1.1; margin: 0 0 8px; letter-spacing: -0.01em; text-wrap: balance; }
+  .sub { color: var(--ink-2); margin: 0 0 40px; }
+  h2 { font-size: 26px; margin: 56px 0 8px; letter-spacing: -0.01em; }
+  h3 { font-size: 19px; margin: 32px 0 6px; }
+  h4 { font-size: 16px; margin: 20px 0 4px; }
+  h3 .n, h4 .n, .val .n { color: var(--ink-3); font-weight: 400; font-size: 14px; }
+  p { margin: 0 0 12px; max-width: 68ch; }
+  .muted { color: var(--ink-2); }
+  .note { color: var(--ink-2); font-size: 14.5px; margin-top: 8px; max-width: 70ch; }
+  .lede { font-size: 19px; color: var(--ink-2); max-width: 62ch; }
+  ul { padding-left: 20px; margin: 0 0 12px; max-width: 70ch; }
+  li { margin-bottom: 6px; }
+  .tiles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 20px 0 8px; }
+  .tile { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; }
+  .tile b { display: block; font-size: 34px; line-height: 1; font-weight: 700; letter-spacing: -0.01em; }
+  .tile span { display: block; color: var(--ink-2); font-size: 14px; margin-top: 8px; line-height: 1.3; }
+  table.bars { width: 100%; border-collapse: collapse; margin: 8px 0 4px; }
+  table.bars th { text-align: left; font-weight: 400; padding: 5px 14px 5px 0; width: 46%; vertical-align: middle; line-height: 1.25; font-size: 15.5px; }
+  table.bars td.track { padding: 5px 0; vertical-align: middle; }
+  table.bars .bar { height: 10px; background: var(--accent); border-radius: 0 4px 4px 0; min-width: 2px; }
+  table.bars td.val { width: 96px; padding: 5px 0 5px 12px; text-align: left; font-variant-numeric: tabular-nums; font-weight: 600; white-space: nowrap; vertical-align: middle; font-size: 15.5px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .sm h4 { margin-top: 12px; }
+  .sm table.bars th { width: 40%; font-size: 14px; }
+  .sm table.bars td.val { width: 40px; font-size: 14px; }
+  .theme { padding: 14px 0 6px; border-top: 1px solid var(--line); }
+  .theme h4 { margin-top: 0; }
+  .quotes { list-style: none; padding: 0; color: var(--ink-2); font-size: 15.5px; }
+  .quotes li { padding-left: 14px; border-left: 2px solid var(--line); margin-bottom: 6px; }
+  table.plain { border-collapse: collapse; margin: 8px 0 12px; font-size: 15px; }
+  table.plain th, table.plain td { padding: 6px 18px 6px 0; border-bottom: 1px solid var(--line); text-align: left; }
+  table.plain td.num, table.plain th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .rec { counter-reset: rec; padding-left: 0; list-style: none; }
+  .rec li { counter-increment: rec; padding-left: 36px; position: relative; margin-bottom: 14px; }
+  .rec li::before { content: counter(rec); position: absolute; left: 0; top: 2px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent-soft); color: var(--ink); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .rec b { font-weight: 700; }
+  @media (max-width: 700px) { .tiles { grid-template-columns: 1fr 1fr; } .grid2 { grid-template-columns: 1fr; } table.bars th { width: 42%; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <h1>Career Navigation Survey: what 143 readers told us</h1>
+  <p class="sub">GuidedTrack program 38720 · runs from Sep 1 to Sep 7, 2026 · report generated 2026-09-07 10:17am</p>
+
+  <p class="lede">The survey asked newsletter readers where they are with their career, what is driving a change, what they weigh when choosing a path, what would help most, and what stands in their way. This report covers every non-test run exported from GuidedTrack.</p>
+
+  <h2>The short version</h2>
+  <ul>
+    <li><b>Most respondents are mid-change.</b> 104 of 143 (73%) are actively changing, seriously considering it, or thinking about it. Only 18 say they are happy where they are.</li>
+    <li><b>They want a diagnosis first, then a plan.</b> A self-assessment that maps strengths and values to careers was the top pick (41%), followed by a step-by-step change program (25%). The live workshop itself came third at 14%.</li>
+    <li><b>Fit and meaning beat money when weighing a path.</b> 70% chose fit with their strengths and personality and 70% chose meaning, against 62% for salary. Reasons for leaving are flatter: no single driver passes 43%.</li>
+    <li><b>The biggest obstacle is choosing.</b> 29 of 96 open answers (30%) are some version of "I don't know which path fits me". Money and time, age and credibility, confidence, and the AI-shaped job market each take another 13 to 17%.</li>
+    <li><b>This is an experienced, highly educated audience.</b> 50% have more than ten years of experience and 43% hold a master's or doctorate. Tech, public sector, research, education, and healthcare lead.</li>
+    <li><b>Demand for the workshop is real.</b> 65 of the 111 people who finished (59%) left an email to be alerted when it is scheduled, rising to 71% among active changers.</li>
+  </ul>
+
+  <h2>Reach and completion</h2>
+  <div class="tiles">
+    <div class="tile"><b>215</b><span>people opened the survey</span></div>
+    <div class="tile"><b>111</b><span>finished it (52% of openers, 78% of those who answered the first question)</span></div>
+    <div class="tile"><b>3.6 min</b><span>median time for finishers (middle half: 2.6 to 6.4 min)</span></div>
+    <div class="tile"><b>87%</b><span>arrived from the newsletter link</span></div>
+  </div>
+  <h3>Where people dropped off</h3>
+  <table class="bars" aria-label="Share of everyone who opened"><tbody>
+<tr><th scope="row">Landed on the intro page</th><td class="track"><div class="bar" style="width:100.0%" title="Landed on the intro page: 215 of 215"></div></td><td class="val">100%<span class="n"> 215</span></td></tr>
+<tr><th scope="row">Answered: where are you with your career</th><td class="track"><div class="bar" style="width:66.5%" title="Answered: where are you with your career: 143 of 215"></div></td><td class="val">67%<span class="n"> 143</span></td></tr>
+<tr><th scope="row">Answered: work situation</th><td class="track"><div class="bar" style="width:54.9%" title="Answered: work situation: 118 of 215"></div></td><td class="val">55%<span class="n"> 118</span></td></tr>
+<tr><th scope="row">Answered: industry</th><td class="track"><div class="bar" style="width:54.4%" title="Answered: industry: 117 of 215"></div></td><td class="val">54%<span class="n"> 117</span></td></tr>
+<tr><th scope="row">Answered: years of experience</th><td class="track"><div class="bar" style="width:53.5%" title="Answered: years of experience: 115 of 215"></div></td><td class="val">53%<span class="n"> 115</span></td></tr>
+<tr><th scope="row">Answered: education</th><td class="track"><div class="bar" style="width:52.6%" title="Answered: education: 113 of 215"></div></td><td class="val">53%<span class="n"> 113</span></td></tr>
+<tr><th scope="row">Reached the thank-you page</th><td class="track"><div class="bar" style="width:51.6%" title="Reached the thank-you page: 111 of 215"></div></td><td class="val">52%<span class="n"> 111</span></td></tr>
+</tbody></table>
+<p class="note">A third of openers never answered the first question: the intro page with its Start button is the single biggest drop. After that, 78% of those who started answering reached the end. Questions shown only to some stages (reasons, factors, obstacle, format) are left out of this funnel so every step has the same base.</p>
+  <h3>By day and source</h3>
+  <table class="plain"><thead><tr><th>Day (UTC)</th><th class="num">Newsletter</th><th class="num">Direct</th><th class="num">Total</th></tr></thead><tbody><tr><td>2026-09-01</td><td class='num'>0</td><td class='num'>1</td><td class='num'>1</td></tr><tr><td>2026-09-02</td><td class='num'>0</td><td class='num'>1</td><td class='num'>1</td></tr><tr><td>2026-09-03</td><td class='num'>19</td><td class='num'>1</td><td class='num'>20</td></tr><tr><td>2026-09-04</td><td class='num'>148</td><td class='num'>20</td><td class='num'>168</td></tr><tr><td>2026-09-05</td><td class='num'>11</td><td class='num'>2</td><td class='num'>13</td></tr><tr><td>2026-09-06</td><td class='num'>6</td><td class='num'>2</td><td class='num'>8</td></tr><tr><td>2026-09-07</td><td class='num'>4</td><td class='num'>0</td><td class='num'>4</td></tr></tbody></table>
+  <p class="note">The newsletter link (campaign slug "what-capitalists-and-marxists-agree-and-disagree-about") drove 188 runs. 43 of them arrived in the first hour after midnight UTC on September 4, which is the send. Newsletter visitors finished at 48% versus 74% for direct visitors, who were fewer and likely more deliberate.</p>
+
+  <h2>Who answered</h2>
+  <h3>Where they are with their career <span class="n">n = 143</span></h3>
+  <table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Actively changing</th><td class="track"><div class="bar" style="width:100.0%" title="Actively changing: 45 of 143"></div></td><td class="val">31%<span class="n"> 45</span></td></tr>
+<tr><th scope="row">Seriously considering</th><td class="track"><div class="bar" style="width:75.6%" title="Seriously considering: 34 of 143"></div></td><td class="val">24%<span class="n"> 34</span></td></tr>
+<tr><th scope="row">Idly thinking about it</th><td class="track"><div class="bar" style="width:55.6%" title="Idly thinking about it: 25 of 143"></div></td><td class="val">17%<span class="n"> 25</span></td></tr>
+<tr><th scope="row">Choosing a first career</th><td class="track"><div class="bar" style="width:46.7%" title="Choosing a first career: 21 of 143"></div></td><td class="val">15%<span class="n"> 21</span></td></tr>
+<tr><th scope="row">Happy where they are</th><td class="track"><div class="bar" style="width:40.0%" title="Happy where they are: 18 of 143"></div></td><td class="val">13%<span class="n"> 18</span></td></tr>
+</tbody></table>
+  <div class="grid2">
+    <div>
+      <h3>Years of experience <span class="n">n = 115</span></h3>
+      <table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">None yet</th><td class="track"><div class="bar" style="width:40.6%" title="None yet: 13 of 115"></div></td><td class="val">11%<span class="n"> 13</span></td></tr>
+<tr><th scope="row">Less than 2 years</th><td class="track"><div class="bar" style="width:31.2%" title="Less than 2 years: 10 of 115"></div></td><td class="val">9%<span class="n"> 10</span></td></tr>
+<tr><th scope="row">2 to 5 years</th><td class="track"><div class="bar" style="width:53.1%" title="2 to 5 years: 17 of 115"></div></td><td class="val">15%<span class="n"> 17</span></td></tr>
+<tr><th scope="row">6 to 10 years</th><td class="track"><div class="bar" style="width:53.1%" title="6 to 10 years: 17 of 115"></div></td><td class="val">15%<span class="n"> 17</span></td></tr>
+<tr><th scope="row">11 to 20 years</th><td class="track"><div class="bar" style="width:81.2%" title="11 to 20 years: 26 of 115"></div></td><td class="val">23%<span class="n"> 26</span></td></tr>
+<tr><th scope="row">More than 20 years</th><td class="track"><div class="bar" style="width:100.0%" title="More than 20 years: 32 of 115"></div></td><td class="val">28%<span class="n"> 32</span></td></tr>
+</tbody></table>
+    </div>
+    <div>
+      <h3>Highest education <span class="n">n = 113</span></h3>
+      <table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">High school or less</th><td class="track"><div class="bar" style="width:20.0%" title="High school or less: 7 of 113"></div></td><td class="val">6%<span class="n"> 7</span></td></tr>
+<tr><th scope="row">Some college or currently studying</th><td class="track"><div class="bar" style="width:31.4%" title="Some college or currently studying: 11 of 113"></div></td><td class="val">10%<span class="n"> 11</span></td></tr>
+<tr><th scope="row">Vocational or professional certification</th><td class="track"><div class="bar" style="width:22.9%" title="Vocational or professional certification: 8 of 113"></div></td><td class="val">7%<span class="n"> 8</span></td></tr>
+<tr><th scope="row">Bachelor&#x27;s degree</th><td class="track"><div class="bar" style="width:97.1%" title="Bachelor&#x27;s degree: 34 of 113"></div></td><td class="val">30%<span class="n"> 34</span></td></tr>
+<tr><th scope="row">Master&#x27;s degree</th><td class="track"><div class="bar" style="width:100.0%" title="Master&#x27;s degree: 35 of 113"></div></td><td class="val">31%<span class="n"> 35</span></td></tr>
+<tr><th scope="row">Doctorate</th><td class="track"><div class="bar" style="width:40.0%" title="Doctorate: 14 of 113"></div></td><td class="val">12%<span class="n"> 14</span></td></tr>
+<tr><th scope="row">Other (free text)</th><td class="track"><div class="bar" style="width:11.4%" title="Other (free text): 4 of 113"></div></td><td class="val">4%<span class="n"> 4</span></td></tr>
+</tbody></table>
+    </div>
+  </div>
+  <div class="grid2">
+    <div>
+      <h3>Work situation <span class="n">n = 118</span></h3>
+      <table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Employed full-time</th><td class="track"><div class="bar" style="width:100.0%" title="Employed full-time: 48 of 118"></div></td><td class="val">41%<span class="n"> 48</span></td></tr>
+<tr><th scope="row">Employed part-time</th><td class="track"><div class="bar" style="width:31.2%" title="Employed part-time: 15 of 118"></div></td><td class="val">13%<span class="n"> 15</span></td></tr>
+<tr><th scope="row">Self-employed or freelancing</th><td class="track"><div class="bar" style="width:25.0%" title="Self-employed or freelancing: 12 of 118"></div></td><td class="val">10%<span class="n"> 12</span></td></tr>
+<tr><th scope="row">Studying</th><td class="track"><div class="bar" style="width:43.8%" title="Studying: 21 of 118"></div></td><td class="val">18%<span class="n"> 21</span></td></tr>
+<tr><th scope="row">Between jobs</th><td class="track"><div class="bar" style="width:22.9%" title="Between jobs: 11 of 118"></div></td><td class="val">9%<span class="n"> 11</span></td></tr>
+<tr><th scope="row">Retired</th><td class="track"><div class="bar" style="width:10.4%" title="Retired: 5 of 118"></div></td><td class="val">4%<span class="n"> 5</span></td></tr>
+<tr><th scope="row">Other (free text)</th><td class="track"><div class="bar" style="width:12.5%" title="Other (free text): 6 of 118"></div></td><td class="val">5%<span class="n"> 6</span></td></tr>
+</tbody></table>
+    </div>
+    <div>
+      <h3>Industry <span class="n">n = 117</span></h3>
+      <table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Technology or software</th><td class="track"><div class="bar" style="width:100.0%" title="Technology or software: 26 of 117"></div></td><td class="val">22%<span class="n"> 26</span></td></tr>
+<tr><th scope="row">Government or nonprofit</th><td class="track"><div class="bar" style="width:57.7%" title="Government or nonprofit: 15 of 117"></div></td><td class="val">13%<span class="n"> 15</span></td></tr>
+<tr><th scope="row">Science or research</th><td class="track"><div class="bar" style="width:50.0%" title="Science or research: 13 of 117"></div></td><td class="val">11%<span class="n"> 13</span></td></tr>
+<tr><th scope="row">Education</th><td class="track"><div class="bar" style="width:42.3%" title="Education: 11 of 117"></div></td><td class="val">9%<span class="n"> 11</span></td></tr>
+<tr><th scope="row">Healthcare or medicine</th><td class="track"><div class="bar" style="width:34.6%" title="Healthcare or medicine: 9 of 117"></div></td><td class="val">8%<span class="n"> 9</span></td></tr>
+<tr><th scope="row">Retail, hospitality, services</th><td class="track"><div class="bar" style="width:34.6%" title="Retail, hospitality, services: 9 of 117"></div></td><td class="val">8%<span class="n"> 9</span></td></tr>
+<tr><th scope="row">Manufacturing, construction, logistics</th><td class="track"><div class="bar" style="width:26.9%" title="Manufacturing, construction, logistics: 7 of 117"></div></td><td class="val">6%<span class="n"> 7</span></td></tr>
+<tr><th scope="row">Creative fields</th><td class="track"><div class="bar" style="width:15.4%" title="Creative fields: 4 of 117"></div></td><td class="val">3%<span class="n"> 4</span></td></tr>
+<tr><th scope="row">Other (free text)</th><td class="track"><div class="bar" style="width:88.5%" title="Other (free text): 23 of 117"></div></td><td class="val">20%<span class="n"> 23</span></td></tr>
+</tbody></table>
+    </div>
+  </div>
+  <p class="note">Free-text roles skew toward software engineers and product managers, teachers and lecturers, researchers and PhD students, public-sector officers, and clinicians. First-career choosers are almost all students; active changers are mostly employed full-time with more than ten years behind them.</p>
+
+  <h2>What would help most</h2>
+  <p>Asked only of people who are changing, considering, thinking, or choosing a first career. One answer each.</p>
+  <h3>Overall <span class="n">n = 118</span></h3>
+  <table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Self-assessment: careers that fit my strengths and values</th><td class="track"><div class="bar" style="width:100.0%" title="Self-assessment: careers that fit my strengths and values: 48 of 118"></div></td><td class="val">41%<span class="n"> 48</span></td></tr>
+<tr><th scope="row">Step-by-step career-change program</th><td class="track"><div class="bar" style="width:62.5%" title="Step-by-step career-change program: 30 of 118"></div></td><td class="val">25%<span class="n"> 30</span></td></tr>
+<tr><th scope="row">Live workshop on designing your ideal career</th><td class="track"><div class="bar" style="width:35.4%" title="Live workshop on designing your ideal career: 17 of 118"></div></td><td class="val">14%<span class="n"> 17</span></td></tr>
+<tr><th scope="row">Real stories of successful career changers</th><td class="track"><div class="bar" style="width:25.0%" title="Real stories of successful career changers: 12 of 118"></div></td><td class="val">10%<span class="n"> 12</span></td></tr>
+<tr><th scope="row">One-on-one career coaching</th><td class="track"><div class="bar" style="width:22.9%" title="One-on-one career coaching: 11 of 118"></div></td><td class="val">9%<span class="n"> 11</span></td></tr>
+</tbody></table>
+<p class="note">Self-assessment and step-by-step program together take 66%. The live workshop, the format this survey was built to shape, is chosen by 14%, and coaching by 9%. Read this as what people think they need before they act: a way to narrow the options, then a path through the change.</p>
+  <h3>By career stage <span class="n">counts</span></h3>
+  <div class="grid2"><div class="sm"><h4>Actively changing <span class="n">n = 41</span></h4><table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Self-assessment</th><td class="track"><div class="bar" style="width:100.0%" title="Self-assessment: 14 of 41"></div></td><td class="val">14</td></tr>
+<tr><th scope="row">Step-by-step program</th><td class="track"><div class="bar" style="width:92.9%" title="Step-by-step program: 13 of 41"></div></td><td class="val">13</td></tr>
+<tr><th scope="row">Live workshop</th><td class="track"><div class="bar" style="width:42.9%" title="Live workshop: 6 of 41"></div></td><td class="val">6</td></tr>
+<tr><th scope="row">Real stories</th><td class="track"><div class="bar" style="width:28.6%" title="Real stories: 4 of 41"></div></td><td class="val">4</td></tr>
+<tr><th scope="row">Coaching</th><td class="track"><div class="bar" style="width:28.6%" title="Coaching: 4 of 41"></div></td><td class="val">4</td></tr>
+</tbody></table></div><div class="sm"><h4>Seriously considering <span class="n">n = 33</span></h4><table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Self-assessment</th><td class="track"><div class="bar" style="width:78.6%" title="Self-assessment: 11 of 33"></div></td><td class="val">11</td></tr>
+<tr><th scope="row">Step-by-step program</th><td class="track"><div class="bar" style="width:78.6%" title="Step-by-step program: 11 of 33"></div></td><td class="val">11</td></tr>
+<tr><th scope="row">Live workshop</th><td class="track"><div class="bar" style="width:28.6%" title="Live workshop: 4 of 33"></div></td><td class="val">4</td></tr>
+<tr><th scope="row">Real stories</th><td class="track"><div class="bar" style="width:21.4%" title="Real stories: 3 of 33"></div></td><td class="val">3</td></tr>
+<tr><th scope="row">Coaching</th><td class="track"><div class="bar" style="width:28.6%" title="Coaching: 4 of 33"></div></td><td class="val">4</td></tr>
+</tbody></table></div><div class="sm"><h4>Idly thinking about it <span class="n">n = 19</span></h4><table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Self-assessment</th><td class="track"><div class="bar" style="width:78.6%" title="Self-assessment: 11 of 19"></div></td><td class="val">11</td></tr>
+<tr><th scope="row">Step-by-step program</th><td class="track"><div class="bar" style="width:28.6%" title="Step-by-step program: 4 of 19"></div></td><td class="val">4</td></tr>
+<tr><th scope="row">Live workshop</th><td class="track"><div class="bar" style="width:7.1%" title="Live workshop: 1 of 19"></div></td><td class="val">1</td></tr>
+<tr><th scope="row">Real stories</th><td class="track"><div class="bar" style="width:14.3%" title="Real stories: 2 of 19"></div></td><td class="val">2</td></tr>
+<tr><th scope="row">Coaching</th><td class="track"><div class="bar" style="width:7.1%" title="Coaching: 1 of 19"></div></td><td class="val">1</td></tr>
+</tbody></table></div><div class="sm"><h4>Choosing a first career <span class="n">n = 17</span></h4><table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Self-assessment</th><td class="track"><div class="bar" style="width:57.1%" title="Self-assessment: 8 of 17"></div></td><td class="val">8</td></tr>
+<tr><th scope="row">Step-by-step program</th><td class="track"><div class="bar" style="width:7.1%" title="Step-by-step program: 1 of 17"></div></td><td class="val">1</td></tr>
+<tr><th scope="row">Live workshop</th><td class="track"><div class="bar" style="width:42.9%" title="Live workshop: 6 of 17"></div></td><td class="val">6</td></tr>
+<tr><th scope="row">Real stories</th><td class="track"><div class="bar" style="width:14.3%" title="Real stories: 2 of 17"></div></td><td class="val">2</td></tr>
+<tr><th scope="row">Coaching</th><td class="track"><div class="bar" style="width:0.0%" title="Coaching: 0 of 17"></div></td><td class="val">0</td></tr>
+</tbody></table></div><div class="sm"><h4>Happy where they are <span class="n">n = 8</span></h4><table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Self-assessment</th><td class="track"><div class="bar" style="width:28.6%" title="Self-assessment: 4 of 8"></div></td><td class="val">4</td></tr>
+<tr><th scope="row">Step-by-step program</th><td class="track"><div class="bar" style="width:7.1%" title="Step-by-step program: 1 of 8"></div></td><td class="val">1</td></tr>
+<tr><th scope="row">Live workshop</th><td class="track"><div class="bar" style="width:0.0%" title="Live workshop: 0 of 8"></div></td><td class="val">0</td></tr>
+<tr><th scope="row">Real stories</th><td class="track"><div class="bar" style="width:7.1%" title="Real stories: 1 of 8"></div></td><td class="val">1</td></tr>
+<tr><th scope="row">Coaching</th><td class="track"><div class="bar" style="width:14.3%" title="Coaching: 2 of 8"></div></td><td class="val">2</td></tr>
+</tbody></table></div></div>
+  <p class="note">The self-assessment leads or ties in every stage. Among active changers the step-by-step program is level with it, and among first-career choosers the live workshop is second.</p>
+
+  <h2>Why they want a different career</h2>
+  <p>Asked of the 127 people who are changing, considering, or thinking about it. Multiple answers allowed; on average people picked 2.8.</p>
+  <table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">My work doesn&#x27;t feel meaningful</th><td class="track"><div class="bar" style="width:100.0%" title="My work doesn&#x27;t feel meaningful: 54 of 127"></div></td><td class="val">43%<span class="n"> 54</span></td></tr>
+<tr><th scope="row">Better pay or financial security</th><td class="track"><div class="bar" style="width:94.4%" title="Better pay or financial security: 51 of 127"></div></td><td class="val">40%<span class="n"> 51</span></td></tr>
+<tr><th scope="row">I want more flexibility or autonomy</th><td class="track"><div class="bar" style="width:83.3%" title="I want more flexibility or autonomy: 45 of 127"></div></td><td class="val">35%<span class="n"> 45</span></td></tr>
+<tr><th scope="row">Workplace culture or management</th><td class="track"><div class="bar" style="width:70.4%" title="Workplace culture or management: 38 of 127"></div></td><td class="val">30%<span class="n"> 38</span></td></tr>
+<tr><th scope="row">I want work that more directly helps people</th><td class="track"><div class="bar" style="width:70.4%" title="I want work that more directly helps people: 38 of 127"></div></td><td class="val">30%<span class="n"> 38</span></td></tr>
+<tr><th scope="row">Burnout or stress</th><td class="track"><div class="bar" style="width:68.5%" title="Burnout or stress: 37 of 127"></div></td><td class="val">29%<span class="n"> 37</span></td></tr>
+<tr><th scope="row">Concerns about my industry&#x27;s future (e.g., AI, layoffs)</th><td class="track"><div class="bar" style="width:66.7%" title="Concerns about my industry&#x27;s future (e.g., AI, layoffs): 36 of 127"></div></td><td class="val">28%<span class="n"> 36</span></td></tr>
+<tr><th scope="row">Not enough growth or learning</th><td class="track"><div class="bar" style="width:59.3%" title="Not enough growth or learning: 32 of 127"></div></td><td class="val">25%<span class="n"> 32</span></td></tr>
+</tbody></table>
+<p class="note">A flat profile: meaning, pay, flexibility, wanting to help people, culture, burnout, AI-driven industry worries, and lack of growth all sit between 26% and 42%. 19 wrote their own reason, mostly retirement transitions, relocation, and redundancy.</p>
+
+  <h2>What they weigh when choosing a path</h2>
+  <p>Asked of the 125 people who are exploring a change or a first career. Multiple answers allowed; on average people picked 4.4.</p>
+  <table class="bars" aria-label="% of respondents"><tbody>
+<tr><th scope="row">Fit with my strengths and personality</th><td class="track"><div class="bar" style="width:100.0%" title="Fit with my strengths and personality: 88 of 125"></div></td><td class="val">70%<span class="n"> 88</span></td></tr>
+<tr><th scope="row">Meaning and purpose</th><td class="track"><div class="bar" style="width:98.9%" title="Meaning and purpose: 87 of 125"></div></td><td class="val">70%<span class="n"> 87</span></td></tr>
+<tr><th scope="row">Flexibility (remote work, control over my hours)</th><td class="track"><div class="bar" style="width:93.2%" title="Flexibility (remote work, control over my hours): 82 of 125"></div></td><td class="val">66%<span class="n"> 82</span></td></tr>
+<tr><th scope="row">Salary and financial security</th><td class="track"><div class="bar" style="width:88.6%" title="Salary and financial security: 78 of 125"></div></td><td class="val">62%<span class="n"> 78</span></td></tr>
+<tr><th scope="row">Feeling confident I could actually succeed at it</th><td class="track"><div class="bar" style="width:70.5%" title="Feeling confident I could actually succeed at it: 62 of 125"></div></td><td class="val">50%<span class="n"> 62</span></td></tr>
+<tr><th scope="row">Positive impact on other people</th><td class="track"><div class="bar" style="width:67.0%" title="Positive impact on other people: 59 of 125"></div></td><td class="val">47%<span class="n"> 59</span></td></tr>
+<tr><th scope="row">Long-term job security and demand</th><td class="track"><div class="bar" style="width:58.0%" title="Long-term job security and demand: 51 of 125"></div></td><td class="val">41%<span class="n"> 51</span></td></tr>
+<tr><th scope="row">How long (and how much money) retraining would take</th><td class="track"><div class="bar" style="width:42.0%" title="How long (and how much money) retraining would take: 37 of 125"></div></td><td class="val">30%<span class="n"> 37</span></td></tr>
+</tbody></table>
+<p class="note">Fit and meaning lead, with flexibility and salary close behind. Only 30% flagged the cost and length of retraining here, yet it is one of the most common obstacles below: people do not weigh it until it blocks them.</p>
+
+  <h2>The biggest obstacle, in their words</h2>
+  <p>96 people wrote an obstacle or open question. Each answer was coded into one theme; three short quotes illustrate each.</p>
+  <table class="bars" aria-label="Share of coded answers"><tbody>
+<tr><th scope="row">Which path fits me</th><td class="track"><div class="bar" style="width:100.0%" title="Which path fits me: 29 of 96"></div></td><td class="val">30%<span class="n"> 29</span></td></tr>
+<tr><th scope="row">Confidence and follow-through</th><td class="track"><div class="bar" style="width:55.2%" title="Confidence and follow-through: 16 of 96"></div></td><td class="val">17%<span class="n"> 16</span></td></tr>
+<tr><th scope="row">Money and time of the transition</th><td class="track"><div class="bar" style="width:48.3%" title="Money and time of the transition: 14 of 96"></div></td><td class="val">15%<span class="n"> 14</span></td></tr>
+<tr><th scope="row">Age, credentials, being taken seriously</th><td class="track"><div class="bar" style="width:48.3%" title="Age, credentials, being taken seriously: 14 of 96"></div></td><td class="val">15%<span class="n"> 14</span></td></tr>
+<tr><th scope="row">Job market and AI</th><td class="track"><div class="bar" style="width:41.4%" title="Job market and AI: 12 of 96"></div></td><td class="val">12%<span class="n"> 12</span></td></tr>
+<tr><th scope="row">Meaning and values</th><td class="track"><div class="bar" style="width:24.1%" title="Meaning and values: 7 of 96"></div></td><td class="val">7%<span class="n"> 7</span></td></tr>
+<tr><th scope="row">Practical how-to</th><td class="track"><div class="bar" style="width:13.8%" title="Practical how-to: 4 of 96"></div></td><td class="val">4%<span class="n"> 4</span></td></tr>
+</tbody></table>
+  <div class="theme"><h4>Which path fits me <span class="n">29 answers, 30%</span></h4><p class="muted">Indecision, too many options, not knowing what they want or are good at</p><ul class='quotes'><li>“too many options”</li><li>“I don’t know what I’m good at , what area to explore.”</li><li>“Uncertainty. All paths seem feasible, but it&#x27;s hard to choose one”</li></ul></div><div class="theme"><h4>Confidence and follow-through <span class="n">16 answers, 17%</span></h4><p class="muted">Fear of failure, inertia, energy, health, family constraints, self-doubt</p><ul class='quotes'><li>“Fear of failure”</li><li>“Inertia”</li><li>“Whether I&#x27;m cut out for it or not”</li></ul></div><div class="theme"><h4>Money and time of the transition <span class="n">14 answers, 15%</span></h4><p class="muted">Pay cut during retraining, cost of school, supporting a family, no spare time</p><ul class='quotes'><li>“can i afford earning significatly less during the transition time”</li><li>“The biggest obstacle is the initial financial hit”</li><li>“How to start while still supporting my family”</li></ul></div><div class="theme"><h4>Age, credentials, being taken seriously <span class="n">14 answers, 15%</span></h4><p class="muted">Ageism, unconventional CVs, gatekeeping, transferable skills</p><ul class='quotes'><li>“Being an older worker is an obstacle.”</li><li>“Will an employer want what I bring to the table?”</li><li>“Not exactly sure how to market my transferable skills.”</li></ul></div><div class="theme"><h4>Job market and AI <span class="n">12 answers, 12%</span></h4><p class="muted">Few openings, AI replacing roles, which skills will still matter</p><ul class='quotes'><li>“Afraid that every career I consider would eventually be replaced by AI or robots”</li><li>“Lack of job opportunities”</li><li>“What job skills will be necessary in the future”</li></ul></div><div class="theme"><h4>Meaning and values <span class="n">7 answers, 7%</span></h4><p class="muted">Whether the change will bring more meaning, doing good, ethics</p><ul class='quotes'><li>“Will the future bring me greater meaning and happiness?”</li><li>“Is working for a university a good or satisfactory way to do good?”</li><li>“What option will give job satisfaction and financial security in retirement?”</li></ul></div><div class="theme"><h4>Practical how-to <span class="n">4 answers, 4%</span></h4><p class="muted">Concrete steps, certifications, mentors, portfolios</p><ul class='quotes'><li>“The concrete steps I can take to start the transition. For example, finding a mentor, taking relevant courses, finding an entry path with…”</li><li>“How many certifications will I need before I will be employable in cybersecurity or should I be looking at another bachelors degree”</li><li>“What sort of portfolio would I need to build to access my desired career path and how could I manage that without having the relevant…”</li></ul></div>
+
+  <h2>Who wants to hear about the workshop</h2>
+  <p>Share of finishers who typed an email for the workshop alert, by career stage.</p>
+  <table class="bars" aria-label="Email opt-in by stage"><tbody><tr><th scope="row">Actively changing</th><td class="track"><div class="bar" style="width:71.1%" title="Actively changing: 27 of 38"></div></td><td class="val">71%<span class="n"> 27 of 38</span></td></tr><tr><th scope="row">Seriously considering</th><td class="track"><div class="bar" style="width:64.5%" title="Seriously considering: 20 of 31"></div></td><td class="val">65%<span class="n"> 20 of 31</span></td></tr><tr><th scope="row">Idly thinking about it</th><td class="track"><div class="bar" style="width:44.4%" title="Idly thinking about it: 8 of 18"></div></td><td class="val">44%<span class="n"> 8 of 18</span></td></tr><tr><th scope="row">Choosing a first career</th><td class="track"><div class="bar" style="width:43.8%" title="Choosing a first career: 7 of 16"></div></td><td class="val">44%<span class="n"> 7 of 16</span></td></tr><tr><th scope="row">Happy where they are</th><td class="track"><div class="bar" style="width:37.5%" title="Happy where they are: 3 of 8"></div></td><td class="val">38%<span class="n"> 3 of 8</span></td></tr></tbody></table>
+  <p class="note">Active changers and serious considerers opt in at roughly two in three. The list of 65 addresses lives in the GuidedTrack export under alertEmail; it is not reproduced here.</p>
+
+  <h2>What this means for the workshop</h2>
+  <ol class="rec">
+    <li><b>Make the core of the workshop a self-assessment, then a plan.</b> Two thirds of respondents asked for exactly that pairing. A live session that walks people through mapping strengths and values to concrete career options, and leaves them with a step-by-step plan, serves both preferences at once.</li>
+    <li><b>Build the agenda from the obstacle themes.</b> A narrowing exercise for the third who cannot choose; a transition budget (money and time) for the 15% blocked by cost; a segment on transferable skills and age for the 15% who fear not being taken seriously; a short evidence-based look at which skills hold up against AI for the 13% worried about the market; and a commitment step for the 17% held back by fear or inertia.</li>
+    <li><b>Pitch it to experienced professionals, not graduates.</b> Half the audience has more than ten years of experience and nearly half holds a graduate degree. Examples and case studies should be mid-career pivots, with first-career choosers as a secondary track.</li>
+    <li><b>Invite the 65 who left an email first.</b> They are the warmest segment, concentrated among active changers. A short reply that quotes the survey findings back to them would close the loop the survey promised.</li>
+    <li><b>Fix the survey's own front door before reusing it.</b> A third of openers left on the intro page, and finishers took a median of 3.6 minutes against a promised two. Put the first question on the landing page, drop the Start button, and say "about four minutes".</li>
+  </ol>
+
+  <h2>Method and caveats</h2>
+  <ul>
+    <li>Source: the GuidedTrack CSV export for program 38720, pulled 2026-09-07 10:17am. GuidedTrack excludes runs marked as tests. One further run whose free-text answers were "qq" was removed as a manual test. 1 row removed in total.</li>
+    <li>Three runs came from earlier program versions (7 and 9) before the September 4 send; they are included because their questions were unchanged.</li>
+    <li>Bases differ by question because routing skips questions for some stages, and because people dropped out along the way. Every chart states its own n.</li>
+    <li>Multi-select questions report the share of respondents who ticked each option, so percentages sum to more than 100.</li>
+    <li>Respondents are self-selected newsletter readers who clicked a survey link, not a sample of the newsletter, let alone of the general public. Treat the shares as directional.</li>
+    <li>Obstacle themes were coded by hand, one theme per answer; borderline answers exist and a different coder would move a handful between "which path fits me", "confidence", and "practical how-to".</li>
+  </ul>
+</div>
+
+</body>
+</html>
