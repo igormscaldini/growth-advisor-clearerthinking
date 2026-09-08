@@ -1,0 +1,52 @@
+--Anonymous feedback survey for the EA intro session Igor facilitated.
+--No identifying questions are asked, so nothing in the data can be traced to a respondent.
+
+*header: How did the EA intro session go?
+
+Thanks for coming. This takes about 2 minutes and it shapes how I run the next one.
+
+It is also *completely anonymous*. I don't ask for your name, your email, or anything else that identifies you. All the answers land in one pooled list, so I have no way of telling who wrote what.
+
+That means you can be blunt. Critical feedback is the most useful kind, and it won't cost you anything here.
+
+*button: Start
+
+*progress: 20%
+
+>> sessionRatingScale = [["Very poor", 1], ["Poor", 2], ["OK", 3], ["Good", 4], ["Excellent", 5]]
+
+*question: Overall, how would you rate the session?
+	*answers: sessionRatingScale
+	*save: sessionRating
+
+*progress: 40%
+
+*question: What should I do *more* of?
+	*tip: Anything that worked: topics, discussion, examples, activities, pacing. Be as specific as you can.
+	*type: paragraph
+	*blank
+	*save: doMore
+
+*progress: 60%
+
+*question: What should I do *less* of?
+	*tip: Anything that didn't land, dragged, confused you, or felt off. This is the most valuable answer in the survey.
+	*type: paragraph
+	*blank
+	*save: doLess
+
+*progress: 80%
+
+*question: Anything else you'd like to share?
+	*tip: Optional. Questions, ideas, things you wish we'd covered, anything at all.
+	*type: paragraph
+	*blank
+	*save: anythingElse
+
+*progress: 100%
+
+*header: Thank you
+
+That's genuinely useful, and it stays anonymous.
+
+If you'd like to keep talking about any of this, just reach out to me directly. You can close this page now.
