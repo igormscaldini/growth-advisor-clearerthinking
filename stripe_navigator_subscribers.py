@@ -9,6 +9,8 @@ Airtable, and can push the same rows into an Airtable table via the API.
 
     python stripe_navigator_subscribers.py                       # CSV only
     python stripe_navigator_subscribers.py --active-only         # drop cancelled subscriptions
+    python stripe_navigator_subscribers.py --sheets              # + a new Google Sheet
+    python stripe_navigator_subscribers.py --sheets --sheet-id ID   # refresh an existing Sheet
     python stripe_navigator_subscribers.py --airtable --base appXXXXXXXXXXXXXX
 
 The Airtable push needs a Personal Access Token with the scopes schema.bases:read,
@@ -169,12 +171,61 @@ def push_to_airtable(rows: list[dict], base_id: str, table_name: str = TABLE_NAM
     return f"https://airtable.com/{base_id}/{table_id}"
 
 
+def push_to_sheets(rows: list[dict], sheet_id: str | None = None,
+                   title: str | None = None) -> str:
+    """Create (or overwrite) a Google Sheet holding the rows. Returns its URL."""
+    from sheets_client import get_client
+
+    svc = get_client()
+    title = title or f"Navigator Subscribers ({dt.date.today()})"
+    values = [COLUMNS] + [[r[c] for c in COLUMNS] for r in rows]
+
+    if sheet_id:
+        svc.spreadsheets().values().clear(
+            spreadsheetId=sheet_id, range="A:Z", body={}
+        ).execute()
+        tab = "Sheet1"
+    else:
+        created = svc.spreadsheets().create(body={
+            "properties": {"title": title},
+            "sheets": [{"properties": {"title": "Subscribers"}}],
+        }).execute()
+        sheet_id = created["spreadsheetId"]
+        tab = "Subscribers"
+
+    svc.spreadsheets().values().update(
+        spreadsheetId=sheet_id, range=f"{tab}!A1",
+        valueInputOption="USER_ENTERED", body={"values": values},
+    ).execute()
+
+    # Bold header, freeze it, size the columns to the content.
+    meta = svc.spreadsheets().get(spreadsheetId=sheet_id).execute()
+    gid = next(s["properties"]["sheetId"] for s in meta["sheets"]
+               if s["properties"]["title"] == tab)
+    svc.spreadsheets().batchUpdate(spreadsheetId=sheet_id, body={"requests": [
+        {"repeatCell": {
+            "range": {"sheetId": gid, "startRowIndex": 0, "endRowIndex": 1},
+            "cell": {"userEnteredFormat": {"textFormat": {"bold": True}}},
+            "fields": "userEnteredFormat.textFormat.bold"}},
+        {"updateSheetProperties": {
+            "properties": {"sheetId": gid, "gridProperties": {"frozenRowCount": 1}},
+            "fields": "gridProperties.frozenRowCount"}},
+        {"autoResizeDimensions": {"dimensions": {
+            "sheetId": gid, "dimension": "COLUMNS",
+            "startIndex": 0, "endIndex": len(COLUMNS)}}},
+    ]}).execute()
+
+    return f"https://docs.google.com/spreadsheets/d/{sheet_id}"
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--active-only", action="store_true",
                     help="only subscriptions currently active (default: every status)")
     ap.add_argument("--out", default=str(Path.home() / "Downloads" /
                                         f"navigator_subscribers_{dt.date.today()}.csv"))
+    ap.add_argument("--sheets", action="store_true", help="also push into a Google Sheet")
+    ap.add_argument("--sheet-id", help="existing spreadsheet id to overwrite (default: create one)")
     ap.add_argument("--airtable", action="store_true", help="also push into Airtable")
     ap.add_argument("--base", help="Airtable base id (appXXXXXXXXXXXXXX)")
     ap.add_argument("--table", default=TABLE_NAME)
@@ -184,6 +235,9 @@ def main() -> None:
     path = write_csv(rows, Path(args.out))
     active = sum(1 for r in rows if r["Status"].startswith("Active"))
     print(f"{len(rows)} Navigator subscriptions ({active} active) -> {path}")
+
+    if args.sheets:
+        print("Google Sheet:", push_to_sheets(rows, args.sheet_id))
 
     if args.airtable:
         if not args.base:
