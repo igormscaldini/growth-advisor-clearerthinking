@@ -1,0 +1,36 @@
+name: Navigator subscribers -> Google Sheet
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"  # every 15 minutes
+  workflow_dispatch:         # allow manual runs from the Actions UI
+
+# Stateless: reads Stripe, writes the Sheet, commits nothing.
+concurrency:
+  group: navigator-sheet-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Sync Navigator subscribers into the Sheet
+        env:
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          OAUTH_CLIENT_JSON: ${{ secrets.OAUTH_CLIENT_JSON }}
+          GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+          NAVIGATOR_SHEET_ID: ${{ secrets.NAVIGATOR_SHEET_ID }}
+        # Upsert only. --rebuild is deliberately absent: a scheduled job must never
+        # be able to wipe columns kept alongside the data by hand.
+        run: python stripe_navigator_subscribers.py --sheets --no-csv

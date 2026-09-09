@@ -73,3 +73,26 @@ def materialize_cloud_secrets() -> bool:
                     found_any = True
 
     return found_any
+
+
+def materialize_ci_secrets() -> bool:
+    """Write the OAuth JSON blobs GitHub Actions passes as env vars to secrets/.
+
+    The CI counterpart of `materialize_cloud_secrets`: on Actions the credentials
+    arrive as env vars, but every Google client here loads them from a file. Reuses
+    the `_FILE_KEYS` mapping so the secret-name-to-filename mapping lives in one
+    place. No-op locally, where the files already exist. Returns True if it wrote any.
+    """
+    root = Path(__file__).parent
+    wrote_any = False
+
+    for secret_key, (filename, _env_var) in _FILE_KEYS.items():
+        blob = os.environ.get(secret_key, "").strip()
+        if not blob:
+            continue
+        target = root / "secrets" / filename
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(blob)
+        wrote_any = True
+
+    return wrote_any
