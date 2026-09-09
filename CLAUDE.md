@@ -21,6 +21,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   tools every 5 min.
   `advisor_inbox.py`: Gmail scan of the week's threads. `advisor_conversations.py`: digests
   Claude Code transcripts. `advisor_memory.py`: the encrypted memory store all of them share.
+- `stripe_navigator_subscribers.py`: Navigator subscribers -> Google Sheet, synced every
+  15 min (`navigator-sheet-sync.yml`, sheet id in the `NAVIGATOR_SHEET_ID` secret and
+  `.env`). The sheet write is an UPSERT matched on Subscription ID: columns right of the
+  owned ones belong to Igor and are never touched. `--rebuild` is the destructive path and
+  the cron never passes it. `--sheets` errors without a target rather than creating a stray
+  sheet; pass `--new-sheet` to create one deliberately.
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
   schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
@@ -59,6 +65,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `secrets/slides-token.json` is a separate Slides-only token (presentations scope, same OAuth
   client) for editing Igor's Google Slides decks in place via the Slides API `replaceAllText`;
   the Slides API was enabled on the GCP project in Sep 2026. Keep it out of the CI secret.
+- CI credentials: `secrets_loader.materialize_ci_secrets()` writes the OAuth blobs GitHub
+  Actions passes as env vars to `secrets/`. Five older scripts still carry their own copy of
+  this helper; prefer the shared one in new code.
 - Claude model: `advisor_memory.advisor_model()` (ADVISOR_MODEL or ANTHROPIC_MODEL env, default
   claude-opus-5). CI has no override, so it uses the default.
 
