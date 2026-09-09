@@ -9,7 +9,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - `data_layer.py`: every metric function (GA4, Stripe, beehiiv, GSC, Ads). Streamlit cache
   decorators are harmless outside Streamlit. `_beehiiv_get` wraps beehiiv calls with
   timeout + retry; route new beehiiv endpoints through it.
-- `fetch_snapshot.py` -> `frontend/public/snapshot.json` (GitHub Actions cron every 30 min,
+- IMPORTANT: GitHub heavily throttles `schedule` events on this repo. Measured 2026-09-09:
+  the `*/5` reply cron and the `*/30` snapshot cron BOTH actually fire only ~5-6 times a day
+  (gaps of 2-4.5 h), regardless of the interval written. Tightening a cron expression does
+  nothing. For anything needing real freshness use `workflow_dispatch` /
+  `repository_dispatch` (not throttled) driven by a webhook or an external scheduler.
+- `fetch_snapshot.py` -> `frontend/public/snapshot.json` (GitHub Actions cron nominally every
+  30 min but see the throttling note above,
   25-minute budget) -> Vercel dashboard at https://growth-advisor-clearerthinking.vercel.app/.
   `frontend/public/beehiiv_new_subs_cache.json` is an incremental cache committed with the
   snapshot; delete it to force a full re-walk (takes ~25 min).
