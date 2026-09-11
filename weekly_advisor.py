@@ -13,7 +13,10 @@ Every Friday this:
      the audience/brand knowledge base, and the digests of Igor's Claude Code sessions this
      week (advisor_conversations.py) so the letter knows what he actually worked on.
   5. Asks Claude, in character as Igor's senior growth advisor, to write the ENTIRE email as
-     one letter in three movements: results, the week's work, next week's priorities.
+     one letter in three movements: results, the week's work, next week's priorities. The
+     call goes through advisor_memory.claude_text: by default headless Claude Code on Igor's
+     subscription (CLAUDE_CODE_OAUTH_TOKEN on CI), never Anthropic API credits unless
+     ADVISOR_BACKEND=api is set.
   6. Extracts any new durable facts from the week's sessions into the durable memory.
   7. Refreshes frontend/public/snapshot.json (same as fetch-snapshot.yml) so the dashboard
      linked at the bottom is current, then sends the letter via the Gmail API.
@@ -149,8 +152,7 @@ FIX_INSTRUCTIONS = {
     "conversations": "Conversation digests couldn't be read (see memory).",
     "inbox": "Gmail scan failed. The shared Google token needs the gmail.modify scope (re-run "
              "`python auth_ga4.py`, then update the GOOGLE_TOKEN_JSON secret).",
-    "narrative": "Claude API call failed. Check ANTHROPIC_API_KEY and account credits, "
-                 f"and that the model id '{ADVISOR_MODEL}' is available (override with ADVISOR_MODEL).",
+    "narrative": mem.claude_fix_hint(),
     "consolidation": "The end-of-week memory update failed (letter still sent). Same checks as narrative.",
     "transport": email_transport.TRANSPORT_FIX,
     "dashboard": "Snapshot refresh or publish failed. Run `python fetch_snapshot.py` locally to see the "

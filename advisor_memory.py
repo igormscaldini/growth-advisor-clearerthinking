@@ -18,10 +18,13 @@ Shared by weekly_advisor.py, advisor_reply.py and advisor_conversations.py.
 """
 from __future__ import annotations
 
+import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -196,36 +199,175 @@ def load_knowledge(max_chars: int = 60_000) -> str:
 
 
 # --- Claude ----------------------------------------------------------------------
-def claude_text(system: str, user: str, max_tokens: int = 4000) -> str:
-    """One streamed Claude call returning the text of the reply. Raises on refusal.
+# Two backends can write for the advisor (weekly letter, memory consolidation, session
+# digests, reply answers):
+#   claude-code (default): the Claude Code CLI in headless mode (`claude -p`), billed to
+#       Igor's Claude subscription, never to Anthropic API credits. Locally it uses the CLI's
+#       own login (keychain); on GitHub Actions it needs the CLAUDE_CODE_OAUTH_TOKEN secret,
+#       generated once with `claude setup-token`.
+#   api: the Anthropic API through the SDK (ANTHROPIC_API_KEY, prepaid credits). Only used
+#       when ADVISOR_BACKEND=api is set explicitly: an exhausted credit balance silently killed
+#       the Friday letter and eleven days of session digests in Sep 2026.
+BACKENDS = ("claude-code", "api")
+DEFAULT_BACKEND = "claude-code"
+DEFAULT_FALLBACK_MODEL = "claude-sonnet-5"   # CLI falls back to it only if the primary is overloaded/unavailable
+CLI_TIMEOUT_S = 900
+RETRIES = 3
+# Env vars never passed to the CLI: this session's own Claude Code markers (a hook-launched call
+# must not look like a nested session) and API credentials (the CLI must bill the subscription).
+_CHILD_ENV_KEEP = {"CLAUDE_CODE_OAUTH_TOKEN", "CLAUDE_CONFIG_DIR"}
+_CHILD_ENV_DROP_PREFIXES = ("CLAUDE", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN")
+_CONFIG_ERROR_MARKERS = ("not logged in", "/login", "invalid api key", "authentication", "oauth")
 
-    The SDK retries failed request setup, but a timeout or dropped connection in the middle
-    of the stream surfaces as an exception (seen live: ReadTimeout killed a weekly letter),
-    so the whole call is retried a couple of times too.
-    """
+
+class ClaudeCodeMissing(RuntimeError):
+    """The Claude Code CLI binary could not be found."""
+
+
+class AdvisorConfigError(RuntimeError):
+    """Login, token or backend configuration problem: retrying will not help."""
+
+
+def advisor_backend() -> str:
+    backend = (os.getenv("ADVISOR_BACKEND") or DEFAULT_BACKEND).strip().lower()
+    if backend not in BACKENDS:
+        raise AdvisorConfigError(f"ADVISOR_BACKEND={backend!r}; expected one of {BACKENDS}")
+    return backend
+
+
+def fallback_model() -> str:
+    """Model the CLI may fall back to when the primary is overloaded (ADVISOR_FALLBACK_MODEL='' disables)."""
+    value = os.getenv("ADVISOR_FALLBACK_MODEL")
+    return DEFAULT_FALLBACK_MODEL if value is None else value.strip()
+
+
+def claude_fix_hint() -> str:
+    """One-line fix instructions for a failed Claude call (shown in the email's error list)."""
+    model = advisor_model()
+    if advisor_backend() == "api":
+        return ("Claude API call failed. Check ANTHROPIC_API_KEY and account credits, and that the "
+                f"model id '{model}' is available (override with ADVISOR_MODEL).")
+    return ("Headless Claude Code call failed. On GitHub Actions: set the CLAUDE_CODE_OAUTH_TOKEN secret "
+            "(run `claude setup-token` locally, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN`). Locally: "
+            f"run `claude` and /login. The model '{model}' must be available on the subscription "
+            "(override with ADVISOR_MODEL).")
+
+
+def _vscode_extension_version(path: Path) -> tuple[int, ...]:
+    m = re.search(r"claude-code-(\d+)\.(\d+)\.(\d+)", str(path))
+    return tuple(int(x) for x in m.groups()) if m else (0,)
+
+
+def find_claude_binary() -> str:
+    """The Claude Code CLI: CLAUDE_BIN, the binary running the current session, PATH, the
+    native installer's location, or the newest VS Code extension bundle."""
+    home = Path.home()
+    for cand in (os.getenv("CLAUDE_BIN"), os.getenv("CLAUDE_CODE_EXECPATH"), shutil.which("claude"),
+                 home / ".local" / "bin" / "claude", home / ".claude" / "local" / "claude"):
+        if cand and Path(cand).is_file() and os.access(cand, os.X_OK):
+            return str(cand)
+    bundles = sorted((home / ".vscode" / "extensions").glob("anthropic.claude-code-*/resources/native-binary/claude"),
+                     key=_vscode_extension_version)
+    if bundles:
+        return str(bundles[-1])
+    raise ClaudeCodeMissing("Claude Code CLI not found. Install it (curl -fsSL https://claude.ai/install.sh | bash) "
+                            "or set CLAUDE_BIN to the binary.")
+
+
+def _child_env() -> dict[str, str]:
+    return {k: v for k, v in os.environ.items()
+            if k in _CHILD_ENV_KEEP or not k.startswith(_CHILD_ENV_DROP_PREFIXES)}
+
+
+def claude_code_command(system: str, tools: list[str] | None = None,
+                        allowed_tools: list[str] | None = None) -> list[str]:
+    """argv for one headless call. No settings files (so no hooks and no CLAUDE.md), no MCP
+    connectors (their tool schemas cost ~80k tokens per call), no session persistence."""
+    cmd = [find_claude_binary(), "-p", "--output-format", "json", "--no-session-persistence",
+           "--setting-sources", "", "--strict-mcp-config",
+           "--tools", ",".join(tools) if tools else "",
+           "--model", advisor_model(), "--system-prompt", system]
+    if allowed_tools:
+        cmd += ["--allowedTools", *allowed_tools]
+    if fallback_model():
+        cmd += ["--fallback-model", fallback_model()]
+    return cmd
+
+
+def parse_claude_code_result(stdout: str, stderr: str = "", returncode: int = 0) -> str:
+    """The reply text out of `claude -p --output-format json`; raises with the CLI's message otherwise."""
+    try:
+        data = json.loads(stdout or "")
+    except (json.JSONDecodeError, TypeError):
+        raise RuntimeError(f"Claude Code exited {returncode} without a JSON result: "
+                           f"{(stderr or stdout or '').strip()[-500:]}") from None
+    if not isinstance(data, dict):
+        raise RuntimeError(f"Claude Code returned unexpected JSON: {str(data)[:200]}")
+    result = str(data.get("result") or "")
+    if data.get("is_error"):
+        msg = f"Claude Code: {result[:500] or data.get('subtype') or 'unknown error'}"
+        if any(marker in result.lower() for marker in _CONFIG_ERROR_MARKERS):
+            raise AdvisorConfigError(msg)
+        raise RuntimeError(msg)
+    if data.get("stop_reason") == "refusal":
+        raise RuntimeError("Claude declined this request (stop_reason=refusal)")
+    models = ", ".join(data.get("modelUsage") or {}) or "?"
+    print(f"[claude] claude-code: {data.get('num_turns')} turn(s), models {models}", file=sys.stderr)
+    return result.strip()
+
+
+def run_claude_code(system: str, user: str, *, cwd: Path | str | None = None,
+                    tools: list[str] | None = None, allowed_tools: list[str] | None = None) -> str:
+    """One headless Claude Code call (user prompt on stdin). Runs in a throwaway directory
+    unless `cwd` is given, so nothing of the caller's project leaks into the session."""
+    cmd = claude_code_command(system, tools, allowed_tools)
+    with tempfile.TemporaryDirectory(prefix="advisor-claude-") as tmp:
+        proc = subprocess.run(cmd, input=user, capture_output=True, text=True,
+                              cwd=str(cwd) if cwd else tmp, env=_child_env(), timeout=CLI_TIMEOUT_S)
+    return parse_claude_code_result(proc.stdout, proc.stderr, proc.returncode)
+
+
+def _api_text(system: str, user: str, max_tokens: int) -> str:
+    """One streamed Anthropic API call returning the text of the reply. Raises on refusal."""
     import anthropic
 
     client = anthropic.Anthropic(max_retries=4, timeout=900.0)
-    msg = None
-    for attempt in range(3):
-        try:
-            with client.messages.stream(
-                model=advisor_model(),
-                max_tokens=max_tokens,
-                system=system,
-                messages=[{"role": "user", "content": user}],
-            ) as stream:
-                msg = stream.get_final_message()
-            break
-        except Exception as e:  # noqa: BLE001
-            if attempt == 2:
-                raise
-            print(f"[claude] attempt {attempt + 1} failed ({type(e).__name__}: {e}); retrying...",
-                  file=sys.stderr)
-            time.sleep(15 * (attempt + 1))
+    with client.messages.stream(
+        model=advisor_model(),
+        max_tokens=max_tokens,
+        system=system,
+        messages=[{"role": "user", "content": user}],
+    ) as stream:
+        msg = stream.get_final_message()
     if msg.stop_reason == "refusal":
         raise RuntimeError("Claude declined this request (stop_reason=refusal)")
     return "".join(b.text for b in msg.content if getattr(b, "type", None) == "text").strip()
+
+
+def with_retries(label: str, fn, attempts: int = RETRIES):
+    """Call fn(); on failure wait 15 s, 30 s, ... and try again, except for configuration
+    errors (missing CLI, not logged in), which fail immediately. Seen live: a ReadTimeout in
+    the middle of a stream killed a weekly letter, hence the retries."""
+    for attempt in range(attempts):
+        try:
+            return fn()
+        except (AdvisorConfigError, ClaudeCodeMissing):
+            raise
+        except Exception as e:  # noqa: BLE001
+            if attempt == attempts - 1:
+                raise
+            print(f"[claude] {label} attempt {attempt + 1} failed ({type(e).__name__}: {e}); retrying...",
+                  file=sys.stderr)
+            time.sleep(15 * (attempt + 1))
+
+
+def claude_text(system: str, user: str, max_tokens: int = 4000) -> str:
+    """One Claude call returning the text of the reply, on the configured backend (see the
+    note above). `max_tokens` only applies to the API backend; the CLI has no such knob, the
+    prompts bound the length instead."""
+    if advisor_backend() == "api":
+        return with_retries("api", lambda: _api_text(system, user, max_tokens))
+    return with_retries("claude-code", lambda: run_claude_code(system, user))
 
 
 # --- git ----------------------------------------------------------------------------
