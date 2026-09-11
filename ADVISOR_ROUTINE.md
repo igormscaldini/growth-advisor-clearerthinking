@@ -1,7 +1,14 @@
 # Weekly advisor letter as a Claude Code routine
 
+**Status (2026-09-11): optional.** The default path no longer needs a routine or API credits:
+`weekly_advisor.py` writes the letter through headless Claude Code (`claude -p`, see
+`advisor_memory.claude_text`) on Igor's subscription, inside the existing GitHub Actions
+workflow, which only needs the `CLAUDE_CODE_OAUTH_TOKEN` secret (`claude setup-token`
+locally, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN`). The routine below stays available as
+an alternative scheduler; its `--brief` / `--send-letter` steps still work.
+
 The Friday growth-advisor letter can run as a Claude Code **routine** (a scheduled cloud
-session on Igor's Claude subscription) instead of through the Anthropic API. The data
+session on Igor's Claude subscription) instead of through GitHub Actions. The data
 gathering and the email sending stay in `weekly_advisor.py`; the routine's own Claude session
 writes the letter and the memory update, so no API credits are used.
 
@@ -41,8 +48,9 @@ the memory update and the dashboard snapshot on its own).
    from the brief, if any. Never paste the letter, the brief or any memory content into the
    final message.
 
-Never send the letter through any other channel, never run the API path (the script without
-`--brief` / `--send-letter`), and never edit or commit files in the repository.
+Never send the letter through any other channel, never run the script without
+`--brief` / `--send-letter` (that path would try to launch a nested Claude Code), and never
+edit or commit files in the repository.
 
 ## Cloud environment setup (one time, in the claude.ai environment editor)
 
@@ -71,5 +79,5 @@ repository's GitHub secrets or from the local `.env`:
   Igor's GitHub connection; if they fail, the email still goes out and lists the failure.
 
 While both the routine and `.github/workflows/weekly-advisor-email.yml` are scheduled for
-Fridays 11:00 UTC, two emails arrive. Once the routine has produced one good letter, remove
+Fridays 11:00 UTC, two emails arrive. If the routine becomes the primary scheduler, remove
 the `schedule` block from that workflow (keep `workflow_dispatch`).

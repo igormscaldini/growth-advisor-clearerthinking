@@ -3,8 +3,11 @@
 When Igor replies to a "Weekly Growth Report" email with a question, this:
   1. Finds unread replies in those threads (Gmail API).
   2. Hands the question to Claude with live data tools (GA4 / Stripe / beehiiv / GSC),
-     so it can pull specific, on-demand data to answer — not just reuse the weekly numbers.
-     Claude also has a `remember_this` tool it calls if the exchange contains a durable
+     so it can pull specific, on-demand data to answer, not just reuse the weekly numbers.
+     The session is headless Claude Code on Igor's subscription (advisor_memory.run_claude_code,
+     no Anthropic API credits): its only tool is Bash, allow-listed to
+     `python advisor_reply.py --tool <name> '<json>'`, which runs one data tool and prints
+     JSON. Claude also has a `remember_this` tool it calls if the exchange contains a durable
      preference, correction, or standing context worth carrying into future reports.
   3. Replies in the same thread with the answer (Gmail API).
   4. Marks the message read so it's never answered twice.
@@ -23,11 +26,13 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import os
 import re
 import subprocess
 import sys
 from datetime import date, datetime, timedelta, timezone
 from email.mime.text import MIMEText
+from pathlib import Path
 
 # weekly_advisor runs load_dotenv + secret materialization at import time, and exposes
 # the config + data helpers we reuse here.
@@ -49,7 +54,8 @@ from data_layer import (
 
 ADVISOR_HEADER = "X-CT-Advisor"
 SUBJECT_MATCH = "Weekly Growth Report"
-MAX_TOOL_TURNS = 8
+TOOL_SCRIPT = "advisor_reply.py"
+DRY_RUN_ENV = "ADVISOR_REPLY_DRY_RUN"
 
 
 # --- data tools exposed to Claude -------------------------------------------
@@ -108,15 +114,14 @@ def _tool_inbox(days=7, **_):
     return advisor_inbox.weekly_inbox_digest(int(days))
 
 
-# Entries saved this run, so main() knows whether ADVISOR_MEMORY.md needs to be committed.
-_memory_written_this_run: list[str] = []
-# --dry-run should have no side effects (see module docstring), so gate the actual file write.
+# --dry-run must have no side effects (see module docstring). The tool runs in a child
+# process of the headless session, so the flag also travels as the DRY_RUN_ENV variable.
 DRY_RUN = False
 
 
 def _tool_remember_this(entry=None, category="context", **_):
     """Append a durable memory entry. `entry` should be a short, first-person-from-the-advisor
-    summary of the fact/preference/correction — written so it reads naturally when re-read as
+    summary of the fact/preference/correction, written so it reads naturally when re-read as
     context in a future prompt.
     """
     if not entry or not str(entry).strip():
@@ -124,9 +129,13 @@ def _tool_remember_this(entry=None, category="context", **_):
     if DRY_RUN:
         print(f"[reply] (dry-run, not written) would remember: {entry!r} ({category})", file=sys.stderr)
         return {"saved": True, "dry_run": True}
-    line = mem.append_durable_memory(str(entry), category)
-    _memory_written_this_run.append(line)
+    mem.append_durable_memory(str(entry), category)
     return {"saved": True}
+
+
+def _durable_bytes() -> bytes:
+    """Snapshot of the durable memory file, to detect writes made by the tool child process."""
+    return mem.DURABLE_FILE.read_bytes() if mem.DURABLE_FILE.exists() else b""
 
 
 def _commit_memory_file() -> None:
@@ -232,11 +241,59 @@ TOOLS = [
 ]
 
 
-# --- Claude answer loop -----------------------------------------------------
-def answer_question(question: str) -> str:
-    import anthropic
+# --- Claude answer (headless Claude Code with a Bash bridge to the tools above) ----------
+def _python_cmd() -> str:
+    """The interpreter the model invokes --tool mode with, from the repo root. The venv's
+    `.venv/bin/python` is made relative (no spaces even though the repo path has them, so
+    the Bash allow-list prefix matches what the model types); an interpreter elsewhere
+    (GitHub Actions) is used by its absolute path; a path with spaces falls back to `python`."""
+    exe = os.path.abspath(sys.executable)
+    root = os.path.abspath(wa.ROOT)
+    if exe.startswith(root + os.sep):
+        return os.path.relpath(exe, root)
+    return exe if " " not in exe else "python"
 
-    client = anthropic.Anthropic()
+
+def tool_command_prefix() -> str:
+    return f"{_python_cmd()} {TOOL_SCRIPT} --tool"
+
+
+def tools_prompt() -> str:
+    """The tool catalogue for the system prompt: each data tool is one shell command that prints JSON."""
+    lines = [
+        "Data tools. Each one is a shell command, run from the repository root with the Bash tool, "
+        "that prints a JSON result. Call it exactly as:",
+        f"  {tool_command_prefix()} <tool_name> '<JSON object of arguments>'",
+        "(single-quote the JSON; pass '{}' when there are no arguments). Never run any other command. "
+        "Tools:",
+    ]
+    for t in TOOLS:
+        props = (t.get("input_schema") or {}).get("properties") or {}
+        args = "; ".join(f"{k}: {v.get('type', 'string')}, {v.get('description', '')}".rstrip(", ")
+                         for k, v in props.items()) or "none"
+        lines.append(f"- {t['name']}: {t['description']} Arguments: {args}")
+    return "\n".join(lines)
+
+
+def run_tool(name: str, args_json: str) -> dict:
+    """--tool mode: run one data tool and return its result. Problems come back as
+    {"error": ...} so the model can read them instead of a stack trace."""
+    fn = TOOL_FNS.get(name)
+    if fn is None:
+        return {"error": f"unknown tool {name!r}; available: {', '.join(TOOL_FNS)}"}
+    try:
+        args = json.loads(args_json or "{}")
+    except json.JSONDecodeError as e:
+        return {"error": f"JSONDecodeError in arguments: {e}"}
+    if not isinstance(args, dict):
+        return {"error": "arguments must be a JSON object"}
+    try:
+        return fn(**args)
+    except Exception as e:  # noqa: BLE001
+        return {"error": f"{type(e).__name__}: {e}"}
+
+
+def answer_question(question: str) -> str:
     today = date.today().isoformat()
     memory_text = wa.load_memory()
     try:
@@ -251,46 +308,22 @@ def answer_question(question: str) -> str:
         f"need specific numbers (today is {today}; the business sells a paid subscription, a $9 "
         "personality-test PDF, a $35/$17.50 cognitive assessment, and runs a beehiiv newsletter). "
         "Pull real data rather than guessing. Reply in PLAIN TEXT (no markdown/asterisks), concise "
-        "and direct, like a sharp advisor answering by email. If a question is ambiguous, state your "
+        "and direct, like a sharp advisor answering by email; your final message is sent to Igor "
+        "verbatim, so it must contain only the answer. If a question is ambiguous, state your "
         "assumption and answer anyway. If you genuinely can't get the data, say so plainly.\n\n"
+        f"{tools_prompt()}\n\n"
         f"Durable memory of things Igor has told you before:\n{memory_text or '(nothing recorded yet)'}\n\n"
         f"Knowledge base (audience and communication):\n{knowledge_text or '(none)'}\n\n"
         f"Digests of Igor's Claude Code working sessions in the last two weeks (what he has been "
         f"working on; use them to answer questions about his own projects):\n"
         f"{conversations_text or '(none)'}\n\n"
         "Never use em dashes. If THIS reply contains a new durable preference, correction, or standing context worth "
-        "carrying into future reports, call remember_this to save it (in addition to answering)."
+        "carrying into future reports, run the remember_this tool to save it (in addition to answering)."
     )
-    messages = [{"role": "user", "content": question}]
-
-    for _ in range(MAX_TOOL_TURNS):
-        resp = client.messages.create(
-            model=wa.ADVISOR_MODEL,
-            max_tokens=2000,
-            system=system,
-            tools=TOOLS,
-            messages=messages,
-        )
-        if resp.stop_reason == "tool_use":
-            messages.append({"role": "assistant", "content": resp.content})
-            results = []
-            for block in resp.content:
-                if getattr(block, "type", None) != "tool_use":
-                    continue
-                fn = TOOL_FNS.get(block.name)
-                try:
-                    out = fn(**(block.input or {})) if fn else {"error": f"unknown tool {block.name}"}
-                    content = json.dumps(out, default=str)
-                except Exception as e:  # noqa: BLE001
-                    content = json.dumps({"error": f"{type(e).__name__}: {e}"})
-                results.append({"type": "tool_result", "tool_use_id": block.id, "content": content})
-            messages.append({"role": "user", "content": results})
-            continue
-        # final answer
-        return "".join(b.text for b in resp.content if getattr(b, "type", None) == "text").strip()
-
-    return ("I wasn't able to finish answering within the tool-call limit. Try narrowing the question "
-            "(e.g. a specific metric and date range).")
+    # No retries here: an unread question is picked up again by the next cron tick, and a retry
+    # after a partial run could save the same memory entry twice.
+    return mem.run_claude_code(system, question, cwd=wa.ROOT, tools=["Bash"],
+                               allowed_tools=[f"Bash({tool_command_prefix()}:*)"])
 
 
 # --- Gmail --------------------------------------------------------------------
@@ -359,8 +392,20 @@ def main() -> int:
     global DRY_RUN
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true", help="answer + print, don't send or mark read")
+    ap.add_argument("--tool", metavar="NAME",
+                    help="run one data tool and print its JSON result (how the headless Claude session "
+                         "calls the tools); TOOL_ARGS is a JSON object of arguments")
+    ap.add_argument("tool_args", nargs="?", default="{}", metavar="TOOL_ARGS")
     args = ap.parse_args()
+
+    if args.tool:
+        DRY_RUN = os.getenv(DRY_RUN_ENV) == "1"
+        print(json.dumps(run_tool(args.tool, args.tool_args), default=str))
+        return 0
+
     DRY_RUN = args.dry_run
+    if DRY_RUN:
+        os.environ[DRY_RUN_ENV] = "1"   # inherited by the tool child processes
 
     svc = gmail_service()
     pending = find_pending(svc)
@@ -369,6 +414,7 @@ def main() -> int:
         return 0
 
     print(f"[reply] {len(pending)} question(s) to answer.", file=sys.stderr)
+    memory_before = _durable_bytes()
     for item in pending:
         q = item["question"]
         if not q:
@@ -391,7 +437,7 @@ def main() -> int:
         except Exception as e:  # noqa: BLE001
             print(f"[error] sending reply failed: {e}", file=sys.stderr)
 
-    if _memory_written_this_run and not args.dry_run:
+    if not args.dry_run and _durable_bytes() != memory_before:
         _commit_memory_file()
     return 0
 

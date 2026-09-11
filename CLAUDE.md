@@ -24,11 +24,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   goals table's "Total revenue" = Stripe gross + these lines. To publish an edit without waiting
   for the throttled cron, rewrite `snapshot.json`'s `manual_revenue` with `manual_revenue_block()`.
 - `weekly_advisor.py`: Friday 11:00 UTC letter (results, the week's work, next week's
-  priorities). Two ways to produce the letter: the API path (default, needs Anthropic credits)
-  and routine mode (`--brief` then `--send-letter`, see `ADVISOR_ROUTINE.md`), where a Claude
-  Code routine on Igor's subscription writes the letter; the routine can only be saved once
-  GitHub is connected to claude.ai. `advisor_reply.py`: answers Igor's replies with live data
-  tools every 5 min.
+  priorities). `advisor_reply.py`: answers Igor's replies with live data tools every 5 min
+  (headless Claude Code whose only tool is Bash, allow-listed to
+  `advisor_reply.py --tool <name> '<json>'`). Routine mode (`--brief` then `--send-letter`,
+  see `ADVISOR_ROUTINE.md`) is an optional alternative scheduler, not the default.
   `advisor_inbox.py`: Gmail scan of the week's threads. `advisor_conversations.py`: digests
   Claude Code transcripts. `advisor_memory.py`: the encrypted memory store all of them share.
 - `stripe_navigator_subscribers.py`: Navigator subscribers -> Google Sheet, synced every
@@ -80,8 +79,17 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - CI credentials: `secrets_loader.materialize_ci_secrets()` writes the OAuth blobs GitHub
   Actions passes as env vars to `secrets/`. Five older scripts still carry their own copy of
   this helper; prefer the shared one in new code.
-- Claude model: `advisor_memory.advisor_model()` (ADVISOR_MODEL or ANTHROPIC_MODEL env, default
-  claude-opus-5). CI has no override, so it uses the default.
+- IMPORTANT: every Claude call goes through `advisor_memory.claude_text` / `run_claude_code`.
+  The default backend is headless Claude Code (`claude -p`) on Igor's subscription, NOT the
+  Anthropic API: an empty credit balance silently killed the letter and 11 days of session
+  digests (2026-08-31 to 09-11). CI needs the `CLAUDE_CODE_OAUTH_TOKEN` secret (`claude
+  setup-token` locally, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN`); locally the CLI's own
+  login is used (binary via CLAUDE_BIN, CLAUDE_CODE_EXECPATH, PATH or the VS Code extension
+  bundle). `ADVISOR_BACKEND=api` opts back into the SDK. The CLI runs with no settings files,
+  no MCP connectors (their schemas cost ~80k tokens per call) and no session persistence, so
+  it never triggers this project's hooks. Model: `advisor_model()` (ADVISOR_MODEL or
+  ANTHROPIC_MODEL env, default claude-opus-5; `.env` sets claude-opus-4-7 locally), with
+  `ADVISOR_FALLBACK_MODEL` (default claude-sonnet-5) only when the primary is overloaded.
 
 ## GuidedTrack tooling
 - Credentials: `GUIDED_TRACK_USERNAME` / `GUIDED_TRACK_PASSWORD` in `.env` (verified 2026-09-11). The

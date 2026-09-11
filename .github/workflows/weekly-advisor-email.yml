@@ -32,6 +32,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Install Claude Code CLI
+        # Claude writes through headless Claude Code on Igor's subscription (no Anthropic API
+        # credits). Needs the CLAUDE_CODE_OAUTH_TOKEN secret: `claude setup-token` locally,
+        # then `gh secret set CLAUDE_CODE_OAUTH_TOKEN`.
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
       - name: Send weekly advisor email
         env:
           # data sources (same secrets the snapshot workflow uses)
@@ -46,8 +54,8 @@ jobs:
           GOOGLE_ADS_DEVELOPER_TOKEN: ${{ secrets.GOOGLE_ADS_DEVELOPER_TOKEN }}
           GOOGLE_ADS_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_CUSTOMER_ID }}
           GOOGLE_ADS_LOGIN_CUSTOMER_ID: ${{ secrets.GOOGLE_ADS_LOGIN_CUSTOMER_ID }}
-          # advisor narrative
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # advisor narrative: headless Claude Code on the subscription (see the install step)
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # decrypts advisor_memory/*.enc (conversation digests + durable memory)
           ADVISOR_MEMORY_KEY: ${{ secrets.ADVISOR_MEMORY_KEY }}
           ADVISOR_MODEL: ${{ secrets.ADVISOR_MODEL }}
