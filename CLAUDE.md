@@ -77,6 +77,19 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - Claude model: `advisor_memory.advisor_model()` (ADVISOR_MODEL or ANTHROPIC_MODEL env, default
   claude-opus-5). CI has no override, so it uses the default.
 
+## GuidedTrack tooling
+- Credentials: `GUIDED_TRACK_USERNAME` / `GUIDED_TRACK_PASSWORD` in `.env` (verified 2026-09-11). The
+  `guidedtrack-builder` skill drives `~/bin/gt` (needs `jq`); ALWAYS set `GT_ENV=production` or it
+  targets localhost. Creds can be piped on stdin: email, password, then `production` for push
+  (pull needs no confirmation line).
+- Staging folder is `~/guidedtrack/` (filename = exact program name, no extension); `guidedtrack/*.gt`
+  in this repo is a second copy of the same source. Both drift because Igor edits programs in the GT
+  web editor after pushing (4 of 5 staged programs were behind live on 2026-09-11), so ALWAYS
+  `gt pull` and diff before any push, or the push overwrites live edits.
+- Run data: `GET /programs/{id}/exports?export_format=csv` returns all non-test runs incl.
+  unfinished ones; `GET /programs/{id}/runs.json?page=N` is 25 per page (`per_page`/`limit` are
+  ignored, iterate until empty) and includes test runs.
+
 ## Working conventions
 - Igor's rules: no em dashes anywhere in prose; always ground audience claims in the survey and
   buyer data (see the knowledge base); keep CT+ / paid framing aligned with the mission.
