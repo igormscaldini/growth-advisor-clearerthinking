@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Why GA4 purchases show (not set)</title>
+<style>
+:root{--ink:#1f2933;--muted:#6b7280;--line:#e5e7eb;--accent:#2563eb;--bg:#fff;--soft:#f8fafc}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+main{max-width:900px;margin:0 auto;padding:40px 24px 80px}
+h1{font-size:30px;line-height:1.2;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 36px}
+h2{font-size:20px;margin:44px 0 12px;padding-top:14px;border-top:1px solid var(--line)}
+h3{font-size:16px;margin:22px 0 8px}
+p{margin:0 0 14px}
+.lead{font-size:18px}
+.flow{display:flex;align-items:stretch;margin:18px 0 6px;overflow-x:auto;padding-bottom:6px}
+.node{flex:1 1 0;min-width:128px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;background:var(--soft)}
+.node b{display:block;margin-bottom:4px}
+.node small{color:var(--muted)}
+.arrow{flex:0 0 26px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font-size:18px}
+.bad{border-color:#f59e0b;background:#fffbeb}
+.good{border-color:#10b981;background:#ecfdf5}
+.cap{font-size:13px;color:var(--muted);margin:0 0 20px}
+table{border-collapse:collapse;width:100%;font-size:14px;margin:10px 0 18px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--muted);font-size:13px}
+blockquote{margin:10px 0 14px;padding:8px 14px;border-left:3px solid var(--accent);background:var(--soft);font-size:14px}
+blockquote cite{display:block;color:var(--muted);font-style:normal;font-size:12px;margin-top:4px}
+code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;background:#f1f5f9;padding:1px 5px;border-radius:4px}
+ol li,ul li{margin-bottom:8px}
+.box{border:1px solid #f59e0b;background:#fffbeb;border-radius:8px;padding:12px 16px;margin:14px 0}
+.who{display:inline-block;font-size:11px;padding:1px 7px;border-radius:999px;background:#e0e7ff;color:#3730a3;margin-left:6px;vertical-align:middle}
+a{color:var(--accent)}
+</style></head><body><main>
+<h1>Why GA4 purchases show (not set), and how to fix it</h1>
+<p class="sub">Clearer Thinking GA4 property, Stripe purchases. Generated 2026-09-11 10:51am</p>
+
+<p class="lead">The purchase event is not sent by the buyer's browser. It is sent by a server (Paytics, listening to Stripe) that has never seen the buyer's browser, so it cannot tell GA4 which visit the purchase belongs to. GA4 credits a traffic source to a visit, not to an event. A server event that cannot be matched to a visit is filed under a phantom visit with no source, which GA4 shows as (not set).</p>
+<p class="lead">The fix is to carry two numbers from the buyer's browser into the Stripe Checkout Session (the GA <code>client_id</code> and <code>session_id</code>) and have the Stripe webhook send those two numbers along with the purchase. Nothing in GA4's settings can fix it, and no thank-you page can fix it for two of the three paid flows.</p>
+
+<h2>1. How GA4 decides where a purchase came from</h2>
+<ul>
+<li><b>Two numbers in a cookie.</b> When someone lands on clearerthinking.org, the Google tag writes two numbers in the browser: <code>client_id</code> (this browser) and <code>session_id</code> (this visit). Once per visit it also records where the visit came from: a Google ad, a newsletter link, organic search.</li>
+<li><b>Events inherit the source from the visit.</b> Any later event that arrives with the same two numbers is filed under that visit and inherits its source. GA4 does not store the source on each event; it looks it up from the visit.</li>
+<li><b>Unknown numbers, new visit.</b> An event that arrives with a made-up <code>client_id</code> and no <code>session_id</code> is filed as a brand-new visit. That visit has no landing page and no <code>session_start</code>, so it has no source. That is exactly the case Google's (not set) article describes.</li>
+</ul>
+<p>The tell is in the screenshot: 32 purchases, 32 "total users". Every purchase arrives as a brand-new anonymous person.</p>
+
+<h2>2. What happens today</h2>
+<div class="flow">
+<div class="node"><b>1. Visitor lands on clearerthinking.org</b><small>Google tag knows the source (say google / cpc) and writes client_id + session_id in cookies.</small></div><div class="arrow">&#8594;</div>
+<div class="node"><b>2. GuidedTrack program</b><small>Buy button asks Firebase for a checkout link. The two GA numbers are not read.</small></div><div class="arrow">&#8594;</div>
+<div class="node"><b>3. Firebase creates the Checkout Session</b><small>No GA numbers attached (metadata holds only product_key and email).</small></div><div class="arrow">&#8594;</div>
+<div class="node"><b>4. checkout.stripe.com</b><small>Stripe's domain. Our tags cannot run there, so the visit ends here for GA4.</small></div><div class="arrow">&#8594;</div>
+<div class="node bad"><b>5. Stripe webhook, then Paytics</b><small>Sends "purchase" to GA4 server-to-server with an invented client_id and no session_id.</small></div><div class="arrow">&#8594;</div>
+<div class="node bad"><b>6. GA4</b><small>Creates a phantom visit with no session_start and no landing page. Source / medium: (not set).</small></div>
+</div>
+<p class="cap">The purchase never travels through the browser, so the information about the visit is never attached to it. It is not lost in transit; it was never there.</p>
+
+<h2>3. What the documentation says</h2>
+<h3>Google Analytics</h3>
+<blockquote>"Session source / medium will report (not set) for sessions where the automatically collected event session_start is missing."<cite><a href="https://support.google.com/analytics/answer/13504892">GA4 Help: What the value (not set) means in your reports</a>. The fix suggested there (a Tag Manager trigger change) is about browser tagging and does not apply here: our purchase never goes through the browser.</cite></blockquote>
+<blockquote>"Both the session ID and session number are associated with each event in a session automatically via gtag.js and the Google Analytics for Firebase SDK. However, the identifier is not included automatically in events from Measurement Protocol or Data Import."<cite><a href="https://support.google.com/analytics/answer/9191807">GA4 Help: About Analytics sessions</a></cite></blockquote>
+<blockquote>"If you want a Measurement Protocol event to reflect geographic and device information from a specific session instead of the latest information for the client_id [...], then include session_id in the event and send it to Measurement Protocol within 24 hours of the start of the session." Also: "While it's possible to send events to Google Analytics solely with the Measurement Protocol, only partial reporting may be available."<cite><a href="https://developers.google.com/analytics/devguides/collection/protocol/ga4">GA4 Measurement Protocol overview</a></cite></blockquote>
+<blockquote>"The client_id should match the ID generated by the Google Analytics tag on your website." Reference: session_id is "Required for several common use cases"; timestamp_micros may backdate an event "up to 72 hours".<cite><a href="https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag">Sending events</a> and <a href="https://developers.google.com/analytics/devguides/collection/protocol/ga4/reference?client_type=gtag">Measurement Protocol reference</a></cite></blockquote>
+<blockquote>gtag('get', 'G-XXXXXXXXXX', 'client_id', callback) and the same with 'session_id' return the two numbers from the page.<cite><a href="https://developers.google.com/tag-platform/gtagjs/reference">gtag.js reference, the get command</a></cite></blockquote>
+<h3>Stripe</h3>
+<blockquote>"In Server-side event recording, you recorded the server-side metrics against an anonymous client ID. That ID is different from the one associated with the page view metrics, so Google Analytics has no way to link the page view and purchase metrics." Stripe's fix: read the ID with gtag('get', ..., 'client_id'), "Store the ID in the Checkout Session's metadata", then "Retrieve the ID and send it with the request to record the event" in the checkout.session.completed webhook.<cite><a href="https://docs.stripe.com/payments/checkout/analyze-conversion-funnel?payment-ui=stripe-hosted">Stripe Docs: Analyze your conversion funnel with GA4</a>. Note that Stripe's example passes only client_id. That links the buyer to the right person (first-user source) but not to the visit. For session source / medium GA4 also needs session_id; two independent test write-ups confirm client_id alone still gives (not set) at session scope (<a href="https://www.simoahava.com/analytics/session-attribution-with-ga4-measurement-protocol/">Simo Ahava</a>, <a href="https://metricfixer.com/publications/analytics-conversion-tracking/ga4-measurement-protocol-session-traffic-source-attribution-lab">MetricFixer lab</a>).</cite></blockquote>
+<blockquote>Metadata is one of the few fields that can be updated on an existing Checkout Session.<cite><a href="https://docs.stripe.com/api/checkout/sessions/update">Stripe API: Update a Checkout Session</a>. This is what ct-checkout's stamp step relies on.</cite></blockquote>
+<blockquote>"You can't rely on triggering fulfillment only from your checkout landing page, because it's not guaranteed customers visit that page."<cite><a href="https://docs.stripe.com/checkout/fulfillment?payment-ui=stripe-hosted">Stripe Docs: Fulfill orders</a>. Same logic applies to analytics: the webhook is the reliable place to record the sale.</cite></blockquote>
+<blockquote>Payment Links accept a client_reference_id URL parameter ("alphanumeric characters, dashes, or underscores, and be any value up to 200 characters") that "is sent in the checkout.session.completed webhook after payment completion."<cite><a href="https://docs.stripe.com/payment-links/url-parameters">Stripe Docs: Track a payment link</a>. Useful for the static buy.stripe.com links (donations, supporter tiers), not for the Firebase-created sessions.</cite></blockquote>
+
+<h2>4. What the data shows today (Sep 11, 2026)</h2>
+<table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td>GA4 purchases, last 45 days</td><td>140 purchases, 100% with session source / medium (not set). First-user source is (direct) for 139 of them: every purchase is a fresh anonymous user.</td></tr>
+<tr><td>Who sends the purchase today</td><td>Paytics. Every transaction id is a Stripe payment-intent id, including renewals. ct-checkout would label renewals with invoice ids and subscription checkouts with session ids, and none appear. So ct-checkout still sends nothing (same Vercel env problem as Sep 3) and there is no double count.</td></tr>
+<tr><td>Paytics gap</td><td>No purchases in GA4 from Sep 2 to Sep 5. Paytics hit its 1,000-event monthly cap on Sep 1 and resumed Sep 6. Five new checkouts from that window never reached GA4 and will not be back-filled. At the current ~1,800 Stripe events per month this recurs every cycle.</td></tr>
+<tr><td>Stripe Checkout Sessions, last 11 days</td><td>24 completed. 0 carry client_reference_id. 0 carry ga_client_id / ga_session_id metadata. The bridge script on programs.clearerthinking.org has no get-ga-ids handler (last change Jun 2). The dashboard repo has no commits since Aug 13. The browser-to-Stripe half of the fix has not been started.</td></tr>
+<tr><td>What "purchase" contains (Sep 1 to 10)</td><td>34 events = 9 new one-off checkouts + 4 first subscription invoices + 21 subscription renewals. Renewals happen weeks after any visit and can never have a session source, even after the fix.</td></tr>
+<tr><td>Where buyers land after paying</td><td>Cognitive test: www.guidedtrack.com (no custom script allowed). Personality PDF: a PDF file on S3 (no page at all). CT+: clearerthinking.org/typ-ct-ambassador. A "fire the purchase on the thank-you page" approach is impossible for two of the three flows.</td></tr>
+</table>
+
+<h2>5. The fix</h2>
+<div class="flow">
+<div class="node"><b>1. Visitor on clearerthinking.org</b><small>Unchanged. Tag writes client_id + session_id.</small></div><div class="arrow">&#8594;</div>
+<div class="node good"><b>2. GT program page reads the two numbers</b><small>Bridge script handler (get-ga-ids) or gtag('get'). Program stores them in variables.</small></div><div class="arrow">&#8594;</div>
+<div class="node good"><b>3. Firebase creates the session with metadata</b><small>ga_client_id and ga_session_id set at creation (Stripe's own pattern). Alternative: ct-checkout stamps them onto the open session.</small></div><div class="arrow">&#8594;</div>
+<div class="node"><b>4. checkout.stripe.com</b><small>Unchanged.</small></div><div class="arrow">&#8594;</div>
+<div class="node good"><b>5. Webhook sends the purchase with the numbers</b><small>client_id + session_id + transaction_id + value, sent within minutes of the visit.</small></div><div class="arrow">&#8594;</div>
+<div class="node good"><b>6. GA4</b><small>Files the purchase under the original visit. Source / medium populated; channels, campaigns and Google Ads attribution work.</small></div>
+</div>
+<p class="cap">Only steps 2, 3 and 5 change. The buyer sees nothing different.</p>
+
+<h3>Steps and owners</h3>
+<ol>
+<li><b>Bridge script</b> <span class="who">Josh, programs-static repo</span>: add the get-ga-ids handler to google_analytics_guidedtrack_trigger.js (12 lines, already written in the Aug 21 email and the ct-checkout README). It reads the _ga cookies and hands client_id and session_id back to GuidedTrack.</li>
+<li><b>GT programs</b> <span class="who">Josh or Igor</span>: at start, trigger get-ga-ids and store the two values; pass them to the Firebase checkout call (or route the checkout redirect through ct-checkout /checkout with cid and sid).</li>
+<li><b>Firebase</b> <span class="who">Josh, dashboard repo</span>: the three getCheckoutUrl functions accept ga_client_id and ga_session_id and write them into the session's metadata. Without a Firebase change, ct-checkout's /stamp-session does the same on the open session.</li>
+<li><b>Webhook</b> <span class="who">Josh, dashboard repo, or ct-checkout</span>: on checkout.session.completed, send the GA4 purchase with client_id, session_id, transaction_id (the payment intent), value in dollars, currency, items and engagement_time_msec. The existing sendGA4PurchaseEvent in the dashboard repo is never called, has no session_id or transaction_id, and its GA4 secret is not declared; fix it or use ct-checkout's sender.</li>
+<li><b>Subscribe program</b> <span class="who">Josh</span>: program 1pvomgo runs on www.guidedtrack.com, where no script runs, so step 1 cannot reach it. Publish it on programs.clearerthinking.org like the other paid flows.</li>
+<li><b>Renewals</b>: send them as a separate event (subscription_renewal) with the client_id stamped on the Stripe Customer, not as purchase. Otherwise "(not set)" never goes away and the purchase count overstates new sales by roughly 2 to 1.</li>
+<li><b>Cut-over</b> <span class="who">Igor</span>: once a new Checkout Session shows ga_ metadata in Stripe and GA4 shows attributed purchases, uninstall Paytics the same day (both running means double counting). Fix the ct-checkout Vercel env or retire the project, depending on who ends up owning the webhook.</li>
+</ol>
+
+<h3>How to verify it worked</h3>
+<ul>
+<li>In Stripe, open the newest Checkout Session: metadata shows ga_client_id and ga_session_id.</li>
+<li>In GA4 Realtime, the purchase appears within a minute of the payment (Measurement Protocol events show there when session_id and engagement_time_msec are included).</li>
+<li>After 24 to 48 hours, the Events report for purchase shows real values under session source / medium. Renewals stay (not set) until step 6.</li>
+</ul>
+
+<div class="box"><b>Do not:</b> buy Paytics Premium (it lifts the cap but still has no way to know the buyer's numbers); change GA4 attribution or channel settings (the data is missing, not misfiled); rely on thank-you pages (impossible for the PDF and cognitive-test flows, and Stripe itself says the redirect is not guaranteed).</div>
+
+<h2>6. Open question</h2>
+<p>Josh replied on Aug 21 that the fix belongs in the dashboard repo rather than in a separate Vercel project, and asked whether the code already there could be reused. There is no written follow-up after that, and the Sep 8 call has no notes. What was agreed there decides who implements steps 3 and 4 and whether ct-checkout is kept as the webhook or retired.</p>
+
+<h2>Sources</h2>
+<ul>
+<li><a href="https://support.google.com/analytics/answer/13504892">GA4 Help: What the value (not set) means in your reports</a></li>
+<li><a href="https://support.google.com/analytics/answer/9191807">GA4 Help: About Analytics sessions</a></li>
+<li><a href="https://support.google.com/analytics/answer/11080067">GA4 Help: Scopes of traffic-source dimensions</a></li>
+<li><a href="https://support.google.com/analytics/answer/10071811">GA4 Help: Set up cross-domain measurement</a></li>
+<li><a href="https://developers.google.com/analytics/devguides/collection/protocol/ga4">GA4 Measurement Protocol overview</a>, <a href="https://developers.google.com/analytics/devguides/collection/protocol/ga4/sending-events?client_type=gtag">Sending events</a>, <a href="https://developers.google.com/analytics/devguides/collection/protocol/ga4/reference?client_type=gtag">Reference</a></li>
+<li><a href="https://developers.google.com/tag-platform/gtagjs/reference">gtag.js reference</a></li>
+<li><a href="https://docs.stripe.com/payments/checkout/analyze-conversion-funnel?payment-ui=stripe-hosted">Stripe: Analyze your conversion funnel with GA4</a></li>
+<li><a href="https://docs.stripe.com/checkout/fulfillment?payment-ui=stripe-hosted">Stripe: Fulfill orders</a></li>
+<li><a href="https://docs.stripe.com/payments/checkout/custom-success-page?payment-ui=stripe-hosted">Stripe: Customize redirect behavior</a></li>
+<li><a href="https://docs.stripe.com/api/checkout/sessions/update">Stripe API: Update a Checkout Session</a>, <a href="https://docs.stripe.com/api/checkout/sessions/object">Checkout Session object</a></li>
+<li><a href="https://docs.stripe.com/payment-links/url-parameters">Stripe: Track a payment link (URL parameters)</a></li>
+<li><a href="https://paytics.io/">Paytics</a> (Measurement Protocol sender, Basic plan capped at 1,000 events per month)</li>
+<li><a href="https://www.simoahava.com/analytics/session-attribution-with-ga4-measurement-protocol/">Simo Ahava: Session attribution with GA4 Measurement Protocol</a></li>
+<li><a href="https://metricfixer.com/publications/analytics-conversion-tracking/ga4-measurement-protocol-session-traffic-source-attribution-lab">MetricFixer: Why GA4 Measurement Protocol purchases become direct or (not set)</a></li>
+<li><a href="https://blog.williamchong.cloud/code/2024/04/20/maintaining-ga-session-in-stripe-checkout.html">William Chong: Maintaining the GA session across Stripe Checkout</a></li>
+</ul>
+</main></body></html>
