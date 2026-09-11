@@ -59,6 +59,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `git pull --rebase --autostash origin main` before pushing. `advisor_memory.git_commit_and_push`
   does this and waits for `index.lock`.
 - Scheduled workflows run only from `main`, so advisor changes must land on `main` to take effect.
+- `context_saves/` (written by the global CLAUDE.md `save` command) is gitignored: the repo is public
+  and `auto-push.sh` does `git add -A`, so it must never be committed.
 
 ## Data gotchas
 - beehiiv `created` = date the record entered beehiiv; bulk imports (utm_channel "import",
