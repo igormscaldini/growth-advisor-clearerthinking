@@ -79,9 +79,8 @@ MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
     "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00), ("Hive", 2_500.00)],
     "Affiliates": [("Kitted Decks", 230.00)],
     "Podcast sponsorships": [("ACE", 800.00)],
-    "Newsletter Sponsorships": [("80,000 Hours", 4_200.00)],
+    "Newsletter Sponsorships": [("80,000 Hours", 4_200.00), ("Game Over (Jesse)", 3_000.00)],
     "Beehiiv Ad Network": [("Beehiiv", 945.41)],
-    "Game Over (Jesse) Sponsorship": [("Game Over (Jesse)", 3_000.00)],
 }
 
 
