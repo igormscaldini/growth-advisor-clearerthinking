@@ -100,15 +100,8 @@ COG_AMOUNTS = (3500, 1750)
 PERSONALITY_AMOUNTS = (900,)
 
 # Manually-tracked revenue lines for the Monetization Summary table.
-# Update both the line items and the date below when revenue is reported.
-MANUAL_REVENUE_LAST_UPDATED = "2026-05-26"
-MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
-    "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00)],
-    "Affiliates": [("Kitted Decks", 230.00)],
-    "Podcast sponsorships": [("ACE", 800.00)],
-    "Newsletter Sponsorships": [("80,000 Hours", 4_200.00)],
-    "Beehiiv Ad Network": [("Beehiiv", 431.85)],
-}
+# Single source of truth is fetch_snapshot.py (shared with the Vercel dashboard and the advisor).
+from fetch_snapshot import MANUAL_REVENUE, MANUAL_REVENUE_LAST_UPDATED  # noqa: E402
 
 # Compute the prior comparison window: same length, immediately before `start`
 period_days = (end - start).days + 1
@@ -647,7 +640,7 @@ with tab_monetization:
     manual_sources = ", ".join(MANUAL_REVENUE.keys())
     st.caption(
         f"📝 Manual values (**{manual_sources}**) last updated by Igor: **{MANUAL_REVENUE_LAST_UPDATED}**. "
-        "Update via the `MANUAL_REVENUE` constant near the top of `dashboard.py`."
+        "Update via the `MANUAL_REVENUE` constant in `fetch_snapshot.py`."
     )
 
 

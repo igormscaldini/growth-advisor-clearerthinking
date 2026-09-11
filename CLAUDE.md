@@ -19,6 +19,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   25-minute budget) -> Vercel dashboard at https://growth-advisor-clearerthinking.vercel.app/.
   `frontend/public/beehiiv_new_subs_cache.json` is an incremental cache committed with the
   snapshot; delete it to force a full re-walk (takes ~25 min).
+- Manual (non-Stripe) revenue lines (sponsorships, MLA, affiliates): `MANUAL_REVENUE` in
+  `fetch_snapshot.py` is the single source (`dashboard.py` and `weekly_advisor.py` import it). The
+  goals table's "Total revenue" = Stripe gross + these lines. To publish an edit without waiting
+  for the throttled cron, rewrite `snapshot.json`'s `manual_revenue` with `manual_revenue_block()`.
 - `weekly_advisor.py`: Friday 11:00 UTC letter (results, the week's work, next week's
   priorities). Two ways to produce the letter: the API path (default, needs Anthropic credits)
   and routine mode (`--brief` then `--send-letter`, see `ADVISOR_ROUTINE.md`), where a Claude

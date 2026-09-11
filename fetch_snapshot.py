@@ -70,14 +70,30 @@ DAILY_WINDOW_FLOOR = date(2026, 1, 1)
 COG_AMOUNTS = (3500, 1750)
 PERSONALITY_AMOUNTS = (900,)
 
-MANUAL_REVENUE_LAST_UPDATED = "2026-07-10"
+# Manually-tracked (non-Stripe) revenue lines. Single source of truth: dashboard.py and
+# weekly_advisor.py import these. After editing, the snapshot cron picks the change up on its
+# next run; to publish immediately, rewrite the manual_revenue block in snapshot.json via
+# manual_revenue_block() and push.
+MANUAL_REVENUE_LAST_UPDATED = "2026-09-11"
 MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
     "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00), ("Hive", 2_500.00)],
     "Affiliates": [("Kitted Decks", 230.00)],
     "Podcast sponsorships": [("ACE", 800.00)],
     "Newsletter Sponsorships": [("80,000 Hours", 4_200.00)],
     "Beehiiv Ad Network": [("Beehiiv", 945.41)],
+    "Game Over (Jesse) Sponsorship": [("Game Over (Jesse)", 3_000.00)],
 }
+
+
+def manual_revenue_block() -> dict:
+    """The snapshot's manual_revenue section, built from MANUAL_REVENUE."""
+    return {
+        "last_updated": MANUAL_REVENUE_LAST_UPDATED,
+        "lines": {
+            label: [{"source": src, "amount": amt} for src, amt in items]
+            for label, items in MANUAL_REVENUE.items()
+        },
+    }
 
 
 def _safe(fn, *args, **kwargs):
@@ -197,13 +213,7 @@ def main() -> None:
         },
         "periods": periods,
         "daily_window": daily_window,
-        "manual_revenue": {
-            "last_updated": MANUAL_REVENUE_LAST_UPDATED,
-            "lines": {
-                label: [{"source": src, "amount": amt} for src, amt in items]
-                for label, items in MANUAL_REVENUE.items()
-            },
-        },
+        "manual_revenue": manual_revenue_block(),
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
