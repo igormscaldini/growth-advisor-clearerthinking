@@ -75,3 +75,59 @@ def test_project_dir_name_matches_claude_code_convention():
     root = Path("/Users/igorscaldini/Documents/Claude/Growth Advisor - Clearer Thinking")
     assert ac.project_dir_name(root) == "-Users-igorscaldini-Documents-Claude-Growth-Advisor---Clearer-Thinking"
     assert ac.TRANSCRIPTS_DIR.parent.name == "projects"
+
+
+# --- sweep lock and dry run ------------------------------------------------------------
+def test_sweep_lock_is_exclusive_and_recovers_from_dead_owner(monkeypatch, tmp_path):
+    lock = tmp_path / "digest.lock"
+    monkeypatch.setattr(ac, "LOCK_FILE", lock)
+    assert ac.acquire_sweep_lock() is True
+    assert lock.read_text() == str(ac.os.getpid())
+    assert ac.acquire_sweep_lock() is False          # held by a live process (us)
+    ac.release_sweep_lock()
+    assert not lock.exists()
+
+    lock.write_text("999999999")                     # a dead owner: taken over
+    monkeypatch.setattr(ac, "_pid_alive", lambda pid: False)
+    assert ac.acquire_sweep_lock() is True
+    ac.release_sweep_lock()
+
+    lock.write_text("garbage")                       # unreadable owner: taken over
+    assert ac.acquire_sweep_lock() is True
+    ac.release_sweep_lock()
+
+    lock.write_text(str(ac.os.getpid()))             # someone else's lock is never released by us
+    monkeypatch.setattr(ac, "_pid_alive", lambda pid: True)
+    lock.write_text("4242")
+    ac.release_sweep_lock()
+    assert lock.exists()
+
+
+def test_sweep_skips_when_another_sweep_holds_the_lock(monkeypatch, tmp_path):
+    lock = tmp_path / "digest.lock"
+    lock.write_text("4242")
+    monkeypatch.setattr(ac, "LOCK_FILE", lock)
+    monkeypatch.setattr(ac, "_pid_alive", lambda pid: True)
+    monkeypatch.setattr(ac, "TRANSCRIPTS_DIR", tmp_path)
+    _write(tmp_path, [_rec("user", [{"type": "text", "text": "hello " * 100}])])
+    calls = []
+    monkeypatch.setattr(ac, "process_session", lambda *a, **k: calls.append(a))
+    ac.sweep("sweep", dry_run=True, push=False, only_idle=False)
+    assert calls == []
+    lock.unlink()
+    ac.sweep("sweep", dry_run=True, push=False, only_idle=False)
+    assert len(calls) == 1
+    assert not lock.exists()                          # released afterwards
+
+
+def test_dry_run_lists_without_calling_claude(monkeypatch, tmp_path, capsys):
+    monkeypatch.setattr(ac, "STATE_FILE", tmp_path / "state.json")
+    monkeypatch.setattr(ac, "_claude", lambda *a, **k: (_ for _ in ()).throw(AssertionError("Claude was called")))
+    path = _write(tmp_path, [
+        {"type": "ai-title", "aiTitle": "Big session", "sessionId": "x"},
+        _rec("user", [{"type": "text", "text": "Please export the workshop signups " * 20}]),
+        _rec("assistant", [{"type": "text", "text": "Done, here is the export. " * 20}], ts="2026-08-26T12:01:00.000Z"),
+    ])
+    assert ac.process_session(path, "sweep", dry_run=True, push=False) is None
+    assert "would digest 58351d99" in capsys.readouterr().err
+    assert not (tmp_path / "state.json").exists()

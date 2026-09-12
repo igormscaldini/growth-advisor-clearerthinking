@@ -17,12 +17,16 @@ How it gets triggered:
 
 Run locally:   .venv/bin/python advisor_conversations.py --sweep            # catch up everything
                .venv/bin/python advisor_conversations.py --session <id> --force --print
-               .venv/bin/python advisor_conversations.py --sweep --dry-run  # show what it would do
+               .venv/bin/python advisor_conversations.py --sweep --dry-run  # list what it would digest (no Claude calls)
+
+Only one sweep runs at a time (.claude/digest.lock): Stop and SessionEnd hooks, or two open
+windows, used to sweep the same backlog concurrently and digest every session twice.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from datetime import date, datetime, timedelta, timezone
@@ -44,6 +48,8 @@ def project_dir_name(root: Path) -> str:
 
 TRANSCRIPTS_DIR = Path.home() / ".claude" / "projects" / project_dir_name(ROOT)
 STATE_FILE = ROOT / ".claude" / "conversation_digest_state.json"
+LOCK_FILE = ROOT / ".claude" / "digest.lock"
+LOCK_STALE_MINUTES = 90        # a lock older than this whose process is gone is ignored
 LOG_PREFIX = "[digest]"
 
 MAX_CHUNK_CHARS = 120_000       # ~30k tokens per Claude call
@@ -285,12 +291,13 @@ def process_session(path: Path, reason: str, dry_run: bool = False, push: bool =
         return None
 
     title = session_title(path)
+    if dry_run:
+        log(f"would digest {session_id[:8]} '{title}' ({len(turns)} turns, {n_prompts} prompts, reason={reason})")
+        return None
     log(f"digesting {session_id[:8]} '{title}' ({len(turns)} turns, {n_prompts} prompts, reason={reason})")
     text = digest_turns(turns, title, session_id)
-    if print_digest or dry_run:
+    if print_digest:
         print(text)
-    if dry_run:
-        return None
 
     last_ts = max((t["ts"] for t in turns if t["ts"]), default="")
     day = date.fromisoformat(last_ts[:10]) if last_ts else now.date()
@@ -314,19 +321,61 @@ def process_session(path: Path, reason: str, dry_run: bool = False, push: bool =
     return out
 
 
+def _pid_alive(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def acquire_sweep_lock() -> bool:
+    """Take .claude/digest.lock (holding our pid). False if another live sweep holds it; a
+    lock whose process is gone, or older than LOCK_STALE_MINUTES, is taken over."""
+    try:
+        if LOCK_FILE.exists():
+            age = datetime.now(timezone.utc) - datetime.fromtimestamp(LOCK_FILE.stat().st_mtime, tz=timezone.utc)
+            owner = LOCK_FILE.read_text().strip()
+            if age < timedelta(minutes=LOCK_STALE_MINUTES) and owner.isdigit() and _pid_alive(int(owner)):
+                return False
+            LOCK_FILE.unlink()
+        fd = os.open(LOCK_FILE, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+    except FileExistsError:
+        return False
+    with os.fdopen(fd, "w") as f:
+        f.write(str(os.getpid()))
+    return True
+
+
+def release_sweep_lock() -> None:
+    try:
+        if LOCK_FILE.exists() and LOCK_FILE.read_text().strip() == str(os.getpid()):
+            LOCK_FILE.unlink()
+    except OSError:
+        pass
+
+
 def sweep(reason: str, dry_run: bool, push: bool, only_idle: bool) -> None:
     if not TRANSCRIPTS_DIR.exists():
         log(f"no transcripts dir at {TRANSCRIPTS_DIR}")
         return
-    cutoff = datetime.now(timezone.utc) - timedelta(minutes=IDLE_MINUTES)
-    for path in sorted(TRANSCRIPTS_DIR.glob("*.jsonl"), key=lambda p: p.stat().st_mtime):
-        mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
-        if only_idle and mtime > cutoff:
-            continue
-        try:
-            process_session(path, reason, dry_run=dry_run, push=push)
-        except Exception as e:  # noqa: BLE001
-            log(f"ERROR on {path.name}: {type(e).__name__}: {e}")
+    if not acquire_sweep_lock():
+        log("another sweep is running (see .claude/digest.lock); skipping")
+        return
+    try:
+        cutoff = datetime.now(timezone.utc) - timedelta(minutes=IDLE_MINUTES)
+        for path in sorted(TRANSCRIPTS_DIR.glob("*.jsonl"), key=lambda p: p.stat().st_mtime):
+            mtime = datetime.fromtimestamp(path.stat().st_mtime, tz=timezone.utc)
+            if only_idle and mtime > cutoff:
+                continue
+            try:
+                process_session(path, reason, dry_run=dry_run, push=push)
+            except Exception as e:  # noqa: BLE001
+                log(f"ERROR on {path.name}: {type(e).__name__}: {e}")
+    finally:
+        release_sweep_lock()
 
 
 def main() -> int:
