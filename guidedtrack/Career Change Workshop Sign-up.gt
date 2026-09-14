@@ -61,6 +61,7 @@
 
 *settings
 	*menu: no
+	*back: yes
 
 --------------------------------------------------------------------------------
 -- PAGE 1: the invitation
@@ -97,12 +98,12 @@
 		.program_container .ct-facts p.ct-skip a { display: inline-block; padding: 6px 0; }
 		.program_container .ct-bio { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #ffffff !important; padding: 18px 20px !important; margin: 10px 0 28px 0 !important; }
 		.program_container .ct-bio p { margin: 4px 0; font-size: 16px; }
-		.program_container .ct-bio p.ct-name { font-size: 18px; margin: 0 0 6px 0; }
-		.program_container .ct-bio-row { display: grid; grid-template-columns: 84px 1fr; column-gap: 18px; row-gap: 2px; align-items: start; }
-		.program_container .ct-avatar { grid-row: 1 / 3; width: 84px; height: 84px; border-radius: 50%; background-color: #e9eef5; background-image: url("https://programs.clearerthinking.org/career-workshop/angel-au.jpg"); background-repeat: no-repeat; background-size: 170%; background-position: 50% 30%; }
-		.program_container .ct-bio-row p.ct-name { grid-column: 2; margin: 0 0 4px 0; }
-		.program_container .ct-bio-row p.ct-bio-para { grid-column: 2; margin: 0; }
-		@media (max-width: 480px) { .program_container .ct-bio-row { grid-template-columns: 56px 1fr; column-gap: 14px; row-gap: 12px; } .program_container .ct-avatar { grid-row: 1; width: 56px; height: 56px; } .program_container .ct-bio-row p.ct-name { align-self: center; margin: 0; } .program_container .ct-bio-row p.ct-bio-para { grid-column: 1 / -1; } }
+		.program_container .ct-bio-row { display: grid; grid-template-columns: 128px 1fr; column-gap: 24px; row-gap: 0; align-items: start; }
+		.program_container .ct-avatar { grid-row: 1 / 4; width: 128px; height: 160px; border-radius: 10px; background-color: #e9eef5; background-image: url("https://programs.clearerthinking.org/career-workshop/angel-au.jpg"); background-repeat: no-repeat; background-size: auto 150%; background-position: 50% 25%; }
+		.program_container .ct-bio p.ct-name { grid-column: 2; font-size: 20px; line-height: 1.25; margin: 0 0 2px 0; }
+		.program_container .ct-bio p.ct-role { grid-column: 2; font-size: 15px; line-height: 1.45; color: #5b6472; margin: 0 0 10px 0; }
+		.program_container .ct-bio p.ct-bio-para { grid-column: 2; margin: 0; }
+		@media (max-width: 480px) { .program_container .ct-bio-row { grid-template-columns: 96px 1fr; column-gap: 16px; } .program_container .ct-avatar { grid-row: 1 / 3; width: 96px; height: 120px; } .program_container .ct-bio p.ct-name { align-self: end; } .program_container .ct-bio p.ct-role { align-self: start; margin: 0; } .program_container .ct-bio p.ct-bio-para { grid-column: 1 / -1; margin-top: 14px; } }
 	</style>
 
 *html
@@ -147,7 +148,8 @@ People who are considering, planning, or already making a career change and want
 		<div class="ct-bio-row">
 			<span class="ct-avatar" role="img" aria-label="Photo of Angel Au"></span>
 			<p class="ct-name"><b>{facilitatorName}</b></p>
-			<p class="ct-bio-para">{facilitatorLine}. Overcome has provided free one-to-one coaching to more than 2,700 people since 2023, and Angel's career coaching has helped people into training places in counseling and applied psychology. Angel is building the session from the research literature and from what readers told us in the survey.</p>
+			<p class="ct-role">{facilitatorLine}</p>
+			<p class="ct-bio-para">Overcome has provided free one-to-one coaching to more than 2,700 people since 2023, and Angel's career coaching has helped people into training places in counseling and applied psychology. Angel is building the session from the research literature and from what readers told us in the survey.</p>
 		</div>
 
 Sign up below. You'll get a confirmation email right away and the link to join before the session. If you can't make it live, sign up anyway: we plan to record it and send the recording to everyone who registered.
