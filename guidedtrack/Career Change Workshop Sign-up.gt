@@ -90,6 +90,7 @@
 		.program_container p.ct-eyebrow { color: #0A6FD6; font-size: 13px; line-height: 1.3; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 10px 0; }
 		.program_container h1.ct-title.ct-hero { font-size: 34px !important; }
 		.program_container .ct-facts p.ct-skip { margin-top: 10px; font-size: 15px; }
+		.program_container .ct-facts p.ct-skip a { display: inline-block; padding: 6px 0; }
 		.program_container .ct-quote { border: none !important; border-left: 3px solid #0885F8 !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; padding: 2px 0 2px 18px !important; margin: 18px 0 24px 0 !important; }
 		.program_container .ct-quote p { color: #3d4652; font-size: 17px; line-height: 1.55; margin: 0 0 8px 0; font-style: italic; }
 		.program_container .ct-bio { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #ffffff !important; padding: 18px 20px !important; margin: 10px 0 0 0 !important; }
@@ -113,7 +114,7 @@
 			<p><b>Length:</b> {workshopLength}</p>
 	*html
 		<p><b>Cost:</b> Free</p>
-		<p class="ct-skip"><a href="#ct-signup">Skip to the sign-up form</a></p>
+		<p class="ct-skip"><a href="#ct-signup">Skip to sign-up</a></p>
 
 In early September we asked newsletter readers where they stood with their careers. 143 people answered. Almost three quarters were thinking about, planning, or making a career change, and half had more than ten years of experience. When we asked about the single biggest obstacle, the most common answer, ahead of money, confidence, and age, was some version of "I don't know which path fits me."
 
