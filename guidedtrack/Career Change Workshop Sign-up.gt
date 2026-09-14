@@ -38,9 +38,12 @@
 >> workshopLength = ""
 >> joinLinkKnown = 0
 >> workshopJoinLink = ""
--- Ready-made Google Calendar link (16:00 UTC, 60-minute block). Set calendarLinkKnown = 1 once the length is confirmed.
->> calendarLinkKnown = 0
->> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Thinking%20Clearly%20About%20Career%20Change%20(Clearer%20Thinking%20workshop)&dates=20260930T160000Z/20260930T170000Z&details=Free%20live%20online%20workshop%20from%20Clearer%20Thinking%20with%20Angel%20Au%20of%20Overcome.%20The%20link%20to%20join%20arrives%20by%20email.&location=Online"
+-- Calendar links (16:00 UTC start, 60-minute block; adjust if the length changes). Use + for spaces,
+-- not %20: GuidedTrack re-encodes percent signs when the link goes into the email. The .ics file and
+-- the facilitator photo are served from the programs.clearerthinking.org repo (career-workshop program).
+>> calendarLinkKnown = 1
+>> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Thinking+Clearly+About+Career+Change&dates=20260930T160000Z/20260930T170000Z&details=Free+live+online+workshop+from+Clearer+Thinking+with+Angel+Au+of+Overcome.+The+link+to+join+arrives+by+email.&location=Online"
+>> icsLink = "https://programs.clearerthinking.org/career-workshop/thinking-clearly-about-career-change.ics"
 >> facilitatorName = "Angel Au"
 >> facilitatorLine = "Co-founder of Overcome, a UK-registered mental health charity, and an EMCC-accredited coach"
 -- Link shown to registrants for sharing. Point the redirect at the run URL with ?src=referral so referred sign-ups stay attributed.
@@ -75,6 +78,7 @@
 		.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
 		.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
 		.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+		.program_container:has(#ct-logo) .ct-brandrow { display: none; }
 		.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
 		.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
 		.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
@@ -94,6 +98,11 @@
 		.program_container .ct-bio { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #ffffff !important; padding: 18px 20px !important; margin: 10px 0 28px 0 !important; }
 		.program_container .ct-bio p { margin: 4px 0; font-size: 16px; }
 		.program_container .ct-bio p.ct-name { font-size: 18px; margin: 0 0 6px 0; }
+		.program_container .ct-bio-row { display: grid; grid-template-columns: 84px 1fr; column-gap: 18px; row-gap: 2px; align-items: start; }
+		.program_container .ct-avatar { grid-row: 1 / 3; width: 84px; height: 84px; border-radius: 50%; background-color: #e9eef5; background-image: url("https://programs.clearerthinking.org/career-workshop/angel-au.jpg"); background-repeat: no-repeat; background-size: 170%; background-position: 50% 30%; }
+		.program_container .ct-bio-row p.ct-name { grid-column: 2; margin: 0 0 4px 0; }
+		.program_container .ct-bio-row p.ct-bio-para { grid-column: 2; margin: 0; }
+		@media (max-width: 480px) { .program_container .ct-bio-row { grid-template-columns: 56px 1fr; column-gap: 14px; row-gap: 12px; } .program_container .ct-avatar { grid-row: 1; width: 56px; height: 56px; } .program_container .ct-bio-row p.ct-name { align-self: center; margin: 0; } .program_container .ct-bio-row p.ct-bio-para { grid-column: 1 / -1; } }
 	</style>
 
 *html
@@ -135,8 +144,11 @@ People who are considering, planning, or already making a career change and want
 *component
 	*classes: ct-bio
 	*html
-		<p class="ct-name"><b>{facilitatorName}</b></p>
-		<p>{facilitatorLine}. Overcome has provided free one-to-one coaching to more than 2,700 people since 2023, and Angel's career coaching has helped people into training places in counseling and applied psychology. Angel is building the session from the research literature and from what readers told us in the survey.</p>
+		<div class="ct-bio-row">
+			<span class="ct-avatar" role="img" aria-label="Photo of Angel Au"></span>
+			<p class="ct-name"><b>{facilitatorName}</b></p>
+			<p class="ct-bio-para">{facilitatorLine}. Overcome has provided free one-to-one coaching to more than 2,700 people since 2023, and Angel's career coaching has helped people into training places in counseling and applied psychology. Angel is building the session from the research literature and from what readers told us in the survey.</p>
+		</div>
 
 Sign up below. You'll get a confirmation email right away and the link to join before the session. If you can't make it live, sign up anyway: we plan to record it and send the recording to everyone who registered.
 
@@ -166,6 +178,7 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 			.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
 			.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
 			.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+		.program_container:has(#ct-logo) .ct-brandrow { display: none; }
 			.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
 			.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
 			.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
@@ -275,7 +288,9 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 
 		*What to expect:* what the research says about finding a career that fits, what predicts a career change going well, and how to work through the obstacles readers told us about (too many options, the cost of the transition, age and credentials, and a job market unsettled by AI).
 
-		If you can't make it live, no problem: we plan to send the recording to everyone who registered, though by watching the recording you won't be able to interact or ask questions.
+		*About the recording:* the session will be recorded and we'll send the recording to everyone who registered. We still recommend attending live, so you can ask questions and interact with other participants in the chat.
+
+		*Add it to your calendar:* [Google Calendar|{calendarLink}], or download the [.ics file|{icsLink}] for Apple Calendar, Outlook and others.
 
 		Nothing else to do for now. If you have a question for the session, or you can't come after all, reply to this email and say so.
 
@@ -298,6 +313,7 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 		.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
 		.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
 		.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+		.program_container:has(#ct-logo) .ct-brandrow { display: none; }
 		.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
 		.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
 		.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
@@ -331,7 +347,7 @@ A confirmation is on its way to {signupEmail}. If it isn't there in a few minute
 *if: dateKnown = 1
 	*if: calendarLinkKnown = 1
 		*html
-			<p><a href="{calendarLink}" target="_blank" rel="noopener">Add it to your calendar</a></p>
+			<p>Add it to your own calendar now so it doesn't slip: <a href="{calendarLink}" target="_blank" rel="noopener">Google Calendar</a>, or <a href="{icsLink}">download the .ics file</a> for Apple Calendar, Outlook and others.</p>
 
 *html
 	<h2 class="ct-h2">What happens next</h2>
