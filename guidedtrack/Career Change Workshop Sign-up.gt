@@ -1,0 +1,372 @@
+--------------------------------------------------------------------------------
+-- NAME: Career Change Workshop Sign-up
+-- Registration page for the live workshop "Thinking Clearly About Career Change"
+-- (Clearer Thinking with Angel Au of Overcome). Collects an email, sends a
+-- confirmation email, and records where the sign-up came from.
+--
+-- HOW TO USE
+-- 1. Fill in the settings block below. Until the date is fixed, keep dateKnown = 0:
+--    the page and the email then say the date is coming, and every sign-up is
+--    still recorded. When you know it, set dateKnown = 1 and fill workshopDate and
+--    workshopTime. Same pattern for the session length (lengthKnown), the join
+--    link (joinLinkKnown) and the calendar link (calendarLinkKnown).
+-- 2. In GuidedTrack: Settings -> Branding, set "Email display name" to
+--    "Clearer Thinking" and the Reply-To address, so the confirmation email does
+--    not arrive from "Career Change Workshop Sign-up".
+-- 3. Share the run link with ?src=newsletter, ?src=overcome, etc. The src value is
+--    saved with each sign-up so you can see which channel brought whom.
+--
+-- GUIDEDTRACK GOTCHAS BAKED IN HERE (verified 2026-09-14 with a scratch program)
+-- - 0 and "" are TRUTHY in *if; only an undefined variable is falsy. Every flag
+--   below is therefore tested with "= 1", never as a bare *if: flag.
+-- - text.find returns the 1-based position, or nothing (falsy) when not found.
+-- - A text line that starts with *Word:* is parsed as a keyword, so bold leads
+--   are done in HTML (<b>) or with multi-word phrases only.
+-- - <img> is stripped from *html, so the logo is a CSS background image (URL written
+--   literally: {variable} interpolation does not run inside <style>).
+-- - *html styles are cleared on every page change, so each page carries its own.
+--------------------------------------------------------------------------------
+
+-- SETTINGS (edit these) ---------------------------------------------------------
+>> workshopTitle = "Thinking Clearly About Career Change"
+>> workshopSubtitle = "What the evidence says, and what it can't tell you"
+>> dateKnown = 0
+>> workshopDate = ""
+-- Include the time zone(s) in workshopTime, e.g. "6 pm UK, 1 pm US Eastern".
+>> workshopTime = ""
+>> lengthKnown = 0
+>> workshopLength = ""
+>> joinLinkKnown = 0
+>> workshopJoinLink = ""
+>> calendarLinkKnown = 0
+>> calendarLink = ""
+>> facilitatorName = "Angel Au"
+>> facilitatorLine = "Co-founder of Overcome, a UK-registered mental health charity, and an EMCC-accredited coach"
+>> hostName = "Igor Scaldini"
+-- Link shown to registrants for sharing; the src tag attributes referred sign-ups.
+>> signupUrl = "https://www.guidedtrack.com/programs/gg4qpas/run?src=referral"
+---------------------------------------------------------------------------------
+
+-- Tracking parameter from the run URL (?src=newsletter). Empty when absent.
+*if: not src
+	>> src = ""
+
+-- Derived text used on the page and in the email.
+>> whenText = "Date and time coming soon. Sign up and we'll email you as soon as it's fixed."
+*if: dateKnown = 1
+	>> whenText = "{workshopDate}, {workshopTime}"
+
+*settings
+	*menu: no
+
+--------------------------------------------------------------------------------
+-- PAGE 1: the invitation
+--------------------------------------------------------------------------------
+*html
+	<style>
+		.program_container .main { max-width: 640px; margin-left: auto; margin-right: auto; padding-top: 28px; padding-bottom: 96px; }
+		@media (max-width: 767px) { .program_container .main { padding-top: 64px; padding-left: 20px; padding-right: 20px; } }
+		.program_container p { font-size: 17px; line-height: 1.6; color: #2a2a2a; font-weight: 400; margin: 0 0 14px 0; }
+		.program_container a { color: #0A6FD6; text-decoration: underline; overflow-wrap: anywhere; word-break: break-word; }
+		.program_container .btn { background-color: #0885F8; border: none; border-radius: 8px; padding: 15px 30px; font-size: 19px; font-weight: 700; color: #fff; }
+		.program_container .btn:hover, .program_container .btn:focus { background-color: #0A6FD6; border: none; color: #fff; }
+		.program_container .btn:focus-visible { outline: 3px solid #0A6FD6; outline-offset: 3px; }
+		@media (min-width: 600px) { .program_container .btn.btn-block { display: inline-block; width: auto; min-width: 300px; } }
+		.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
+		.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
+		.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+		.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
+		.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
+		.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
+		.program_container p.ct-fine, .program_container .ct-quote p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
+		.program_container .ct-facts { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #f4f8fd !important; padding: 16px 20px !important; margin: 0 0 24px 0 !important; }
+		.program_container .ct-facts p { margin: 3px 0; font-size: 16px; }
+		.program_container .ct-facts b { color: #1a1a1a; }
+		.program_container ul.ct-list { padding-left: 22px; margin: 0 0 8px 0; }
+		.program_container ul.ct-list li { font-size: 17px; line-height: 1.6; color: #2a2a2a; margin-bottom: 10px; }
+		.program_container ul.ct-list li b { color: #1a1a1a; }
+		@media (max-width: 480px) { .program_container h1.ct-title { font-size: 28px !important; } .program_container p.ct-sub { font-size: 18px; } }
+		
+		.program_container p.ct-eyebrow { color: #0A6FD6; font-size: 13px; line-height: 1.3; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 10px 0; }
+		.program_container h1.ct-title.ct-hero { font-size: 34px !important; }
+		.program_container .ct-facts p.ct-skip { margin-top: 10px; font-size: 15px; }
+		.program_container .ct-quote { border: none !important; border-left: 3px solid #0885F8 !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; padding: 2px 0 2px 18px !important; margin: 18px 0 24px 0 !important; }
+		.program_container .ct-quote p { color: #3d4652; font-size: 17px; line-height: 1.55; margin: 0 0 8px 0; font-style: italic; }
+		.program_container .ct-bio { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #ffffff !important; padding: 18px 20px !important; margin: 10px 0 0 0 !important; }
+		.program_container .ct-bio p { margin: 4px 0; font-size: 16px; }
+		.program_container .ct-bio p.ct-name { font-size: 18px; margin: 0 0 6px 0; }
+	</style>
+
+*html
+	<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
+	<p class="ct-eyebrow">Free live workshop, with Overcome</p>
+	<h1 class="ct-title ct-hero">{workshopTitle}</h1>
+	<p class="ct-sub">{workshopSubtitle}</p>
+
+*component
+	*classes: ct-facts
+	*html
+		<p><b>When:</b> {whenText}</p>
+		<p><b>Where:</b> Online, live. We'll email the link to join before the session.</p>
+	*if: lengthKnown = 1
+		*html
+			<p><b>Length:</b> {workshopLength}</p>
+	*html
+		<p><b>Cost:</b> Free</p>
+		<p class="ct-skip"><a href="#ct-signup">Skip to the sign-up form</a></p>
+
+In early September we asked newsletter readers where they stood with their careers. 143 people answered. Almost three quarters were thinking about, planning, or making a career change, and half had more than ten years of experience. When we asked about the single biggest obstacle, the most common answer, ahead of money, confidence, and age, was some version of "I don't know which path fits me."
+
+This workshop is our response. It covers what the research on career change shows, where that research runs out, and how to work through the obstacles readers raised.
+
+*html
+	<h2 class="ct-h2">What we'll cover</h2>
+	<ul class="ct-list">
+		<li><b>What the evidence says about finding a career that fits.</b> Self-assessments and conversations with people who made the change: what studies show about each, and why the research suggests a self-assessment on its own isn't enough.</li>
+		<li><b>What predicts a career change going well.</b> The factors the research has linked to a successful change, and how strong that evidence is.</li>
+		<li><b>The obstacles readers told us about.</b> Too many plausible options, the money and time a transition costs, worries about age and credentials, and a job market unsettled by AI.</li>
+	</ul>
+
+*component
+	*classes: ct-quote
+	*html
+		<p>"Uncertainty. All paths seem feasible, but it's hard to choose one."</p>
+		<p>"Can I afford earning significantly less during the transition time?"</p>
+		<p>"Will an employer want what I bring to the table?"</p>
+		<p class="ct-fine">Three of the 96 obstacles readers described in the survey, lightly edited for spelling.</p>
+
+*html
+	<h2 class="ct-h2">Who it's for</h2>
+
+People who are considering, planning, or already making a career change and want to think it through carefully. If you're choosing a first career, you're welcome too: much of the evidence applies, even if the constraints differ.
+
+*html
+	<h2 class="ct-h2">Who's leading it</h2>
+
+*component
+	*classes: ct-bio
+	*html
+		<p class="ct-name"><b>{facilitatorName}</b></p>
+		<p>{facilitatorLine}. Overcome has provided free one-to-one coaching to more than 2,700 people since 2023, and Angel's career coaching has helped people into training places in counseling and applied psychology. Angel is building the session from the research literature and from what readers told us in the survey.</p>
+		<p class="ct-fine">Hosted by {hostName} for Clearer Thinking.</p>
+
+*html
+	<h2 class="ct-h2">A caveat</h2>
+
+The research on career change is thinner than you might expect. Part of the session is about what it can't tell you, and which parts of the decision are yours to make.
+
+Sign up below. You'll get a confirmation email right away and the link to join before the session. If you can't make it live, sign up anyway: we plan to record it and send the recording to everyone who registered.
+
+*html
+	<div id="ct-signup"></div>
+
+*button: Sign up
+
+--------------------------------------------------------------------------------
+-- PAGE 2: the form
+--------------------------------------------------------------------------------
+>> emailLooksWrong = 0
+
+*label: signupForm
+
+*page
+	*html
+		<style>
+			.program_container .main { max-width: 640px; margin-left: auto; margin-right: auto; padding-top: 28px; padding-bottom: 96px; }
+			@media (max-width: 767px) { .program_container .main { padding-top: 64px; padding-left: 20px; padding-right: 20px; } }
+			.program_container p { font-size: 17px; line-height: 1.6; color: #2a2a2a; font-weight: 400; margin: 0 0 14px 0; }
+			.program_container a { color: #0A6FD6; text-decoration: underline; overflow-wrap: anywhere; word-break: break-word; }
+			.program_container .btn { background-color: #0885F8; border: none; border-radius: 8px; padding: 15px 30px; font-size: 19px; font-weight: 700; color: #fff; }
+			.program_container .btn:hover, .program_container .btn:focus { background-color: #0A6FD6; border: none; color: #fff; }
+			.program_container .btn:focus-visible { outline: 3px solid #0A6FD6; outline-offset: 3px; }
+			@media (min-width: 600px) { .program_container .btn.btn-block { display: inline-block; width: auto; min-width: 300px; } }
+			.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
+			.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
+			.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+			.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
+			.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
+			.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
+			.program_container p.ct-fine, .program_container .ct-quote p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
+			.program_container .ct-facts { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #f4f8fd !important; padding: 16px 20px !important; margin: 0 0 24px 0 !important; }
+			.program_container .ct-facts p { margin: 3px 0; font-size: 16px; }
+			.program_container .ct-facts b { color: #1a1a1a; }
+			.program_container ul.ct-list { padding-left: 22px; margin: 0 0 8px 0; }
+			.program_container ul.ct-list li { font-size: 17px; line-height: 1.6; color: #2a2a2a; margin-bottom: 10px; }
+			.program_container ul.ct-list li b { color: #1a1a1a; }
+			@media (max-width: 480px) { .program_container h1.ct-title { font-size: 28px !important; } .program_container p.ct-sub { font-size: 18px; } }
+			
+			.program_container p.ct-sub { font-size: 17px; line-height: 1.5; margin: 0 0 8px 0; }
+			.program_container .prompt { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+			.program_container .tip { color: #6b7380; font-size: 15px; line-height: 1.45; }
+			.program_container .form-control { border-radius: 8px; border: 1px solid #cfd6e0; padding: 12px 14px; height: auto; font-size: 17px; box-shadow: none; }
+			.program_container .form-control:focus { border-color: #0885F8; box-shadow: 0 0 0 3px rgba(8,133,248,0.22); outline: none; }
+			.program_container li.answer { border: 1px solid #dfe6f0; border-radius: 8px; margin-bottom: 8px; }
+			.program_container li.answer:hover, .program_container li.answer:focus-within { border-color: #0885F8; }
+			.program_container .ct-warn { border: 1px solid #f3c98b !important; border-radius: 10px !important; box-shadow: none !important; background: #fff7ea !important; padding: 12px 16px !important; margin: 0 0 18px 0 !important; }
+			.program_container .ct-warn p { margin: 0; font-size: 16px; color: #6b4a12; }
+		</style>
+
+	*if: emailLooksWrong = 1
+		*component
+			*classes: ct-warn
+			*html
+				<p>That email address doesn't look complete (it needs an @ and a dot after it). Please check it and try again.</p>
+
+	*html
+		<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
+		<h1 class="ct-title">Where should we send the link to join?</h1>
+		<p class="ct-sub">Four short fields, two of them optional.</p>
+
+	*question: Email address
+		*tip: Used only for emails about this workshop: the confirmation, the link to join, and the recording if we send one. Nothing else.
+		*type: text
+		*placeholder: you@example.com
+		*save: signupEmail
+
+	*question: First name (optional)
+		*tip: So the emails can say hello properly.
+		*type: text
+		*blank
+		*placeholder: Your first name
+		*save: signupFirstName
+
+	*question: Where are you with your career right now?
+		*tip: So Angel knows who is in the room.
+		I'm actively planning or making a career change
+		I'm seriously considering a career change
+		The thought crosses my mind, but I have no plans
+		I'm choosing my first career
+		I'm happy where I am, just curious
+		*save: careerStage
+
+	*question: Is there one question you'd like the session to answer? (optional)
+		*tip: A sentence is plenty. We pass these to Angel before the session.
+		*type: paragraph
+		*blank
+		*placeholder: e.g., How do I compare two paths when both seem possible?
+		*save: questionForSession
+
+-- Light check that the address can receive mail: an @ that isn't first, and a dot after it.
+-- text.find returns the 1-based position, or nothing (falsy) when the text is absent.
+>> signupEmail = signupEmail.clean
+>> emailLooksWrong = 0
+>> atPosition = signupEmail.find("@")
+*if: not atPosition
+	>> emailLooksWrong = 1
+*if: atPosition
+	*if: atPosition < 2
+		>> emailLooksWrong = 1
+	>> dotPosition = signupEmail.find(".")
+	*if: not dotPosition
+		>> emailLooksWrong = 1
+	*if: dotPosition
+		*if: dotPosition < atPosition + 2
+			>> emailLooksWrong = 1
+*if: emailLooksWrong = 1
+	*goto: signupForm
+
+>> signedUpAt = calendar::now
+
+--------------------------------------------------------------------------------
+-- CONFIRMATION EMAIL
+--------------------------------------------------------------------------------
+>> greetingName = ""
+>> headingName = ""
+>> hasFirstName = 0
+*if: signupFirstName
+	*if: signupFirstName.size > 0
+		>> hasFirstName = 1
+*if: hasFirstName = 1
+	>> greetingName = " {signupFirstName}"
+	>> headingName = ", {signupFirstName}"
+
+>> emailWhenLine = "We're fixing the date now and will email you as soon as it's set."
+*if: dateKnown = 1
+	>> emailWhenLine = "{workshopDate}, {workshopTime}."
+
+>> emailLinkLine = "We'll email the link to join before the session."
+*if: joinLinkKnown = 1
+	>> emailLinkLine = "Join here: {workshopJoinLink}"
+
+*email
+	*to: {signupEmail}
+	*subject: You're registered: {workshopTitle}
+	*body
+		Hi{greetingName},
+
+		You're registered for *{workshopTitle}: {workshopSubtitle}*, a free live workshop from Clearer Thinking with {facilitatorName} of Overcome.
+
+		*Date and time:* {emailWhenLine}
+
+		*Where to join:* Online. {emailLinkLine}
+
+		*What to expect:* what the research says about finding a career that fits, what predicts a career change going well, and how to work through the obstacles readers told us about (too many options, the cost of the transition, age and credentials, and a job market unsettled by AI).
+
+		If you can't make it live, no problem: we plan to record it and send the recording to everyone who registered.
+
+		Nothing else to do for now. If you have a question for the session, or you can't come after all, reply to this email and say so.
+
+		Igor Scaldini
+		Clearer Thinking
+
+--------------------------------------------------------------------------------
+-- PAGE 3: confirmation
+--------------------------------------------------------------------------------
+*html
+	<style>
+		.program_container .main { max-width: 640px; margin-left: auto; margin-right: auto; padding-top: 28px; padding-bottom: 96px; }
+		@media (max-width: 767px) { .program_container .main { padding-top: 64px; padding-left: 20px; padding-right: 20px; } }
+		.program_container p { font-size: 17px; line-height: 1.6; color: #2a2a2a; font-weight: 400; margin: 0 0 14px 0; }
+		.program_container a { color: #0A6FD6; text-decoration: underline; overflow-wrap: anywhere; word-break: break-word; }
+		.program_container .btn { background-color: #0885F8; border: none; border-radius: 8px; padding: 15px 30px; font-size: 19px; font-weight: 700; color: #fff; }
+		.program_container .btn:hover, .program_container .btn:focus { background-color: #0A6FD6; border: none; color: #fff; }
+		.program_container .btn:focus-visible { outline: 3px solid #0A6FD6; outline-offset: 3px; }
+		@media (min-width: 600px) { .program_container .btn.btn-block { display: inline-block; width: auto; min-width: 300px; } }
+		.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
+		.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
+		.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+		.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
+		.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
+		.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
+		.program_container p.ct-fine, .program_container .ct-quote p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
+		.program_container .ct-facts { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #f4f8fd !important; padding: 16px 20px !important; margin: 0 0 24px 0 !important; }
+		.program_container .ct-facts p { margin: 3px 0; font-size: 16px; }
+		.program_container .ct-facts b { color: #1a1a1a; }
+		.program_container ul.ct-list { padding-left: 22px; margin: 0 0 8px 0; }
+		.program_container ul.ct-list li { font-size: 17px; line-height: 1.6; color: #2a2a2a; margin-bottom: 10px; }
+		.program_container ul.ct-list li b { color: #1a1a1a; }
+		@media (max-width: 480px) { .program_container h1.ct-title { font-size: 28px !important; } .program_container p.ct-sub { font-size: 18px; } }
+		
+		.program_container p.ct-fine { margin: 28px 0 0 0; padding-top: 14px; border-top: 1px solid #e6eaf0; }
+		.program_container p.ct-share { margin: 4px 0 14px 0; }
+		.program_container p.ct-share a { display: inline-block; max-width: 100%; padding: 10px 14px; border: 1px solid #dfe6f0; border-radius: 8px; background: #f4f8fd; color: #0A6FD6; font-size: 15px; line-height: 1.4; text-decoration: none; word-break: break-all; }
+	</style>
+
+*html
+	<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
+	<h1 class="ct-title">You're registered{headingName}.</h1>
+
+A confirmation is on its way to {signupEmail}. If it isn't there in a few minutes, check your spam folder and mark it as not spam so the link to join doesn't end up there too.
+
+*component
+	*classes: ct-facts
+	*html
+		<p><b>Workshop:</b> {workshopTitle}</p>
+		<p><b>When:</b> {whenText}</p>
+		<p><b>Where:</b> Online, live. We'll email the link to join before the session.</p>
+
+*if: dateKnown = 1
+	*if: calendarLinkKnown = 1
+		*html
+			<p><a href="{calendarLink}" target="_blank" rel="noopener">Add it to your calendar</a></p>
+
+*html
+	<h2 class="ct-h2">What happens next</h2>
+	<ul class="ct-list">
+		<li><b>Before the session:</b> the link to join, by email.</li>
+		<li><b>Afterward:</b> we plan to send the recording to everyone who registered.</li>
+	</ul>
+	<h2 class="ct-h2">In the meantime</h2>
+	<p>If you sent a question, thank you. We pass them all to Angel before the session. And if you know someone partway through the same decision, send them the sign-up link below. Judging by the survey, many readers are.</p>
+	<p class="ct-share"><a href="{signupUrl}">{signupUrl}</a></p>
+	<p class="ct-fine">Clearer Thinking is a not-for-profit project. The workshop is free.</p>
