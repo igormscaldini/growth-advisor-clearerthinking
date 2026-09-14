@@ -103,6 +103,20 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - Run data: `GET /programs/{id}/exports?export_format=csv` returns all non-test runs incl.
   unfinished ones; `GET /programs/{id}/runs.json?page=N` is 25 per page (`per_page`/`limit` are
   ignored, iterate until empty) and includes test runs.
+- GT runtime facts verified 2026-09-14 (the skill guide gets some wrong): `0` and `""` are TRUTHY,
+  only undefined is falsy, so test flags with `*if: flag = 1` (the Career Navigation Survey's
+  `*if: changingCareer` gate never worked for this reason). `text.find` returns a 1-based position
+  or empty. A visible line starting `*Word:*` is parsed as a keyword. `*page` forces a page break,
+  so a page's `*html <style>` must sit INSIDE the `*page`. `{var}` is not interpolated inside
+  `<style>`; `<img>` is stripped but CSS `background-image` works. GT's `.program_container h1/p/.btn`
+  rules beat bare classes: prefix selectors with `.program_container` (+ `!important` on headings).
+- Headless testing of GT runs: Playwright with `channel: 'chrome'` works (plain headless Chrome
+  screenshots render blank); such runs are real runs, not test runs. Scripts from the 2026-09-14
+  session live in the scratchpad only; rebuild from `guidedtrack/` notes if needed.
+- Workshop sign-up page (Sep 2026): program "Career Change Workshop Sign-up" (id 38791, run URL
+  https://www.guidedtrack.com/programs/gg4qpas/run, `?src=` tracks the channel). Settings block at
+  the top (dateKnown/lengthKnown/joinLinkKnown flags); sends a confirmation `*email`. The email's
+  display name and Reply-To are set in GT Settings -> Branding, not in code.
 
 ## Working conventions
 - Igor's rules: no em dashes anywhere in prose; always ground audience claims in the survey and
