@@ -30,21 +30,21 @@
 -- SETTINGS (edit these) ---------------------------------------------------------
 >> workshopTitle = "Thinking Clearly About Career Change"
 >> workshopSubtitle = "What the evidence says, and what it can't tell you"
->> dateKnown = 0
->> workshopDate = ""
+>> dateKnown = 1
+>> workshopDate = "Wednesday, September 30"
 -- Include the time zone(s) in workshopTime, e.g. "6 pm UK, 1 pm US Eastern".
->> workshopTime = ""
+>> workshopTime = "12 pm Eastern Time (9 am Pacific, 5 pm UK)"
 >> lengthKnown = 0
 >> workshopLength = ""
 >> joinLinkKnown = 0
 >> workshopJoinLink = ""
+-- Ready-made Google Calendar link (16:00 UTC, 60-minute block). Set calendarLinkKnown = 1 once the length is confirmed.
 >> calendarLinkKnown = 0
->> calendarLink = ""
+>> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Thinking%20Clearly%20About%20Career%20Change%20(Clearer%20Thinking%20workshop)&dates=20260930T160000Z/20260930T170000Z&details=Free%20live%20online%20workshop%20from%20Clearer%20Thinking%20with%20Angel%20Au%20of%20Overcome.%20The%20link%20to%20join%20arrives%20by%20email.&location=Online"
 >> facilitatorName = "Angel Au"
 >> facilitatorLine = "Co-founder of Overcome, a UK-registered mental health charity, and an EMCC-accredited coach"
->> hostName = "Igor Scaldini"
--- Link shown to registrants for sharing; the src tag attributes referred sign-ups.
->> signupUrl = "https://www.guidedtrack.com/programs/gg4qpas/run?src=referral"
+-- Link shown to registrants for sharing. Point the redirect at the run URL with ?src=referral so referred sign-ups stay attributed.
+>> signupUrl = "https://programs.clearerthinking.org/career-workshop"
 ---------------------------------------------------------------------------------
 
 -- Tracking parameter from the run URL (?src=newsletter). Empty when absent.
@@ -78,7 +78,7 @@
 		.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
 		.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
 		.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
-		.program_container p.ct-fine, .program_container .ct-quote p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
+		.program_container p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
 		.program_container .ct-facts { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #f4f8fd !important; padding: 16px 20px !important; margin: 0 0 24px 0 !important; }
 		.program_container .ct-facts p { margin: 3px 0; font-size: 16px; }
 		.program_container .ct-facts b { color: #1a1a1a; }
@@ -91,9 +91,7 @@
 		.program_container h1.ct-title.ct-hero { font-size: 34px !important; }
 		.program_container .ct-facts p.ct-skip { margin-top: 10px; font-size: 15px; }
 		.program_container .ct-facts p.ct-skip a { display: inline-block; padding: 6px 0; }
-		.program_container .ct-quote { border: none !important; border-left: 3px solid #0885F8 !important; border-radius: 0 !important; box-shadow: none !important; background: transparent !important; padding: 2px 0 2px 18px !important; margin: 18px 0 24px 0 !important; }
-		.program_container .ct-quote p { color: #3d4652; font-size: 17px; line-height: 1.55; margin: 0 0 8px 0; font-style: italic; }
-		.program_container .ct-bio { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #ffffff !important; padding: 18px 20px !important; margin: 10px 0 0 0 !important; }
+		.program_container .ct-bio { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #ffffff !important; padding: 18px 20px !important; margin: 10px 0 28px 0 !important; }
 		.program_container .ct-bio p { margin: 4px 0; font-size: 16px; }
 		.program_container .ct-bio p.ct-name { font-size: 18px; margin: 0 0 6px 0; }
 	</style>
@@ -114,27 +112,17 @@
 			<p><b>Length:</b> {workshopLength}</p>
 	*html
 		<p><b>Cost:</b> Free</p>
-		<p class="ct-skip"><a href="#ct-signup">Skip to sign-up</a></p>
-
-In early September we asked newsletter readers where they stood with their careers. 143 people answered. Almost three quarters were thinking about, planning, or making a career change, and half had more than ten years of experience. When we asked about the single biggest obstacle, the most common answer, ahead of money, confidence, and age, was some version of "I don't know which path fits me."
-
-This workshop is our response. It covers what the research on career change shows, where that research runs out, and how to work through the obstacles readers raised.
+		<p class="ct-skip"><a href="#ct-signup">Sign up now</a></p>
 
 *html
+	<p>In early September we asked newsletter readers where they stood with their careers. Hundreds of people answered. Most were thinking about, planning, or making a career change. When we asked about the single biggest obstacle, the most common answer, ahead of money, confidence, and age, was some version of <b>"I don't know which path fits me."</b></p>
+	<p>This workshop is our response. It covers what the research on career change shows, where that research runs out, and how to work through the obstacles readers raised.</p>
 	<h2 class="ct-h2">What we'll cover</h2>
 	<ul class="ct-list">
-		<li><b>What the evidence says about finding a career that fits.</b> Self-assessments and conversations with people who made the change: what studies show about each, and why the research suggests a self-assessment on its own isn't enough.</li>
-		<li><b>What predicts a career change going well.</b> The factors the research has linked to a successful change, and how strong that evidence is.</li>
-		<li><b>The obstacles readers told us about.</b> Too many plausible options, the money and time a transition costs, worries about age and credentials, and a job market unsettled by AI.</li>
+		<li>What the evidence says about finding a career that fits.</li>
+		<li>What predicts a career change going well.</li>
+		<li>How to navigate common obstacles such as too many plausible options, transition costs, and a job market unsettled by AI.</li>
 	</ul>
-
-*component
-	*classes: ct-quote
-	*html
-		<p>"Uncertainty. All paths seem feasible, but it's hard to choose one."</p>
-		<p>"Can I afford earning significantly less during the transition time?"</p>
-		<p>"Will an employer want what I bring to the table?"</p>
-		<p class="ct-fine">Three of the 96 obstacles readers described in the survey, lightly edited for spelling.</p>
 
 *html
 	<h2 class="ct-h2">Who it's for</h2>
@@ -149,12 +137,6 @@ People who are considering, planning, or already making a career change and want
 	*html
 		<p class="ct-name"><b>{facilitatorName}</b></p>
 		<p>{facilitatorLine}. Overcome has provided free one-to-one coaching to more than 2,700 people since 2023, and Angel's career coaching has helped people into training places in counseling and applied psychology. Angel is building the session from the research literature and from what readers told us in the survey.</p>
-		<p class="ct-fine">Hosted by {hostName} for Clearer Thinking.</p>
-
-*html
-	<h2 class="ct-h2">A caveat</h2>
-
-The research on career change is thinner than you might expect. Part of the session is about what it can't tell you, and which parts of the decision are yours to make.
 
 Sign up below. You'll get a confirmation email right away and the link to join before the session. If you can't make it live, sign up anyway: we plan to record it and send the recording to everyone who registered.
 
@@ -187,7 +169,7 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 			.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
 			.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
 			.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
-			.program_container p.ct-fine, .program_container .ct-quote p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
+			.program_container p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
 			.program_container .ct-facts { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #f4f8fd !important; padding: 16px 20px !important; margin: 0 0 24px 0 !important; }
 			.program_container .ct-facts p { margin: 3px 0; font-size: 16px; }
 			.program_container .ct-facts b { color: #1a1a1a; }
@@ -216,7 +198,6 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 	*html
 		<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
 		<h1 class="ct-title">Where should we send the link to join?</h1>
-		<p class="ct-sub">Four short fields, two of them optional.</p>
 
 	*question: Email address
 		*tip: Used only for emails about this workshop: the confirmation, the link to join, and the recording if we send one. Nothing else.
@@ -230,15 +211,6 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 		*blank
 		*placeholder: Your first name
 		*save: signupFirstName
-
-	*question: Where are you with your career right now?
-		*tip: So Angel knows who is in the room.
-		I'm actively planning or making a career change
-		I'm seriously considering a career change
-		The thought crosses my mind, but I have no plans
-		I'm choosing my first career
-		I'm happy where I am, just curious
-		*save: careerStage
 
 	*question: Is there one question you'd like the session to answer? (optional)
 		*tip: A sentence is plenty. We pass these to Angel before the session.
@@ -285,7 +257,7 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 *if: dateKnown = 1
 	>> emailWhenLine = "{workshopDate}, {workshopTime}."
 
->> emailLinkLine = "We'll email the link to join before the session."
+>> emailLinkLine = "We'll email you the link to join 24 hours before the event starts, and add you to the event's Google Calendar invite."
 *if: joinLinkKnown = 1
 	>> emailLinkLine = "Join here: {workshopJoinLink}"
 
@@ -303,7 +275,7 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 
 		*What to expect:* what the research says about finding a career that fits, what predicts a career change going well, and how to work through the obstacles readers told us about (too many options, the cost of the transition, age and credentials, and a job market unsettled by AI).
 
-		If you can't make it live, no problem: we plan to record it and send the recording to everyone who registered.
+		If you can't make it live, no problem: we plan to send the recording to everyone who registered, though by watching the recording you won't be able to interact or ask questions.
 
 		Nothing else to do for now. If you have a question for the session, or you can't come after all, reply to this email and say so.
 
@@ -329,7 +301,7 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 		.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
 		.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
 		.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
-		.program_container p.ct-fine, .program_container .ct-quote p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
+		.program_container p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
 		.program_container .ct-facts { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #f4f8fd !important; padding: 16px 20px !important; margin: 0 0 24px 0 !important; }
 		.program_container .ct-facts p { margin: 3px 0; font-size: 16px; }
 		.program_container .ct-facts b { color: #1a1a1a; }
@@ -364,8 +336,8 @@ A confirmation is on its way to {signupEmail}. If it isn't there in a few minute
 *html
 	<h2 class="ct-h2">What happens next</h2>
 	<ul class="ct-list">
-		<li><b>Before the session:</b> the link to join, by email.</li>
-		<li><b>Afterward:</b> we plan to send the recording to everyone who registered.</li>
+		<li><b>Before the session:</b> we'll send you the link to join 24 hours before the event starts, and add you to the event's Google Calendar invite.</li>
+		<li><b>Afterward:</b> we plan to send the recording to everyone who registered, though by watching the recording you won't be able to interact or ask questions.</li>
 	</ul>
 	<h2 class="ct-h2">In the meantime</h2>
 	<p>If you sent a question, thank you. We pass them all to Angel before the session. And if you know someone partway through the same decision, send them the sign-up link below. Judging by the survey, many readers are.</p>

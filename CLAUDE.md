@@ -116,7 +116,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - Workshop sign-up page (Sep 2026): program "Career Change Workshop Sign-up" (id 38791, run URL
   https://www.guidedtrack.com/programs/gg4qpas/run, `?src=` tracks the channel). Settings block at
   the top (dateKnown/lengthKnown/joinLinkKnown flags); sends a confirmation `*email`. The email's
-  display name and Reply-To are set in GT Settings -> Branding, not in code.
+  display name and Reply-To are set in GT Settings -> Branding, not in code. Published at
+  https://programs.clearerthinking.org/career-workshop/ via the team repo
+  `willfind/clearer-thinking-programs-static` (clone in `~/Documents/Claude/`; one YAML per program in
+  `src/data/programs/`, Vercel deploys `main`; work on `purpose/YYYY-MM-DD/desc` branches and never
+  push `main` from an agent). GT embed "allowed pages" API: `GET/POST /programs/{id}/pages`.
 
 ## Working conventions
 - Igor's rules: no em dashes anywhere in prose; always ground audience claims in the survey and
