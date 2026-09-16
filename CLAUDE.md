@@ -42,7 +42,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   sign-up to the Vercel route, which upserts by email; the script is the backfill / safety net
   (`workshop-signups-sync.yml`). Vercel env for the route (project growth-advisor-clearerthinking,
   Spark Wave team): those three + `GOOGLE_TOKEN_JSON`; set from `frontend/` with
-  `npx vercel link` then `npx vercel env add NAME production` (value on stdin). The column
+  `npx vercel link` then `npx vercel env add NAME production` (value on stdin), then
+  `npx vercel redeploy growth-advisor-clearerthinking.vercel.app`: env changes only reach NEW deployments. The column
   layout is duplicated in the TS helpers and the Python script: change both.
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
   schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
