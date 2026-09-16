@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Workshop announcement bar for clearerthinking.org</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { margin: 0; padding: 40px 24px 80px; font: 16px/1.6 -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; color: #1a1a1a; background: #fff; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 28px; margin: 0 0 4px; }
+  .sub { color: #6b7380; margin: 0 0 32px; }
+  h2 { font-size: 20px; margin: 40px 0 12px; }
+  figure { margin: 0 0 28px; }
+  figure img { width: 100%; height: auto; border: 1px solid #e3e8ef; border-radius: 8px; display: block; }
+  figcaption { color: #5b6472; font-size: 14px; margin-top: 8px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  .row figure img { max-width: 100%; }
+  ol li, ul li { margin-bottom: 6px; }
+  pre { background: #f4f6f9; border: 1px solid #e3e8ef; border-radius: 8px; padding: 16px; overflow: auto; font-size: 12.5px; line-height: 1.45; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .note { background: #f4f8fd; border: 1px solid #dfe6f0; border-radius: 8px; padding: 12px 16px; }
+  @media (max-width: 700px) { .row { grid-template-columns: 1fr; } }
+</style></head><body>
+<h1>Workshop announcement bar for clearerthinking.org</h1>
+<p class="sub">Generated 2026-09-16 10:16am. Tested by injecting the snippet into the live site in a headless browser.</p>
+
+<h2>How it looks</h2>
+<figure><img src="workshop_alert_bar/bar_desktop_top.png" alt="Bar at the top of the homepage on desktop"><figcaption>Homepage, desktop (1280px). The bar sits above the site header in normal flow.</figcaption></figure>
+<figure><img src="workshop_alert_bar/bar_desktop_scrolled.png" alt="After scrolling the bar is gone and the header sticks"><figcaption>After scrolling 500px: the bar has scrolled away and the site's sticky header sits at the top, as before.</figcaption></figure>
+<div class="row">
+  <figure><img src="workshop_alert_bar/bar_inner_top.png" alt="Bar on the All Tools page"><figcaption>Inner page (All Tools), desktop.</figcaption></figure>
+  <figure><img src="workshop_alert_bar/bar_mobile_top.png" alt="Bar on a phone" style="max-width: 390px"><figcaption>Phone (Wix serves its 320px mobile layout). The bar stacks; the close button stays top right.</figcaption></figure>
+</div>
+
+<h2>Behaviour</h2>
+<ul>
+  <li>Not sticky: it scrolls away with the page. The Wix header keeps its own sticky behaviour.</li>
+  <li>Shows on every page (inserted before Wix's <code>#SITE_CONTAINER</code>), once per page load, also on client-side navigation.</li>
+  <li>The x hides it for 7 days on that browser (localStorage). It stops appearing by itself from the workshop start, 2026-09-30 16:00 UTC.</li>
+  <li>Both the title and the button link to the sign-up page with <code>?src=sitebar</code>, so these sign-ups are attributed in GuidedTrack's run data.</li>
+  <li>No dependencies, no external requests, keyboard accessible (focus rings, labelled close button).</li>
+</ul>
+
+<h2>Install in Wix</h2>
+<ol>
+  <li>In the Wix dashboard open <b>Settings</b> &rarr; <b>Advanced</b> &rarr; <b>Custom Code</b> (the site may need to be on a plan that allows custom code; it already runs custom code today).</li>
+  <li>Click <b>+ Add Custom Code</b> and paste the whole snippet below. Name it "Workshop announcement bar".</li>
+  <li>Add code to pages: <b>All pages</b>, <b>Load code once</b>.</li>
+  <li>Place code in: <b>Body - end</b>.</li>
+  <li>Apply, then publish the site. Check the homepage in a private window; press the x to make sure it dismisses.</li>
+</ol>
+<p class="note">To change the wording, date, link or expiry later, edit the <code>CONFIG</code> block at the top of the script and save the code snippet again in Wix. To take the bar down early, delete the snippet in Custom Code.</p>
+
+<h2>The snippet</h2>
+<p>Also saved to <code>landing_pages/workshop_alert_bar.html</code> in the growth-advisor repo and to <code>~/Downloads/workshop-alert-bar-wix.html</code>.</p>
+<pre><code>&lt;!-- Clearer Thinking: workshop announcement bar.
+     Paste the whole snippet in Wix: Settings &gt; Advanced &gt; Custom Code &gt; Add Custom Code,
+     place it in &quot;Body - end&quot;, apply to &quot;All pages&quot;, load &quot;Once&quot;.
+     It sits at the very top of the page in normal flow (it scrolls away, it never floats),
+     hides itself from the workshop start time, and stays hidden for 7 days after &quot;x&quot;.
+     Everything editable lives in CONFIG below. --&gt;
+&lt;style&gt;
+  #ct-workshop-bar { position: relative; z-index: 1; box-sizing: border-box; width: 100%; margin: 0; background: #0885F8; color: #fff; font-family: &quot;roboto-bold&quot;, &quot;Roboto&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  #ct-workshop-bar * { box-sizing: border-box; }
+  #ct-workshop-bar .ctwb-inner { position: relative; max-width: 1200px; margin: 0 auto; min-height: 60px; padding: 12px 64px 12px 24px; display: flex; align-items: center; gap: 20px; }
+  #ct-workshop-bar .ctwb-text { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; }
+  #ct-workshop-bar .ctwb-eyebrow { display: inline-block; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.18); font-size: 11px; line-height: 1.2; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  #ct-workshop-bar .ctwb-title { font-family: &quot;avenir-lt-w01_85-heavy1475544&quot;, &quot;Avenir Next&quot;, &quot;Avenir&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 17px; line-height: 1.3; color: #fff; text-decoration: none; }
+  #ct-workshop-bar .ctwb-title:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  #ct-workshop-bar .ctwb-detail { font-family: &quot;roboto&quot;, &quot;Roboto&quot;, &quot;Helvetica Neue&quot;, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.3; color: rgba(255,255,255,.88); }
+  #ct-workshop-bar .ctwb-cta { flex: 0 0 auto; display: inline-block; padding: 10px 22px; border-radius: 999px; background: #fff; color: #0A6FD6; font-size: 14px; line-height: 1.2; letter-spacing: .01em; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,.14); transition: transform .12s ease, box-shadow .12s ease; }
+  #ct-workshop-bar .ctwb-cta:hover { color: #0A6FD6; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(0,0,0,.2); }
+  #ct-workshop-bar .ctwb-close { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: rgba(255,255,255,.85); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  #ct-workshop-bar .ctwb-close:hover { background: rgba(255,255,255,.16); color: #fff; }
+  #ct-workshop-bar .ctwb-close svg { width: 16px; height: 16px; display: block; }
+  #ct-workshop-bar .ctwb-cta:focus-visible, #ct-workshop-bar .ctwb-title:focus-visible, #ct-workshop-bar .ctwb-close:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  @media (max-width: 640px) {
+    #ct-workshop-bar .ctwb-inner { flex-direction: column; align-items: stretch; gap: 12px; padding: 14px 16px 16px; }
+    #ct-workshop-bar .ctwb-text { padding-right: 40px; gap: 6px 10px; }
+    #ct-workshop-bar .ctwb-title { font-size: 16px; }
+    #ct-workshop-bar .ctwb-detail { width: 100%; font-size: 13px; }
+    #ct-workshop-bar .ctwb-cta { text-align: center; padding: 12px 22px; }
+    #ct-workshop-bar .ctwb-close { top: 10px; right: 8px; transform: none; }
+  }
+&lt;/style&gt;
+&lt;script&gt;
+(function () {
+  var CONFIG = {
+    eyebrow: &quot;Free live workshop&quot;,
+    title: &quot;Thinking Clearly About Career Change&quot;,
+    detail: &quot;Wed, Sep 30 · 12 pm ET · on Zoom&quot;,
+    cta: &quot;Save my spot&quot;,
+    href: &quot;https://programs.clearerthinking.org/career-workshop/?src=sitebar&quot;,
+    hideAfter: &quot;2026-09-30T16:00:00Z&quot;,   // workshop start (UTC): the bar stops showing from then on
+    dismissDays: 7,                       // how long &quot;x&quot; keeps it hidden on this browser
+    storageKey: &quot;ctWorkshopBarDismissedAt&quot;
+  };
+  var ID = &quot;ct-workshop-bar&quot;;
+
+  function esc(s) { return String(s).replace(/[&amp;&lt;&gt;&quot;]/g, function (c) { return { &quot;&amp;&quot;: &quot;&amp;amp;&quot;, &quot;&lt;&quot;: &quot;&amp;lt;&quot;, &quot;&gt;&quot;: &quot;&amp;gt;&quot;, &#x27;&quot;&#x27;: &quot;&amp;quot;&quot; }[c]; }); }
+
+  function shouldShow() {
+    if (Date.now() &gt;= Date.parse(CONFIG.hideAfter)) return false;
+    try {
+      var dismissedAt = Number(localStorage.getItem(CONFIG.storageKey));
+      if (dismissedAt &amp;&amp; Date.now() - dismissedAt &lt; CONFIG.dismissDays * 864e5) return false;
+    } catch (e) {}
+    return true;
+  }
+
+  function build() {
+    if (document.getElementById(ID) || !shouldShow()) return;
+    var bar = document.createElement(&quot;div&quot;);
+    bar.id = ID;
+    bar.setAttribute(&quot;role&quot;, &quot;region&quot;);
+    bar.setAttribute(&quot;aria-label&quot;, &quot;Workshop announcement&quot;);
+    bar.innerHTML =
+      &#x27;&lt;div class=&quot;ctwb-inner&quot;&gt;&#x27; +
+        &#x27;&lt;div class=&quot;ctwb-text&quot;&gt;&#x27; +
+          &#x27;&lt;span class=&quot;ctwb-eyebrow&quot;&gt;&#x27; + esc(CONFIG.eyebrow) + &#x27;&lt;/span&gt;&#x27; +
+          &#x27;&lt;a class=&quot;ctwb-title&quot; href=&quot;&#x27; + esc(CONFIG.href) + &#x27;&quot;&gt;&#x27; + esc(CONFIG.title) + &#x27;&lt;/a&gt;&#x27; +
+          &#x27;&lt;span class=&quot;ctwb-detail&quot;&gt;&#x27; + esc(CONFIG.detail) + &#x27;&lt;/span&gt;&#x27; +
+        &#x27;&lt;/div&gt;&#x27; +
+        &#x27;&lt;a class=&quot;ctwb-cta&quot; href=&quot;&#x27; + esc(CONFIG.href) + &#x27;&quot;&gt;&#x27; + esc(CONFIG.cta) + &#x27;&lt;/a&gt;&#x27; +
+        &#x27;&lt;button class=&quot;ctwb-close&quot; type=&quot;button&quot; aria-label=&quot;Dismiss this announcement&quot;&gt;&#x27; +
+          &#x27;&lt;svg viewBox=&quot;0 0 20 20&quot; aria-hidden=&quot;true&quot;&gt;&lt;path d=&quot;M5 5l10 10M15 5L5 15&quot; fill=&quot;none&quot; stroke=&quot;currentColor&quot; stroke-width=&quot;2.2&quot; stroke-linecap=&quot;round&quot;/&gt;&lt;/svg&gt;&#x27; +
+        &#x27;&lt;/button&gt;&#x27; +
+      &#x27;&lt;/div&gt;&#x27;;
+    var site = document.getElementById(&quot;SITE_CONTAINER&quot;);
+    if (site &amp;&amp; site.parentNode) site.parentNode.insertBefore(bar, site);
+    else document.body.insertBefore(bar, document.body.firstChild);
+    bar.querySelector(&quot;.ctwb-close&quot;).addEventListener(&quot;click&quot;, function () {
+      bar.parentNode.removeChild(bar);
+      try { localStorage.setItem(CONFIG.storageKey, String(Date.now())); } catch (e) {}
+    });
+  }
+
+  if (document.readyState === &quot;loading&quot;) document.addEventListener(&quot;DOMContentLoaded&quot;, build);
+  else build();
+})();
+&lt;/script&gt;
+</code></pre>
+</body></html>

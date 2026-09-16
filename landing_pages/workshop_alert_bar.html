@@ -1,0 +1,86 @@
+<!-- Clearer Thinking: workshop announcement bar.
+     Paste the whole snippet in Wix: Settings > Advanced > Custom Code > Add Custom Code,
+     place it in "Body - end", apply to "All pages", load "Once".
+     It sits at the very top of the page in normal flow (it scrolls away, it never floats),
+     hides itself from the workshop start time, and stays hidden for 7 days after "x".
+     Everything editable lives in CONFIG below. -->
+<style>
+  #ct-workshop-bar { position: relative; z-index: 1; box-sizing: border-box; width: 100%; margin: 0; background: #0885F8; color: #fff; font-family: "roboto-bold", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+  #ct-workshop-bar * { box-sizing: border-box; }
+  #ct-workshop-bar .ctwb-inner { position: relative; max-width: 1200px; margin: 0 auto; min-height: 60px; padding: 12px 64px 12px 24px; display: flex; align-items: center; gap: 20px; }
+  #ct-workshop-bar .ctwb-text { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; }
+  #ct-workshop-bar .ctwb-eyebrow { display: inline-block; padding: 5px 10px; border-radius: 999px; background: rgba(255,255,255,.18); font-size: 11px; line-height: 1.2; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
+  #ct-workshop-bar .ctwb-title { font-family: "avenir-lt-w01_85-heavy1475544", "Avenir Next", "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 17px; line-height: 1.3; color: #fff; text-decoration: none; }
+  #ct-workshop-bar .ctwb-title:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  #ct-workshop-bar .ctwb-detail { font-family: "roboto", "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.3; color: rgba(255,255,255,.88); }
+  #ct-workshop-bar .ctwb-cta { flex: 0 0 auto; display: inline-block; padding: 10px 22px; border-radius: 999px; background: #fff; color: #0A6FD6; font-size: 14px; line-height: 1.2; letter-spacing: .01em; text-decoration: none; white-space: nowrap; box-shadow: 0 1px 2px rgba(0,0,0,.14); transition: transform .12s ease, box-shadow .12s ease; }
+  #ct-workshop-bar .ctwb-cta:hover { color: #0A6FD6; transform: translateY(-1px); box-shadow: 0 5px 14px rgba(0,0,0,.2); }
+  #ct-workshop-bar .ctwb-close { position: absolute; top: 50%; right: 16px; transform: translateY(-50%); width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: rgba(255,255,255,.85); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  #ct-workshop-bar .ctwb-close:hover { background: rgba(255,255,255,.16); color: #fff; }
+  #ct-workshop-bar .ctwb-close svg { width: 16px; height: 16px; display: block; }
+  #ct-workshop-bar .ctwb-cta:focus-visible, #ct-workshop-bar .ctwb-title:focus-visible, #ct-workshop-bar .ctwb-close:focus-visible { outline: 2px solid #fff; outline-offset: 3px; }
+  @media (max-width: 640px) {
+    #ct-workshop-bar .ctwb-inner { flex-direction: column; align-items: stretch; gap: 12px; padding: 14px 16px 16px; }
+    #ct-workshop-bar .ctwb-text { padding-right: 40px; gap: 6px 10px; }
+    #ct-workshop-bar .ctwb-title { font-size: 16px; }
+    #ct-workshop-bar .ctwb-detail { width: 100%; font-size: 13px; }
+    #ct-workshop-bar .ctwb-cta { text-align: center; padding: 12px 22px; }
+    #ct-workshop-bar .ctwb-close { top: 10px; right: 8px; transform: none; }
+  }
+</style>
+<script>
+(function () {
+  var CONFIG = {
+    eyebrow: "Free live workshop",
+    title: "Thinking Clearly About Career Change",
+    detail: "Wed, Sep 30 · 12 pm ET · on Zoom",
+    cta: "Save my spot",
+    href: "https://programs.clearerthinking.org/career-workshop/?src=sitebar",
+    hideAfter: "2026-09-30T16:00:00Z",   // workshop start (UTC): the bar stops showing from then on
+    dismissDays: 7,                       // how long "x" keeps it hidden on this browser
+    storageKey: "ctWorkshopBarDismissedAt"
+  };
+  var ID = "ct-workshop-bar";
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function shouldShow() {
+    if (Date.now() >= Date.parse(CONFIG.hideAfter)) return false;
+    try {
+      var dismissedAt = Number(localStorage.getItem(CONFIG.storageKey));
+      if (dismissedAt && Date.now() - dismissedAt < CONFIG.dismissDays * 864e5) return false;
+    } catch (e) {}
+    return true;
+  }
+
+  function build() {
+    if (document.getElementById(ID) || !shouldShow()) return;
+    var bar = document.createElement("div");
+    bar.id = ID;
+    bar.setAttribute("role", "region");
+    bar.setAttribute("aria-label", "Workshop announcement");
+    bar.innerHTML =
+      '<div class="ctwb-inner">' +
+        '<div class="ctwb-text">' +
+          '<span class="ctwb-eyebrow">' + esc(CONFIG.eyebrow) + '</span>' +
+          '<a class="ctwb-title" href="' + esc(CONFIG.href) + '">' + esc(CONFIG.title) + '</a>' +
+          '<span class="ctwb-detail">' + esc(CONFIG.detail) + '</span>' +
+        '</div>' +
+        '<a class="ctwb-cta" href="' + esc(CONFIG.href) + '">' + esc(CONFIG.cta) + '</a>' +
+        '<button class="ctwb-close" type="button" aria-label="Dismiss this announcement">' +
+          '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>' +
+        '</button>' +
+      '</div>';
+    var site = document.getElementById("SITE_CONTAINER");
+    if (site && site.parentNode) site.parentNode.insertBefore(bar, site);
+    else document.body.insertBefore(bar, document.body.firstChild);
+    bar.querySelector(".ctwb-close").addEventListener("click", function () {
+      bar.parentNode.removeChild(bar);
+      try { localStorage.setItem(CONFIG.storageKey, String(Date.now())); } catch (e) {}
+    });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", build);
+  else build();
+})();
+</script>
