@@ -43,10 +43,12 @@
 >> workshopMeetingId = "816 9911 3497"
 >> workshopPasscode = "581154"
 -- Calendar links (16:00 UTC start, 60-minute block; adjust if the length changes). Use + for spaces,
--- not %20: GuidedTrack re-encodes percent signs when the link goes into the email. The .ics file and
--- the facilitator photo are served from the programs.clearerthinking.org repo (career-workshop program).
+-- not %20: GuidedTrack re-encodes percent signs when the link goes into the email, so the Zoom URL
+-- goes in unencoded (Google Calendar reads the value up to the next &). The .ics file and the
+-- facilitator photo are served from the programs.clearerthinking.org repo (career-workshop program);
+-- when the Zoom details change, update the .ics there too.
 >> calendarLinkKnown = 1
->> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Thinking+Clearly+About+Career+Change&dates=20260930T160000Z/20260930T170000Z&details=Free+live+online+workshop+from+Clearer+Thinking+with+Angel+Au+of+Overcome.+The+link+to+join+arrives+by+email.&location=Online"
+>> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Thinking+Clearly+About+Career+Change&dates=20260930T160000Z/20260930T170000Z&details=Free+live+online+workshop+from+Clearer+Thinking+with+Angel+Au+of+Overcome.+Join+Zoom+Meeting:+https://us06web.zoom.us/j/81699113497?pwd=RJrDbXA84pZQXaxzC4wrrdS7ybDWaN.1+(Meeting+ID+816+9911+3497,+passcode+581154).&location=https://us06web.zoom.us/j/81699113497?pwd=RJrDbXA84pZQXaxzC4wrrdS7ybDWaN.1"
 >> icsLink = "https://programs.clearerthinking.org/career-workshop/thinking-clearly-about-career-change.ics"
 >> facilitatorName = "Angel Au"
 >> facilitatorLine = "Co-Founder of Overcome and EMCC-accredited coach"
