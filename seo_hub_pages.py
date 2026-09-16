@@ -130,7 +130,11 @@ def parse_sitemap(xml: str) -> list[dict]:
         if not loc:
             continue
         lastmod = re.search(r"<lastmod>([^<]+)</lastmod>", block)
-        out.append({"url": loc.group(1).strip(), "lastmod": lastmod.group(1).strip() if lastmod else None})
+        # Sitemaps XML-escape URLs, so &apos; and &amp; have to be decoded or the link 404s.
+        out.append({
+            "url": html.unescape(loc.group(1).strip()),
+            "lastmod": lastmod.group(1).strip() if lastmod else None,
+        })
     return out
 
 

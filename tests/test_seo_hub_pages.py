@@ -156,3 +156,13 @@ def test_head_complete_on_an_article():
 def test_head_complete_on_a_page_without_a_publish_date():
     """Tool pages carry no datePublished; </head> means no more metadata is coming."""
     assert head_complete("<title>A tool</title><meta name=x></head><body>") is True
+
+
+def test_parse_sitemap_unescapes_xml_entities():
+    """The tools sitemap carries world&apos;s-biggest-problems-quiz; leaving it escaped 404s."""
+    xml = ("<urlset><url><loc>https://www.clearerthinking.org/tools/world&apos;s-biggest-problems-quiz"
+           "</loc></url><url><loc>https://x.org/a?b=1&amp;c=2</loc></url></urlset>")
+    assert [r["url"] for r in parse_sitemap(xml)] == [
+        "https://www.clearerthinking.org/tools/world's-biggest-problems-quiz",
+        "https://x.org/a?b=1&c=2",
+    ]
