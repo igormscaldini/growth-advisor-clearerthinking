@@ -1,0 +1,42 @@
+name: Workshop sign-ups -> Google Sheet
+
+# Safety net for the live path (GuidedTrack *service -> /api/workshop-signup on Vercel):
+# re-reads the program's CSV export and appends any sign-up the sheet is missing.
+# GitHub throttles schedule events on this repo to a handful of runs a day, so the
+# freshness comes from the live path, not from this cron.
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: workshop-signups-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Write the Google OAuth files
+        env:
+          OAUTH_CLIENT_JSON: ${{ secrets.OAUTH_CLIENT_JSON }}
+          GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+        run: python -c "import secrets_loader; secrets_loader.materialize_ci_secrets()"
+
+      - name: Sync sign-ups into the Sheet
+        env:
+          GUIDED_TRACK_USERNAME: ${{ secrets.GUIDED_TRACK_USERNAME }}
+          GUIDED_TRACK_PASSWORD: ${{ secrets.GUIDED_TRACK_PASSWORD }}
+          WORKSHOP_SHEET_ID: ${{ secrets.WORKSHOP_SHEET_ID }}
+        run: python workshop_signups_sheet.py

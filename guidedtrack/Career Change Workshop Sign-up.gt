@@ -15,6 +15,8 @@
 --    not arrive from "Career Change Workshop Sign-up".
 -- 3. Share the run link with ?src=newsletter, ?src=overcome, etc. The src value is
 --    saved with each sign-up so you can see which channel brought whom.
+-- 4. Every sign-up is also written live to the Google Sheet "Career Workshop Sign-ups"
+--    through the external service "Sign-up sheet" (Settings -> Services).
 --
 -- GUIDEDTRACK GOTCHAS BAKED IN HERE (verified 2026-09-14 with a scratch program)
 -- - 0 and "" are TRUTHY in *if; only an undefined variable is falsy. Every flag
@@ -45,7 +47,7 @@
 >> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Thinking+Clearly+About+Career+Change&dates=20260930T160000Z/20260930T170000Z&details=Free+live+online+workshop+from+Clearer+Thinking+with+Angel+Au+of+Overcome.+The+link+to+join+arrives+by+email.&location=Online"
 >> icsLink = "https://programs.clearerthinking.org/career-workshop/thinking-clearly-about-career-change.ics"
 >> facilitatorName = "Angel Au"
->> facilitatorLine = "Co-founder of Overcome, a UK-registered mental health charity, and an EMCC-accredited coach"
+>> facilitatorLine = "Co-Founder of Overcome and EMCC-accredited coach"
 -- Link shown to registrants for sharing. Point the redirect at the run URL with ?src=referral so referred sign-ups stay attributed.
 >> signupUrl = "https://programs.clearerthinking.org/career-workshop"
 ---------------------------------------------------------------------------------
@@ -96,14 +98,14 @@
 		.program_container h1.ct-title.ct-hero { font-size: 34px !important; }
 		.program_container .ct-facts p.ct-skip { margin-top: 10px; font-size: 15px; }
 		.program_container .ct-facts p.ct-skip a { display: inline-block; padding: 6px 0; }
-		.program_container .ct-bio { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #ffffff !important; padding: 18px 20px !important; margin: 10px 0 28px 0 !important; }
-		.program_container .ct-bio p { margin: 4px 0; font-size: 16px; }
-		.program_container .ct-bio-row { display: grid; grid-template-columns: 128px 1fr; column-gap: 24px; row-gap: 0; align-items: start; }
-		.program_container .ct-avatar { grid-row: 1 / 4; width: 128px; height: 160px; border-radius: 10px; background-color: #e9eef5; background-image: url("https://programs.clearerthinking.org/career-workshop/angel-au.jpg"); background-repeat: no-repeat; background-size: auto 150%; background-position: 50% 25%; }
-		.program_container .ct-bio p.ct-name { grid-column: 2; font-size: 20px; line-height: 1.25; margin: 0 0 2px 0; }
-		.program_container .ct-bio p.ct-role { grid-column: 2; font-size: 15px; line-height: 1.45; color: #5b6472; margin: 0 0 10px 0; }
-		.program_container .ct-bio p.ct-bio-para { grid-column: 2; margin: 0; }
-		@media (max-width: 480px) { .program_container .ct-bio-row { grid-template-columns: 96px 1fr; column-gap: 16px; } .program_container .ct-avatar { grid-row: 1 / 3; width: 96px; height: 120px; } .program_container .ct-bio p.ct-name { align-self: end; } .program_container .ct-bio p.ct-role { align-self: start; margin: 0; } .program_container .ct-bio p.ct-bio-para { grid-column: 1 / -1; margin-top: 14px; } }
+		.program_container .ct-bio { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #ffffff !important; padding: 20px 22px !important; margin: 10px 0 28px 0 !important; }
+		.program_container .ct-bio p { margin: 0; font-size: 16px; }
+		.program_container .ct-bio-row { display: grid; grid-template-columns: 112px 1fr; column-gap: 20px; row-gap: 0; align-items: center; }
+		.program_container .ct-avatar { grid-column: 1; grid-row: 1 / 3; width: 112px; height: 140px; border-radius: 12px; background-color: #e9eef5; background-image: url("https://programs.clearerthinking.org/career-workshop/angel-au.jpg"); background-repeat: no-repeat; background-size: auto 150%; background-position: 46% 50%; }
+		.program_container .ct-bio p.ct-name { grid-column: 2; align-self: end; font-size: 20px; line-height: 1.25; margin: 0 0 4px 0; }
+		.program_container .ct-bio p.ct-role { grid-column: 2; align-self: start; font-size: 15px; line-height: 1.45; color: #5b6472; margin: 0; }
+		.program_container .ct-bio p.ct-bio-para { grid-column: 1 / -1; margin: 16px 0 0 0; line-height: 1.6; }
+		@media (max-width: 480px) { .program_container .ct-bio-row { grid-template-columns: 88px 1fr; column-gap: 16px; } .program_container .ct-avatar { width: 88px; height: 110px; border-radius: 10px; } .program_container .ct-bio p.ct-name { font-size: 19px; } .program_container .ct-bio p.ct-role { font-size: 14px; } .program_container .ct-bio p.ct-bio-para { margin-top: 14px; } }
 	</style>
 
 *html
@@ -149,7 +151,7 @@ People who are considering, planning, or already making a career change and want
 			<span class="ct-avatar" role="img" aria-label="Photo of Angel Au"></span>
 			<p class="ct-name"><b>{facilitatorName}</b></p>
 			<p class="ct-role">{facilitatorLine}</p>
-			<p class="ct-bio-para">Overcome has provided free one-to-one coaching to more than 2,700 people since 2023, and Angel's career coaching has helped people into training places in counseling and applied psychology.</p>
+			<p class="ct-bio-para">Angel Au is Co-Founder of Overcome, a UK-registered mental health charity that has provided free one-to-one coaching to 4,000+ people since 2023. She holds an MSci in Psychology from UCL, and is an incoming MPhil/PhD student at UCL's Division of Psychiatry. As an EMCC-accredited coach, she has delivered 120+ hours of one-to-one coaching to psychology graduates and career changers navigating postgraduate applications and early-career psychology roles. For this workshop, she has compiled what the research does and doesn't say about career decisions.</p>
 		</div>
 
 Sign up below. You'll get a confirmation email right away and the link to join before the session. If you can't make it live, sign up anyway: we plan to record it and send the recording to everyone who registered.
@@ -298,6 +300,27 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 
 		Igor Scaldini
 		Clearer Thinking
+
+-- Record the sign-up in the Google Sheet right away (the live path; workshop_signups_sheet.py
+-- in the growth-advisor repo is the backfill and safety net). The service "Sign-up sheet"
+-- (URL + basic auth) is defined in Settings -> Services. It runs after the email so a sheet
+-- outage never blocks the confirmation, and the *error branch shows the registrant nothing.
+>> sheetFirstName = ""
+*if: signupFirstName
+	>> sheetFirstName = signupFirstName
+>> sheetQuestion = ""
+*if: questionForSession
+	>> sheetQuestion = questionForSession
+>> sheetSignedUpAt = "{signedUpAt}"
+>> sheetSynced = 0
+*service: Sign-up sheet
+	*path: /api/workshop-signup
+	*method: POST
+	*send: { "email" -> signupEmail, "firstName" -> sheetFirstName, "question" -> sheetQuestion, "src" -> src, "signedUpAt" -> sheetSignedUpAt }
+	*success
+		>> sheetSynced = 1
+	*error
+		>> sheetSynced = 0
 
 --------------------------------------------------------------------------------
 -- PAGE 3: confirmation
