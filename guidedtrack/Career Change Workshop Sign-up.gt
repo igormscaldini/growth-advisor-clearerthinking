@@ -60,6 +60,14 @@
 *if: not src
 	>> src = ""
 
+-- "Sign up now" at the top of the invitation reloads the page with &jump=form (GuidedTrack strips
+-- inline JavaScript from *html, so a plain link cannot advance the page); the run then skips the
+-- invitation and opens the form. Settings above still run, so the email and confirmation are intact.
+*if: not jump
+	>> jump = ""
+*if: jump = "form"
+	*goto: signupForm
+
 -- Derived text used on the page and in the email.
 >> whenText = "Date and time coming soon. Sign up and we'll email you as soon as it's fixed."
 *if: dateKnown = 1
@@ -128,7 +136,7 @@
 			<p><b>Length:</b> {workshopLength}</p>
 	*html
 		<p><b>Cost:</b> Free</p>
-		<p class="ct-skip"><a href="#ct-signup">Sign up now</a></p>
+		<p class="ct-skip"><a href="?src={src}&jump=form">Sign up now</a></p>
 
 *html
 	<p>In early September we asked newsletter readers where they stood with their careers. Hundreds of people answered. Most were thinking about, planning, or making a career change. When we asked about the single biggest obstacle, the most common answer, ahead of money, confidence, and age, was some version of <b>"I don't know which path fits me."</b></p>
@@ -221,24 +229,23 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 		<h1 class="ct-title">Where should we send the link to join?</h1>
 
 	*question: Email address
-		*tip: Used only for emails about this workshop: the confirmation, the link to join, and the recording if we send one. Nothing else.
 		*type: text
 		*placeholder: you@example.com
 		*save: signupEmail
 
 	*question: First name (optional)
-		*tip: So the emails can say hello properly.
 		*type: text
 		*blank
 		*placeholder: Your first name
 		*save: signupFirstName
 
 	*question: Is there one question you'd like the session to answer? (optional)
-		*tip: A sentence is plenty. We pass these to Angel before the session.
 		*type: paragraph
 		*blank
 		*placeholder: e.g., How do I compare two paths when both seem possible?
 		*save: questionForSession
+
+	*button: Confirm sign up
 
 -- Light check that the address can receive mail: an @ that isn't first, and a dot after it.
 -- text.find returns the 1-based position, or nothing (falsy) when the text is absent.
