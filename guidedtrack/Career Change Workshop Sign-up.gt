@@ -312,15 +312,16 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 *if: questionForSession
 	>> sheetQuestion = questionForSession
 >> sheetSignedUpAt = "{signedUpAt}"
->> sheetSynced = 0
+-- sheetSync in the run data tells you what happened: "ok", "error: ..." or "not attempted".
+>> sheetSync = "not attempted"
 *service: Sign-up sheet
 	*path: /api/workshop-signup
 	*method: POST
 	*send: { "email" -> signupEmail, "firstName" -> sheetFirstName, "question" -> sheetQuestion, "src" -> src, "signedUpAt" -> sheetSignedUpAt }
 	*success
-		>> sheetSynced = 1
+		>> sheetSync = "ok"
 	*error
-		>> sheetSynced = 0
+		>> sheetSync = "error: {it}"
 
 --------------------------------------------------------------------------------
 -- PAGE 3: confirmation
