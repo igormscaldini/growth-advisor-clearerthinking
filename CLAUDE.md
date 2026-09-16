@@ -47,6 +47,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   layout is duplicated in the TS helpers and the Python script: change both.
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
   schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
+- `seo_hub_pages.py`: builds the /all-articles + /all-tools link hubs into `~/Downloads` (paste into a
+  NATIVE Wix text element; a Wix HTML embed is an iframe, so its links would not count). Title cache in
+  `reports/` is gitignored; re-runs only fetch what is missing.
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
   CI runs them on every push (`tests.yml`).
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
@@ -79,6 +82,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   ~200k in Aug 2026, ~350k Sep-Oct 2025) are excluded from "new subscribers". Cursor-paginate
   (offset paging caps at 10k). Genuine sign-ups run ~300-500/day.
 - GA4 event names do not mean what they say: see `GA4_EVENTS.md`. "Tools finished" = Submitted Email.
+- Scraping www.clearerthinking.org (Wix), verified 2026-09-16: metadata is front-loaded ONLY for a
+  Googlebot UA; to any other client `<title>` sits ~127KB in, so read until the head is complete, never
+  a fixed prefix. Wix 429s hard on bursts and the penalty outlives them (4 workers + 0.5s is safe).
+  Sitemap `<loc>` values are XML-escaped (`&apos;`), so unescape or you emit 404 links. Article BODY
+  links are server-rendered and crawlable, but the /blog and /clearer-thinking-tools galleries are not:
+  they expose 3 and 0 links respectively in raw HTML, which is the real cause of CT's indexing backlog.
 - Gmail: SMTP app passwords are blocked from GitHub Actions; send and read through the Gmail API
   with the shared Google token (`secrets/ga4-token.json`, scopes incl. gmail.send/modify).
   To add scopes: edit SCOPES in `auth_ga4.py`, re-run it, then `gh secret set GOOGLE_TOKEN_JSON`.
