@@ -38,8 +38,10 @@
 >> workshopTime = "12 pm Eastern Time (9 am Pacific, 5 pm UK)"
 >> lengthKnown = 0
 >> workshopLength = ""
->> joinLinkKnown = 0
->> workshopJoinLink = ""
+>> joinLinkKnown = 1
+>> workshopJoinLink = "https://us06web.zoom.us/j/81699113497?pwd=RJrDbXA84pZQXaxzC4wrrdS7ybDWaN.1"
+>> workshopMeetingId = "816 9911 3497"
+>> workshopPasscode = "581154"
 -- Calendar links (16:00 UTC start, 60-minute block; adjust if the length changes). Use + for spaces,
 -- not %20: GuidedTrack re-encodes percent signs when the link goes into the email. The .ics file and
 -- the facilitator photo are served from the programs.clearerthinking.org repo (career-workshop program).
@@ -274,9 +276,19 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 *if: dateKnown = 1
 	>> emailWhenLine = "{workshopDate}, {workshopTime}."
 
->> emailLinkLine = "We'll email you the link to join 24 hours before the event starts, and add you to the event's Google Calendar invite."
+-- Where-to-join lines for the email and the confirmation page. When the link is not known yet
+-- the Zoom lines stay empty.
+>> emailWhereLine = "Online. We'll email you the link to join 24 hours before the event starts, and add you to the event's Google Calendar invite."
+>> emailZoomLine = ""
+>> emailMeetingLine = ""
+>> emailPasscodeLine = ""
+>> beforeSessionText = "we'll send you the link to join 24 hours before the event starts, and add you to the event's Google Calendar invite."
 *if: joinLinkKnown = 1
-	>> emailLinkLine = "Join here: {workshopJoinLink}"
+	>> emailWhereLine = "Online, on Zoom. Keep these details:"
+	>> emailZoomLine = "Join Zoom Meeting: {workshopJoinLink}"
+	>> emailMeetingLine = "Meeting ID: {workshopMeetingId}"
+	>> emailPasscodeLine = "Passcode: {workshopPasscode}"
+	>> beforeSessionText = "we'll send a reminder with the same Zoom link 24 hours before the start, and add you to the event's Google Calendar invite."
 
 *email
 	*to: {signupEmail}
@@ -288,7 +300,10 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 
 		*Date and time:* {emailWhenLine}
 
-		*Where to join:* Online. {emailLinkLine}
+		*Where to join:* {emailWhereLine}
+		{emailZoomLine}
+		{emailMeetingLine}
+		{emailPasscodeLine}
 
 		*What to expect:* what the research says about finding a career that fits, what predicts a career change going well, and how to work through the obstacles readers told us about (too many options, the cost of the transition, age and credentials, and a job market unsettled by AI).
 
@@ -368,7 +383,15 @@ A confirmation is on its way to {signupEmail}. If it isn't there in a few minute
 	*html
 		<p><b>Workshop:</b> {workshopTitle}</p>
 		<p><b>When:</b> {whenText}</p>
-		<p><b>Where:</b> Online, live. We'll email the link to join before the session.</p>
+	*if: joinLinkKnown = 1
+		*html
+			<p><b>Where:</b> Online, on Zoom. These details are also in your confirmation email.</p>
+			<p><b>Join Zoom Meeting:</b> <a href="{workshopJoinLink}" target="_blank" rel="noopener">{workshopJoinLink}</a></p>
+			<p><b>Meeting ID:</b> {workshopMeetingId}</p>
+			<p><b>Passcode:</b> {workshopPasscode}</p>
+	*if: joinLinkKnown = 0
+		*html
+			<p><b>Where:</b> Online, live. We'll email the link to join before the session.</p>
 
 *if: dateKnown = 1
 	*if: calendarLinkKnown = 1
@@ -378,7 +401,7 @@ A confirmation is on its way to {signupEmail}. If it isn't there in a few minute
 *html
 	<h2 class="ct-h2">What happens next</h2>
 	<ul class="ct-list">
-		<li><b>Before the session:</b> we'll send you the link to join 24 hours before the event starts, and add you to the event's Google Calendar invite.</li>
+		<li><b>Before the session:</b> {beforeSessionText}</li>
 		<li><b>Afterward:</b> we plan to send the recording to everyone who registered, though by watching the recording you won't be able to interact or ask questions.</li>
 	</ul>
 	<h2 class="ct-h2">In the meantime</h2>
