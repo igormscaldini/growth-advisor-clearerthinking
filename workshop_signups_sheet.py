@@ -27,15 +27,7 @@ warnings.filterwarnings("ignore")
 PROGRAM_ID = 38791
 EXPORT_URL = f"https://www.guidedtrack.com/programs/{PROGRAM_ID}/exports?export_format=csv"
 SHEET_TAB = "Sign-ups"
-HEADER = [
-    "Signed up (UTC)",
-    "Email",
-    "First name",
-    "Question for the session",
-    "Source",
-    "Registrant's local time",
-    "Recorded by",
-]
+HEADER = ["Signed up (UTC)", "Email", "First name", "Question for the session"]
 # src values used by test / probe runs (see the program's HOW TO USE block) and
 # email fragments that mark automated test sign-ups. Excluded from the sheet.
 TEST_SOURCES = {"test", "probe", "previewtest2", "screenshot", "e2etest"}
@@ -69,20 +61,18 @@ def real_signups(rows: list[dict]) -> dict[str, dict]:
             "email": email,
             "first_name": (row.get("signupFirstName") or "").strip(),
             "question": (row.get("questionForSession") or "").strip(),
-            "src": (row.get("src") or "").strip(),
-            "local_time": (row.get("signedUpAt") or "").strip(),
         }
     return out
 
 
 def to_row(rec: dict) -> list[str]:
-    return [rec["signed_up_utc"], rec["email"], rec["first_name"], rec["question"], rec["src"], rec["local_time"], "sync"]
+    return [rec["signed_up_utc"], rec["email"], rec["first_name"], rec["question"]]
 
 
 def plan_changes(sheet_values: list[list[str]], signups: dict[str, dict]) -> tuple[list[list[str]], dict[int, list[str]]]:
     """Return (rows to append, {1-based sheet row -> replacement row}) to bring the sheet in
-    line with the export. Existing rows keep their timestamp and "Recorded by" value; only
-    first name / question / source are refreshed when they differ."""
+    line with the export. Existing rows keep their timestamp; first name and question are
+    refreshed when they differ."""
     by_email: dict[str, int] = {}
     for i, row in enumerate(sheet_values[1:], start=2):
         email = normalize_email(row[1] if len(row) > 1 else "")
@@ -96,8 +86,8 @@ def plan_changes(sheet_values: list[list[str]], signups: dict[str, dict]) -> tup
             continue
         i = by_email[email]
         current = list(sheet_values[i - 1]) + [""] * (len(HEADER) - len(sheet_values[i - 1]))
-        if (current[2], current[3], current[4]) != (rec["first_name"], rec["question"], rec["src"]):
-            updates[i] = [current[0], email, rec["first_name"], rec["question"], rec["src"], current[5] or rec["local_time"], current[6] or "sync"]
+        if (current[2], current[3]) != (rec["first_name"], rec["question"]):
+            updates[i] = [current[0], email, rec["first_name"], rec["question"]]
     return appends, updates
 
 
@@ -122,7 +112,7 @@ def create_sheet(svc) -> str:
     svc.spreadsheets().values().update(
         spreadsheetId=sheet_id, range=f"{SHEET_TAB}!A1", valueInputOption="RAW", body={"values": [HEADER]}
     ).execute()
-    widths = [150, 240, 120, 420, 110, 210, 100]
+    widths = [150, 240, 120, 420]
     requests_ = [{"repeatCell": {
         "range": {"sheetId": gid, "startRowIndex": 0, "endRowIndex": 1},
         "cell": {"userEnteredFormat": {"textFormat": {"bold": True}}},
@@ -141,7 +131,7 @@ def sync(sheet_id: str, dry_run: bool = False) -> tuple[int, int]:
     from sheets_client import get_client
 
     svc = get_client()
-    values = svc.spreadsheets().values().get(spreadsheetId=sheet_id, range=f"{SHEET_TAB}!A:G").execute().get("values", [])
+    values = svc.spreadsheets().values().get(spreadsheetId=sheet_id, range=f"{SHEET_TAB}!A:D").execute().get("values", [])
     if not values:
         values = [HEADER]
         if not dry_run:
@@ -160,13 +150,13 @@ def sync(sheet_id: str, dry_run: bool = False) -> tuple[int, int]:
         return len(appends), len(updates)
     if appends:
         svc.spreadsheets().values().append(
-            spreadsheetId=sheet_id, range=f"{SHEET_TAB}!A:G", valueInputOption="RAW",
+            spreadsheetId=sheet_id, range=f"{SHEET_TAB}!A:D", valueInputOption="RAW",
             insertDataOption="INSERT_ROWS", body={"values": appends},
         ).execute()
     if updates:
         svc.spreadsheets().values().batchUpdate(spreadsheetId=sheet_id, body={
             "valueInputOption": "RAW",
-            "data": [{"range": f"{SHEET_TAB}!A{i}:G{i}", "values": [row]} for i, row in updates.items()],
+            "data": [{"range": f"{SHEET_TAB}!A{i}:D{i}", "values": [row]} for i, row in updates.items()],
         }).execute()
     return len(appends), len(updates)
 

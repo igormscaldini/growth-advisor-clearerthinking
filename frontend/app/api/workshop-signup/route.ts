@@ -52,10 +52,10 @@ export async function POST(request: Request) {
     const existing = await sheets(range("B:B"));
     const rowNumber = findEmailRow((existing.values as string[][] | undefined) ?? [], signup.email);
     if (rowNumber) {
-      await sheets(`${range(`A${rowNumber}:G${rowNumber}`)}?valueInputOption=RAW`, { method: "PUT", body: JSON.stringify({ values: [row] }) });
+      await sheets(`${range(`A${rowNumber}:D${rowNumber}`)}?valueInputOption=RAW`, { method: "PUT", body: JSON.stringify({ values: [row] }) });
       return Response.json({ ok: true, action: "updated" });
     }
-    await sheets(`${range("A:G")}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, { method: "POST", body: JSON.stringify({ values: [row] }) });
+    await sheets(`${range("A:D")}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`, { method: "POST", body: JSON.stringify({ values: [row] }) });
     return Response.json({ ok: true, action: "appended" });
   } catch (err) {
     console.error("workshop-signup", err);

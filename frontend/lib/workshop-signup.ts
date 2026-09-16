@@ -5,22 +5,12 @@
 import { timingSafeEqual } from "node:crypto";
 
 export const SHEET_TAB = "Sign-ups";
-export const HEADER = [
-  "Signed up (UTC)",
-  "Email",
-  "First name",
-  "Question for the session",
-  "Source",
-  "Registrant's local time",
-  "Recorded by",
-];
+export const HEADER = ["Signed up (UTC)", "Email", "First name", "Question for the session"];
 
 export type Signup = {
   email: string;
   firstName: string;
   question: string;
-  src: string;
-  signedUpAt: string;
 };
 
 function str(v: unknown): string {
@@ -44,13 +34,7 @@ export function parseBody(contentType: string | null, text: string): Record<stri
 export function normalizeSignup(raw: Record<string, unknown>): Signup | null {
   const email = str(raw.email).toLowerCase();
   if (!email.includes("@")) return null;
-  return {
-    email,
-    firstName: str(raw.firstName),
-    question: str(raw.question),
-    src: str(raw.src),
-    signedUpAt: str(raw.signedUpAt),
-  };
+  return { email, firstName: str(raw.firstName), question: str(raw.question) };
 }
 
 /** Constant-time check of an HTTP Basic Authorization header against the expected pair. */
@@ -71,5 +55,5 @@ export function findEmailRow(columnB: string[][], email: string): number {
 
 export function toRow(signup: Signup, receivedAt: Date): string[] {
   const utc = receivedAt.toISOString().replace("T", " ").slice(0, 19);
-  return [utc, signup.email, signup.firstName, signup.question, signup.src, signup.signedUpAt, "live"];
+  return [utc, signup.email, signup.firstName, signup.question];
 }

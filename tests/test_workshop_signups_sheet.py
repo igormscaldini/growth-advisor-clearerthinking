@@ -31,7 +31,6 @@ def test_real_signups_keeps_latest_run_per_email_and_skips_empty():
     out = real_signups(rows)
     assert list(out) == ["ann@x.io", "cat@x.io"]
     assert out["ann@x.io"]["question"] == "second try"
-    assert out["ann@x.io"]["src"] == "referral"
     assert out["ann@x.io"]["signed_up_utc"] == "2026-09-21 08:00:00"
     assert out["cat@x.io"]["signed_up_utc"] == "2026-09-20 09:59:00"  # falls back to start time
 
@@ -40,14 +39,14 @@ def test_to_row_matches_header_layout():
     rec = real_signups([row(1, "ann@x.io", first="Ann", question="Q?", src="newsletter")])["ann@x.io"]
     r = to_row(rec)
     assert len(r) == len(HEADER)
-    assert r == ["2026-09-20 10:00:00", "ann@x.io", "Ann", "Q?", "newsletter", "Sep 20th, 2026, 7:00 AM", "sync"]
+    assert r == ["2026-09-20 10:00:00", "ann@x.io", "Ann", "Q?"]
 
 
-def test_plan_changes_appends_missing_updates_changed_keeps_live_rows():
+def test_plan_changes_appends_missing_and_updates_changed():
     sheet = [
         HEADER,
-        ["2026-09-19 12:00:00", "ann@x.io", "Ann", "old question", "newsletter", "local", "live"],
-        ["2026-09-19 13:00:00", "bob@x.io", "Bob", "", "", "", "live"],
+        ["2026-09-19 12:00:00", "ann@x.io", "Ann", "old question"],
+        ["2026-09-19 13:00:00", "bob@x.io", "Bob"],
     ]
     signups = real_signups([
         row(1, "ann@x.io", first="Ann", question="new question", src="newsletter"),
@@ -55,9 +54,9 @@ def test_plan_changes_appends_missing_updates_changed_keeps_live_rows():
         row(3, "cat@x.io", first="Cat", question="Hi", src="overcome"),
     ])
     appends, updates = plan_changes(sheet, signups)
-    assert appends == [["2026-09-20 10:00:00", "cat@x.io", "Cat", "Hi", "overcome", "Sep 20th, 2026, 7:00 AM", "sync"]]
-    # Ann's question changed: row 2 is refreshed but keeps its timestamp and "live" marker.
-    assert updates == {2: ["2026-09-19 12:00:00", "ann@x.io", "Ann", "new question", "newsletter", "local", "live"]}
+    assert appends == [["2026-09-20 10:00:00", "cat@x.io", "Cat", "Hi"]]
+    # Ann's question changed: row 2 is refreshed but keeps its timestamp.
+    assert updates == {2: ["2026-09-19 12:00:00", "ann@x.io", "Ann", "new question"]}
 
 
 def test_plan_changes_on_header_only_sheet_and_short_rows():

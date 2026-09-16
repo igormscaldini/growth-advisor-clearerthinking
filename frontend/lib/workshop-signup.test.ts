@@ -10,8 +10,8 @@ test("parseBody accepts JSON and form bodies", () => {
 });
 
 test("normalizeSignup lower-cases and trims, rejects rows without an email", () => {
-  const s = normalizeSignup({ email: "  Ann@Example.COM ", firstName: " Ann ", question: null, src: undefined, signedUpAt: "Sep 1" });
-  assert.deepEqual(s, { email: "ann@example.com", firstName: "Ann", question: "", src: "", signedUpAt: "Sep 1" });
+  const s = normalizeSignup({ email: "  Ann@Example.COM ", firstName: " Ann ", question: null, src: "ignored" });
+  assert.deepEqual(s, { email: "ann@example.com", firstName: "Ann", question: "" });
   assert.equal(normalizeSignup({ email: "nope" }), null);
   assert.equal(normalizeSignup({}), null);
 });
@@ -36,6 +36,6 @@ test("findEmailRow returns the 1-based row, skipping the header", () => {
 });
 
 test("toRow lays out the sheet columns", () => {
-  const row = toRow({ email: "a@x.io", firstName: "A", question: "Q?", src: "newsletter", signedUpAt: "local" }, new Date("2026-09-16T12:34:56.789Z"));
-  assert.deepEqual(row, ["2026-09-16 12:34:56", "a@x.io", "A", "Q?", "newsletter", "local", "live"]);
+  const row = toRow({ email: "a@x.io", firstName: "A", question: "Q?" }, new Date("2026-09-16T12:34:56.789Z"));
+  assert.deepEqual(row, ["2026-09-16 12:34:56", "a@x.io", "A", "Q?"]);
 });
