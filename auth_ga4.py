@@ -1,4 +1,4 @@
-"""One-time OAuth flow for Google read-only access (GA4 + Search Console).
+"""One-time OAuth flow for the shared Google token (GA4, Search Console, Sheets, Gmail, Docs).
 
 Opens a browser, walks you through Google sign-in + consent, and saves a
 refresh token to secrets/ga4-token.json. After this runs once, the rest of
@@ -20,6 +20,7 @@ SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",  # create/edit sheets (upgraded from readonly)
     "https://www.googleapis.com/auth/gmail.send",  # weekly advisor email (Gmail API send)
     "https://www.googleapis.com/auth/gmail.modify",  # reply handler: read replies + mark them read
+    "https://www.googleapis.com/auth/documents",  # edit Google Docs in place (Docs API batchUpdate)
 ]
 CLIENT_FILE = Path(__file__).parent / "secrets" / "oauth-client.json"
 TOKEN_FILE = Path(__file__).parent / "secrets" / "ga4-token.json"
