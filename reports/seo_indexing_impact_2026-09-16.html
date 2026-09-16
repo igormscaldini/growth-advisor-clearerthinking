@@ -1,0 +1,154 @@
+<!doctype html><html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>CT SEO fixes: did indexing improve?</title>
+<style>
+:root{--surface:#fcfcfb;--ink:#16181d;--mut:#6b7280;--line:#e7e9ee;--s1:#2a78d6;--s2:#eb6834;
+--ok:#0f7b3f;--okbg:#e8f5ee;--warn:#8a5a00;--warnbg:#fdf3e0;--bad:#a02020;--badbg:#fbeaea}
+*{box-sizing:border-box}
+body{margin:0;padding:48px 32px 72px;font:15px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink);background:var(--surface)}
+.wrap{max-width:1000px;margin:0 auto}
+h1{font-size:27px;font-weight:650;letter-spacing:-.02em;margin:0 0 6px}
+.sub{color:var(--mut);font-size:13.5px;margin:0 0 30px}
+h2{font-size:12px;font-weight:650;letter-spacing:.05em;margin:44px 0 14px;text-transform:uppercase;color:var(--mut)}
+h3{font-size:15.5px;font-weight:650;margin:26px 0 8px}
+p{margin:0 0 13px}
+.lede{background:#f4f6f9;border-radius:10px;padding:18px 22px;margin:0 0 6px}
+.lede p{margin:0 0 10px}.lede p:last-child{margin:0}
+.big{font-size:19px;font-weight:600;letter-spacing:-.01em}
+table{border-collapse:collapse;width:100%;font-size:13.5px;margin:6px 0 4px}
+th{text-align:left;font-weight:600;color:var(--mut);font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:0 14px 9px 0;border-bottom:1px solid var(--line)}
+td{padding:11px 14px 11px 0;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;color:#3d4149}
+.pill{border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:600;white-space:nowrap;display:inline-block}
+.p-ok{background:var(--okbg);color:var(--ok)}.p-warn{background:var(--warnbg);color:var(--warn)}.p-bad{background:var(--badbg);color:var(--bad)}
+.note{border-left:2px solid var(--line);padding:3px 0 3px 18px;margin:16px 0;color:#3d4149;font-size:14px}
+.note b{font-weight:650;color:var(--ink)}
+.chart{margin:10px 0 4px}
+.legend{display:flex;gap:20px;font-size:12.5px;color:var(--mut);margin:0 0 16px}
+.legend span{display:flex;align-items:center;gap:7px}
+.sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+.row{display:grid;grid-template-columns:250px 1fr;gap:16px;align-items:center;margin-bottom:11px}
+.rl{font-size:13px;color:var(--ink);text-align:right;line-height:1.35}
+.bars{display:flex;flex-direction:column;gap:3px}
+.bar{height:15px;border-radius:0 4px 4px 0;display:flex;align-items:center;min-width:2px}
+.bv{font-size:11.5px;color:var(--mut);font-variant-numeric:tabular-nums;padding-left:8px;white-space:nowrap}
+.foot{color:var(--mut);font-size:12px;margin-top:48px;border-top:1px solid var(--line);padding-top:16px}
+a{color:var(--s1);text-decoration:none}a:hover{text-decoration:underline}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:4px}
+</style></head><body><div class=wrap>
+
+<h1>Did the SEO fixes move indexing?</h1>
+<p class=sub>Fresh GSC URL Inspection sweep of all 233 tracked pages, property <code>sc-domain:clearerthinking.org</code> &middot; 2026-09-16 4:58pm</p>
+
+<div class=lede>
+<p class=big>Yes, but almost none of it is attributable to the fixes.</p>
+<p>23 of the 233 tracked pages are now indexed. When you check <em>when</em> each of them started serving search impressions, 19 of the 23 were already indexed before the fixes shipped on 2 September. Only 3 first appeared in search after that date.</p>
+<p>The one clean, provable win: the <b>programs.clearerthinking.org</b> sitemap, which had never been submitted to GSC, was submitted on 2 September, and 8 of its 10 tracked pages went from "URL is unknown to Google" to "Discovered". The other 5 sitemap submissions were redundant and produced nothing.</p>
+</div>
+
+<h2>a. When the fixes were done</h2>
+<table>
+<thead><tr><th>Date</th><th>What happened</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td class=mono>~2026-08-06</td><td>Baseline URL Inspection sweep that produced the tracking sheet</td><td>Latest crawl timestamp in the sheet is 2026-08-06; sheet is titled "Aug 2026"</td></tr>
+<tr><td class=mono>2026-09-02</td><td>Sheet cleaned from 284 to 233 rows, 51 junk pages split out; 7-step plan written</td><td>Session digest 2026-09-02</td></tr>
+<tr><td class=mono>2026-09-02<br>14:48 UTC</td><td><b>The actual fix.</b> Six sitemaps submitted to GSC (all HTTP 204): programs.clearerthinking.org plus the 5 www child sitemaps. Two stale registrations deleted (podcast sitemap2.xml, the 2017 http://www one). <code>auth_ga4.py</code> upgraded to write scope to make this possible (commit <code>e95e5c5</code>).</td><td>GSC Sitemaps API <code>lastSubmitted</code> = 2026-09-02T14:48:45&ndash;51Z on all six</td></tr>
+<tr><td class=mono>2026-09-02 on</td><td>Nothing else shipped. Steps 2 to 6 of the plan (noindex the junk pages, fix soft 404s, internal linking, content triage, request indexing) were handed off or not started.</td><td>No commits, no further GSC writes</td></tr>
+</tbody></table>
+
+<p class=note><b>So: 14 days of elapsed data since the fix</b>, and the only thing that actually changed on Google's side was sitemap registration. Nothing about the pages themselves changed.</p>
+
+<h2>b. How indexing changed</h2>
+
+<h3>All 233 tracked pages, baseline vs now</h3>
+<div class=legend>
+  <span><i class="sw" style="background:var(--s1)"></i>Baseline (early Aug)</span>
+  <span><i class="sw" style="background:var(--s2)"></i>Now (16 Sep)</span>
+</div>
+<div class=chart id=chart></div>
+
+<p class=note><b>The headline number is 23 pages indexed, up from 0.</b> Underneath that, the "Crawled but not indexed" bucket halved (42 to 22) and "URL unknown to Google" barely moved (72 to 67). There is also churn in the wrong direction: 13 pages that Google had discovered in August have fallen back to "unknown".</p>
+
+<h3>The attribution test</h3>
+<p>A page cannot serve a search impression unless it is indexed. So for each of the 23 now-indexed pages I pulled its first day with impressions since 1 June:</p>
+<table>
+<thead><tr><th>First served impressions</th><th class=num>Pages</th><th>Reading</th></tr></thead>
+<tbody>
+<tr><td>Before 2026-09-02</td><td class=num>19</td><td>Already indexed before the fix. Mostly mid-to-late August, in the gap between the baseline sweep and the fix date.</td></tr>
+<tr><td>On or after 2026-09-02</td><td class=num>3</td><td>The only candidates for credit, and two of them were last crawled in August, before the fix.</td></tr>
+<tr><td>Never</td><td class=num>1</td><td>Indexed, zero search demand.</td></tr>
+</tbody></table>
+<p>Backing this up from the crawl side: of the 233 pages, only <b>10 have been crawled at all since 2 September</b>, and <b>162 have never been crawled in their life</b>. The sitemap submissions did not produce a crawl surge. Google's crawl rate on this set is about 0.7 pages/day both before and after.</p>
+
+<h3>What the fix actually did: programs.clearerthinking.org</h3>
+<p>This is the part that worked, and it worked exactly as predicted. That sitemap had never been submitted. It was submitted 2 September and downloaded by Google on 9 September.</p>
+<table>
+<thead><tr><th>Page</th><th>Baseline</th><th>Now</th><th>Sitemap registered</th></tr></thead>
+<tbody>
+<tr><td class=mono>index.html (x2), achieve_your_goals_signup, make_your_relationship_guidebook, pathkeeper, personality-test-for-teams, program_guide_tool, spencer-self-help-workshop</td><td>URL unknown to Google</td><td><span class="pill p-warn">Discovered, not yet indexed</span></td><td>Yes (8 of 8)</td></tr>
+<tr><td class=mono>practice_gratitude.html, one index.html</td><td>URL unknown to Google</td><td><span class="pill p-bad">Still unknown</span></td><td>No</td></tr>
+</tbody></table>
+<p>8 of 10 previously invisible URLs are now known to Google. None are indexed yet, which is the normal next wait.</p>
+
+<h3>Why the other 5 sitemap submissions did nothing</h3>
+<p>The 58 tracked <code>/tools/</code> pages were the big hope: 49 of them were "URL unknown to Google" despite being sitemap-listed. Today <b>48 of those 49 are still unknown</b>.</p>
+<p>The reason is that resubmitting them was redundant. <code>https://www.clearerthinking.org/sitemap.xml</code> is a sitemap <em>index</em> that has been registered in GSC since April 2025, is downloaded regularly (last on 16 Sep), and already references all five child sitemaps that were submitted on 2 September. Google had the tools sitemap the whole time. Submitting a child sitemap Google already reads adds no discovery signal, which is why programs (genuinely new) moved and www (already known) did not.</p>
+<p class=note><b>Correcting the sheet's diagnosis.</b> The sheet attributes the 59 unknown tools pages to "suspected GSC property/sitemap-submission problem". That was wrong. They are sitemap-listed and the sitemap is read. They are unknown because Google is choosing not to crawl them: the pages are thin (about 230 words of mostly boilerplate to a crawler) and have almost no internal links pointing at them. Four of them are already flagged Soft 404, which is Google telling you the page looks empty. More sitemap work will not fix this; internal linking and page content will.</p>
+
+<h3>Traffic effect: none</h3>
+<table>
+<thead><tr><th>12-day window</th><th class=num>Impressions</th><th class=num>Clicks</th></tr></thead>
+<tbody>
+<tr><td>All 233 tracked pages, before (21 Aug to 1 Sep)</td><td class=num>795</td><td class=num>8</td></tr>
+<tr><td>All 233 tracked pages, after (3 to 14 Sep)</td><td class=num>667</td><td class=num>7</td></tr>
+<tr><td>The 23 now-indexed pages, before</td><td class=num>385</td><td class=num>6</td></tr>
+<tr><td>The 23 now-indexed pages, after</td><td class=num>556</td><td class=num>6</td></tr>
+<tr><td>Whole site, before</td><td class=num>544,112</td><td class=num>8,342</td></tr>
+<tr><td>Whole site, after</td><td class=num>586,303</td><td class=num>10,772</td></tr>
+</tbody></table>
+<p>The entire tracked set produced 7 clicks in 12 days, about 0.1% of site impressions. Getting these pages indexed is worth doing, but it is not where near-term traffic comes from.</p>
+
+<p class=note><b>Do not credit the September traffic rise to SEO.</b> Site clicks climbed from 584/day (8 Sep) to 1,447/day (14 Sep). That is entirely <code>programs.clearerthinking.org/who_attracts_you_study.html</code>, the same page behind the 3 to 10 August spike that peaked at 25,919 clicks/day on queries like "who attracts you" and "attraction test". It is a viral-content wave, unrelated to indexing work.</p>
+
+<h2>What is still blocking, by segment</h2>
+<table>
+<thead><tr><th>Segment</th><th class=num>Tracked</th><th class=num>Indexed</th><th>Main blocker now</th></tr></thead>
+<tbody>
+<tr><td>Blog posts (www /post/)</td><td class=num>136</td><td class=num>12</td><td>81 Discovered but not crawled, 15 crawled and rejected, 12 Soft 404</td></tr>
+<tr><td>Tools (www /tools/)</td><td class=num>58</td><td class=num>1</td><td>48 never discovered, 4 Soft 404, 3 redirects</td></tr>
+<tr><td>Podcast</td><td class=num>21</td><td class=num>10</td><td>4 discovered, 4 crawled and rejected, 3 trailing-slash duplicates that are not real problems</td></tr>
+<tr><td>programs.*</td><td class=num>10</td><td class=num>0</td><td>8 now discovered and waiting, 2 still unknown</td></tr>
+<tr><td>Other www pages</td><td class=num>8</td><td class=num>0</td><td>3 unknown, 1 deliberate noindex</td></tr>
+</tbody></table>
+
+<p class=note><b>Still open from the 2 September session:</b> <code>society.clearerthinking.org/sitemap.xml</code> is still erroring in GSC and has <b>never</b> been downloaded since it was submitted on 3 June 2026. The mod_security fix on the host was drafted to Spencer but has not landed.</p>
+
+<div class=foot>
+Source: Google Search Console URL Inspection API, sweep of 233 URLs run 2026-09-16, 0 errors. Search Analytics API for impressions and clicks (web search type). Sitemaps API for submission timestamps. Baseline reason codes from the sheet "CT &mdash; Pages Not Indexed".
+</div>
+
+<script>
+const data = [
+ ["Submitted and indexed", 0, 23],
+ ["Discovered, not indexed", 94, 95],
+ ["URL unknown to Google", 72, 67],
+ ["Crawled, not indexed", 42, 22],
+ ["Soft 404", 16, 16],
+ ["Page with redirect", 5, 5],
+ ["Duplicate, no canonical", 2, 3],
+ ["Duplicate, wrong canonical", 1, 1],
+ ["Excluded by noindex", 1, 1],
+];
+const max = 100, W = 100;
+document.getElementById('chart').innerHTML = data.map(([l,a,b]) => `
+ <div class=row>
+   <div class=rl>${l}</div>
+   <div class=bars>
+     <div style="display:flex;align-items:center"><div class=bar style="width:${a/max*W}%;background:var(--s1)"></div><span class=bv>${a}</span></div>
+     <div style="display:flex;align-items:center"><div class=bar style="width:${b/max*W}%;background:var(--s2)"></div><span class=bv>${b}</span></div>
+   </div>
+ </div>`).join('');
+</script>
+</div></body></html>
