@@ -36,6 +36,14 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   owned ones belong to Igor and are never touched. `--rebuild` is the destructive path and
   the cron never passes it. `--sheets` errors without a target rather than creating a stray
   sheet; pass `--new-sheet` to create one deliberately.
+- `workshop_signups_sheet.py` + `frontend/app/api/workshop-signup/route.ts`: Career Workshop
+  sign-ups -> Google Sheet (`WORKSHOP_SHEET_ID`). Live path: GT program 38791's external service
+  "Sign-up sheet" (Settings -> Services, basic auth `WORKSHOP_SIGNUP_USER/PASSWORD`) POSTs each
+  sign-up to the Vercel route, which upserts by email; the script is the backfill / safety net
+  (`workshop-signups-sync.yml`). Vercel env for the route (project growth-advisor-clearerthinking,
+  Spark Wave team): those three + `GOOGLE_TOKEN_JSON`; set from `frontend/` with
+  `npx vercel link` then `npx vercel env add NAME production` (value on stdin). The column
+  layout is duplicated in the TS helpers and the Python script: change both.
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
   schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
@@ -113,7 +121,7 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - Headless testing of GT runs: Playwright with `channel: 'chrome'` works (plain headless Chrome
   screenshots render blank); such runs are real runs, not test runs. Scripts from the 2026-09-14
   session live in the scratchpad only; rebuild from `guidedtrack/` notes if needed.
-- Workshop sign-up page (Sep 2026): program "Career Change Workshop Sign-up" (id 38791, run URL
+- Workshop sign-up page (Sep 2026, bio final 2026-09-16): program "Career Change Workshop Sign-up" (id 38791, run URL
   https://www.guidedtrack.com/programs/gg4qpas/run, `?src=` tracks the channel). Settings block at
   the top (dateKnown/lengthKnown/joinLinkKnown flags); sends a confirmation `*email`. The email's
   display name and Reply-To are set in GT Settings -> Branding, not in code. Published at
