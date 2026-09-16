@@ -37,8 +37,12 @@ TOOLS_SITEMAP = (
     "dynamic-tools_p_5c1ea742_9746_4bde_b765_d5e3f20bcaa5_0_5000-sitemap.xml"
 )
 UA = "Mozilla/5.0 (compatible; ClearerThinkingSEO/1.0; +https://www.clearerthinking.org/)"
-HEAD_BYTES = 24_000  # title and datePublished both land in the first ~2KB
-POLITE_DELAY = 0.8  # seconds between requests per worker; Wix returns 429 if pushed harder
+# Wix only front-loads page metadata for Googlebot. To an ordinary client it serves the SPA
+# shell first, so <title> can sit ~130KB in. Read in chunks and stop as soon as the head is
+# complete rather than guessing a fixed offset.
+HEAD_BYTES = 600_000
+CHUNK = 65_536
+POLITE_DELAY = 0.5  # seconds between requests per worker; Wix returns 429 if pushed harder
 CACHE = Path(__file__).parent / "reports" / "seo_hub_titles_cache.json"
 
 # Wix appends this to most page titles; it is noise as anchor text.
@@ -130,7 +134,19 @@ def parse_sitemap(xml: str) -> list[dict]:
     return out
 
 
-def _fetch(url: str, limit: int | None = None, attempts: int = 6) -> str:
+def head_complete(text: str) -> bool:
+    """True once the decoded prefix holds everything page_meta needs.
+
+    <title> plus either the article's datePublished or the end of <head>, after which no
+    further metadata is coming (tool pages carry no datePublished at all).
+    """
+    if "</title>" not in text:
+        return False
+    return '"datePublished"' in text or "</head>" in text
+
+
+def _fetch(url: str, limit: int | None = None, attempts: int = 6,
+           until: "callable | None" = None) -> str:
     """GET a URL, reading at most `limit` bytes, backing off on Wix's 429 rate limiting.
 
     Wix throttles aggressively once a burst has been seen, and the penalty outlives the burst,
@@ -141,8 +157,19 @@ def _fetch(url: str, limit: int | None = None, attempts: int = 6) -> str:
         req = urllib.request.Request(url, headers={"User-Agent": UA})
         try:
             with urllib.request.urlopen(req, timeout=60) as r:
-                raw = r.read(limit) if limit else r.read()
-            return raw.decode("utf-8", "ignore")
+                if until is None:
+                    return (r.read(limit) if limit else r.read()).decode("utf-8", "ignore")
+                buf = b""
+                cap = limit or 0
+                while not cap or len(buf) < cap:
+                    chunk = r.read(CHUNK)
+                    if not chunk:
+                        break
+                    buf += chunk
+                    text = buf.decode("utf-8", "ignore")
+                    if until(text):
+                        return text
+                return buf.decode("utf-8", "ignore")
         except urllib.error.HTTPError as e:
             last = e
             if e.code not in (429, 500, 502, 503, 504):
@@ -162,7 +189,7 @@ def fetch_sitemap(url: str) -> list[dict]:
 def page_meta(url: str) -> dict:
     """Read only the head of the page: enough for <title> and datePublished."""
     try:
-        head = _fetch(url, limit=HEAD_BYTES)
+        head = _fetch(url, limit=HEAD_BYTES, until=head_complete)
     except Exception as e:  # noqa: BLE001 - one bad page must not sink the run
         return {"title": None, "published": None, "error": f"{type(e).__name__}: {e}"}
     time.sleep(POLITE_DELAY)
@@ -175,7 +202,7 @@ def page_meta(url: str) -> dict:
     }
 
 
-def enrich(entries: list[dict], use_cache: bool = True, workers: int = 2) -> list[dict]:
+def enrich(entries: list[dict], use_cache: bool = True, workers: int = 4) -> list[dict]:
     """Attach a title and publish date to each sitemap entry, caching across runs."""
     cache = {}
     if use_cache and CACHE.exists():

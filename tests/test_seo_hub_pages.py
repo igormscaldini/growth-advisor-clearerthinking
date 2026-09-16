@@ -9,6 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from seo_hub_pages import (  # noqa: E402
     clean_title,
     group_by_year,
+    head_complete,
     parse_sitemap,
     published_from_url,
     render_links,
@@ -138,3 +139,20 @@ def test_parse_sitemap_worked_by_hand():
 
 def test_parse_sitemap_empty_document():
     assert parse_sitemap("<urlset></urlset>") == []
+
+
+# --- head_complete ------------------------------------------------------------------------
+# Wix serves <title> ~130KB into the document for a non-Googlebot client, so the fetcher reads
+# in chunks and stops on this predicate instead of a fixed byte offset.
+def test_head_complete_needs_a_title():
+    assert head_complete('<html><head><meta charset="utf-8">') is False
+    assert head_complete('<title>Only a title</title>') is False
+
+
+def test_head_complete_on_an_article():
+    assert head_complete('<title>A post</title> ... "datePublished": "2025-12-02T21:44:04.155Z"') is True
+
+
+def test_head_complete_on_a_page_without_a_publish_date():
+    """Tool pages carry no datePublished; </head> means no more metadata is coming."""
+    assert head_complete("<title>A tool</title><meta name=x></head><body>") is True
