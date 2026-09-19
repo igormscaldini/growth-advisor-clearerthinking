@@ -123,8 +123,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   ignored, iterate until empty) and includes test runs.
 - GT runtime facts verified 2026-09-14 (the skill guide gets some wrong): `0` and `""` are TRUTHY,
   only undefined is falsy, so test flags with `*if: flag = 1` (the Career Navigation Survey's
-  `*if: changingCareer` gate never worked for this reason). `text.find` returns a 1-based position
-  or empty. A visible line starting `*Word:*` is parsed as a keyword. `*page` forces a page break,
+  `*if: changingCareer` gate never worked for this reason). `text.find` returns the 1-based position
+  of the FIRST match only, or empty; an `*if` condition must test a VARIABLE, not a method call
+  (`*if: text.find(" ")` silently never fires), so assign first, then test. Both cost real sign-ups
+  in the workshop form (see `workshop_signup_validation_check.py`, which re-tests it live). A visible line starting `*Word:*` is parsed as a keyword. `*page` forces a page break,
   so a page's `*html <style>` must sit INSIDE the `*page`. `{var}` is not interpolated inside
   `<style>`; `<img>` is stripped but CSS `background-image` works. GT's `.program_container h1/p/.btn`
   rules beat bare classes: prefix selectors with `.program_container` (+ `!important` on headings).
