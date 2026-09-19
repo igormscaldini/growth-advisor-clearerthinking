@@ -30,12 +30,17 @@ SHEET_TAB = "Sign-ups"
 HEADER = ["Signed up (UTC)", "Email", "First name", "Question for the session"]
 # src values used by test / probe runs (see the program's HOW TO USE block) and
 # email fragments that mark automated test sign-ups. Excluded from the sheet.
-TEST_SOURCES = {"test", "probe", "previewtest2", "screenshot", "e2etest"}
-TEST_EMAIL_MARKERS = ("+gtprobe", "+e2e")
+TEST_SOURCES = {"test", "probe", "previewtest2", "screenshot", "e2etest", "validationfixtest"}
+TEST_EMAIL_MARKERS = ("+gtprobe", "+e2e", "+wsfixtest")
 
 
 def normalize_email(value: str | None) -> str:
-    return (value or "").strip().lower()
+    """Lower-cased address, with a trailing dot dropped.
+
+    A trailing dot is a typo people make ("ann@x.io."), and mail to it bounces. Dropping it
+    keeps the person to one row instead of two. Mirrored in frontend/lib/workshop-signup.ts.
+    """
+    return (value or "").strip().lower().rstrip(".")
 
 
 def is_test_signup(row: dict) -> bool:

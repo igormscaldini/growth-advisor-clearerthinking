@@ -10,6 +10,16 @@ def row(run, email, first="", question="", src="", finished="2026-09-20 10:00:00
 def test_normalize_email():
     assert normalize_email("  Ann@Example.COM ") == "ann@example.com"
     assert normalize_email(None) == ""
+    # A trailing dot is a typo (seen in the real sign-ups): same person, not a second row.
+    assert normalize_email("ann@example.com.") == "ann@example.com"
+    assert normalize_email("ann@example.com..") == "ann@example.com"
+
+
+def test_real_signups_merges_a_trailing_dot_typo_with_the_clean_address():
+    rows = [row(1, "ann@x.io.", first="Ann"), row(2, "ann@x.io", first="Ann", question="Q?")]
+    out = real_signups(rows)
+    assert list(out) == ["ann@x.io"]
+    assert out["ann@x.io"]["question"] == "Q?"
 
 
 def test_test_signups_are_excluded():

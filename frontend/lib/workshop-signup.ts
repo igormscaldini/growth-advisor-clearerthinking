@@ -32,7 +32,9 @@ export function parseBody(contentType: string | null, text: string): Record<stri
 
 /** Normalise the raw payload; null when there is no usable email address. */
 export function normalizeSignup(raw: Record<string, unknown>): Signup | null {
-  const email = str(raw.email).toLowerCase();
+  // The trailing dot is dropped for the same reason as in workshop_signups_sheet.py: it is a
+  // typo, mail to it bounces, and keeping it would file the person under a second address.
+  const email = str(raw.email).toLowerCase().replace(/\.+$/, "");
   if (!email.includes("@")) return null;
   return { email, firstName: str(raw.firstName), question: str(raw.question) };
 }

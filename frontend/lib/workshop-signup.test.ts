@@ -14,6 +14,8 @@ test("normalizeSignup lower-cases and trims, rejects rows without an email", () 
   assert.deepEqual(s, { email: "ann@example.com", firstName: "Ann", question: "" });
   assert.equal(normalizeSignup({ email: "nope" }), null);
   assert.equal(normalizeSignup({}), null);
+  // Trailing dot dropped, matching normalize_email in workshop_signups_sheet.py.
+  assert.equal(normalizeSignup({ email: "Ann@Example.com." })?.email, "ann@example.com");
 });
 
 test("basicAuthOk matches only the exact user:password pair", () => {

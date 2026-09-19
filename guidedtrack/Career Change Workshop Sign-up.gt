@@ -21,7 +21,11 @@
 -- GUIDEDTRACK GOTCHAS BAKED IN HERE (verified 2026-09-14 with a scratch program)
 -- - 0 and "" are TRUTHY in *if; only an undefined variable is falsy. Every flag
 --   below is therefore tested with "= 1", never as a bare *if: flag.
--- - text.find returns the 1-based position, or nothing (falsy) when not found.
+-- - text.find returns the 1-based position of the FIRST match, or nothing (falsy) when
+--   not found. It cannot search from an offset, so "is there a dot after the @" has to
+--   be asked of the domain on its own (see the email check below).
+-- - An *if condition must test a variable, not a method call: *if: text.find(" ") never
+--   fires (verified live 2026-09-19). Assign the method's result first, then test it.
 -- - A text line that starts with *Word:* is parsed as a keyword, so bold leads
 --   are done in HTML (<b>) or with multi-word phrases only.
 -- - <img> is stripped from *html, so the logo is a CSS background image (URL written
@@ -247,22 +251,39 @@ Sign up below. You'll get a confirmation email right away and the link to join b
 
 	*button: Confirm sign up
 
--- Light check that the address can receive mail: an @ that isn't first, and a dot after it.
--- text.find returns the 1-based position, or nothing (falsy) when the text is absent.
+-- Light check that the address can receive mail: exactly one @ with text on both sides, no
+-- spaces, and a dot inside the DOMAIN with at least two characters after it.
+-- text.find returns the 1-based position of the FIRST match, or nothing (falsy) when the text
+-- is absent. That first-match rule is why the dot is looked for in the domain alone, after
+-- splitting on the @: addresses like first.last@gmail.com carry a dot in the local part, and an
+-- earlier version of this check compared that first dot with the @ position and rejected them.
 >> signupEmail = signupEmail.clean
 >> emailLooksWrong = 0
 >> atPosition = signupEmail.find("@")
+>> spacePosition = signupEmail.find(" ")
 *if: not atPosition
+	>> emailLooksWrong = 1
+*if: spacePosition
 	>> emailLooksWrong = 1
 *if: atPosition
 	*if: atPosition < 2
 		>> emailLooksWrong = 1
-	>> dotPosition = signupEmail.find(".")
-	*if: not dotPosition
-		>> emailLooksWrong = 1
-	*if: dotPosition
-		*if: dotPosition < atPosition + 2
+	*if: atPosition > 1
+		>> emailParts = signupEmail.split("@")
+		>> emailPartCount = emailParts.size
+		*if: not (emailPartCount = 2)
 			>> emailLooksWrong = 1
+		*if: emailPartCount = 2
+			>> emailDomain = emailParts[2]
+			>> domainDot = emailDomain.find(".")
+			>> domainSize = emailDomain.size
+			*if: not domainDot
+				>> emailLooksWrong = 1
+			*if: domainDot
+				*if: domainDot < 2
+					>> emailLooksWrong = 1
+				*if: domainDot > domainSize - 2
+					>> emailLooksWrong = 1
 *if: emailLooksWrong = 1
 	*goto: signupForm
 
