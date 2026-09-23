@@ -1,0 +1,145 @@
+<!-- Clearer Thinking: "Questions? Get in touch" floating button for the coaching page.
+     Paste the whole snippet in Wix: Settings > Advanced > Custom Code > Add Custom Code,
+     place it in "Body - end", apply to "Choose specific pages" > Coaching, load "Once".
+     It is the twin of the site-wide "Get Coaching" floating button (same spot, same style).
+     That one hides itself on /coaching and this one only ever shows on /coaching, so the two
+     never overlap. Everything editable lives in CONFIG below. -->
+<style>
+  #ct-contact-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 2147483000;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    background-color: #0885F8;
+    color: #ffffff !important;
+    font-family: "Avenir Next", "Avenir", "Nunito Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none !important;
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(8, 133, 248, 0.35);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+  #ct-contact-fab.is-visible { display: inline-flex; }
+  #ct-contact-fab:hover {
+    background-color: #0a76d8;
+    color: #ffffff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(8, 133, 248, 0.45);
+  }
+  #ct-contact-fab:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(8, 133, 248, 0.35);
+  }
+  #ct-contact-fab:focus-visible {
+    outline: 3px solid #ffffff;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 6px rgba(8, 133, 248, 0.55);
+  }
+  #ct-contact-fab svg { width: 18px; height: 18px; flex-shrink: 0; }
+  #ct-contact-fab .ctcf-q { opacity: 0.85; font-weight: 500; }
+
+  /* Quieter secondary look (white pill, blue text): set CONFIG.variant to "outline". */
+  #ct-contact-fab.is-outline {
+    background-color: #ffffff;
+    color: #0885F8 !important;
+    border: 2px solid #0885F8;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+  #ct-contact-fab.is-outline:hover {
+    background-color: #EAF3FF;
+    color: #0885F8 !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+  }
+  #ct-contact-fab.is-outline svg { stroke: #0885F8; }
+
+  @media (max-width: 480px) {
+    #ct-contact-fab { bottom: 16px; right: 16px; padding: 12px 18px; font-size: 15px; }
+    #ct-contact-fab .ctcf-q { display: none; } /* phones show just the icon + "Get in touch" */
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #ct-contact-fab { transition: none; }
+    #ct-contact-fab:hover { transform: none; }
+  }
+</style>
+<script>
+(function () {
+  var CONFIG = {
+    lead: "Questions?",                 // the lighter first word(s); leave "" to drop it
+    label: "Get in touch",              // the main label
+    href: "mailto:info@clearerthinking.org?subject=" + encodeURIComponent("Question about coaching"),
+    // To send people to the contact form instead of their mail app, use this instead:
+    // href: "https://www.clearerthinking.org/contact",
+    variant: "solid",                   // "solid" (blue, like Get Coaching) or "outline" (white pill)
+    showOnPaths: ["/coaching"],         // path prefixes where the button appears
+    gaEvent: "coaching_contact_click"   // GA4 event fired on click when gtag is on the page
+  };
+  var ID = "ct-contact-fab";
+
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function onAllowedPath() {
+    var p = window.location.pathname.toLowerCase();
+    for (var i = 0; i < CONFIG.showOnPaths.length; i++) {
+      if (p.indexOf(CONFIG.showOnPaths[i].toLowerCase()) === 0) return true;
+    }
+    return false;
+  }
+
+  function build() {
+    var a = document.getElementById(ID);
+    if (a) return a;
+    a = document.createElement("a");
+    a.id = ID;
+    a.href = CONFIG.href;
+    a.setAttribute("aria-label", (CONFIG.lead ? CONFIG.lead + " " : "") + CONFIG.label);
+    if (CONFIG.variant === "outline") a.className = "is-outline";
+    a.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>' +
+        '<path d="M22 6l-10 7L2 6"/>' +
+      '</svg>' +
+      (CONFIG.lead ? '<span class="ctcf-q">' + esc(CONFIG.lead) + '</span>' : '') +
+      '<span>' + esc(CONFIG.label) + '</span>';
+    a.addEventListener("click", function () {
+      try {
+        if (typeof window.gtag === "function") {
+          window.gtag("event", CONFIG.gaEvent, { page_path: window.location.pathname, link_url: CONFIG.href });
+        }
+      } catch (e) {}
+    });
+    document.body.appendChild(a);
+    return a;
+  }
+
+  function applyVisibility() {
+    var a = build();
+    if (onAllowedPath()) a.classList.add("is-visible");
+    else a.classList.remove("is-visible");
+  }
+
+  function start() {
+    applyVisibility();
+    // Wix is a single-page app: re-check when the route changes without a reload.
+    var lastPath = window.location.pathname;
+    setInterval(function () {
+      if (window.location.pathname !== lastPath) {
+        lastPath = window.location.pathname;
+        applyVisibility();
+      }
+    }, 400);
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
+})();
+</script>
