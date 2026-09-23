@@ -82,6 +82,14 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   ~200k in Aug 2026, ~350k Sep-Oct 2025) are excluded from "new subscribers". Cursor-paginate
   (offset paging caps at 10k). Genuine sign-ups run ~300-500/day.
 - GA4 event names do not mean what they say: see `GA4_EVENTS.md`. "Tools finished" = Submitted Email.
+- GSC reports only against CANONICAL urls, and several CT_TOOLS.md links are the pre-redirect form.
+  The Ultimate Personality Test is `programs.clearerthinking.org/personality-test.html`; the listed
+  `personality.html` 301s for humans but returns ~0 impressions in GSC, silently, with no hint you are
+  querying the wrong page. Confirm a page's url from a GSC `page` breakdown before filtering on it.
+- GSC retains 16 months. `sc-domain:clearerthinking.org` covers the `programs.` subdomain too.
+- Oct 2025 - Mar 2026 is a poisoned window for any CTR/impression comparison: desktop impressions for
+  "personality test" went 256k -> 4.12M with CTR collapsing to 0.06% while mobile was untouched (a Google
+  SERP artifact, not anything CT did). Position was unaffected. Undiagnosed; worth its own look.
 - Scraping www.clearerthinking.org (Wix), verified 2026-09-16: metadata is front-loaded ONLY for a
   Googlebot UA; to any other client `<title>` sits ~127KB in, so read until the head is complete, never
   a fixed prefix. Wix 429s hard on bursts and the penalty outlives them (4 workers + 0.5s is safe).
@@ -118,6 +126,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   in this repo is a second copy of the same source. Both drift because Igor edits programs in the GT
   web editor after pushing (4 of 5 staged programs were behind live on 2026-09-11), so ALWAYS
   `gt pull` and diff before any push, or the push overwrites live edits.
+- "UPT - SEO Experiment" (id 31723, `a9ytpna`) is ANSWERED, do not re-run it for SEO: 3,443 Positly runs
+  over two waves genuinely produced clicks (+0.82 GSC clicks per run) but moved ranking zero at every lag,
+  and at 0.055% of impressions it never could. Its value is the 2,948 cold first impressions (58% positive,
+  18% "like every other personality test"). `seo_experiment_analysis.py` + report in `reports/`.
 - Run data: `GET /programs/{id}/exports?export_format=csv` returns all non-test runs incl.
   unfinished ones; `GET /programs/{id}/runs.json?page=N` is 25 per page (`per_page`/`limit` are
   ignored, iterate until empty) and includes test runs.
