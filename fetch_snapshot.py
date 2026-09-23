@@ -74,13 +74,13 @@ PERSONALITY_AMOUNTS = (900,)
 # weekly_advisor.py import these. After editing, the snapshot cron picks the change up on its
 # next run; to publish immediately, rewrite the manual_revenue block in snapshot.json via
 # manual_revenue_block() and push.
-MANUAL_REVENUE_LAST_UPDATED = "2026-09-11"
+MANUAL_REVENUE_LAST_UPDATED = "2026-09-23"
 MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
     "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00), ("Hive", 2_500.00)],
     "Affiliates": [("Kitted Decks", 230.00)],
     "Podcast sponsorships": [("ACE", 800.00)],
     "Newsletter Sponsorships": [("80,000 Hours", 4_200.00), ("Game Over (Jesse)", 3_000.00)],
-    "Beehiiv Ad Network": [("Beehiiv", 945.41)],
+    "Beehiiv Ad Network": [("Beehiiv", 1_102.91)],
 }
 
 
