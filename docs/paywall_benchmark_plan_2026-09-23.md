@@ -1,6 +1,6 @@
 # Plan: benchmarking Substack-style paywalled-post conversion (draft for Igor, 2026-09-23)
 
-Status: awaiting Igor's evaluation. Nothing below has been run yet beyond a source scan and the CT baseline pull.
+Status (2026-09-23): Igor chose to run the desk benchmark only, without the CT comparison. Delivered as reports/paywall_conversion_benchmark_2026-09-23.html (data and generator in reports/paywall_conversion_benchmark_2026-09-23_src/). Phases 2 to 4 below were not run.
 
 ## What "conversion of a paywalled post" can mean
 
