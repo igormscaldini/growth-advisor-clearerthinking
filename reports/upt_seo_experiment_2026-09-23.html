@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UPT SEO Experiment</title>
+<style>
+  :root{
+    color-scheme: light;
+    --page:#f9f9f7; --surface:#fcfcfb;
+    --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+    --rule:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,0.10);
+    --s1:#2a78d6; --s2:#eb6834; --neg:#e34948; --neutral:#b9b7ae;
+    --good:#0ca30c; --crit:#d03b3b;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --page:#0d0d0d; --surface:#1a1a19;
+      --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+      --rule:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,0.10);
+      --s1:#3987e5; --s2:#d95926; --neg:#e66767; --neutral:#6d6b64;
+      --good:#0ca30c; --crit:#d03b3b;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --page:#0d0d0d; --surface:#1a1a19;
+    --ink:#ffffff; --ink2:#c3c2b7; --muted:#898781;
+    --rule:#2c2c2a; --axis:#383835; --ring:rgba(255,255,255,0.10);
+    --s1:#3987e5; --s2:#d95926; --neg:#e66767; --neutral:#6d6b64;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--page); color:var(--ink);
+    font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:56px 16px 96px}
+  header{margin-bottom:44px}
+  h1{font-size:34px; line-height:1.2; letter-spacing:-0.02em; margin:0 0 10px; font-weight:650}
+  .sub{color:var(--muted); font-size:14px; margin:0}
+  .lede{font-size:18px; line-height:1.6; color:var(--ink2); margin:22px 0 0; max-width:66ch}
+  h2{font-size:13px; letter-spacing:0.09em; text-transform:uppercase; color:var(--muted);
+     font-weight:650; margin:0 0 18px; padding-top:20px; border-top:1px solid var(--rule)}
+  section{margin:52px 0 0}
+  h3{font-size:19px; margin:32px 0 10px; font-weight:620; letter-spacing:-0.01em}
+  p{margin:0 0 14px; max-width:68ch}
+  .card{background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:22px}
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:0 0 8px}
+  .tile{background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:16px 18px}
+  .tile .v{font-size:27px; font-weight:640; letter-spacing:-0.02em; line-height:1.15}
+  .tile .k{font-size:12.5px; color:var(--muted); margin-top:5px; line-height:1.4}
+  .tile .n{font-size:12px; color:var(--ink2); margin-top:7px; line-height:1.45}
+  .verdict{border-left:3px solid var(--s1); padding:4px 0 4px 18px; margin:20px 0; max-width:68ch}
+  .verdict.no{border-left-color:var(--neg)}
+  .verdict.yes{border-left-color:var(--good)}
+  .verdict > b{display:block; font-size:16px; margin-bottom:3px}
+  .verdict span{color:var(--ink2); font-size:15px}
+  figure{margin:24px 0 8px; background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:20px 18px 14px}
+  figcaption{font-size:13px; color:var(--muted); margin-top:12px; line-height:1.5}
+  .ftitle{font-size:15px; font-weight:600; margin:0 0 2px}
+  .fsub{font-size:13px; color:var(--muted); margin:0 0 14px}
+  svg{display:block; width:100%; height:auto; overflow:visible}
+  .lg{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--ink2); margin:0 0 12px}
+  .lg i{width:10px; height:10px; border-radius:2px; display:inline-block; margin-right:6px; vertical-align:-1px}
+  table{border-collapse:collapse; width:100%; font-size:14px; margin:6px 0 4px}
+  th,td{text-align:right; padding:9px 10px; border-bottom:1px solid var(--rule)}
+  th:first-child,td:first-child{text-align:left}
+  th{font-size:11.5px; letter-spacing:0.05em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  td.num{font-variant-numeric:tabular-nums}
+  tr:last-child td{border-bottom:none}
+  blockquote{margin:0; padding:13px 16px; background:var(--surface); border:1px solid var(--ring);
+             border-radius:10px; font-size:14.5px; color:var(--ink2); line-height:1.55}
+  blockquote:before{content:"\201C"; color:var(--muted)}
+  blockquote:after{content:"\201D"; color:var(--muted)}
+  .qs{display:grid; gap:10px; margin:14px 0 6px}
+  ul{margin:0 0 14px; padding-left:20px; max-width:68ch} li{margin:0 0 8px}
+  .rec{background:var(--surface); border:1px solid var(--ring); border-radius:12px; padding:18px 20px; margin:0 0 12px}
+  .rec b{display:block; font-size:16px; margin-bottom:5px}
+  .rec p{margin:0; font-size:14.5px; color:var(--ink2)}
+  .tag{display:inline-block; font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+       color:var(--muted); border:1px solid var(--ring); border-radius:99px; padding:2px 9px; margin-left:8px; vertical-align:2px}
+  code{font:13px ui-monospace,SFMono-Regular,Menlo,monospace; background:var(--surface);
+       border:1px solid var(--ring); border-radius:5px; padding:1px 5px}
+  .tt{position:fixed; pointer-events:none; opacity:0; transition:opacity .1s; background:var(--ink);
+      color:var(--page); font-size:12.5px; line-height:1.5; padding:7px 10px; border-radius:7px; z-index:50; white-space:nowrap}
+  .steps{counter-reset:s; list-style:none; padding:0; margin:14px 0}
+  .steps li{counter-increment:s; position:relative; padding-left:38px; margin-bottom:12px; max-width:68ch}
+  .steps li:before{content:counter(s); position:absolute; left:0; top:1px; width:24px; height:24px;
+      border-radius:50%; background:var(--surface); border:1px solid var(--ring); color:var(--ink2);
+      font-size:12.5px; font-weight:600; display:grid; place-items:center}
+  .foot{margin-top:60px; padding-top:20px; border-top:1px solid var(--rule); font-size:13px; color:var(--muted)}
+  @media (max-width:560px){ h1{font-size:27px} .wrap{padding:36px 16px 72px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Can you buy a Google ranking with real human clicks?</h1>
+  <p class="sub">GuidedTrack program 31723 &middot; &ldquo;UPT&nbsp;-&nbsp;SEO Experiment&rdquo; &middot; 3,443 runs, Feb 2025 &ndash; Sep 2026 &middot; 2026-09-23 10:28am</p>
+  <p class="lede">The experiment paid 2,928 people to Google <em>&ldquo;personality test&rdquo;</em>, hunt down the
+  Clearer Thinking result, click it and report their first impression. They did exactly that: each run
+  left roughly one real click in Search Console. The ranking never moved. What the experiment did buy,
+  almost by accident, is the single largest body of cold first impressions of the Ultimate Personality
+  Test that exists.</p>
+</header>
+
+<section>
+<h2>What the program actually does</h2>
+<p>It is a four-screen Positly task, not an A/B test. There is no randomisation, no control group and no
+variant: every participant sees the same instructions. The only recorded outcome is one free-text answer.</p>
+<ol class="steps">
+  <li><b>Google it.</b> Search the exact phrase <em>personality test</em>, then look through the first,
+      second or third page of results for the Clearer Thinking entry (shown as a screenshot of the SERP snippet).</li>
+  <li><b>Try it.</b> Open the test and answer the <em>first three questions only</em>, repeated three times
+      in the copy and capitalised for emphasis.</li>
+  <li><b>Report.</b> One paragraph question: <em>&ldquo;In a few words, what was your first impression of the
+      Personality Test?&rdquo;</em></li>
+  <li><b>Get paid.</b> A Positly completion link.</li>
+</ol>
+<p>The target is <code>programs.clearerthinking.org/personality-test.html</code>, titled
+&ldquo;Free Scientific Personality Test: Briggs-Myers, Big 5 &amp; More&rdquo;. Because participants reach it
+through a genuine Google search rather than a supplied link, every run leaves a fingerprint in Search
+Console. That fingerprint is what makes the rest of this analysis possible.</p>
+</section>
+
+<section>
+<h2>Participation</h2>
+<div class="tiles" id="tiles"></div>
+<p style="margin-top:16px">Two bursts separated by a six-month silence: Feb&ndash;Sep 2025 (2,549 runs) and
+Apr&ndash;Aug 2026 (893 runs). Nothing ran between October 2025 and March 2026, which turns out to be the
+most useful part of the dataset: it is a clean six-month control window.</p>
+
+<figure>
+  <p class="ftitle">Runs and ranking, month by month</p>
+  <p class="fsub">Two panels, one shared timeline. Search Console data begins May 2025, so the first three months of wave 1 have no ranking series.</p>
+  <div id="timeline"></div>
+  <figcaption>Average position is impression-weighted for the exact query &ldquo;personality test&rdquo;.
+  The shaded band marks the six months with zero runs.</figcaption>
+</figure>
+</section>
+
+<section>
+<h2>Question 1: did people really do the task?</h2>
+<div class="verdict yes">
+  <b>Yes. Each run produced about 0.8 real Google clicks.</b>
+  <span>Regressing daily Search Console clicks on the daily run count, controlling for impressions and
+  day of week: <b>+0.82 clicks per run</b> (95% CI 0.57 to 1.06, p&nbsp;=&nbsp;2&times;10<sup>-10</sup>, n&nbsp;=&nbsp;275 days).
+  The interval comfortably contains 1.0.</span>
+</div>
+<p>This is the compliance check, and it is unusually clean. Participants were never given a link, so the
+only way a click could appear is if someone genuinely searched, found the result and clicked it. A
+coefficient near 1.0 means roughly four out of five runs converted into a real search click; the shortfall
+is the people who gave up, mis-clicked or found the page another way.</p>
+<p>An independent and much simpler method agrees almost exactly. Comparing weekday run-days against
+weekday quiet-days (no regression at all) gives <b>+0.81 clicks per run</b>. Impressions were
+slightly <em>lower</em> on run-days, so the extra clicks are not an artefact of more traffic.</p>
+<div id="uplift-table"></div>
+</section>
+
+<section>
+<h2>Question 2: did those clicks move the ranking?</h2>
+<div class="verdict no">
+  <b>No. The effect is indistinguishable from zero at every lag tested.</b>
+  <span>Across lags of 0 to 28 days, every point estimate is slightly <em>positive</em> (a worse rank) and
+  every 95% interval straddles zero. At the 7-day lag, a 300-run month buys
+  <b>+0.90 positions</b> (95% CI &minus;1.07 to +2.88): the wrong sign, and the interval rules out any
+  gain larger than about one position.</span>
+</div>
+
+<figure>
+  <p class="ftitle">Effect of runs on ranking position, by lag</p>
+  <p class="fsub">Coefficient with 95% confidence interval. Negative would mean a better rank. Nothing clears zero.</p>
+  <div id="lagchart"></div>
+  <figcaption>OLS of daily average position on the run count <em>n</em> days earlier, controlling for
+  impressions and day of week, fitted on the 275 days inside the two active windows.</figcaption>
+</figure>
+
+<h3>The six-month gap says the same thing</h3>
+<p>If the clicks were propping up the ranking, position should have decayed once the runs stopped in
+October 2025. It did not.</p>
+<div id="periods-table"></div>
+<p style="margin-top:14px">Position was essentially flat across all three regimes: 7.92 while running,
+8.32 through six months of complete silence, 8.02 when running resumed. The apparent collapse in
+click-through rate during the gap is not a ranking story either, as the next section explains.</p>
+
+<h3>Why it was never going to work</h3>
+<p>The arithmetic was decisive before any statistics. Over wave 2, the experiment contributed 893 runs
+against 1.61&nbsp;million impressions for that query.</p>
+<div id="scale-table"></div>
+<p style="margin-top:14px">The experiment was <b>9.5% of the clicks but 0.055% of the impressions</b>.
+Whatever Google measures, it measures it against the whole population of searchers, and a 0.05% nudge is
+far below the noise floor of a query that swings by hundreds of thousands of impressions month to month.
+Detecting an effect this small would require orders of magnitude more participants than the budget allows.</p>
+</section>
+
+<section>
+<h2>An anomaly worth separating out</h2>
+<p>Between October 2025 and March 2026 impressions for this one query jumped roughly fivefold while clicks
+stayed flat, dragging measured CTR from 0.76% to 0.14%. That was <b>entirely desktop</b>: desktop
+impressions went from 256k to 4.12&nbsp;million over Oct&ndash;Nov while desktop CTR collapsed from 1.13% to
+<b>0.06%</b>. Mobile was untouched over the same window (613k to 653k impressions, CTR steady at 0.72%).</p>
+<p>This is a Google SERP or reporting change, not anything the experiment did, and it has nothing to do
+with the six-month pause coinciding with it. It matters here for one reason: any before-and-after CTR
+comparison spanning that window is meaningless. Both active windows sit outside it, so the estimates above
+are unaffected. It is worth a separate look on its own merits, though: 4.1 million desktop impressions at
+0.06% CTR is essentially phantom visibility.</p>
+</section>
+
+<section>
+<h2>What the experiment actually bought</h2>
+<p>2,948 unprompted first impressions from people who had just found the test cold in a search
+result, which is the closest thing available to an organic visitor. Answers were coded into themes with a
+rule-based coder; on a 50-answer sample I read and coded by hand it agrees 98% of the time.</p>
+
+<figure>
+  <p class="ftitle">What people mentioned</p>
+  <p class="fsub">Share of the 2,948 answers touching each theme. Answers can carry several.</p>
+  <div id="themes"></div>
+</figure>
+
+<figure>
+  <p class="ftitle">Overall tone</p>
+  <p class="fsub">Polarity of each answer, n = 2,948.</p>
+  <div id="sentiment"></div>
+</figure>
+
+<h3>The good news: the first three questions land</h3>
+<p>A third of all answers reach for <em>easy</em>, <em>simple</em> or <em>straightforward</em>, and a fifth
+say <em>interesting</em> or <em>engaging</em>. Several volunteer that they wanted to keep going, which is
+exactly the reaction the opening of a long test needs to produce.</p>
+<div class="qs" id="q-easy"></div>
+
+<h3>The problem: one in five says it looks like everything else</h3>
+<p><b>18.1% of answers</b> (534 people) describe the test as generic, standard, typical or
+&ldquo;like every other personality test&rdquo;. Only a quarter of those were positive overall. This is the
+clearest, most actionable finding in the dataset: at the moment of first contact, the thing CT believes
+differentiates this test (Jungian plus Enneagram plus Big Five in one scientifically-grounded
+report) is not reaching the person taking it.</p>
+<div class="qs" id="q-generic"></div>
+<p>The mechanism is visible in the answers: the first three questions are ordinary agree/disagree
+personality items, indistinguishable from any free quiz. Whatever makes the test different arrives later,
+after the point where a cold visitor has already decided what kind of site this is.</p>
+
+<h3>A small but sharp trust problem</h3>
+<p>2.2% raise trust concerns unprompted: ads, a suspected paywall, or what happens to their email.
+The number is small, but these are people who have not yet been asked for anything.</p>
+<div class="qs" id="q-skeptical"></div>
+</section>
+
+<section>
+<h2>Two flaws in the instrument</h2>
+<div class="rec">
+  <b>It never asks the one question it was designed to answer <span class="tag">design</span></b>
+  <p>Participants are told to look through the first, second or third page of results, an explicit
+  admission that finding the result is the hard part, and then are never asked whether they found it,
+  where, or how long it took. There is no <em>&ldquo;which page was it on?&rdquo;</em>, no
+  <em>&ldquo;how many results did you scroll past?&rdquo;</em>. The findability data the design implies it is
+  collecting simply is not collected. Median completion was 2.3 minutes, which tells us the task was not
+  onerous, but nothing about the search itself.</p>
+</div>
+<div class="rec">
+  <b>The sample is 92% desktop; the real audience is 63% mobile <span class="tag">sampling</span></b>
+  <p>Positly panellists work on computers: 92.4% of runs were desktop, 6.7% smartphone. Real search traffic
+  for this query is the mirror image: 63.0% mobile against 35.1% desktop. Every first impression in
+  this dataset is of the desktop experience, which is the minority experience. The mobile first impression,
+  which is what most real visitors get, is unmeasured. The sample is also 100% US, against 56% of real
+  impressions.</p>
+</div>
+</section>
+
+<section>
+<h2>What I would do next</h2>
+<div class="rec">
+  <b>1. Stop running it as an SEO experiment <span class="tag">high confidence</span></b>
+  <p>The ranking hypothesis is answered: no detectable effect, and the scale arithmetic says none was
+  possible. Further runs under this design buy nothing on that question. Roughly 2,600 paid runs went into
+  answering it; that is enough.</p>
+</div>
+<div class="rec">
+  <b>2. Re-run it as a first-impression instrument, on mobile <span class="tag">high value</span></b>
+  <p>The qualitative return is genuinely valuable and cheap. Recruit for smartphone, and add the questions
+  the current version is missing: which result page it was on, whether anything made them hesitate, and what
+  they expected to get. A few hundred mobile runs would be more informative than the 2,549 desktop runs of
+  wave 1.</p>
+</div>
+<div class="rec">
+  <b>3. Treat &ldquo;generic&rdquo; as the conversion problem it is <span class="tag">actionable</span></b>
+  <p>One in five cold visitors classifies the test as interchangeable within three questions. That is a
+  first-screen copy and sequencing problem, not a ranking problem. The differentiators need to appear
+  before or during the opening questions, not in the results. This is testable directly on live traffic,
+  with far more statistical power than any panel.</p>
+</div>
+<div class="rec">
+  <b>4. Point the SEO effort at the desktop impression anomaly instead <span class="tag">investigate</span></b>
+  <p>4.1 million desktop impressions at 0.06% CTR over two months is a far larger lever than anything a
+  panel could move, and nobody appears to have looked at what changed. Worth its own diagnosis.</p>
+</div>
+<div class="rec">
+  <b>5. Fix the stale URL in the tools index <span class="tag">housekeeping</span></b>
+  <p><code>CT_TOOLS.md</code> lists the test as <code>personality.html</code>. That URL still works for a
+  human (it 301-redirects), but the canonical page that ranks and carries the traffic is
+  <code>personality-test.html</code>, and Search Console reports only against the canonical. Querying the
+  listed URL returns essentially zero impressions, so any analysis keyed on it finds nothing and gives no
+  hint that it is looking in the wrong place. This cost me a detour in this analysis.</p>
+</div>
+</section>
+
+<section>
+<h2>Method and caveats</h2>
+<ul>
+  <li><b>Sources.</b> GuidedTrack CSV export for program 31723 (all non-test runs, including unfinished
+      ones), and the Search Console <code>sc-domain:clearerthinking.org</code> property, filtered to the
+      exact query and the target page.</li>
+  <li><b>Windows.</b> Estimates are fitted only on the 275 days inside the two active windows
+      (Jun&ndash;Sep 2025 and Apr&ndash;Aug 2026), both outside the desktop-impression anomaly.</li>
+  <li><b>Search Console retention is 16 months</b>, so the first three months of wave 1
+      (Feb&ndash;Apr 2025, 856 runs) have no matching ranking data and are excluded from the estimates
+      though not from the participation counts.</li>
+  <li><b>Confounding.</b> Runs cluster on weekdays and weekday traffic is heavier, which on its own would
+      manufacture a click effect; day-of-week is therefore a control, and a test asserts that the
+      uncontrolled version does find a spurious effect where the controlled one does not.</li>
+  <li><b>Not an A/B test.</b> There is no control group inside the program, so every ranking claim rests on
+      time-series comparison and inherits its weaknesses. The null result is the robust part; a true effect
+      smaller than roughly one position per 300-run month would not be detectable here.</li>
+  <li><b>Text coding is rule-based</b>, not a language model: reproducible and unit-tested, but blunt.
+      Validated at 98% exact agreement against 50 answers hand-coded from a random sample.</li>
+  <li><b>Code.</b> <code>seo_experiment_analysis.py</code>, with 65 tests in
+      <code>tests/test_seo_experiment_analysis.py</code> covering hand-computed cases and synthetic
+      null/positive datasets.</li>
+</ul>
+</section>
+
+<p class="foot">Generated 2026-09-23 10:28am &middot; Growth Advisor, Clearer Thinking</p>
+</div>
+
+<div class="tt" id="tt"></div>
+<script>
+const D = {"overview": {"runs": 3443, "finished": 2949, "answered": 2948, "participants": 2928, "repeat_participants": 449, "first_run": "2025-02-24", "last_run": "2026-09-23", "median_minutes": 2.32, "p90_minutes": 4.62, "answer_rate": 85.62300319488818}, "waves": [{"label": "Wave 1", "runs": 2549, "answered": 2170, "answer_rate": 85.13142408787759, "median_minutes": 2.13, "start": "2025-02-24", "end": "2025-09-20"}, {"label": "Wave 2", "runs": 894, "answered": 778, "answer_rate": 87.02460850111858, "median_minutes": 2.03, "start": "2026-04-16", "end": "2026-09-23"}], "monthly": [{"month": "2025-02", "runs": 136, "position": null, "clicks": 0, "impressions": 0}, {"month": "2025-03", "runs": 479, "position": null, "clicks": 0, "impressions": 0}, {"month": "2025-04", "runs": 241, "position": null, "clicks": 0, "impressions": 0}, {"month": "2025-05", "runs": 0, "position": 11.83, "clicks": 94, "impressions": 12141}, {"month": "2025-06", "runs": 653, "position": 10.35, "clicks": 845, "impressions": 171867}, {"month": "2025-07", "runs": 401, "position": 8.31, "clicks": 2100, "impressions": 325630}, {"month": "2025-08", "runs": 379, "position": 7.36, "clicks": 3286, "impressions": 408696}, {"month": "2025-09", "runs": 260, "position": 7.26, "clicks": 4274, "impressions": 480016}, {"month": "2025-10", "runs": 0, "position": 7.81, "clicks": 4113, "impressions": 2235151}, {"month": "2025-11", "runs": 0, "position": 7.9, "clicks": 3544, "impressions": 2559358}, {"month": "2025-12", "runs": 0, "position": 7.55, "clicks": 3137, "impressions": 1904795}, {"month": "2026-01", "runs": 0, "position": 9.1, "clicks": 2189, "impressions": 1520099}, {"month": "2026-02", "runs": 0, "position": 9.38, "clicks": 1252, "impressions": 1602202}, {"month": "2026-03", "runs": 0, "position": 9.01, "clicks": 1031, "impressions": 1139860}, {"month": "2026-04", "runs": 173, "position": 8.77, "clicks": 1735, "impressions": 389765}, {"month": "2026-05", "runs": 270, "position": 7.43, "clicks": 2893, "impressions": 299777}, {"month": "2026-06", "runs": 238, "position": 7.66, "clicks": 2124, "impressions": 306691}, {"month": "2026-07", "runs": 136, "position": 8.35, "clicks": 1173, "impressions": 293755}, {"month": "2026-08", "runs": 76, "position": 7.72, "clicks": 1483, "impressions": 324283}, {"month": "2026-09", "runs": 1, "position": 8.41, "clicks": 739, "impressions": 155636}], "click_uplift": {"both": {"coef": 0.81679237407501, "ci_low": 0.5729397546055199, "ci_high": 1.0606449935445001, "p_value": 2.2823350267344836e-10, "n": 275, "r_squared": 0.5068851953274929}, "wave1": {"coef": 0.7159117050730595, "ci_low": 0.45602385973593107, "ci_high": 0.9757995504101878, "p_value": 2.889751032358965e-07, "n": 122, "r_squared": 0.7478188426692078}, "wave2": {"coef": 0.8689088000914489, "ci_low": 0.44132795332417757, "ci_high": 1.2964896468587201, "p_value": 9.468624188942015e-05, "n": 153, "r_squared": 0.2942086353400908}}, "click_uplift_nocontrol": {"coef": 0.5555731070121134, "ci_low": 0.22914287555004037, "ci_high": 0.8820033384741863, "p_value": 0.0009199820657611488, "n": 275, "r_squared": 0.03949953666521422}, "position_lags": [{"lag": 0, "coef": 5.8543317095725855e-06, "ci_low": -0.006599496722056675, "ci_high": 0.00661120538547582, "p_value": 0.9986089534129737, "n": 275, "r_squared": 0.41543400927251983}, {"lag": 1, "coef": 0.0003477757186012044, "ci_low": -0.006250479917281671, "ci_high": 0.00694603135448408, "p_value": 0.9174238516276954, "n": 274, "r_squared": 0.40575618195508756}, {"lag": 2, "coef": 0.004134774046492665, "ci_low": -0.002451169655387212, "ci_high": 0.010720717748372542, "p_value": 0.21749494759231394, "n": 273, "r_squared": 0.4004158588480463}, {"lag": 3, "coef": 0.005313182029337879, "ci_low": -0.0012313322182362198, "ci_high": 0.011857696276911977, "p_value": 0.1111194262295092, "n": 272, "r_squared": 0.3957770987914482}, {"lag": 5, "coef": 0.0029051054585998194, "ci_low": -0.003640472091808603, "ci_high": 0.009450683009008242, "p_value": 0.38295551788886006, "n": 270, "r_squared": 0.3726677898501214}, {"lag": 7, "coef": 0.003008958355261677, "ci_low": -0.0035787505949673084, "ci_high": 0.009596667305490662, "p_value": 0.3692628283706777, "n": 268, "r_squared": 0.36834098329571807}, {"lag": 10, "coef": 0.004373157807033167, "ci_low": -0.002186598398760055, "ci_high": 0.010932914012826388, "p_value": 0.19041072054191652, "n": 265, "r_squared": 0.35070597770216105}, {"lag": 14, "coef": 0.002166448359700862, "ci_low": -0.0044207157166385996, "ci_high": 0.008753612436040323, "p_value": 0.5177543611872522, "n": 261, "r_squared": 0.32287389820507517}, {"lag": 21, "coef": 0.004281324690769542, "ci_low": -0.0022099383477299436, "ci_high": 0.010772587729269027, "p_value": 0.195125586021152, "n": 254, "r_squared": 0.28532835942548296}, {"lag": 28, "coef": 0.0013673766418251312, "ci_low": -0.004872330751820677, "ci_high": 0.00760708403547094, "p_value": 0.6663473652892096, "n": 247, "r_squared": 0.27055712489680006}], "simple_check": {"run_days": 122, "quiet_days": 74, "mean_runs": 17.60655737704918, "clicks_run": 79.90983606557377, "clicks_quiet": 65.72972972972973, "impr_run": 10734.040983606557, "impr_quiet": 11704.324324324325, "per_run": 0.8053877900246617, "pos_run": 8.350654751256489, "pos_quiet": 8.142281067279868}, "periods": [{"label": "Wave 1 active", "runs": 1693, "position": 7.92, "clicks": 10505, "impressions": 1386209, "ctr": 0.758}, {"label": "Gap (no runs)", "runs": 0, "position": 8.32, "clicks": 15266, "impressions": 10961465, "ctr": 0.139}, {"label": "Wave 2 active", "runs": 893, "position": 8.02, "clicks": 9408, "impressions": 1614271, "ctr": 0.583}], "scale": [{"label": "Wave 1", "runs": 1693, "clicks": 10505, "impressions": 1386209, "pct_clicks": 16.1, "pct_impressions": 0.1221}, {"label": "Wave 2", "runs": 893, "clicks": 9408, "impressions": 1614271, "pct_clicks": 9.5, "pct_impressions": 0.0553}], "themes": [{"key": "easy", "label": "Easy / simple / straightforward", "pct": 33.2, "n": 978, "w1": 32.1, "w2": 36.2}, {"key": "interesting", "label": "Interesting / engaging / fun", "pct": 21.0, "n": 620, "w1": 22.4, "w2": 17.2}, {"key": "generic", "label": "Generic: \u201clike every other test\u201d", "pct": 18.1, "n": 534, "w1": 18.0, "w2": 18.5}, {"key": "depth_accuracy", "label": "Thorough / accurate / scientific", "pct": 8.0, "n": 235, "w1": 7.9, "w2": 8.2}, {"key": "design_visual", "label": "Design & layout", "pct": 5.5, "n": 162, "w1": 5.5, "w2": 5.4}, {"key": "skeptical", "label": "Skeptical (ads, paywall, data)", "pct": 2.2, "n": 65, "w1": 2.2, "w2": 2.2}, {"key": "confusing", "label": "Confusing / limited options", "pct": 1.9, "n": 57, "w1": 1.8, "w2": 2.2}, {"key": "length_concern", "label": "Too long / slow", "pct": 1.1, "n": 32, "w1": 1.2, "w2": 0.9}], "sentiment": {"positive": 58.4, "neutral": 35.0, "negative": 6.6, "n": 2948}, "generic_detail": {"n": 534, "pct": 18.1, "neg": 16, "neu": 59, "pos": 25}, "demo": {"country": {"United States": 3435}, "device": {"desktop": 92.4, "smartphone": 6.7, "tablet": 0.9}, "gender": {"female": 56.4, "male": 42.8, "other": 0.8}, "age_median": 41.0, "age_q1": 34.0, "age_q3": 51.0}, "real_traffic": {"mobile": 63.0, "desktop": 35.1, "tablet": 1.9, "us_share": 56.3}, "quotes": {"generic": ["I thought it was asking generic questions about personality but I assume with a lengthy test it would be enough to learn something about a person.", "Generic garbage.", "Nothing seems to be out of the ordinary, it appears to be a normal generalized test to gauge your feelings about general scenarios."], "easy": ["i thought it was well-organized, and simple to navigate through.", "very easy to answer since you just choose an answer that is applicable", "Seemed as if it would be easy to take--the questions were straight forward and I just have to make choices."], "interesting": ["It seemed fine, I'd continue taking it for fun.", "It seems interesting, the questions feel relevant, and I feel like I want to continue answering questions so I can find out my personality.", "Simple, kind of fun, and I wanted to keep taking the test."], "skeptical": ["click bait and generic.", "It asks questions about workaholic, nervousness, and party mingling. The way the website is setup seems a little bit sketchy but otherwise seems okay", "I didn't like the front page having AI art as it made the site feel a little sketchy and cheap- I usually get that impression from AI generated art."], "confusing": ["I was confused about it showing all the images at first. I didn't know if I had to pick one.", "It felt a bit repetitive at times, but it was genuinely more insightful than I had expected.", "I liked the questions, but I thought there were a few too many answer choices (7 for each question)."]}};
+const $ = s => document.querySelector(s);
+const tt = $('#tt');
+const fmt = n => n.toLocaleString('en-US');
+function hover(el, html){
+  el.addEventListener('mousemove', e => {
+    tt.innerHTML = html; tt.style.opacity = 1;
+    let x = e.clientX + 14, y = e.clientY - 12;
+    if (x + tt.offsetWidth > innerWidth - 8) x = e.clientX - tt.offsetWidth - 14;
+    tt.style.left = x + 'px'; tt.style.top = y + 'px';
+  });
+  el.addEventListener('mouseleave', () => tt.style.opacity = 0);
+}
+const NS = 'http://www.w3.org/2000/svg';
+function el(n, a){ const e = document.createElementNS(NS, n); for(const k in a) e.setAttribute(k, a[k]); return e; }
+function txt(x, y, s, o){ const t = el('text', Object.assign({x, y}, o||{})); t.textContent = s; return t; }
+
+/* ---------- tiles ---------- */
+(function(){
+  const o = D.overview;
+  const t = [
+    ['3,443', 'runs recorded', o.first_run + ' to ' + o.last_run],
+    ['2,928', 'unique participants', o.repeat_participants + ' came back more than once'],
+    [o.answered.toLocaleString(), 'wrote an impression', o.answer_rate.toFixed(0) + '% of runs'],
+    [o.median_minutes.toFixed(1) + ' min', 'median time on task', '90th percentile ' + o.p90_minutes.toFixed(1) + ' min'],
+  ];
+  $('#tiles').innerHTML = t.map(r =>
+    '<div class="tile"><div class="v">' + r[0] + '</div><div class="k">' + r[1] + '</div><div class="n">' + r[2] + '</div></div>').join('');
+})();
+
+/* ---------- timeline: two stacked panels, shared x ---------- */
+(function(){
+  const m = D.monthly, W = 860, L = 52, R = 14;
+  const hA = 120, hB = 120, gap = 46, H = hA + gap + hB + 54;
+  const iw = W - L - R, bw = iw / m.length;
+  const svg = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
+    'aria-label': 'Monthly experiment runs and average Google position'});
+
+  const maxRuns = Math.max(...m.map(d => d.runs));
+  const pos = m.filter(d => d.position != null);
+  const pMin = Math.min(...pos.map(d => d.position)), pMax = Math.max(...pos.map(d => d.position));
+  const lo = Math.floor(pMin - 0.4), hi = Math.ceil(pMax + 0.4);
+
+  // gap shading behind both panels
+  const gi = m.findIndex(d => d.month === '2025-10'), ge = m.findIndex(d => d.month === '2026-04');
+  if (gi >= 0 && ge > gi){
+    svg.appendChild(el('rect', {x: L + gi*bw, y: 0, width: (ge-gi)*bw, height: hA + gap + hB,
+      fill: 'var(--ink)', opacity: 0.035}));
+    svg.appendChild(txt(L + (gi + (ge-gi)/2)*bw, 12, 'no runs', {'text-anchor':'middle','font-size':11,fill:'var(--muted)'}));
+  }
+
+  // panel A: runs
+  svg.appendChild(txt(L, 16, 'Runs per month', {'font-size':12,'font-weight':600,fill:'var(--ink2)'}));
+  const aTop = 24, aBot = hA;
+  [0, maxRuns].forEach(v => {
+    const y = aBot - (v/maxRuns) * (aBot - aTop);
+    svg.appendChild(txt(L - 8, y + 4, fmt(v), {'text-anchor':'end','font-size':11,fill:'var(--muted)'}));
+  });
+  svg.appendChild(el('line', {x1: L, y1: aBot, x2: W - R, y2: aBot, stroke: 'var(--axis)', 'stroke-width': 1}));
+  m.forEach((d, i) => {
+    if (!d.runs) return;
+    const h = (d.runs/maxRuns) * (aBot - aTop);
+    const r = el('rect', {x: L + i*bw + 2, y: aBot - h, width: Math.max(bw - 4, 2), height: h,
+      fill: 'var(--s1)', rx: 3});
+    hover(r, '<b>' + d.month + '</b><br>' + fmt(d.runs) + ' runs');
+    svg.appendChild(r);
+  });
+
+  // panel B: position (inverted: lower number is a better rank, so it sits higher)
+  const bTop = hA + gap, bBot = bTop + hB;
+  svg.appendChild(txt(L, bTop - 10, 'Average Google position for “personality test”',
+    {'font-size':12,'font-weight':600,fill:'var(--ink2)'}));
+  const py = v => bTop + ((v - lo)/(hi - lo)) * (bBot - bTop);
+  [lo, (lo+hi)/2, hi].forEach(v => {
+    svg.appendChild(txt(L - 8, py(v) + 4, v.toFixed(1), {'text-anchor':'end','font-size':11,fill:'var(--muted)'}));
+  });
+  svg.appendChild(txt(L - 40, bTop + (bBot-bTop)/2, 'better', {'text-anchor':'middle','font-size':10.5,
+    fill:'var(--muted)', transform: 'rotate(-90 ' + (L-40) + ' ' + (bTop + (bBot-bTop)/2) + ')'}));
+  svg.appendChild(el('line', {x1: L, y1: bBot, x2: W - R, y2: bBot, stroke: 'var(--axis)', 'stroke-width': 1}));
+
+  let dPath = '', started = false;
+  m.forEach((d, i) => {
+    if (d.position == null){ started = false; return; }
+    const x = L + i*bw + bw/2, y = py(d.position);
+    dPath += (started ? ' L' : ' M') + x + ' ' + y; started = true;
+  });
+  svg.appendChild(el('path', {d: dPath.trim(), fill: 'none', stroke: 'var(--s2)', 'stroke-width': 2,
+    'stroke-linejoin': 'round', 'stroke-linecap': 'round'}));
+  m.forEach((d, i) => {
+    if (d.position == null) return;
+    const x = L + i*bw + bw/2, y = py(d.position);
+    svg.appendChild(el('circle', {cx: x, cy: y, r: 4.5, fill: 'var(--s2)',
+      stroke: 'var(--surface)', 'stroke-width': 2}));
+    const hit = el('circle', {cx: x, cy: y, r: 13, fill: 'transparent'});
+    hover(hit, '<b>' + d.month + '</b><br>position ' + d.position.toFixed(2) +
+      '<br>' + fmt(d.clicks) + ' clicks · ' + fmt(d.impressions) + ' impressions' +
+      (d.runs ? '<br>' + fmt(d.runs) + ' runs' : ''));
+    svg.appendChild(hit);
+  });
+
+  // x labels: every 3rd month, angled clear of the axis
+  m.forEach((d, i) => {
+    if (i % 3) return;
+    svg.appendChild(txt(L + i*bw + bw/2, bBot + 18, d.month,
+      {'text-anchor':'end','font-size':11,fill:'var(--muted)',
+       transform:'rotate(-40 ' + (L + i*bw + bw/2) + ' ' + (bBot + 18) + ')'}));
+  });
+  $('#timeline').appendChild(svg);
+})();
+
+/* ---------- lag coefficient chart ---------- */
+(function(){
+  const g = D.position_lags, W = 860, L = 60, R = 120, T = 20, H = 300;
+  const iw = W - L - R, ih = H - T - 40;
+  const lo = Math.min(...g.map(d => d.ci_low)), hi = Math.max(...g.map(d => d.ci_high));
+  const pad = (hi - lo) * 0.08, xlo = lo - pad, xhi = hi + pad;
+  const X = v => L + ((v - xlo)/(xhi - xlo)) * iw;
+  const Y = i => T + 14 + i * (ih / g.length);
+  const svg = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img',
+    'aria-label': 'Estimated effect of runs on ranking position by lag, with confidence intervals'});
+
+  svg.appendChild(el('line', {x1: X(0), y1: T, x2: X(0), y2: T + ih + 6,
+    stroke: 'var(--axis)', 'stroke-width': 1.5, 'stroke-dasharray': '3 3'}));
+  svg.appendChild(txt(X(0), T + ih + 24, 'no effect', {'text-anchor':'middle','font-size':11,fill:'var(--muted)'}));
+  svg.appendChild(txt(L, T + ih + 24, '← better rank', {'font-size':11,fill:'var(--muted)'}));
+  svg.appendChild(txt(L + iw, T + ih + 24, 'worse rank →', {'text-anchor':'end','font-size':11,fill:'var(--muted)'}));
+
+  g.forEach((d, i) => {
+    const y = Y(i);
+    svg.appendChild(txt(L - 12, y + 4, d.lag + 'd', {'text-anchor':'end','font-size':11.5,fill:'var(--muted)'}));
+    svg.appendChild(el('line', {x1: X(d.ci_low), y1: y, x2: X(d.ci_high), y2: y,
+      stroke: 'var(--s1)', 'stroke-width': 2, opacity: 0.32, 'stroke-linecap': 'round'}));
+    const c = el('circle', {cx: X(d.coef), cy: y, r: 5, fill: 'var(--s1)',
+      stroke: 'var(--surface)', 'stroke-width': 2});
+    svg.appendChild(c);
+    const hit = el('circle', {cx: X(d.coef), cy: y, r: 14, fill: 'transparent'});
+    hover(hit, '<b>lag ' + d.lag + ' days</b><br>coefficient ' + d.coef.toFixed(5) +
+      '<br>95% CI ' + d.ci_low.toFixed(5) + ' to ' + d.ci_high.toFixed(5) + '<br>p = ' + d.p_value.toFixed(3));
+    svg.appendChild(hit);
+    svg.appendChild(txt(L + iw + 12, y + 4, 'p = ' + d.p_value.toFixed(2),
+      {'font-size':11,fill:'var(--muted)'}));
+  });
+  svg.appendChild(txt(L - 12, T, 'lag', {'text-anchor':'end','font-size':11,fill:'var(--muted)'}));
+  $('#lagchart').appendChild(svg);
+})();
+
+/* ---------- themes ---------- */
+(function(){
+  const t = D.themes, W = 860, L = 250, R = 56, H = t.length * 38 + 16;
+  const iw = W - L - R, max = Math.max(...t.map(d => d.pct));
+  const svg = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Share of answers by theme'});
+  t.forEach((d, i) => {
+    const y = i * 38 + 12, w = (d.pct/max) * iw;
+    svg.appendChild(txt(L - 14, y + 15, d.label, {'text-anchor':'end','font-size':13,fill:'var(--ink2)'}));
+    const r = el('rect', {x: L, y: y, width: Math.max(w, 2), height: 21, rx: 4, fill: 'var(--s1)'});
+    hover(r, '<b>' + d.label + '</b><br>' + d.pct + '% of answers (' + fmt(d.n) + ')<br>wave 1 ' + d.w1 + '% · wave 2 ' + d.w2 + '%');
+    svg.appendChild(r);
+    svg.appendChild(txt(L + Math.max(w, 2) + 10, y + 15, d.pct.toFixed(1) + '%',
+      {'font-size':12.5,fill:'var(--ink2)','font-weight':600}));
+  });
+  $('#themes').appendChild(svg);
+})();
+
+/* ---------- sentiment: one diverging stacked bar ---------- */
+(function(){
+  const s = D.sentiment, W = 860, H = 72, L = 0, iw = W;
+  const svg = el('svg', {viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Sentiment split of answers'});
+  const parts = [
+    ['Positive', s.positive, 'var(--s1)'],
+    ['Neutral / descriptive', s.neutral, 'var(--neutral)'],
+    ['Negative', s.negative, 'var(--neg)'],
+  ];
+  let x = 0;
+  parts.forEach(p => {
+    const w = (p[1]/100) * iw - 2;
+    const r = el('rect', {x: x, y: 26, width: Math.max(w, 2), height: 34, rx: 4, fill: p[2]});
+    hover(r, '<b>' + p[0] + '</b><br>' + p[1] + '% (' + fmt(Math.round(s.n * p[1]/100)) + ' answers)');
+    svg.appendChild(r);
+    if (p[1] > 5){
+      svg.appendChild(txt(x + 10, 48, p[1] + '%', {'font-size':13,'font-weight':650,fill:'var(--page)'}));
+    }
+    svg.appendChild(txt(x, 18, p[0], {'font-size':12,fill:'var(--muted)'}));
+    x += w + 2;
+  });
+  $('#sentiment').appendChild(svg);
+})();
+
+/* ---------- tables ---------- */
+function table(sel, head, rows){
+  $(sel).innerHTML = '<table><thead><tr>' + head.map(h => '<th>' + h + '</th>').join('') +
+    '</tr></thead><tbody>' + rows.map(r => '<tr>' + r.map((c, i) =>
+      '<td' + (i ? ' class="num"' : '') + '>' + c + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+}
+(function(){
+  const u = D.click_uplift, c = D.simple_check;
+  table('#uplift-table', ['Estimate', 'Clicks per run', '95% CI', 'p'], [
+    ['Both waves (regression)', u.both.coef.toFixed(2), u.both.ci_low.toFixed(2) + ' to ' + u.both.ci_high.toFixed(2), u.both.p_value.toExponential(1)],
+    ['Wave 1 only', u.wave1.coef.toFixed(2), u.wave1.ci_low.toFixed(2) + ' to ' + u.wave1.ci_high.toFixed(2), u.wave1.p_value.toExponential(1)],
+    ['Wave 2 only', u.wave2.coef.toFixed(2), u.wave2.ci_low.toFixed(2) + ' to ' + u.wave2.ci_high.toFixed(2), u.wave2.p_value.toExponential(1)],
+    ['Weekday difference in means', c.per_run.toFixed(2), 'n/a', 'n/a'],
+  ]);
+  table('#periods-table', ['Period', 'Runs', 'Avg position', 'Clicks', 'Impressions', 'CTR'],
+    D.periods.map(p => [p.label, fmt(p.runs), p.position.toFixed(2), fmt(p.clicks), fmt(p.impressions), p.ctr + '%']));
+  table('#scale-table', ['Wave', 'Runs', 'GSC clicks', 'Runs as % of clicks', 'Impressions', 'Runs as % of impressions'],
+    D.scale.map(p => [p.label, fmt(p.runs), fmt(p.clicks), p.pct_clicks + '%', fmt(p.impressions), p.pct_impressions + '%']));
+})();
+
+/* ---------- quotes ---------- */
+(function(){
+  const Q = {
+    '#q-easy': [
+      'i thought it was well-organized, and simple to navigate through.',
+      'It seems interesting, the questions feel relevant, and I feel like I want to continue answering questions so I can find out my personality.',
+      'Simple, kind of fun, and I wanted to keep taking the test.'
+    ],
+    '#q-generic': [
+      'It seemed like any other personality test I’ve ever taken',
+      'it seems like your standard personality test',
+      'They seemed to be fairly generic questions for this sort of thing.',
+      'It seems like any other personality test. For all I know, it could be copy-pasted from somewhere else. It is nothing special.'
+    ],
+    '#q-skeptical': [
+      'seems easy to use and understand However I am skepticism from random links and always expecting it to eventually ask for money or PII',
+      'I didn’t like the front page having AI art as it made the site feel a little sketchy and cheap- I usually get that impression from AI generated art.',
+      'It appears easy to read. I wonder if it will ask for my information before giving me the results if I were to complete it.'
+    ]
+  };
+  for (const k in Q) $(k).innerHTML = Q[k].map(q => '<blockquote>' + q + '</blockquote>').join('');
+})();
+</script>
+</body>
+</html>
