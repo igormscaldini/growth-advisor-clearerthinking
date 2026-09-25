@@ -60,6 +60,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   performance labels (judge on metrics), `DURING LAST_90_DAYS` is invalid (use explicit dates), `change_event`
   allows at most a 30-day window, `campaign_asset`/`performance_max_placement_view` queries must SELECT
   `campaign.id`.
+- `reports/newsletter_send_strategy_2026-09-25_src/`: beehiiv send-strategy analysis (`fetch_data.py` ->
+  `data/`, `analysis.py` -> `datapoints.json`, `build_report.py` -> the HTML; tests in `tests/`). beehiiv
+  `publish_date` is UTC and the GA4 property clock is US Eastern. Per-ISP stats and A/B-test results are
+  only in the beehiiv UI / MCP connector, not the v2 API; `unique_verified_clicks` is the bot-filtered count.
+  Key finding (Aug 2026 split test): the same email got 31% Gmail opens from ohi.clearerthinking.net vs 5%
+  from info@clearerthinking.net, so check the sending domain's Gmail reputation first when open rates move.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
