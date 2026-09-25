@@ -3,7 +3,7 @@
 /*
  * Three audience personas for Clearer Thinking, synthesized from:
  *  - the March 2026 audience survey (~540 respondents; 160 to 190 answers per question)
- *  - the coaching-interest survey (276 respondents, Aug 2026)
+ *  - the coaching-interest survey (276 runs, Jul to Nov 2024; GuidedTrack program 29944)
  *  - the Paths quiz export (20,201 runs, 2023 to 2026)
  *  - the cross-source buyer/engagement profile (Stripe + beehiiv + GA4, Jun 2026)
  *  - the Communication and Content Writing Guidelines
@@ -36,12 +36,12 @@ const PERSONAS: Persona[] = [
       "Politically mixed: about six in ten lean progressive, but a real conservative minority reads too, so neutrality is not optional.",
     ],
     wants: [
-      "Top goals: become a better version of myself (55%), get better at figuring out the truth on complex issues (45%), improve mental health (41%), become a better decision maker (34%).",
-      "Favourite formats: personal assessments (68%) and thinking-skill developers (66%), then topic quizzes and interpersonal-skill tools.",
+      "Top goals: become a better version of myself (55%), get better at figuring out the truth on complex issues (45%), improve mental health (39%), become a better decision maker (35%).",
+      "Favourite formats: personal assessments (68%) and thinking-skill developers (68%), then topic quizzes and interpersonal-skill tools.",
       "Weekly email cadence (48%), short practical insights; One Helpful Idea and the interactive tools tie as the most valued products.",
     ],
     blockers: [
-      "Procrastination (51%), lack of motivation (40%), poor focus (38%), time management (38%). Ambition is not the problem; follow-through is.",
+      "Procrastination (52%), poor focus (40%), lack of motivation (39%), time management (39%). Ambition is not the problem; follow-through is.",
       "Trust wobbles when sourcing is thin or a tool feels like a slow, dated flow next to modern AI products.",
     ],
     path: [
@@ -64,7 +64,7 @@ const PERSONAS: Persona[] = [
     share: "A vocal minority, about a quarter to a third of respondents, over-represented among CT+ members, podcast listeners and sharers",
     color: "border-t-blue-600 dark:border-t-blue-400",
     who: [
-      "Rationalist or aspiring to be one (34%), Effective Altruist (25%), philosopher (20%), academic, researcher or technologist.",
+      "Rationalist or aspiring to be one (34%), Effective Altruist (26%), philosopher (20%), academic, researcher or technologist.",
       "Compares CT to 80,000 Hours, LessWrong, Astral Codex Ten and Hidden Brain; often already in those communities.",
       "Skeptical by default: questions small effect sizes, wants citations, methods and transparency about expertise.",
     ],
@@ -76,7 +76,7 @@ const PERSONAS: Persona[] = [
     blockers: [
       "Paywalls read as off-mission; anything that looks like a generic wellness startup erodes credibility.",
       "Finds CT hard to share: friends \"don't like having their irrationalities pointed out\", and the content feels too niche or academic for wider circles.",
-      "Most likely to be a detractor when quality dips: the audience NPS is minus 6, polarized between promoters (30%) and detractors (36%).",
+      "Most likely to be a detractor when quality dips: the audience NPS is minus 5, polarized between promoters (31%) and detractors (36%).",
     ],
     path: [
       "Arrives through argument-and-reasoning tools (Faulty Reasoning Quiz, Nuanced Thinking Techniques), the podcast and Spencer's essays.",
@@ -84,7 +84,7 @@ const PERSONAS: Persona[] = [
     ],
     money: [
       "Buys the Cognitive Assessment ($17.50 / $35, 27% of buyers) and is the natural Clearer Thinking Plus member, if membership feels like supporting the mission rather than a paywall.",
-      "Only 30% of survey respondents knew CT+ existed: awareness, not willingness, is the first gap.",
+      "Only 31% of survey respondents knew CT+ existed: awareness, not willingness, is the first gap.",
     ],
     voice: [
       "Show the evidence and the uncertainty; never talk down or claim to be the better thinker.",
@@ -98,13 +98,13 @@ const PERSONAS: Persona[] = [
     share: "A large share of new sign-ups and Paths quiz takers; smallest share of revenue today",
     color: "border-t-amber-500 dark:border-t-amber-400",
     who: [
-      "Students, early-career and not-currently-employed readers (31% of survey respondents are not employed; 20% are students), plus anyone in a rough patch.",
+      "Students, early-career and not-currently-employed readers (30% of survey respondents are not employed; 20% are students), plus anyone in a rough patch.",
       "Global: India is about 25% of tool sign-ups but close to 0% of revenue; many use a personal address and a phone.",
-      "Reports anxiety (37%), low mood (30%), career uncertainty (40%) and low self-discipline alongside procrastination.",
+      "Reports anxiety (37%), low mood (30%), career uncertainty (41%) and low self-discipline alongside procrastination.",
     ],
     wants: [
       "Therapeutic tools and wellbeing improvers, bite-sized content, and tools that name the problem: increase focus (47%), avoid emotional overwhelm (43%), reduce self-criticism (38%), a daily-intention program.",
-      "Human help: 88% of coaching-survey respondents were likely or very likely to try CT coaching, favouring problem-solving (30%), values (27%) and behavioral (26%) coaching, every two weeks, at $50 to $99 per session.",
+      "Human help: 88% of coaching-survey respondents were likely or very likely to try CT coaching, favouring problem-solving (67%), values (61%) and behavioral (60%) coaching (multi-select), every two weeks, at $50 to $99 per session.",
       "Paths quiz priorities put better decisions (3.2 of 4), effective plans (3.1) and understanding yourself (3.1) first.",
     ],
     blockers: [
@@ -123,7 +123,7 @@ const PERSONAS: Persona[] = [
       "Nuanced and optimistic, with encouragement and practicality; a meaningful slice arrives in distress, so tone carries duty of care.",
       "Add value in under three minutes, one concrete next step at a time; avoid anything prescriptive or that sounds like a lecture.",
     ],
-    evidence: ["Audience survey Mar 2026", "Coaching survey Aug 2026 (n=276)", "Paths quiz (n=20,201)", "Buyer profile Jun 2026"],
+    evidence: ["Audience survey Mar 2026", "Coaching survey Jul to Nov 2024 (n=276)", "Paths quiz (n=20,201)", "Buyer profile Jun 2026"],
   },
 ];
 

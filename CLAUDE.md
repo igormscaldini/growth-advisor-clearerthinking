@@ -52,6 +52,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `reports/` is gitignored; re-runs only fetch what is missing.
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
   CI runs them on every push (`tests.yml`).
+- `reports/ct_audience_personas_2026-09-25_src/build_report.py`: rebuilds the personas + audience-breakdown
+  PDF (to `~/Downloads`, Playwright Chrome print). Section 1 is parsed from `frontend/components/personas-tab.tsx`,
+  the single source for persona copy; section 2 from `datapoints.json` beside the script.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
