@@ -55,6 +55,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - `reports/ct_audience_personas_2026-09-25_src/build_report.py`: rebuilds the personas + audience-breakdown
   PDF (to `~/Downloads`, Playwright Chrome print). Section 1 is parsed from `frontend/components/personas-tab.tsx`,
   the single source for persona copy; section 2 from `datapoints.json` beside the script.
+- `google_ads_pmax_assets.py --campaign <id>`: per-asset table (lifetime, last 30 d, Search-only CTR, Submitted
+  Email) for any PMax campaign; the creative-audit starting point. Google Ads API v24 gotchas: no asset
+  performance labels (judge on metrics), `DURING LAST_90_DAYS` is invalid (use explicit dates), `change_event`
+  allows at most a 30-day window, `campaign_asset`/`performance_max_placement_view` queries must SELECT
+  `campaign.id`.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
@@ -85,6 +90,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   ~200k in Aug 2026, ~350k Sep-Oct 2025) are excluded from "new subscribers". Cursor-paginate
   (offset paging caps at 10k). Genuine sign-ups run ~300-500/day.
 - GA4 event names do not mean what they say: see `GA4_EVENTS.md`. "Tools finished" = Submitted Email.
+- GA4 attributes Google Ads (auto-tagged) sessions to the Ads CAMPAIGN NAME (e.g. `[PMAX] Rationality Test`),
+  not to the `utm_campaign` in the final URL; filtering GA4 on the utm value shows ~1% of the real sessions.
 - GSC reports only against CANONICAL urls, and several CT_TOOLS.md links are the pre-redirect form.
   The Ultimate Personality Test is `programs.clearerthinking.org/personality-test.html`; the listed
   `personality.html` 301s for humans but returns ~0 impressions in GSC, silently, with no hint you are
