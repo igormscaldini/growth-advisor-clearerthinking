@@ -45,6 +45,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `npx vercel link` then `npx vercel env add NAME production` (value on stdin), then
   `npx vercel redeploy growth-advisor-clearerthinking.vercel.app`: env changes only reach NEW deployments. The column
   layout is duplicated in the TS helpers and the Python script: change both.
+- Newsletter ratings dashboard is a SEPARATE project: `~/Documents/Claude/ct-newsletter-ratings` (private repo
+  igormscaldini/ct-newsletter-ratings, Vercel project ct-newsletter-ratings on Spark Wave, basic-auth login in its
+  `.env.local`). It pulls GT program 38551's CSV export + beehiiv; its README has the counting rules. Email link
+  scanners click all 5 rating links within seconds of each send (~22% of runs), so never read raw GT rating counts.
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
   schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
 - `seo_hub_pages.py`: builds the /all-articles + /all-tools link hubs into `~/Downloads` (paste into a
