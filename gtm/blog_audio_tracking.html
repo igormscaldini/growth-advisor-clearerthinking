@@ -1,0 +1,43 @@
+<!--
+GTM Custom HTML tag: "CT - Blog audio tracking". Trigger: Initialization - All Pages.
+Listens to the <audio> element itself (not the play button, whose Wix CSS class is a build hash
+that changes: the old click_audio_button trigger on button.dUf0R stopped firing after Dec 2025 that way).
+Pushes dataLayer event "ct_audio" with audio_action = audio_start | audio_progress | audio_complete.
+-->
+<script>
+(function () {
+  if (window.__ctAudioTracking) return;  // Wix navigates between posts without reloading
+  window.__ctAudioTracking = true;
+  var seen = {};  // "<path>|<src>|<action><percent>" -> true, so each milestone fires once per post view
+
+  function send(audio, action, percent) {
+    var key = location.pathname + '|' + audio.currentSrc + '|' + action + (percent || '');
+    if (seen[key]) return;
+    seen[key] = true;
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+      event: 'ct_audio',
+      audio_action: action,
+      audio_percent: percent || 0,
+      audio_url: audio.currentSrc,
+      audio_duration: Math.round(audio.duration) || 0
+    });
+  }
+
+  // Media events do not bubble, so listen in the capture phase.
+  document.addEventListener('play', function (e) {
+    if (e.target.tagName === 'AUDIO') send(e.target, 'audio_start');
+  }, true);
+
+  document.addEventListener('timeupdate', function (e) {
+    var a = e.target;
+    if (a.tagName !== 'AUDIO' || !a.duration) return;
+    var pct = a.currentTime / a.duration * 100;
+    [25, 50, 75].forEach(function (m) { if (pct >= m) send(a, 'audio_progress', m); });
+  }, true);
+
+  document.addEventListener('ended', function (e) {
+    if (e.target.tagName === 'AUDIO') send(e.target, 'audio_complete', 100);
+  }, true);
+})();
+</script>

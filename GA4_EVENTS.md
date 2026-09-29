@@ -29,3 +29,13 @@ In [data_layer.py](data_layer.py) (`ga4_audience_metrics`):
 - **Starts → Email reach**: `Reached Email Ask` / `Accepted Privacy Policy` — measures drop-off mid-quiz.
 - **Email reach → Submit**: `Submitted Email` / `Reached Email Ask` — measures email-gate friction (this is where the actual conversion happens).
 - **Starts → Finish**: `Submitted Email` / `Accepted Privacy Policy` — overall tool completion rate.
+
+## Blog audio player
+
+| GA4 event | What it means |
+|---|---|
+| `audio_start` | Reader pressed play on the "Click here to listen" player in a blog post. Fires once per post view (pause/resume does not re-fire). **This is "listens".** |
+| `audio_progress` | Reached 25 / 50 / 75% (`audio_percent`). Seeking ahead also counts. |
+| `audio_complete` | Reached the end. |
+
+Source: GTM Custom HTML tag from [gtm/blog_audio_tracking.html](gtm/blog_audio_tracking.html), which listens to the `<audio>` element rather than the button. The older `click_audio_button` event (click trigger on a Wix CSS class) fired only in Dec 2025 (73 events) and is dead.
