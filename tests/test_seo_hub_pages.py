@@ -13,6 +13,7 @@ from seo_hub_pages import (  # noqa: E402
     parse_sitemap,
     published_from_url,
     render_links,
+    render_ricos,
     title_from_slug,
     year_of,
 )
@@ -166,3 +167,47 @@ def test_parse_sitemap_unescapes_xml_entities():
         "https://www.clearerthinking.org/tools/world's-biggest-problems-quiz",
         "https://x.org/a?b=1&c=2",
     ]
+
+
+# --- render_ricos -------------------------------------------------------------------------
+# Ricos is the rich-content format the Wix Blog API takes. Shape confirmed against a live
+# createDraftPost call on 2026-09-30.
+def test_render_ricos_worked_by_hand():
+    doc = render_ricos("Intro line", [("2026", [
+        {"title": "First post", "url": "https://www.clearerthinking.org/post/first"},
+    ])])
+    assert [n["type"] for n in doc["nodes"]] == ["PARAGRAPH", "HEADING", "PARAGRAPH"]
+    assert doc["nodes"][0]["nodes"][0]["textData"]["text"] == "Intro line"
+    assert doc["nodes"][1]["headingData"] == {"level": 2}
+    link = doc["nodes"][2]["nodes"][0]["textData"]["decorations"][0]
+    assert link["type"] == "LINK"
+    assert link["linkData"]["link"]["url"] == "https://www.clearerthinking.org/post/first"
+
+
+def test_render_ricos_never_nofollows_a_link():
+    """A nofollow here would defeat the entire purpose of the hub."""
+    doc = render_ricos("i", [("2026", [{"title": "t", "url": "https://x.org/a"}]),
+                             ("2025", [{"title": "u", "url": "https://x.org/b"}])])
+    links = [n["nodes"][0]["textData"]["decorations"][0]["linkData"]["link"]
+             for n in doc["nodes"] if n["type"] == "PARAGRAPH" and n["nodes"][0]["textData"]["decorations"]]
+    assert len(links) == 2
+    assert all(l["rel"]["nofollow"] is False for l in links)
+
+
+def test_render_ricos_intro_and_headings_carry_no_link():
+    doc = render_ricos("Intro", [("2026", [{"title": "t", "url": "https://x.org/a"}])])
+    assert doc["nodes"][0]["nodes"][0]["textData"]["decorations"] == []
+    assert doc["nodes"][1]["nodes"][0]["textData"]["decorations"] == []
+
+
+def test_render_ricos_node_ids_are_unique():
+    """Duplicate node ids make Ricos documents render unpredictably."""
+    doc = render_ricos("i", [("2026", [{"title": f"t{i}", "url": f"https://x.org/{i}"} for i in range(5)]),
+                             ("2025", [{"title": f"u{i}", "url": f"https://y.org/{i}"} for i in range(5)])])
+    ids = [n["id"] for n in doc["nodes"]]
+    assert len(ids) == len(set(ids)) == 13  # intro + 2 headings + 10 posts
+
+
+def test_render_ricos_section_with_no_name_emits_no_heading():
+    doc = render_ricos("i", [("", [{"title": "t", "url": "https://x.org/a"}])])
+    assert [n["type"] for n in doc["nodes"]] == ["PARAGRAPH", "PARAGRAPH"]
