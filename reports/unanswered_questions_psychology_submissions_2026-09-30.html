@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unanswered Questions Survey</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #8a8984;
+  --axis: #d8d7d2;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --tip-bg: #ffffff;
+  --tip-border: #e3e2dd;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface: #1a1a19;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8f8e86;
+    --axis: #3a3a37;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --tip-bg: #242423;
+    --tip-border: #3a3a37;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a19;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #8f8e86;
+  --axis: #3a3a37;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --tip-bg: #242423;
+  --tip-border: #3a3a37;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--text-primary);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 880px; margin: 0 auto; padding: 32px 16px 48px; }
+h1 { font-size: 24px; margin: 0 0 4px; }
+.sub { color: var(--text-secondary); margin: 0 0 24px; }
+.tiles { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 24px; }
+.tile .n { font-size: 32px; font-weight: 600; line-height: 1.1; }
+.tile .l { color: var(--text-secondary); font-size: 13px; }
+.legend { display: flex; gap: 20px; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px;
+  border-radius: 2px; margin-right: 6px; vertical-align: -1px; background: var(--c); }
+.chart { position: relative; }
+svg { display: block; width: 100%; height: auto; overflow: visible; }
+.tip { position: absolute; pointer-events: none; background: var(--tip-bg);
+  border: 1px solid var(--tip-border); border-radius: 6px; padding: 6px 10px; font-size: 13px;
+  white-space: nowrap; display: none; box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+.notes { color: var(--text-secondary); font-size: 14px; margin-top: 24px; }
+.notes li { margin-bottom: 6px; }
+details { margin-top: 16px; font-size: 14px; }
+table { border-collapse: collapse; margin-top: 8px; }
+td, th { padding: 2px 16px 2px 0; text-align: left; }
+th { color: var(--text-secondary); font-weight: 500; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Unanswered Questions Of Psychology: submissions</h1>
+  <p class="sub">GuidedTrack program 37281, Aug 31 to Sep 30, 2026 (UTC days) · generated 2026-09-30 10:10am</p>
+
+  <div class="tiles">
+    <div class="tile"><div class="n">11</div><div class="l">runs started</div></div>
+    <div class="tile"><div class="n">1</div><div class="l">question submitted</div></div>
+    <div class="tile"><div class="n">9%</div><div class="l">start to submit</div></div>
+  </div>
+
+  <div class="legend">
+    <span style="--c: var(--series-1)">Runs started</span>
+    <span style="--c: var(--series-2)">Questions submitted</span>
+  </div>
+  <div class="chart" id="chart"><div class="tip" id="tip"></div></div>
+
+  <ul class="notes">
+    <li>"Submitted" means the run has an answer in <code>submitted_question</code>. The one submission (Sep 14) is from an assistant professor in clinical psychology who opted into the prize.</li>
+    <li>The Sep 28 spike is 6 runs within 31 minutes, 5 of which lasted under 1 minute with nothing answered. That pattern looks like someone testing or repeatedly opening the link, not 6 real visitors.</li>
+    <li>No run in the window answered any question other than the submission above. All-time, the program has 28 runs; the earlier "test" answers in April were internal tests.</li>
+  </ul>
+
+  <details>
+    <summary>Table view</summary>
+    <table id="tbl"><thead><tr><th>Day (UTC)</th><th>Started</th><th>Submitted</th></tr></thead><tbody></tbody></table>
+  </details>
+</main>
+<script>
+const data = [["2026-08-31",1,0],["2026-09-01",0,0],["2026-09-02",0,0],["2026-09-03",0,0],["2026-09-04",0,0],["2026-09-05",0,0],["2026-09-06",0,0],["2026-09-07",0,0],["2026-09-08",0,0],["2026-09-09",0,0],["2026-09-10",0,0],["2026-09-11",0,0],["2026-09-12",0,0],["2026-09-13",0,0],["2026-09-14",2,1],["2026-09-15",0,0],["2026-09-16",0,0],["2026-09-17",0,0],["2026-09-18",0,0],["2026-09-19",0,0],["2026-09-20",0,0],["2026-09-21",0,0],["2026-09-22",0,0],["2026-09-23",0,0],["2026-09-24",0,0],["2026-09-25",0,0],["2026-09-26",0,0],["2026-09-27",0,0],["2026-09-28",6,0],["2026-09-29",2,0],["2026-09-30",0,0]];
+const W = 840, H = 300, m = {t: 12, r: 8, b: 28, l: 28};
+const iw = W - m.l - m.r, ih = H - m.t - m.b, yMax = 6;
+const band = iw / data.length, bw = Math.min(10, (band - 4) / 2);
+const y = v => m.t + ih - (v / yMax) * ih;
+const fmt = s => new Date(s + "T00:00:00Z").toLocaleDateString("en-US", {month: "short", day: "numeric", timeZone: "UTC"});
+const ns = "http://www.w3.org/2000/svg";
+const svg = document.createElementNS(ns, "svg");
+svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+svg.setAttribute("role", "img");
+svg.setAttribute("aria-label", "Daily runs started and questions submitted");
+const el = (tag, attrs, parent = svg) => { const e = document.createElementNS(ns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+// rounded-top bar anchored to baseline
+const bar = (x, v, color) => {
+  if (!v) return;
+  const top = y(v), base = y(0), r = Math.min(4, bw / 2, base - top);
+  el("path", {d: `M${x},${base}V${top + r}Q${x},${top} ${x + r},${top}H${x + bw - r}Q${x + bw},${top} ${x + bw},${top + r}V${base}Z`, fill: color});
+};
+for (let v = 0; v <= yMax; v += 2) {
+  const t = el("text", {x: m.l - 8, y: y(v) + 4, "text-anchor": "end", "font-size": 11, fill: "var(--text-muted)"});
+  t.textContent = v;
+}
+el("line", {x1: m.l, x2: W - m.r, y1: y(0), y2: y(0), stroke: "var(--axis)", "stroke-width": 1});
+data.forEach(([d, s, q], i) => {
+  const cx = m.l + band * i + band / 2;
+  bar(cx - bw - 1, s, "var(--series-1)");
+  bar(cx + 1, q, "var(--series-2)");
+  if (i % 7 === 0 || i === data.length - 1) {
+    const t = el("text", {x: cx, y: H - 8, "text-anchor": "middle", "font-size": 11, fill: "var(--text-muted)"});
+    t.textContent = fmt(d);
+  }
+  const hit = el("rect", {x: m.l + band * i, y: m.t, width: band, height: ih, fill: "transparent"});
+  hit.addEventListener("mouseenter", () => {
+    tip.innerHTML = `<strong>${fmt(d)}</strong><br>Started: ${s}<br>Submitted: ${q}`;
+    tip.style.display = "block";
+    const box = chart.getBoundingClientRect(), scale = box.width / W;
+    let left = cx * scale + 12;
+    if (left + 140 > box.width) left = cx * scale - 140;
+    tip.style.left = left + "px"; tip.style.top = (y(Math.max(s, 1)) * scale - 10) + "px";
+  });
+  hit.addEventListener("mouseleave", () => tip.style.display = "none");
+});
+// direct label on the spike
+const spike = data.findIndex(r => r[1] === 6);
+const lbl = el("text", {x: m.l + band * spike + band / 2 - bw / 2 - 1, y: y(6) - 4 + 12, "text-anchor": "end", "font-size": 11, fill: "var(--text-secondary)", dx: -10});
+lbl.textContent = "6 runs in 31 min, mostly empty";
+const chart = document.getElementById("chart"), tip = document.getElementById("tip");
+chart.insertBefore(svg, tip);
+const tb = document.querySelector("#tbl tbody");
+data.filter(r => r[1] || r[2]).forEach(([d, s, q]) => { tb.insertAdjacentHTML("beforeend", `<tr><td>${fmt(d)}</td><td>${s}</td><td>${q}</td></tr>`); });
+</script>
+</body>
+</html>
