@@ -189,15 +189,25 @@ def sync() -> tuple[str, str]:
     return f"All Articles hub: +{len(added)} article(s), {total} total", "\n".join(lines)
 
 
-def _email(subject: str, body: str) -> None:
+def _email(subject: str, body: str) -> bool:
+    """Send the run report. Returns False if it could not be delivered at all.
+
+    On Actions the Google credentials arrive as env vars but every Google client here reads
+    them from a file, so they have to be written to secrets/ first.
+    """
     import email_transport
+    import secrets_loader
+
+    secrets_loader.materialize_ci_secrets()
     to = os.getenv("ADVISOR_EMAIL_TO") or email_transport.EMAIL_FROM
     try:
         email_transport.send_email(subject, body, to, header_tag="wix-hub-sync")
         print(f"emailed {to}: {subject}")
-    except Exception as e:  # noqa: BLE001 - a failed notification must not mask the real result
+        return True
+    except Exception as e:  # noqa: BLE001 - report the delivery failure, do not crash on it
         print(f"[warn] could not email the report: {e}", file=sys.stderr)
-        email_transport.slack_fallback(str(e), "All Articles hub sync", email_transport.TRANSPORT_FIX)
+        return email_transport.slack_fallback(str(e), "All Articles hub sync",
+                                              email_transport.TRANSPORT_FIX)
 
 
 def main() -> None:
@@ -225,8 +235,9 @@ def main() -> None:
             raise SystemExit(1) from e
         print(subject)
         print(report)
-        if not args.no_email:
-            _email(subject, report)
+        if not args.no_email and not _email(subject, report):
+            raise SystemExit("The sync itself succeeded but the report could not be delivered by "
+                             "email or Slack. Failing the run so this is not silently invisible.")
         return
 
     if args.delete_draft:
