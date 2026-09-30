@@ -55,6 +55,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - `seo_hub_pages.py`: builds the /all-articles + /all-tools link hubs into `~/Downloads` (paste into a
   NATIVE Wix text element; a Wix HTML embed is an iframe, so its links would not count). Title cache in
   `reports/` is gitignored; re-runs only fetch what is missing.
+- `wix_publish_hub.py`: publishes that articles hub as a Wix BLOG POST (post bodies are server-rendered,
+  unlike the /blog gallery). Live since 2026-09-30 at /post/all-clearer-thinking-articles, backdated to
+  2026-01-01 so it stays out of the recent feed; 621 links verified in raw HTML, none nofollowed.
+  Rerun after publishing new articles. Needs `WIX_API_KEY` (Blog scope) + `WIX_SITE_ID` in `.env`.
+  An API key has no member identity, so `memberId` is REQUIRED or you get "Missing post owner
+  information"; it defaults to Igor's member and sets the public byline.
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
   CI runs them on every push (`tests.yml`).
 - `reports/ct_audience_personas_2026-09-25_src/build_report.py`: rebuilds the personas + audience-breakdown

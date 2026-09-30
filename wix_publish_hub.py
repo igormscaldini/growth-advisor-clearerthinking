@@ -48,6 +48,11 @@ POST_TITLE = "All Clearer Thinking Articles"
 FIRST_PUBLISHED_DATE = "2026-01-01T09:00:00.000Z"
 # A single post is capped at 400KB by the Blog API.
 MAX_POST_BYTES = 400 * 1024
+# An API key has no member identity of its own, so the post owner must be named explicitly or
+# the API returns "Missing post owner information". Defaults to Igor's member (nickname
+# igormscaldini); the byline is publicly visible, so override it if the post should sit under a
+# different author. The CT staff writers have their own member IDs.
+DEFAULT_MEMBER_ID = "45fbd8aa-4a8f-42fe-afae-cdcfdaa2332f"
 
 
 def _headers() -> dict:
@@ -85,6 +90,7 @@ def build_payload() -> tuple[dict, int]:
         "commentingEnabled": False,
         "language": "en",
         "firstPublishedDate": FIRST_PUBLISHED_DATE,
+        "memberId": os.getenv("WIX_BLOG_MEMBER_ID", DEFAULT_MEMBER_ID),
     }}
     size = len(json.dumps(body).encode())
     if size > MAX_POST_BYTES:
