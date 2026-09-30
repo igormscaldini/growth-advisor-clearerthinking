@@ -65,6 +65,16 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   something changed, and emails Igor either way; it PATCHes richContent/excerpt only, so the
   backdate, byline and slug survive. `reports/seo_hub_titles_cache.json` is COMMITTED (not
   ignored) so CI starts warm; the workflow commits it back.
+- `tools_redirect_map.py` + `tools_redirects.py`: the Wix "Tools" CMS collection (internal id
+  `Courses`) auto-creates a /tools/<slug> dynamic page per tool that duplicates the real
+  programs.* tool. 85 of them were 301'd to the official pages on 2026-09-30 (ids in
+  `reports/wix_tools_redirects_created.json`; `--rollback` undoes exactly those).
+  IMPORTANT Wix limits found doing this: the Redirects API DECODES the `from` path before storing,
+  so `%3A` becomes `:` and `%3F` becomes `?` and truncates: the 11 slugs with punctuation cannot be
+  redirected at all (they earn 0 clicks, so it does not matter). A new redirect also takes up to a
+  minute to reach the edge, and a burst of requests gets 429s whose 200 responses are then CACHED,
+  which produces convincing false negatives when verifying; throttle and re-check before believing a
+  failure. Redirects override live pages and survive page deletion, so no page deletion is needed.
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
   CI runs them on every push (`tests.yml`).
 - `reports/ct_audience_personas_2026-09-25_src/build_report.py`: rebuilds the personas + audience-breakdown
