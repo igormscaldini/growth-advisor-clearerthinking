@@ -5,6 +5,10 @@
 - data/gsc_control_daily.csv: GSC daily x device for every query EXCEPT ones containing
   "personality" / "mbti" / "test" (a control series the UPT campaign cannot plausibly touch).
 - data/ads_search_terms.csv: search-term insight categories for the UPT campaign per ON period.
+- data/positly_runs_daily.csv: daily run counts of GT program 31723 ("UPT - SEO Experiment"),
+  whose Positly participants searched "personality test" and clicked CT (~0.8 GSC clicks per
+  run). Wave 2 started the same day the campaign resumed, so it must be controlled for.
+  Only counts are saved: no personal data.
 
 Run from the repo root: .venv/bin/python reports/ads_vs_gsc_personality_test_2026-09-30_src/fetch_data.py
 """
@@ -56,6 +60,24 @@ def fetch_search_terms(ads: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+def fetch_positly_runs() -> pd.DataFrame:
+    import csv
+    import io
+    import os
+
+    import requests
+    from dotenv import load_dotenv
+    load_dotenv(ROOT / ".env")
+    r = requests.get("https://www.guidedtrack.com/programs/31723/exports?export_format=csv",
+                     auth=(os.environ["GUIDED_TRACK_USERNAME"], os.environ["GUIDED_TRACK_PASSWORD"]),
+                     timeout=120)
+    r.raise_for_status()
+    rows = list(csv.DictReader(io.StringIO(r.text)))
+    df = pd.DataFrame({"date": [x["Time Started (UTC)"][:10] for x in rows],
+                       "mobile": [x.get("device", "").lower() in ("smartphone", "mobile", "phone", "tablet") for x in rows]})
+    return df.groupby("date").agg(runs=("mobile", "size"), mobile_runs=("mobile", "sum")).reset_index()
+
+
 def _gsc(dims, filters) -> pd.DataFrame:
     from gsc_client import SITE_URL, get_client
     svc = get_client()
@@ -76,6 +98,7 @@ def main():
     DATA.mkdir(exist_ok=True)
     ads = fetch_ads()
     ads.to_csv(DATA / "ads_daily.csv", index=False)
+    fetch_positly_runs().to_csv(DATA / "positly_runs_daily.csv", index=False)
     fetch_search_terms(ads).to_csv(DATA / "ads_search_terms.csv", index=False)
     _gsc(["date", "device"], [{"dimension": "query", "operator": "equals", "expression": QUERY}]) \
         .to_csv(DATA / "gsc_query_device_daily.csv", index=False)
