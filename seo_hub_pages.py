@@ -121,6 +121,39 @@ def render_hub(heading: str, intro: str, sections: list[tuple[str, list[dict]]])
     )
 
 
+# --- Ricos rich content (for publishing the hub as a Wix blog post) ------------------------
+def _ricos_text(text: str, url: str | None = None, node_id: str = "") -> dict:
+    """A TEXT node, optionally carrying a LINK decoration.
+
+    rel.nofollow is explicitly false: the entire point of the hub is passing crawl signal.
+    """
+    decorations = []
+    if url:
+        decorations.append({
+            "type": "LINK",
+            "linkData": {"link": {"url": url, "target": "SELF", "rel": {"nofollow": False}}},
+        })
+    return {"type": "TEXT", "id": node_id, "nodes": [], "textData": {"text": text, "decorations": decorations}}
+
+
+def render_ricos(intro: str, sections: list[tuple[str, list[dict]]]) -> dict:
+    """Ricos document: an intro paragraph, an H2 per section, one linked paragraph per item."""
+    nodes = [{"type": "PARAGRAPH", "id": "intro", "nodes": [_ricos_text(intro)], "paragraphData": {}}]
+    for si, (name, items) in enumerate(sections):
+        if name:
+            nodes.append({
+                "type": "HEADING", "id": f"h{si}", "nodes": [_ricos_text(name)],
+                "headingData": {"level": 2},
+            })
+        for ii, it in enumerate(items):
+            nodes.append({
+                "type": "PARAGRAPH", "id": f"p{si}_{ii}",
+                "nodes": [_ricos_text(it["title"], it["url"], node_id=f"t{si}_{ii}")],
+                "paragraphData": {},
+            })
+    return {"nodes": nodes}
+
+
 # --- fetching -----------------------------------------------------------------------------
 def parse_sitemap(xml: str) -> list[dict]:
     """Return [{url, lastmod}] for every <url> entry in a sitemap document."""
