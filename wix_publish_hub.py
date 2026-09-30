@@ -53,12 +53,15 @@ MAX_POST_BYTES = 400 * 1024
 # igormscaldini); the byline is publicly visible, so override it if the post should sit under a
 # different author. The CT staff writers have their own member IDs.
 DEFAULT_MEMBER_ID = "45fbd8aa-4a8f-42fe-afae-cdcfdaa2332f"
+# The hub is itself a blog post, so it appears in blog-posts-sitemap.xml and would otherwise
+# list itself.
+HUB_URL = "https://www.clearerthinking.org/post/all-clearer-thinking-articles"
 
 
 def _headers() -> dict:
     key, site = os.getenv("WIX_API_KEY"), os.getenv("WIX_SITE_ID")
     if not key or not site:
-        raise SystemExit("Set WIX_API_KEY and WIX_SITE_ID in .env (see this file's docstring).")
+        raise RuntimeError("Set WIX_API_KEY and WIX_SITE_ID in .env (see this file's docstring).")
     return {"Authorization": key, "wix-site-id": site, "Content-Type": "application/json"}
 
 
@@ -75,12 +78,13 @@ def _call(method: str, path: str, body: dict | None = None) -> dict:
         return json.loads(raw) if raw else {}
     except urllib.error.HTTPError as e:
         detail = e.read().decode("utf-8", "ignore")[:1500]
-        raise SystemExit(f"Wix API {method} {path} failed: HTTP {e.code}\n{detail}") from e
+        raise RuntimeError(f"Wix API {method} {path} failed: HTTP {e.code}\n{detail}") from e
 
 
 def build_payload() -> tuple[dict, int]:
     """Returns (request body, article count). All titles come from the cached page <title>s."""
-    posts = hub.enrich(hub.fetch_sitemap(hub.BLOG_SITEMAP))
+    posts = [p for p in hub.enrich(hub.fetch_sitemap(hub.BLOG_SITEMAP))
+             if p["url"].rstrip("/") != HUB_URL]
     intro = (f"Every article Clearer Thinking has published, {len(posts)} in total, "
              "grouped by year with the newest first.")
     body = {"draftPost": {
@@ -94,9 +98,36 @@ def build_payload() -> tuple[dict, int]:
     }}
     size = len(json.dumps(body).encode())
     if size > MAX_POST_BYTES:
-        raise SystemExit(f"Payload is {size:,} bytes, over the {MAX_POST_BYTES:,} byte post limit. "
-                         "Split the hub across several posts.")
+        raise RuntimeError(f"Payload is {size:,} bytes, over the {MAX_POST_BYTES:,} byte post limit. "
+                           "Split the hub across several posts.")
     return body, len(posts)
+
+
+def find_hub_post() -> dict:
+    """Locate the hub post by title rather than a hardcoded ID, so it survives a recreate."""
+    if os.getenv("WIX_HUB_POST_ID"):
+        return _call("GET", f"/draft-posts/{os.getenv('WIX_HUB_POST_ID')}?fieldsets=RICH_CONTENT&fieldsets=URL")["draftPost"]
+    res = _call("POST", "/draft-posts/query", {
+        "query": {"filter": {"title": {"$eq": POST_TITLE}}},
+        "fieldsets": ["RICH_CONTENT", "URL"],
+    })
+    found = res.get("draftPosts", [])
+    if len(found) != 1:
+        raise RuntimeError(f"Expected exactly 1 draft post titled {POST_TITLE!r}, found {len(found)}. "
+                           "Set WIX_HUB_POST_ID in .env to disambiguate.")
+    return found[0]
+
+
+def linked_urls(rich_content: dict) -> set[str]:
+    """Every URL currently linked from a Ricos document."""
+    out = set()
+    for node in (rich_content or {}).get("nodes", []):
+        for child in node.get("nodes", []):
+            for dec in child.get("textData", {}).get("decorations", []):
+                url = dec.get("linkData", {}).get("link", {}).get("url")
+                if url:
+                    out.add(url)
+    return out
 
 
 def verify(url: str, expected: int) -> int:
@@ -113,14 +144,90 @@ def verify(url: str, expected: int) -> int:
     return len(found)
 
 
+def sync() -> tuple[str, str]:
+    """Refresh the live hub with any newly published articles. Returns (subject, body).
+
+    Skips the write entirely when nothing changed, so a quiet week costs one query and leaves
+    the post's revision history clean.
+    """
+    body, total = build_payload()
+    wanted = linked_urls(body["draftPost"]["richContent"])
+    post = find_hub_post()
+    live = linked_urls(post.get("richContent"))
+    url = (post.get("url") or {}).get("base", "") + (post.get("url") or {}).get("path", "")
+
+    added, removed = sorted(wanted - live), sorted(live - wanted)
+    if not added and not removed:
+        return (f"All Articles hub: no change ({total} articles)",
+                f"Checked {total} articles in the sitemap. Nothing new since the last run, so the "
+                f"post was left untouched.\n\n{url}\n")
+
+    # PATCH only the fields that change. Leaving out firstPublishedDate, memberId, title and slug
+    # means the backdate and byline survive the update.
+    _call("PATCH", f"/draft-posts/{post['id']}", {"draftPost": {
+        "id": post["id"],
+        "richContent": body["draftPost"]["richContent"],
+        "excerpt": body["draftPost"]["excerpt"],
+    }})
+    _call("POST", f"/draft-posts/{post['id']}/publish")
+
+    after = find_hub_post()
+    now_linked = len(linked_urls(after.get("richContent")))
+    lines = [f"Updated the All Articles hub: {total} articles now linked "
+             f"(was {len(live)}, the post reports {now_linked}).", "", url, ""]
+    if added:
+        lines.append(f"Added ({len(added)}):")
+        lines += [f"  + {u}" for u in added]
+    if removed:
+        lines.append(f"\nRemoved ({len(removed)}), usually an unpublished or re-slugged post:")
+        lines += [f"  - {u}" for u in removed]
+    if now_linked != total:
+        lines.append(f"\nWARNING: the post reports {now_linked} links but {total} were sent. "
+                     "Check the post before trusting this run.")
+    lines.append(f"\nfirstPublishedDate is still {after.get('firstPublishedDate')} "
+                 "(the backdate should not move).")
+    return f"All Articles hub: +{len(added)} article(s), {total} total", "\n".join(lines)
+
+
+def _email(subject: str, body: str) -> None:
+    import email_transport
+    to = os.getenv("ADVISOR_EMAIL_TO") or email_transport.EMAIL_FROM
+    try:
+        email_transport.send_email(subject, body, to, header_tag="wix-hub-sync")
+        print(f"emailed {to}: {subject}")
+    except Exception as e:  # noqa: BLE001 - a failed notification must not mask the real result
+        print(f"[warn] could not email the report: {e}", file=sys.stderr)
+        email_transport.slack_fallback(str(e), "All Articles hub sync", email_transport.TRANSPORT_FIX)
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--create", action="store_true")
     ap.add_argument("--publish", action="store_true", help="publish the draft created by --create")
+    ap.add_argument("--sync", action="store_true", help="refresh the live hub, then email the outcome")
+    ap.add_argument("--no-email", action="store_true", help="with --sync, print the report instead")
     ap.add_argument("--verify", metavar="URL")
     ap.add_argument("--delete-draft", metavar="ID")
     args = ap.parse_args()
+
+    if args.sync:
+        try:
+            subject, report = sync()
+        except Exception as e:  # noqa: BLE001 - the whole point is to be told when it breaks
+            import traceback
+            detail = traceback.format_exc()
+            print(detail, file=sys.stderr)
+            if not args.no_email:
+                _email("All Articles hub sync FAILED",
+                       f"The weekly update of the All Articles hub did not run cleanly.\n\n"
+                       f"{e}\n\nFull traceback:\n{detail}")
+            raise SystemExit(1) from e
+        print(subject)
+        print(report)
+        if not args.no_email:
+            _email(subject, report)
+        return
 
     if args.delete_draft:
         _call("DELETE", f"/draft-posts/{args.delete_draft}")

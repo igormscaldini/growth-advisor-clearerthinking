@@ -1,0 +1,57 @@
+name: Weekly All Articles hub sync
+
+on:
+  schedule:
+    # Mondays 12:20 UTC. GitHub throttles schedule events on this repo (see CLAUDE.md), so the
+    # run can land hours late; at a weekly cadence that does not matter.
+    - cron: "20 12 * * 1"
+  workflow_dispatch:
+
+# Needs write access: the title cache is committed so CI starts warm instead of refetching
+# every article page, which would take ~10 minutes and risk Wix rate limiting.
+permissions:
+  contents: write
+
+concurrency:
+  group: wix-hub-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Sync the All Articles hub and email the outcome
+        env:
+          WIX_API_KEY: ${{ secrets.WIX_API_KEY }}
+          WIX_SITE_ID: ${{ secrets.WIX_SITE_ID }}
+          # Gmail API send uses the shared Google token; SMTP is blocked from Actions IPs.
+          OAUTH_CLIENT_JSON: ${{ secrets.OAUTH_CLIENT_JSON }}
+          GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          ADVISOR_EMAIL_TO: ${{ secrets.ADVISOR_EMAIL_TO }}
+          # Only used if the email itself cannot be sent.
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_DEFAULT_CHANNEL: ${{ secrets.SLACK_DEFAULT_CHANNEL }}
+        run: python wix_publish_hub.py --sync
+
+      - name: Commit the refreshed title cache
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add reports/seo_hub_titles_cache.json
+          git diff --staged --quiet && echo "cache unchanged" && exit 0
+          git commit -m "hub sync: refresh article title cache"
+          git pull --rebase --autostash origin main
+          git push

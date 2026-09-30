@@ -60,7 +60,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   2026-01-01 so it stays out of the recent feed; 621 links verified in raw HTML, none nofollowed.
   Rerun after publishing new articles. Needs `WIX_API_KEY` (Blog scope) + `WIX_SITE_ID` in `.env`.
   An API key has no member identity, so `memberId` is REQUIRED or you get "Missing post owner
-  information"; it defaults to Igor's member and sets the public byline.
+  information"; it defaults to Igor's member and sets the public byline. `--sync` (weekly cron
+  `wix-hub-sync.yml`) diffs the sitemap against the live post, PATCHes + republishes only when
+  something changed, and emails Igor either way; it PATCHes richContent/excerpt only, so the
+  backdate, byline and slug survive. `reports/seo_hub_titles_cache.json` is COMMITTED (not
+  ignored) so CI starts warm; the workflow commits it back.
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
   CI runs them on every push (`tests.yml`).
 - `reports/ct_audience_personas_2026-09-25_src/build_report.py`: rebuilds the personas + audience-breakdown
