@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ads vs Organic: "personality test"</title>
+<style>
+:root {
+  --surface: #fcfcfb; --surface-2: #f3f2ef; --ink: #0b0b0b; --ink-2: #52514e; --muted: #8a8984;
+  --rule: #e4e3de; --series: #2a78d6; --band: rgba(42,120,214,0.09); --marker: #eb6834;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: #1a1a19; --surface-2: #242423; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #8f8e87;
+    --rule: #34332f; --series: #3987e5; --band: rgba(57,135,229,0.16); --marker: #d95926;
+  }
+}
+:root[data-theme="dark"] {
+  --surface: #1a1a19; --surface-2: #242423; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #8f8e87;
+  --rule: #34332f; --series: #3987e5; --band: rgba(57,135,229,0.16); --marker: #d95926;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--ink);
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 920px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 28px; line-height: 1.2; margin: 0 0 6px; }
+.sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+h2 { font-size: 19px; margin: 40px 0 10px; }
+p, li { color: var(--ink-2); }
+b, strong { color: var(--ink); }
+.verdict { background: var(--surface-2); border-radius: 10px; padding: 18px 20px; }
+.verdict p { margin: 0 0 10px; } .verdict p:last-child { margin: 0; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 8px 0; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip { display: inline-block; font-size: 12px; color: var(--ink-2); background: var(--surface-2);
+  border-radius: 6px; padding: 1px 6px; margin: 1px 2px; white-space: nowrap; }
+.chart { position: relative; margin: 6px 0 4px; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 18px; }
+.chart-note { font-size: 13px; color: var(--muted); }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 6px 9px; font-size: 12px; color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  display: none; white-space: nowrap; }
+.key { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+.key i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+small { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+<h1>Did running the Personality Test ads lift organic "personality test" in Search Console?</h1>
+<div class="sub">Google Ads campaign "[ACQ] Personality Test - UPT" vs GSC exact query "personality test", May 2025 to Sep 2026 (the full 16 months GSC keeps) · {{STAMP}}</div>
+
+<div class="verdict">
+<p><strong>No detectable correlation.</strong> Organic "personality test" performance was no better while the campaign ran than it would be under any other on/off schedule of the same shape. Mobile organic clicks averaged {{CLICK_COEF}} per day higher on ON days, but a randomly shifted schedule gives a gap at least that big {{CLICK_P_PCT}} of the time (p = {{CLICK_P}}). Position (p = {{POS_P}}) and CTR (p = {{CTR_P}}) show the same thing.</p>
+<p><strong>The main evidence against it:</strong> the biggest organic gain in the window (position 10.4 to 7.4, Jun to Aug 2025) happened with the ads <em>off</em>, and the five on/off switches moved clicks in inconsistent directions over the following two weeks (only two of five went the way "ads help" predicts).</p>
+<p><strong>What this can't rule out:</strong> the data is noisy enough to hide an effect of up to about &plusmn;{{CLICK_MDE}} clicks a day, which is roughly the whole baseline of {{CLICK_BASE}}. It can only rule out a very large effect. Also, only one ON period (Sep to Dec 2025) put the ad in front of many "personality test" searchers, so in practice this is one real test.</p>
+</div>
+
+<h2>What happened, week by week</h2>
+<div class="key"><span><i style="background:var(--band);border:1px solid var(--series)"></i>Campaign ON</span><span><i style="background:var(--marker);width:2px;height:12px"></i>Positly SEO experiment wave 2 starts (same day the ads came back)</span></div>
+<div class="chart-title">Mobile organic clicks per day (weekly average)</div>
+<div class="chart" id="c1"></div>
+<div class="chart-title">Mobile organic average position (lower is better)</div>
+<div class="chart" id="c2"></div>
+<p class="chart-note">Mobile only: desktop data from Oct 2025 to Mar 2026 is distorted by a Google results-page glitch (desktop impressions jumped about 15x and CTR collapsed), which has nothing to do with the ads.</p>
+
+<h2>Each ON and OFF period</h2>
+<p>The ON periods differ a lot in how much the ad actually showed on the exact search "personality test". Only Sep to Dec 2025 had real presence: 338 paid clicks a day, several times the organic mobile volume. In 2026 the same campaign spent its budget on other searches and placements, and got fewer than 10 paid clicks a day on this search.</p>
+<div class="scroll"><table>
+<tr><th>Period</th><th>Ads</th><th class=n>Days</th><th class=n>Spend / day</th><th class=n>Ad impr / day*</th><th class=n>Paid clicks / day*</th><th class=n>Organic clicks / day</th><th class=n>CTR</th><th class=n>Position</th></tr>
+{{PER_ROWS}}
+</table></div>
+<small>* On the exact search "personality test". Organic columns are mobile. Ad figures come from Google Ads search-term insights for each whole ON period (the first one starts 2025-05-01, before GSC data begins). Spend is the campaign's total, all networks.</small>
+
+<p>At face value, the Sep to Dec 2025 ON period was the best organic stretch, and the ranking did slide about three weeks after the ads stopped on 2025-12-22 (other CT queries did not slide). But the page reached that ranking <em>before</em> the ads started (week of 2025-08-31: position 7.1), and when the ads came back in Apr 2026, clicks first fell for five weeks before recovering in late May. With the ad barely showing on the query then, that recovery can't be credited to it.</p>
+
+<h2>The statistical tests</h2>
+<div class="scroll"><table>
+<tr><th>Outcome</th><th class=n>Mean on OFF days</th><th class=n>ON minus OFF</th><th class=n>p</th><th class=n>Smallest detectable</th><th class=n>With 4-week delay</th><th class=n>p</th><th>Two weeks before vs after each switch (+ = higher when ON)</th></tr>
+{{TEST_ROWS}}
+</table></div>
+<small>"ON minus OFF": daily regression controlling for Positly experiment runs. p comes from a shift test: the real on/off schedule is slid through the calendar by every offset of 30+ days and refit ({{N_SHIFTS}} fits). This keeps the schedule's shape and the slow drift of the organic series, which an ordinary p-value ignores (with ordinary Newey-West errors, CTR gets p&nbsp;=&nbsp;{{CTR_HAC_P}}). "Smallest detectable" is about 2 standard deviations of that shifted distribution. For position a negative number means better ranking. The delayed version tests the idea that ads work slowly.</small>
+
+<h2>Independent cross-check: monthly correlation</h2>
+<p>Separately written code, the simplest valid version: monthly UPT spend against monthly mobile organic results, {{N_MONTHS}} full months. Correlations are weakly in the "ads help" direction (clicks r = {{R_CLICK_L}}, month-over-month changes r = {{R_CLICK_C}}; position r = {{R_POS_L}}, changes r = {{R_POS_C}}), but with 15 months none reach significance (about |r| &gt; 0.51 would be needed), and monthly correlation still ignores the slow drift that the shift test accounts for. So it agrees: a hint in the direction you'd hope, nothing distinguishable from noise. Aug 2026 shows why: the highest spend of the window ($2,032) came with some of the lowest organic clicks.</p>
+<div class="scroll"><table><tr><th>Month</th><th class=n>UPT ad spend</th><th class=n>Mobile organic clicks</th><th class=n>Mobile position</th></tr>{{MO_ROWS}}</table></div>
+
+<h2>Why an effect would be unlikely anyway</h2>
+<ul>
+<li>Google states that ads do not influence organic ranking, and CT's own evidence agrees: the Positly experiment sent 3,443 real people to search "personality test" and click the CT result (organic clicks, not ad clicks), and ranking did not move.</li>
+<li>The more plausible link is the opposite: the ad taking clicks from the organic result on the same page. That didn't show up either: mobile organic CTR was not lower while the ad was showing heavily (0.73% in Sep to Dec 2025, the highest of any period).</li>
+</ul>
+
+<h2>Caveats</h2>
+<ul>
+<li>Positly experiment wave 2 started on 2026-04-16, the same day the ads came back, and each run adds about 0.8 organic clicks. It's controlled for in the regressions, and its runs were 92% desktop, so the mobile series is barely touched.</li>
+<li>GSC keeps 16 months, so earlier switches (the 2024 campaigns) can't be checked.</li>
+<li>This is observational. To actually measure a halo effect, the clean test is a geo split: run the ad in half of a set of matched regions for 6 to 8 weeks and compare organic clicks by region in GSC (country breakdown). That would be powered, unlike this history.</li>
+</ul>
+<small>Source: reports/ads_vs_gsc_personality_test_2026-09-30_src (fetch_data.py, analysis.py, simple_check.py, tests/).</small>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+const D = {{DATA}};
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const NS = "http://www.w3.org/2000/svg";
+const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p && p.appendChild(e); return e; };
+const fmtD = s => new Date(s + "T00:00:00Z").toLocaleDateString("en-US", {month: "short", day: "numeric", year: "numeric", timeZone: "UTC"});
+
+function chart(id, key, invert, fmt) {
+  const host = document.getElementById(id); host.innerHTML = "";
+  const W = 880, H = 220, m = {l: 44, r: 12, t: 12, b: 26};
+  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, role: "img"}, host);
+  const pts = D.weekly;
+  const t0 = Date.parse(pts[0].week), t1 = Date.parse(pts[pts.length - 1].week) + 6 * 864e5;
+  const x = s => m.l + (Date.parse(s) - t0) / (t1 - t0) * (W - m.l - m.r);
+  const vals = pts.map(p => p[key]);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = (hi - lo) * 0.08; lo = invert ? lo - pad : 0; hi = hi + pad;
+  const y = v => invert ? m.t + (v - lo) / (hi - lo) * (H - m.t - m.b) : H - m.b - (v - lo) / (hi - lo) * (H - m.t - m.b);
+  D.on.forEach(([a, b]) => el("rect", {x: x(a), y: m.t, width: Math.max(2, x(b) - x(a)), height: H - m.t - m.b, fill: css("--band")}, svg));
+  const px = x(D.positly);
+  el("line", {x1: px, x2: px, y1: m.t, y2: H - m.b, stroke: css("--marker"), "stroke-width": 1.5, "stroke-dasharray": "3 3"}, svg);
+  const raw = (hi - lo) / 4, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(k => k * mag).find(s => s >= raw);
+  const ticks = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) ticks.push(v);
+  ticks.forEach(v => { const t = el("text", {x: m.l - 8, y: y(v) + 4, "text-anchor": "end", "font-size": 11, fill: css("--muted")}, svg); t.textContent = fmt(v); });
+  el("line", {x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, stroke: css("--rule")}, svg);
+  for (let yy = 2025, mo = 6; yy < 2027; mo += 3) { if (mo > 12) { mo -= 12; yy++; } const s = `${yy}-${String(mo).padStart(2, "0")}-01`;
+    if (Date.parse(s) > t1) break; const t = el("text", {x: x(s), y: H - 8, "text-anchor": "middle", "font-size": 11, fill: css("--muted")}, svg);
+    t.textContent = new Date(s + "T00:00:00Z").toLocaleDateString("en-US", {month: "short", year: "numeric", timeZone: "UTC"}); }
+  el("path", {d: pts.map((p, i) => (i ? "L" : "M") + x(p.week).toFixed(1) + "," + y(p[key]).toFixed(1)).join(""),
+    fill: "none", stroke: css("--series"), "stroke-width": 2, "stroke-linejoin": "round"}, svg);
+  const cross = el("line", {y1: m.t, y2: H - m.b, stroke: css("--muted"), "stroke-width": 1, visibility: "hidden"}, svg);
+  const dot = el("circle", {r: 4.5, fill: css("--series"), stroke: css("--surface"), "stroke-width": 2, visibility: "hidden"}, svg);
+  const hit = el("rect", {x: m.l, y: 0, width: W - m.l - m.r, height: H, fill: "transparent"}, svg);
+  const tip = document.getElementById("tip");
+  hit.addEventListener("mousemove", ev => {
+    const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W;
+    let best = pts[0]; pts.forEach(p => { if (Math.abs(x(p.week) - sx) < Math.abs(x(best.week) - sx)) best = p; });
+    cross.setAttribute("x1", x(best.week)); cross.setAttribute("x2", x(best.week)); cross.setAttribute("visibility", "visible");
+    dot.setAttribute("cx", x(best.week)); dot.setAttribute("cy", y(best[key])); dot.setAttribute("visibility", "visible");
+    tip.innerHTML = `<b>Week of ${fmtD(best.week)}</b><br>${key === "clicks" ? "Clicks/day" : "Position"}: ${fmt(best[key])}<br>Ads ON ${Math.round(best.on * 7)} of 7 days`;
+    tip.style.display = "block";
+    const hr = host.getBoundingClientRect();
+    let left = ev.clientX - hr.left + 14; if (left + 170 > hr.width) left -= 190;
+    tip.style.left = (hr.left + window.scrollX + left) + "px"; tip.style.top = (hr.top + window.scrollY + 10) + "px";
+  });
+  hit.addEventListener("mouseleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); });
+}
+function draw() { chart("c1", "clicks", false, v => v.toFixed(0)); chart("c2", "position", true, v => (+v.toFixed(1)).toString()); }
+draw();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+</script>
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ads vs Organic: "personality test"</title>
+<style>
+:root {
+  --surface: #fcfcfb; --surface-2: #f3f2ef; --ink: #0b0b0b; --ink-2: #52514e; --muted: #8a8984;
+  --rule: #e4e3de; --series: #2a78d6; --band: rgba(42,120,214,0.09); --marker: #eb6834;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --surface: #1a1a19; --surface-2: #242423; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #8f8e87;
+    --rule: #34332f; --series: #3987e5; --band: rgba(57,135,229,0.16); --marker: #d95926;
+  }
+}
+:root[data-theme="dark"] {
+  --surface: #1a1a19; --surface-2: #242423; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #8f8e87;
+  --rule: #34332f; --series: #3987e5; --band: rgba(57,135,229,0.16); --marker: #d95926;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--ink);
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+main { max-width: 920px; margin: 0 auto; padding: 40px 16px 80px; }
+h1 { font-size: 28px; line-height: 1.2; margin: 0 0 6px; }
+.sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+h2 { font-size: 19px; margin: 40px 0 10px; }
+p, li { color: var(--ink-2); }
+b, strong { color: var(--ink); }
+.verdict { background: var(--surface-2); border-radius: 10px; padding: 18px 20px; }
+.verdict p { margin: 0 0 10px; } .verdict p:last-child { margin: 0; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 8px 0; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 12px; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip { display: inline-block; font-size: 12px; color: var(--ink-2); background: var(--surface-2);
+  border-radius: 6px; padding: 1px 6px; margin: 1px 2px; white-space: nowrap; }
+.chart { position: relative; margin: 6px 0 4px; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 18px; }
+.chart-note { font-size: 13px; color: var(--muted); }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--rule);
+  border-radius: 8px; padding: 6px 9px; font-size: 12px; color: var(--ink); box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  display: none; white-space: nowrap; }
+.key { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--ink-2); margin-top: 8px; }
+.key i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+small { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+<h1>Did running the Personality Test ads lift organic "personality test" in Search Console?</h1>
+<div class="sub">Google Ads campaign "[ACQ] Personality Test - UPT" vs GSC exact query "personality test", May 2025 to Sep 2026 (the full 16 months GSC keeps) · 2026-09-30 11:52am</div>
+
+<div class="verdict">
+<p><strong>No detectable correlation.</strong> Organic "personality test" performance was no better while the campaign ran than it would be under any other on/off schedule of the same shape. Mobile organic clicks averaged +11.1 per day higher on ON days, but a randomly shifted schedule gives a gap at least that big 71% of the time (p = 0.71). Position (p = 0.76) and CTR (p = 0.35) show the same thing.</p>
+<p><strong>The main evidence against it:</strong> the biggest organic gain in the window (position 10.4 to 7.4, Jun to Aug 2025) happened with the ads <em>off</em>, and the five on/off switches moved clicks in inconsistent directions over the following two weeks (only two of five went the way "ads help" predicts).</p>
+<p><strong>What this can't rule out:</strong> the data is noisy enough to hide an effect of up to about &plusmn;39 clicks a day, which is roughly the whole baseline of 36. It can only rule out a very large effect. Also, only one ON period (Sep to Dec 2025) put the ad in front of many "personality test" searchers, so in practice this is one real test.</p>
+</div>
+
+<h2>What happened, week by week</h2>
+<div class="key"><span><i style="background:var(--band);border:1px solid var(--series)"></i>Campaign ON</span><span><i style="background:var(--marker);width:2px;height:12px"></i>Positly SEO experiment wave 2 starts (same day the ads came back)</span></div>
+<div class="chart-title">Mobile organic clicks per day (weekly average)</div>
+<div class="chart" id="c1"></div>
+<div class="chart-title">Mobile organic average position (lower is better)</div>
+<div class="chart" id="c2"></div>
+<p class="chart-note">Mobile only: desktop data from Oct 2025 to Mar 2026 is distorted by a Google results-page glitch (desktop impressions jumped about 15x and CTR collapsed), which has nothing to do with the ads.</p>
+
+<h2>Each ON and OFF period</h2>
+<p>The ON periods differ a lot in how much the ad actually showed on the exact search "personality test". Only Sep to Dec 2025 had real presence: 338 paid clicks a day, several times the organic mobile volume. In 2026 the same campaign spent its budget on other searches and placements, and got fewer than 10 paid clicks a day on this search.</p>
+<div class="scroll"><table>
+<tr><th>Period</th><th>Ads</th><th class=n>Days</th><th class=n>Spend / day</th><th class=n>Ad impr / day*</th><th class=n>Paid clicks / day*</th><th class=n>Organic clicks / day</th><th class=n>CTR</th><th class=n>Position</th></tr>
+<tr><td style='white-space:nowrap'>May 18, 2025 to Jun 10, 2025</td><td><b>ON</b></td><td class=n>24</td><td class=n>$69</td><td class=n>201</td><td class=n>27</td><td class=n>5.8</td><td class=n>0.79%</td><td class=n>11.67</td></tr><tr><td style='white-space:nowrap'>Jun 11, 2025 to Aug 31, 2025</td><td>off</td><td class=n>82</td><td class=n>$0</td><td class=n></td><td class=n></td><td class=n>41.8</td><td class=n>0.51%</td><td class=n>8.56</td></tr><tr><td style='white-space:nowrap'>Sep 1, 2025 to Dec 21, 2025</td><td><b>ON</b></td><td class=n>112</td><td class=n>$46</td><td class=n>1241</td><td class=n>338</td><td class=n>78.2</td><td class=n>0.73%</td><td class=n>7.29</td></tr><tr><td style='white-space:nowrap'>Dec 22, 2025 to Apr 15, 2026</td><td>off</td><td class=n>115</td><td class=n>$0</td><td class=n></td><td class=n></td><td class=n>33.5</td><td class=n>0.42%</td><td class=n>8.75</td></tr><tr><td style='white-space:nowrap'>Apr 16, 2026 to Sep 15, 2026</td><td><b>ON</b></td><td class=n>153</td><td class=n>$49</td><td class=n>75</td><td class=n>10</td><td class=n>30.4</td><td class=n>0.41%</td><td class=n>8.19</td></tr><tr><td style='white-space:nowrap'>Sep 16, 2026 to Sep 27, 2026</td><td>off</td><td class=n>12</td><td class=n>$0</td><td class=n></td><td class=n></td><td class=n>14.4</td><td class=n>0.31%</td><td class=n>8.55</td></tr>
+</table></div>
+<small>* On the exact search "personality test". Organic columns are mobile. Ad figures come from Google Ads search-term insights for each whole ON period (the first one starts 2025-05-01, before GSC data begins). Spend is the campaign's total, all networks.</small>
+
+<p>At face value, the Sep to Dec 2025 ON period was the best organic stretch, and the ranking did slide about three weeks after the ads stopped on 2025-12-22 (other CT queries did not slide). But the page reached that ranking <em>before</em> the ads started (week of 2025-08-31: position 7.1), and when the ads came back in Apr 2026, clicks first fell for five weeks before recovering in late May. With the ad barely showing on the query then, that recovery can't be credited to it.</p>
+
+<h2>The statistical tests</h2>
+<div class="scroll"><table>
+<tr><th>Outcome</th><th class=n>Mean on OFF days</th><th class=n>ON minus OFF</th><th class=n>p</th><th class=n>Smallest detectable</th><th class=n>With 4-week delay</th><th class=n>p</th><th>Two weeks before vs after each switch (+ = higher when ON)</th></tr>
+<tr><td>Mobile organic clicks / day</td><td class=n>35.7</td><td class=n>+11.1</td><td class=n>0.71</td><td class=n>&plusmn;39.2</td><td class=n>+2.6</td><td class=n>0.94</td><td><span class=chip>2025-06 ON->OFF: -37%</span> <span class=chip>2025-09 OFF->ON: +27%</span> <span class=chip>2025-12 ON->OFF: -8%</span> <span class=chip>2026-04 OFF->ON: -44%</span> <span class=chip>2026-09 ON->OFF: +9%</span></td></tr><tr><td>Mobile organic CTR (%)</td><td class=n>0.45</td><td class=n>+0.12</td><td class=n>0.35</td><td class=n>&plusmn;0.21</td><td class=n>+0.01</td><td class=n>0.99</td><td><span class=chip>2025-06 ON->OFF: +81%</span> <span class=chip>2025-09 OFF->ON: +17%</span> <span class=chip>2025-12 ON->OFF: -3%</span> <span class=chip>2026-04 OFF->ON: -23%</span> <span class=chip>2026-09 ON->OFF: +3%</span></td></tr><tr><td>Mobile organic position</td><td class=n>8.66</td><td class=n>-0.53</td><td class=n>0.76</td><td class=n>&plusmn;1.94</td><td class=n>-0.31</td><td class=n>0.81</td><td><span class=chip>2025-06 ON->OFF: +9%</span> <span class=chip>2025-09 OFF->ON: -4%</span> <span class=chip>2025-12 ON->OFF: +0%</span> <span class=chip>2026-04 OFF->ON: +8%</span> <span class=chip>2026-09 ON->OFF: +3%</span></td></tr><tr><td>All-device organic position</td><td class=n>8.74</td><td class=n>-0.53</td><td class=n>0.75</td><td class=n>&plusmn;1.74</td><td class=n>-0.30</td><td class=n>0.81</td><td><span class=chip>2025-06 ON->OFF: +5%</span> <span class=chip>2025-09 OFF->ON: -1%</span> <span class=chip>2025-12 ON->OFF: -2%</span> <span class=chip>2026-04 OFF->ON: +8%</span> <span class=chip>2026-09 ON->OFF: +3%</span></td></tr>
+</table></div>
+<small>"ON minus OFF": daily regression controlling for Positly experiment runs. p comes from a shift test: the real on/off schedule is slid through the calendar by every offset of 30+ days and refit (439 fits). This keeps the schedule's shape and the slow drift of the organic series, which an ordinary p-value ignores (with ordinary Newey-West errors, CTR gets p&nbsp;=&nbsp;0.05). "Smallest detectable" is about 2 standard deviations of that shifted distribution. For position a negative number means better ranking. The delayed version tests the idea that ads work slowly.</small>
+
+<h2>Independent cross-check: monthly correlation</h2>
+<p>Separately written code, the simplest valid version: monthly UPT spend against monthly mobile organic results, 15 full months. Correlations are weakly in the "ads help" direction (clicks r = +0.27, month-over-month changes r = +0.43; position r = -0.48, changes r = -0.25), but with 15 months none reach significance (about |r| &gt; 0.51 would be needed), and monthly correlation still ignores the slow drift that the shift test accounts for. So it agrees: a hint in the direction you'd hope, nothing distinguishable from noise. Aug 2026 shows why: the highest spend of the window ($2,032) came with some of the lowest organic clicks.</p>
+<div class="scroll"><table><tr><th>Month</th><th class=n>UPT ad spend</th><th class=n>Mobile organic clicks</th><th class=n>Mobile position</th></tr><tr><td>2025-06</td><td class=n>$733</td><td class=n>333</td><td class=n>10.42</td></tr><tr><td>2025-07</td><td class=n>$0</td><td class=n>1,244</td><td class=n>8.27</td></tr><tr><td>2025-08</td><td class=n>$0</td><td class=n>1,926</td><td class=n>7.37</td></tr><tr><td>2025-09</td><td class=n>$1,160</td><td class=n>2,514</td><td class=n>7.12</td></tr><tr><td>2025-10</td><td class=n>$1,537</td><td class=n>2,653</td><td class=n>7.12</td></tr><tr><td>2025-11</td><td class=n>$1,535</td><td class=n>2,206</td><td class=n>7.49</td></tr><tr><td>2025-12</td><td class=n>$871</td><td class=n>2,010</td><td class=n>7.50</td></tr><tr><td>2026-01</td><td class=n>$0</td><td class=n>1,434</td><td class=n>8.65</td></tr><tr><td>2026-02</td><td class=n>$0</td><td class=n>694</td><td class=n>9.06</td></tr><tr><td>2026-03</td><td class=n>$0</td><td class=n>557</td><td class=n>9.11</td></tr><tr><td>2026-04</td><td class=n>$860</td><td class=n>867</td><td class=n>8.73</td></tr><tr><td>2026-05</td><td class=n>$1,955</td><td class=n>1,572</td><td class=n>7.43</td></tr><tr><td>2026-06</td><td class=n>$1,297</td><td class=n>1,116</td><td class=n>7.58</td></tr><tr><td>2026-07</td><td class=n>$921</td><td class=n>687</td><td class=n>8.27</td></tr><tr><td>2026-08</td><td class=n>$2,032</td><td class=n>721</td><td class=n>7.88</td></tr></table></div>
+
+<h2>Why an effect would be unlikely anyway</h2>
+<ul>
+<li>Google states that ads do not influence organic ranking, and CT's own evidence agrees: the Positly experiment sent 3,443 real people to search "personality test" and click the CT result (organic clicks, not ad clicks), and ranking did not move.</li>
+<li>The more plausible link is the opposite: the ad taking clicks from the organic result on the same page. That didn't show up either: mobile organic CTR was not lower while the ad was showing heavily (0.73% in Sep to Dec 2025, the highest of any period).</li>
+</ul>
+
+<h2>Caveats</h2>
+<ul>
+<li>Positly experiment wave 2 started on 2026-04-16, the same day the ads came back, and each run adds about 0.8 organic clicks. It's controlled for in the regressions, and its runs were 92% desktop, so the mobile series is barely touched.</li>
+<li>GSC keeps 16 months, so earlier switches (the 2024 campaigns) can't be checked.</li>
+<li>This is observational. To actually measure a halo effect, the clean test is a geo split: run the ad in half of a set of matched regions for 6 to 8 weeks and compare organic clicks by region in GSC (country breakdown). That would be powered, unlike this history.</li>
+</ul>
+<small>Source: reports/ads_vs_gsc_personality_test_2026-09-30_src (fetch_data.py, analysis.py, simple_check.py, tests/).</small>
+</main>
+<div class="tip" id="tip"></div>
+<script>
+const D = {"weekly": [{"week": "2025-05-11", "clicks": 3.0, "position": 12.14, "on": 1.0}, {"week": "2025-05-18", "clicks": 5.4, "position": 11.96, "on": 1.0}, {"week": "2025-05-25", "clicks": 3.9, "position": 12.22, "on": 1.0}, {"week": "2025-06-01", "clicks": 7.1, "position": 11.0, "on": 1.0}, {"week": "2025-06-08", "clicks": 10.0, "position": 10.61, "on": 0.29}, {"week": "2025-06-15", "clicks": 8.7, "position": 10.53, "on": 0.0}, {"week": "2025-06-22", "clicks": 17.9, "position": 10.36, "on": 0.0}, {"week": "2025-06-29", "clicks": 17.6, "position": 10.17, "on": 0.0}, {"week": "2025-07-06", "clicks": 16.0, "position": 9.66, "on": 0.0}, {"week": "2025-07-13", "clicks": 64.3, "position": 7.51, "on": 0.0}, {"week": "2025-07-20", "clicks": 56.9, "position": 7.46, "on": 0.0}, {"week": "2025-07-27", "clicks": 50.1, "position": 7.58, "on": 0.0}, {"week": "2025-08-03", "clicks": 53.1, "position": 7.58, "on": 0.0}, {"week": "2025-08-10", "clicks": 62.0, "position": 7.32, "on": 0.0}, {"week": "2025-08-17", "clicks": 65.6, "position": 7.46, "on": 0.0}, {"week": "2025-08-24", "clicks": 71.0, "position": 7.14, "on": 0.0}, {"week": "2025-08-31", "clicks": 77.3, "position": 7.14, "on": 1.0}, {"week": "2025-09-07", "clicks": 95.9, "position": 6.92, "on": 1.0}, {"week": "2025-09-14", "clicks": 98.4, "position": 6.68, "on": 1.0}, {"week": "2025-09-21", "clicks": 65.0, "position": 7.78, "on": 1.0}, {"week": "2025-09-28", "clicks": 92.3, "position": 7.2, "on": 1.0}, {"week": "2025-10-05", "clicks": 96.4, "position": 7.01, "on": 1.0}, {"week": "2025-10-12", "clicks": 84.3, "position": 7.22, "on": 1.0}, {"week": "2025-10-19", "clicks": 86.3, "position": 6.88, "on": 1.0}, {"week": "2025-10-26", "clicks": 69.4, "position": 7.29, "on": 1.0}, {"week": "2025-11-02", "clicks": 73.1, "position": 7.42, "on": 1.0}, {"week": "2025-11-09", "clicks": 79.1, "position": 7.36, "on": 1.0}, {"week": "2025-11-16", "clicks": 72.3, "position": 7.53, "on": 1.0}, {"week": "2025-11-23", "clicks": 63.4, "position": 7.78, "on": 1.0}, {"week": "2025-11-30", "clicks": 67.1, "position": 7.2, "on": 1.0}, {"week": "2025-12-07", "clicks": 76.4, "position": 7.43, "on": 1.0}, {"week": "2025-12-14", "clicks": 55.1, "position": 7.75, "on": 1.0}, {"week": "2025-12-21", "clicks": 60.4, "position": 7.62, "on": 0.0}, {"week": "2025-12-28", "clicks": 82.6, "position": 7.51, "on": 0.0}, {"week": "2026-01-04", "clicks": 44.4, "position": 8.63, "on": 0.0}, {"week": "2026-01-11", "clicks": 42.1, "position": 8.52, "on": 0.0}, {"week": "2026-01-18", "clicks": 33.4, "position": 9.11, "on": 0.0}, {"week": "2026-01-25", "clicks": 34.6, "position": 9.38, "on": 0.0}, {"week": "2026-02-01", "clicks": 32.3, "position": 9.23, "on": 0.0}, {"week": "2026-02-08", "clicks": 25.1, "position": 9.67, "on": 0.0}, {"week": "2026-02-15", "clicks": 26.3, "position": 8.48, "on": 0.0}, {"week": "2026-02-22", "clicks": 11.9, "position": 7.77, "on": 0.0}, {"week": "2026-03-01", "clicks": 20.3, "position": 8.84, "on": 0.0}, {"week": "2026-03-08", "clicks": 10.0, "position": 9.48, "on": 0.0}, {"week": "2026-03-15", "clicks": 12.9, "position": 9.53, "on": 0.0}, {"week": "2026-03-22", "clicks": 26.6, "position": 9.26, "on": 0.0}, {"week": "2026-03-29", "clicks": 27.4, "position": 8.74, "on": 0.0}, {"week": "2026-04-05", "clicks": 37.1, "position": 8.36, "on": 0.0}, {"week": "2026-04-12", "clicks": 43.7, "position": 8.46, "on": 0.57}, {"week": "2026-04-19", "clicks": 17.0, "position": 9.15, "on": 1.0}, {"week": "2026-04-26", "clicks": 14.0, "position": 10.22, "on": 1.0}, {"week": "2026-05-03", "clicks": 27.1, "position": 8.93, "on": 1.0}, {"week": "2026-05-10", "clicks": 38.9, "position": 8.13, "on": 1.0}, {"week": "2026-05-17", "clicks": 77.6, "position": 7.19, "on": 1.0}, {"week": "2026-05-24", "clicks": 74.7, "position": 6.82, "on": 1.0}, {"week": "2026-05-31", "clicks": 60.0, "position": 7.7, "on": 1.0}, {"week": "2026-06-07", "clicks": 33.4, "position": 7.23, "on": 1.0}, {"week": "2026-06-14", "clicks": 33.3, "position": 7.36, "on": 1.0}, {"week": "2026-06-21", "clicks": 27.3, "position": 7.91, "on": 1.0}, {"week": "2026-06-28", "clicks": 20.9, "position": 8.2, "on": 1.0}, {"week": "2026-07-05", "clicks": 9.3, "position": 9.15, "on": 1.0}, {"week": "2026-07-12", "clicks": 23.4, "position": 8.21, "on": 1.0}, {"week": "2026-07-19", "clicks": 29.4, "position": 7.92, "on": 1.0}, {"week": "2026-07-26", "clicks": 30.7, "position": 8.13, "on": 1.0}, {"week": "2026-08-02", "clicks": 34.9, "position": 7.37, "on": 1.0}, {"week": "2026-08-09", "clicks": 19.3, "position": 8.26, "on": 1.0}, {"week": "2026-08-16", "clicks": 14.6, "position": 8.03, "on": 1.0}, {"week": "2026-08-23", "clicks": 19.3, "position": 8.26, "on": 1.0}, {"week": "2026-08-30", "clicks": 21.6, "position": 8.01, "on": 1.0}, {"week": "2026-09-06", "clicks": 14.3, "position": 9.26, "on": 1.0}, {"week": "2026-09-13", "clicks": 13.3, "position": 8.82, "on": 0.29}, {"week": "2026-09-20", "clicks": 14.0, "position": 8.51, "on": 0.0}], "on": [["2025-05-18", "2025-06-10"], ["2025-09-01", "2025-12-21"], ["2026-04-16", "2026-09-15"]], "positly": "2026-04-16"};
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const NS = "http://www.w3.org/2000/svg";
+const el = (t, a, p) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); p && p.appendChild(e); return e; };
+const fmtD = s => new Date(s + "T00:00:00Z").toLocaleDateString("en-US", {month: "short", day: "numeric", year: "numeric", timeZone: "UTC"});
+
+function chart(id, key, invert, fmt) {
+  const host = document.getElementById(id); host.innerHTML = "";
+  const W = 880, H = 220, m = {l: 44, r: 12, t: 12, b: 26};
+  const svg = el("svg", {viewBox: `0 0 ${W} ${H}`, role: "img"}, host);
+  const pts = D.weekly;
+  const t0 = Date.parse(pts[0].week), t1 = Date.parse(pts[pts.length - 1].week) + 6 * 864e5;
+  const x = s => m.l + (Date.parse(s) - t0) / (t1 - t0) * (W - m.l - m.r);
+  const vals = pts.map(p => p[key]);
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  const pad = (hi - lo) * 0.08; lo = invert ? lo - pad : 0; hi = hi + pad;
+  const y = v => invert ? m.t + (v - lo) / (hi - lo) * (H - m.t - m.b) : H - m.b - (v - lo) / (hi - lo) * (H - m.t - m.b);
+  D.on.forEach(([a, b]) => el("rect", {x: x(a), y: m.t, width: Math.max(2, x(b) - x(a)), height: H - m.t - m.b, fill: css("--band")}, svg));
+  const px = x(D.positly);
+  el("line", {x1: px, x2: px, y1: m.t, y2: H - m.b, stroke: css("--marker"), "stroke-width": 1.5, "stroke-dasharray": "3 3"}, svg);
+  const raw = (hi - lo) / 4, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(k => k * mag).find(s => s >= raw);
+  const ticks = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) ticks.push(v);
+  ticks.forEach(v => { const t = el("text", {x: m.l - 8, y: y(v) + 4, "text-anchor": "end", "font-size": 11, fill: css("--muted")}, svg); t.textContent = fmt(v); });
+  el("line", {x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, stroke: css("--rule")}, svg);
+  for (let yy = 2025, mo = 6; yy < 2027; mo += 3) { if (mo > 12) { mo -= 12; yy++; } const s = `${yy}-${String(mo).padStart(2, "0")}-01`;
+    if (Date.parse(s) > t1) break; const t = el("text", {x: x(s), y: H - 8, "text-anchor": "middle", "font-size": 11, fill: css("--muted")}, svg);
+    t.textContent = new Date(s + "T00:00:00Z").toLocaleDateString("en-US", {month: "short", year: "numeric", timeZone: "UTC"}); }
+  el("path", {d: pts.map((p, i) => (i ? "L" : "M") + x(p.week).toFixed(1) + "," + y(p[key]).toFixed(1)).join(""),
+    fill: "none", stroke: css("--series"), "stroke-width": 2, "stroke-linejoin": "round"}, svg);
+  const cross = el("line", {y1: m.t, y2: H - m.b, stroke: css("--muted"), "stroke-width": 1, visibility: "hidden"}, svg);
+  const dot = el("circle", {r: 4.5, fill: css("--series"), stroke: css("--surface"), "stroke-width": 2, visibility: "hidden"}, svg);
+  const hit = el("rect", {x: m.l, y: 0, width: W - m.l - m.r, height: H, fill: "transparent"}, svg);
+  const tip = document.getElementById("tip");
+  hit.addEventListener("mousemove", ev => {
+    const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) / r.width * W;
+    let best = pts[0]; pts.forEach(p => { if (Math.abs(x(p.week) - sx) < Math.abs(x(best.week) - sx)) best = p; });
+    cross.setAttribute("x1", x(best.week)); cross.setAttribute("x2", x(best.week)); cross.setAttribute("visibility", "visible");
+    dot.setAttribute("cx", x(best.week)); dot.setAttribute("cy", y(best[key])); dot.setAttribute("visibility", "visible");
+    tip.innerHTML = `<b>Week of ${fmtD(best.week)}</b><br>${key === "clicks" ? "Clicks/day" : "Position"}: ${fmt(best[key])}<br>Ads ON ${Math.round(best.on * 7)} of 7 days`;
+    tip.style.display = "block";
+    const hr = host.getBoundingClientRect();
+    let left = ev.clientX - hr.left + 14; if (left + 170 > hr.width) left -= 190;
+    tip.style.left = (hr.left + window.scrollX + left) + "px"; tip.style.top = (hr.top + window.scrollY + 10) + "px";
+  });
+  hit.addEventListener("mouseleave", () => { tip.style.display = "none"; cross.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); });
+}
+function draw() { chart("c1", "clicks", false, v => v.toFixed(0)); chart("c2", "position", true, v => (+v.toFixed(1)).toString()); }
+draw();
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+</script>
+</body>
+</html>
