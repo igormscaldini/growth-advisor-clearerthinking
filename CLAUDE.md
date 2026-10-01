@@ -186,7 +186,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - Headless testing of GT runs: Playwright with `channel: 'chrome'` works (plain headless Chrome
   screenshots render blank); such runs are real runs, not test runs. Scripts from the 2026-09-14
   session live in the scratchpad only; rebuild from `guidedtrack/` notes if needed.
-- Workshop sign-up page (Sep 2026, bio final 2026-09-16): program "Career Change Workshop Sign-up" (id 38791, run URL
+- Workshop sign-up page (Sep 2026; workshop held 2026-09-30; since 2026-10-01 the program is a RECORDING page,
+  YouTube nlGCK76aEKk + Overcome course CTA, and the sign-up flow lives in git history): program "Career Change Workshop Sign-up" (id 38791, run URL
   https://www.guidedtrack.com/programs/gg4qpas/run, `?src=` tracks the channel). Settings block at
   the top (dateKnown/lengthKnown/joinLinkKnown flags); sends a confirmation `*email`. The email's
   display name and Reply-To are set in GT Settings -> Branding, not in code. Published at
