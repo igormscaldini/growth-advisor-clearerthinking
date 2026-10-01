@@ -98,7 +98,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   so memory is Fernet-encrypted at rest: `conversations/<date>_<session8>.md.enc` (one per Claude
   Code session), `durable.md.enc` (facts, preferences, corrections), `knowledge/*.md.enc`
   (audience research, communication guidelines). Key: `ADVISOR_MEMORY_KEY` in `.env` and as a
-  GitHub secret; both must match. `python advisor_memory.py show` prints everything decrypted.
+  GitHub secret; both must match. `python advisor_memory.py show` prints durable memory + the last
+  14 days of digests only, and does NOT load `.env` (export the key first); with no argument it
+  prints a fresh random key. To search older digests, `load_dotenv(".env")` then
+  `read_encrypted()` each `*.enc` (write plaintext to the scratchpad only, then delete it).
 - Session digests are produced by `.claude/on-stop.sh` (Stop + SessionEnd hooks in
   `.claude/settings.local.json`; Claude Code snapshots hooks at startup, so hook edits apply
   from the next session). Catch-up manually with `python advisor_conversations.py --sweep`.
