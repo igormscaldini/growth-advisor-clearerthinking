@@ -52,6 +52,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Monday 12:00 (São Paulo) email via Vercel cron + Gmail API (its README has the details).
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
   schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
+- `site_health_check.py` (`site-health-check.yml`, daily): emails Igor ONLY when a check fails or cannot
+  run, plus a Monday "N of 7 ran" summary. Six checks: GA4 key events site-wide and per tool, menu pages,
+  Sign Up links on /plus and /coaching, Stripe checkout (headless Chrome), beehiiv API subscribers. Rules,
+  thresholds and their backtest are in the file header. It exits non-zero on any non-pass because the run
+  conclusion is what the Monday summary reads. The checkout check creates 3 REAL runs a day of GT program
+  34235 (+ unpaid Stripe sessions), tagged `src=healthcheck` / `igormscaldini+healthcheck@gmail.com`:
+  exclude them whenever that program's runs are counted as sign-up clicks.
 - `seo_hub_pages.py`: builds the /all-articles + /all-tools link hubs into `~/Downloads` (paste into a
   NATIVE Wix text element; a Wix HTML embed is an iframe, so its links would not count). Title cache in
   `reports/` is gitignored; re-runs only fetch what is missing.
@@ -124,6 +131,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   ~200k in Aug 2026, ~350k Sep-Oct 2025) are excluded from "new subscribers". Cursor-paginate
   (offset paging caps at 10k). Genuine sign-ups run ~300-500/day.
 - GA4 event names do not mean what they say: see `GA4_EVENTS.md`. "Tools finished" = Submitted Email.
+- Key-event volume is a traffic signal, not a tracking signal: it moves 10x when ad or partner campaigns
+  (`/p/<partner>/` pages) start or stop. Only "an event stopped entirely" indicates breakage. The UPT has
+  fired no `Viewed Privacy Policy` since Sep 2025 (intentional, Igor 2026-10-01). GA4 recorded NOTHING on
+  the UPT pages Jul 22 - Aug 10 2026 (through the X/Twitter wave) while its sign-ups kept reaching beehiiv:
+  treat UPT GA4 numbers for that window as missing, not low.
+- Tools have created beehiiv subscribers through the API (`utm_channel=api`) only since 2026-03-09.
 - GA4 attributes Google Ads (auto-tagged) sessions to the Ads CAMPAIGN NAME (e.g. `[PMAX] Rationality Test`),
   not to the `utm_campaign` in the final URL; filtering GA4 on the utm value shows ~1% of the real sessions.
 - GSC reports only against CANONICAL urls, and several CT_TOOLS.md links are the pre-redirect form.

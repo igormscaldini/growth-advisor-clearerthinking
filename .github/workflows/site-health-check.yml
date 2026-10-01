@@ -1,0 +1,56 @@
+name: Daily site health check
+
+on:
+  schedule:
+    # 10:00 UTC daily. GitHub throttles schedule events on this repo (see CLAUDE.md), so the run
+    # usually lands around 14:00 UTC; by then GA4 has finished yesterday's (US Eastern) data.
+    - cron: "0 10 * * *"
+  workflow_dispatch:
+    inputs:
+      heartbeat:
+        description: "Also send the weekly summary email (automatic on Mondays)"
+        type: boolean
+        default: false
+
+# actions: read lets the Monday summary read this workflow's run history.
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: site-health-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      # Playwright drives the runner's preinstalled Google Chrome (channel="chrome"), so no
+      # browser download is needed. It is installed here only: the dashboard does not need it.
+      - name: Install dependencies
+        run: pip install -r requirements.txt playwright
+
+      # Exits non-zero when any check did not pass or the alert could not be emailed: the run's
+      # conclusion is what the weekly summary reads, and GitHub's failure notification is the
+      # backstop if Gmail itself is down.
+      - name: Run the checks and email Igor if anything is wrong
+        env:
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          OAUTH_CLIENT_JSON: ${{ secrets.OAUTH_CLIENT_JSON }}
+          GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+          BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
+          BEEHIIV_PUB_CLEARER_THINKING: ${{ secrets.BEEHIIV_PUB_CLEARER_THINKING }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GITHUB_TOKEN: ${{ github.token }}
+          # Only used if the email itself cannot be sent.
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_DEFAULT_CHANNEL: ${{ secrets.SLACK_DEFAULT_CHANNEL }}
+        run: python site_health_check.py ${{ inputs.heartbeat && '--heartbeat' || '' }}
