@@ -353,8 +353,9 @@ def test_beehiiv_stale_or_empty_fails():
 
 
 def test_beehiiv_ratio_against_ga4_submitted_email():
-    created = [NOW - 60] + [START + i for i in range(30)]    # 30 yesterday
-    assert shc.evaluate_beehiiv(created, START, END, NOW, ga4_submitted=100).status == PASS   # exactly 30%
+    created = [NOW - 60] + [START + i for i in range(20)]    # 20 yesterday
+    assert shc.MIN_SHARE_OF_SUBMITTED == 0.20
+    assert shc.evaluate_beehiiv(created, START, END, NOW, ga4_submitted=100).status == PASS   # exactly 20%
     low = shc.evaluate_beehiiv(created, START, END, NOW, ga4_submitted=101)
     assert low.status == FAIL and "not reaching beehiiv" in low.problems[0]
     # Too few GA4 events to judge the ratio, or GA4 unavailable: freshness alone decides.

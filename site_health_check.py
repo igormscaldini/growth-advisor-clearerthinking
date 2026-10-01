@@ -99,7 +99,11 @@ PRICE_RE = re.compile(r"\d+[.,]\d{2}")
 # ---- beehiiv ---------------------------------------------------------------------------------
 API_CHANNEL = "api"
 MAX_API_SUB_AGE_HOURS = 3
-MIN_SHARE_OF_SUBMITTED = 0.30   # API subscribers / GA4 Submitted Email ran 0.63-1.54 in Sep 2026
+# API subscribers per GA4 Submitted Email. Since the tools began writing to beehiiv (2026-03-09)
+# the daily ratio's low was 0.25, on one GA4 spike day (2026-03-19); otherwise 0.46 and up. A broken
+# pipe gives a ratio near 0. (Backtested on the committed new-subscriber cache: all non-import
+# channels by UTC day, of which API subscribers are about 98%.)
+MIN_SHARE_OF_SUBMITTED = 0.20
 MIN_SUBMITTED_FOR_RATIO = 50    # below this the ratio is too noisy to judge
 BEEHIIV_MAX_PAGES = 150         # 15k subscribers; a walk that long means paging is broken
 
