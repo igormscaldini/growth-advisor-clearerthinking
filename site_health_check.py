@@ -1,5 +1,5 @@
-"""Daily health check of the Clearer Thinking site. Emails Igor one "Website Checks - <date>"
-message a day listing every check and its status, whether or not anything failed.
+"""Daily health check of the Clearer Thinking site. Emails Igor one "Website Checks - <date>:
+<outcome>" message a day listing every check and its status, whether or not anything failed.
 
 Six checks, each ending PASS, FAIL or UNKNOWN (reported as "COULD NOT CHECK"):
 
@@ -679,6 +679,14 @@ def report_date(now: Optional[datetime] = None) -> date:
     return (now or datetime.now(timezone.utc)).astimezone(ZoneInfo(REPORT_TZ)).date()
 
 
+def outcome(results: list) -> str:
+    """The subject's suffix, so a bad day stands out in the inbox: "all passed", "1 failed",
+    "2 could not check", "1 failed, 1 could not check"."""
+    counts = [(sum(r.status == status for r in results), STATUS_LABEL[status].lower())
+              for status in (FAIL, UNKNOWN)]
+    return ", ".join(f"{n} {label}" for n, label in counts if n) or "all passed"
+
+
 def compose_email(results: list, day: date) -> tuple:
     """(subject, body) of the daily email: every check that ran and its status, with the reason
     indented under any that did not pass."""
@@ -687,7 +695,7 @@ def compose_email(results: list, day: date) -> tuple:
     for r in results:
         lines.append(f"{r.name}: {STATUS_LABEL[r.status]}")
         lines += [f"    {p}" for p in r.problems]
-    return f"{EMAIL_SUBJECT} - {day}", "\n".join(lines)
+    return f"{EMAIL_SUBJECT} - {day}: {outcome(results)}", "\n".join(lines)
 
 
 def send(subject: str, body: str) -> bool:

@@ -454,7 +454,7 @@ def test_email_when_everything_passes():
     results = [CheckResult("GA4 key events (site-wide)", PASS, "Viewed 1,735 on 2026-10-01"),
                CheckResult("Stripe checkout", PASS, "all 3 tiers reach a Stripe checkout")]
     subject, body = shc.compose_email(results, date(2026, 10, 2))
-    assert subject == "Website Checks - 2026-10-02"
+    assert subject == "Website Checks - 2026-10-02: all passed"
     assert body == "All 2 checks passed.\n\nGA4 key events (site-wide): OK\nStripe checkout: OK"
 
 
@@ -464,13 +464,22 @@ def test_email_lists_every_check_in_run_order_with_reasons_under_the_ones_that_d
                CheckResult("beehiiv", UNKNOWN, "", ["HTTPError: 401"]),
                CheckResult("Links", PASS, "fine")]
     subject, body = shc.compose_email(results, date(2026, 10, 2))
-    assert subject == "Website Checks - 2026-10-02"   # the same subject whatever the outcome
+    assert subject == "Website Checks - 2026-10-02: 1 failed, 1 could not check"
     assert body == ("2 of 4 checks did not pass.\n\n"
                     "Pages: OK\n"
                     "Checkout: FAILED\n    navigator: never reached Stripe\n    explorer: no price\n"
                     "beehiiv: COULD NOT CHECK\n    HTTPError: 401\n"
                     "Links: OK")
     assert "\u2014" not in subject + body   # Igor's rule: no em dashes
+
+
+def test_outcome_counts_each_kind_of_bad_result():
+    ok, bad, unk = (CheckResult("x", status, "") for status in (PASS, FAIL, UNKNOWN))
+    assert shc.outcome([ok, ok]) == "all passed"
+    assert shc.outcome([ok, bad]) == "1 failed"
+    assert shc.outcome([bad, ok, bad]) == "2 failed"
+    assert shc.outcome([unk, ok]) == "1 could not check"
+    assert shc.outcome([unk, bad, unk]) == "1 failed, 2 could not check"
 
 
 def test_report_date_is_igors_local_date():
