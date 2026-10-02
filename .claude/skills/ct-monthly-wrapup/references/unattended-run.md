@@ -24,6 +24,8 @@ curl -fsSL $BASE/references/examples.md
 
 Target month = the calendar month before today's UTC date (`date -u`). Below, `{Month}` is its English name (for example `October`) and `{month}` the lowercase form.
 
+**Network.** The cloud environment only reaches hosts on its allow list, and the connectors (beehiiv, Gmail) do not go through it. The crawl needs `podcast.clearerthinking.org` and `www.youtube.com`; the link check needs `www.clearerthinking.org` and `programs.clearerthinking.org`. Igor adds them in the environment's network settings on claude.ai. A blocked host shows up as a 403 from `curl` or `EGRESS_BLOCKED` from WebFetch: do not look for a way around it, report it. The first preflight (2026-10-02) found the podcast and YouTube hosts blocked.
+
 ## 1. Skip if it already exists (`normal` mode only)
 
 List beehiiv posts (publication `pub_d0ed5a5f-0bca-4054-ab2c-73fd51707f71`, statuses draft, scheduled and published). If one is titled exactly `Monthly Debrief - {Month}` and was created in the last 45 days, do not build another: send the email in step 6 with that post's `editor_url`, say it already existed, and stop.
@@ -35,7 +37,7 @@ Follow Phase 1 of `SKILL.md` and read every surviving piece in full. Notes that 
 - **beehiiv:** read with the connector (`list_posts`, then `get_post_content` format `text`). The text format drops block quotes; that is expected.
 - **Podcast:** `curl` the RSS and each episode page; the page carries the full transcript. `pubDate` is UTC and can differ by a day from the date printed on the page.
 - **YouTube:** the channel feed gives title, link and description. Try for the transcript (`pip install youtube-transcript-api`, then `YouTubeTranscriptApi().fetch(video_id, languages=['en'])`). If YouTube blocks it, write the bullet only from the description and chapter list, or drop the video when that is too thin to support a grounded bullet.
-- A source that stays unreachable after three tries is skipped, and the email says which one.
+- A source that stays unreachable after three tries is skipped: build the draft from what could be read in full, never from a newsletter blurb about a piece you could not open. The email then leads with what is missing and why, and its subject becomes `CT wrap-up for {Month} is on beehiiv, but incomplete`.
 
 ## 3. The two gates, decided without Igor
 
@@ -49,7 +51,7 @@ Write per `voice-and-format.md` (title line `Some of Our Most Important Ideas Fr
 
 - no `—` or `–` anywhere in the copy;
 - every number, name and episode number in a bullet appears in that bullet's own source;
-- every link returns 200 and is the canonical one: the `clearerthinking.org/post/...` article URL, the podcast episode URL with its trailing slash, the YouTube watch URL, and for a tool the URL its launch email used.
+- every link returns 200 and is the canonical one: the `clearerthinking.org/post/...` article URL, the podcast episode URL with its trailing slash, the YouTube watch URL, and for a tool the URL its launch email used. If a link's host is blocked, keep the link as the source gave it and say in the email that it was not checked.
 
 ## 5. Build the beehiiv draft
 
@@ -97,5 +99,5 @@ If the draft cannot be built, still email `EMAIL_TO`: subject `CT wrap-up for {M
 
 ## Other modes
 
-- **`preflight`:** change nothing in beehiiv. Check and report by email (subject `[TEST] CT wrap-up routine preflight`): the three skill files fetched; the podcast RSS, one episode page with its transcript, and the YouTube feed are reachable; whether a video transcript can be fetched; beehiiv `list_posts` works and which post would be used as the template; whether a `Monthly Debrief - {Month}` post already exists.
+- **`preflight`:** change nothing in beehiiv. Check and report by email (subject `[TEST] CT wrap-up routine preflight`): the three skill files fetched; the podcast RSS, one episode page with its transcript, and the YouTube feed are reachable; whether a video transcript can be fetched; `www.clearerthinking.org` and `programs.clearerthinking.org` respond; beehiiv `list_posts` works and which post would be used as the template; whether a `Monthly Debrief - {Month}` post already exists.
 - **`test`:** a full run that skips step 1. Title the draft `[ROUTINE TEST] Monthly Debrief - {Month}` with slug `routine-test-monthly-debrief-{month}`, and prefix the email subject with `[TEST]`. Igor deletes the test draft afterwards.
