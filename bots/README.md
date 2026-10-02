@@ -17,7 +17,6 @@ Last verified: 2026-10-02 (states and last runs below are from that day).
 | [Weekly growth-advisor letter](#weekly-growth-advisor-letter) | Friday letter: results, the week's work, next priorities | Fridays 11:00 | GitHub Actions | 2026-06-14 | Active. Last run 2026-09-25 passed |
 | [Advisor reply handler](#advisor-reply-handler) | Answers Igor's email replies to the letter with live data | Every 5 min (nominal) | GitHub Actions | 2026-06-14 | Active, passing |
 | [Dashboard snapshot](#dashboard-snapshot) | Refreshes the data behind the Vercel dashboard | Every 30 min (nominal) | GitHub Actions | 2026-05-26 | Active, passing |
-| [Hourly email responder](#hourly-email-responder) | Drafts Gmail replies in Igor's voice | Hourly | Claude cloud routine | 2026-07-14 | Disabled. Last fired 2026-07-19 |
 | [Newsletter ratings email](#newsletter-ratings-email) | Monday email with the newsletter ratings | Mondays 15:00 | Vercel cron, separate project | Sep 2026 | Not checked from here |
 
 ## Three things that apply to all of them
@@ -53,10 +52,6 @@ Cloud routines: https://claude.ai/code/routines (run now, pause, edit the prompt
 ### Weekly growth-advisor letter as a routine (optional)
 
 The Friday letter can also run as a cloud routine instead of through GitHub Actions. It is documented in [ADVISOR_ROUTINE.md](ADVISOR_ROUTINE.md) and is not set up as a routine today; the GitHub workflow below is the live path.
-
-### Hourly email responder
-
-Reads unread Gmail threads and saves draft replies in Igor's voice; it can only draft, never send. Disabled since July 2026.
 
 ## GitHub Actions bots (this repository)
 
@@ -126,4 +121,4 @@ Add a row to the table and a short section here in the same shape (does, code, t
 
 - **Workshop sign-ups sync** (workflow `workshop-signups-sync.yml`, `workshop_signups_sheet.py`): deleted 2026-10-02, the workshop was over. The code is in git history.
 - **Positly Reddit finder** (`positly_reddit_recruiter.py`, launchd job `com.positly.reddit-finder`): deleted 2026-10-02, job unloaded and its plist removed.
-- **Positly cloud routines** (Saturday performance report, Monday lead import): disabled 2026-10-02, to be deleted on claude.ai.
+- **Positly cloud routines** (Saturday performance report, Monday lead import) and the **hourly email responder**: deleted on claude.ai by Igor, 2026-10-02.
