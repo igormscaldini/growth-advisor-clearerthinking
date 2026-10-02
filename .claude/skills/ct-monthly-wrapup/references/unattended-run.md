@@ -41,7 +41,7 @@ Follow Phase 1 of `SKILL.md` and read every surviving piece in full. Notes that 
 
 ## 3. The two gates, decided without Igor
 
-- **Shortlist:** 8 to 10 bullets. A new tool always stays and goes first. After that, prefer pieces with one concrete, surprising, well-supported idea and keep a mix of articles, podcasts and videos. Drop first: compilations of older material, Q&A or promo pieces with no single idea, and whatever is lightest on ideas. Every dropped item is listed in the email with a one-line reason.
+- **Shortlist:** 8 to 10 bullets, fewer when fewer pieces could be read. One bullet per piece; a second from the same piece only when it carries a clearly separate idea. A new tool always stays and goes first. After that, prefer pieces with one concrete, surprising, well-supported idea and keep a mix of articles, podcasts and videos. Drop first: compilations of older material, Q&A or promo pieces with no single idea, and whatever is lightest on ideas. Every dropped item is listed in the email with a one-line reason.
 - **Actionable Insight:** the most concrete thing a reader can do today. Read the previous debrief first and pick a different theme from it. Its source may also have a bullet, as long as the bullet and the actionable cover different ideas.
 - **Length:** each bullet 60 to 90 words including the bold lead-in; the actionable at most about 110 words; the whole email at most about 1,100 words. "In 2 Minutes" is a promise.
 
@@ -57,7 +57,7 @@ Write per `voice-and-format.md` (title line `Some of Our Most Important Ideas Fr
 
 Duplicate the previous edition instead of creating a blank post. The copy keeps the logo and banner images, the grey Actionable Insight box, the closing text and the email audience; a blank post would default to the free list, which is the wrong audience.
 
-1. Find the template: the most recent post titled `Monthly Debrief - <Month>` in any status, ignoring titles that contain `TEST`. Normally that is last month's edition.
+1. Find the template: the `Monthly Debrief - <Month>` post for the month before the target month, in any status. If there is none, take the most recent earlier edition. Ignore titles that contain `TEST`.
 2. `duplicate_post` on it. The copy is a draft.
 3. `get_post_content` (format `editor_html`) on the copy. The blocks are, in order: logo image, centered title paragraph, banner image, opening paragraph, transition paragraph, one paragraph per bullet, the Actionable Insight section, two closing paragraphs.
 4. One `edit_post_content` call:

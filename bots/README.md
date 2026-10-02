@@ -8,7 +8,7 @@ Last verified: 2026-10-02 (states and last runs below are from that day).
 
 | Bot | What it does | When (UTC) | Runs on | Since | State on 2026-10-02 |
 |---|---|---|---|---|---|
-| [Monthly wrap-up draft](#monthly-wrap-up-draft) | Builds the CT+ "Monthly Debrief" as a beehiiv draft, emails Igor to review it | 1st of month, 12:00 | Claude cloud routine | 2026-10-02 | Enabled. First scheduled run 2026-11-01. Podcast and YouTube hosts still blocked in the cloud environment |
+| [Monthly wrap-up draft](#monthly-wrap-up-draft) | Builds the CT+ "Monthly Debrief" as a beehiiv draft, emails Igor to review it | 1st of month, 12:00 | Claude cloud routine | 2026-10-02 | Enabled. Tested end to end 2026-10-02. First scheduled run 2026-11-01. Podcast, YouTube and clearerthinking.org hosts still blocked in the cloud environment |
 | [Daily site health check](#daily-site-health-check) | Six checks of the CT site; emails only when one does not pass | Daily 10:00 | GitHub Actions | 2026-10-01 | Active. Only run so far (manual, 2026-10-01) reported failed sign-up links on /plus and /coaching |
 | [All Articles hub sync](#all-articles-hub-sync) | Keeps the Wix "All Clearer Thinking Articles" post in step with the sitemap | Mondays 12:20 | GitHub Actions | 2026-09-30 | Active. Two manual runs passed; first scheduled run 2026-10-05 |
 | [Workshop sign-ups sync](#workshop-sign-ups-sync) | Backfills Career Workshop sign-ups into a Google Sheet | Every 6 h | GitHub Actions | 2026-09-16 | Active and passing, but the workshop was held 2026-09-30: candidate to retire |
