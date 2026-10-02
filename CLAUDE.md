@@ -162,6 +162,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   they expose 3 and 0 links respectively in raw HTML, which is the real cause of CT's indexing backlog.
 - Gmail: SMTP app passwords are blocked from GitHub Actions; send and read through the Gmail API
   with the shared Google token (`secrets/ga4-token.json`, scopes incl. gmail.send/modify).
+  IMPORTANT: mail sent from Igor's address to itself is filed under Sent ONLY (no INBOX, no UNREAD), so
+  he never sees it arrive. Every report this repo sends behaves that way; pass `to_inbox=True` to
+  `email_transport.send_email` (as the site check does) for anything he must notice.
   To add scopes: edit SCOPES in `auth_ga4.py`, re-run it, then `gh secret set GOOGLE_TOKEN_JSON`.
   `secrets/slides-token.json` is a separate Slides-only token (presentations scope, same OAuth
   client) for editing Igor's Google Slides decks in place via the Slides API `replaceAllText`;

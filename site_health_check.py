@@ -213,8 +213,9 @@ def top_tool_medians(by_tool: dict, day: date) -> dict:
 
 
 def _tool_state(by_tool: dict, day: date, tool: str, medians: dict) -> tuple:
-    """(dead events, busiest event count, usual daily total) for one tool on `day`. An event is
-    dead when the tool usually fires it (median >= TOOL_MIN_BASELINE) and it did not fire once."""
+    """(dead events, busiest event count, usual daily total, silent) for one tool on `day`. An
+    event is dead when the tool usually fires it (median >= TOOL_MIN_BASELINE) and it did not fire
+    once; the tool is silent when every event it usually fires is dead."""
     counts = by_tool[tool].get(day.isoformat(), {})
     expected = [ev for ev in KEY_EVENTS if medians[ev] >= TOOL_MIN_BASELINE]
     dead = [ev for ev in expected if counts.get(ev, 0) == 0]
