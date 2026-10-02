@@ -55,11 +55,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Monday 12:00 (São Paulo) email via Vercel cron + Gmail API (its README has the details).
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
   schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
-- `site_health_check.py` (`site-health-check.yml`, daily): emails Igor ONLY when a check fails or cannot
-  run, plus a Monday "N of 7 ran" summary. Six checks: GA4 key events site-wide and per tool, menu pages,
+- `site_health_check.py` (`site-health-check.yml`, daily): sends Igor ONE "Website Checks - <date>" email
+  every day listing each check and its status (his choice 2026-10-02: no alert-only mode, no weekly
+  summary, never two emails). Six checks: GA4 key events site-wide and per tool, menu pages,
   Sign Up links on /plus and /coaching, Stripe checkout (headless Chrome), beehiiv API subscribers. Rules,
-  thresholds and their backtest are in the file header. It exits non-zero on any non-pass because the run
-  conclusion is what the Monday summary reads. The checkout check creates 3 REAL runs a day of GT program
+  thresholds and their backtest are in the file header. It exits non-zero only when the email could not be
+  sent (a failed run triggers GitHub's own email). The checkout check creates 3 REAL runs a day of GT program
   34235 (+ unpaid Stripe sessions), tagged `src=healthcheck` / `igormscaldini+healthcheck@gmail.com`:
   exclude them whenever that program's runs are counted as sign-up clicks.
 - `seo_hub_pages.py`: builds the /all-articles + /all-tools link hubs into `~/Downloads` (paste into a

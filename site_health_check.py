@@ -1,4 +1,5 @@
-"""Daily health check of the Clearer Thinking site. Emails Igor only when something is wrong.
+"""Daily health check of the Clearer Thinking site. Emails Igor one "Website Checks - <date>"
+message a day listing every check and its status, whether or not anything failed.
 
 Six checks, each ending PASS, FAIL or UNKNOWN (reported as "COULD NOT CHECK"):
 
@@ -10,18 +11,18 @@ Six checks, each ending PASS, FAIL or UNKNOWN (reported as "COULD NOT CHECK"):
   checkout  that program really ends on a Stripe checkout page, for each tier
   beehiiv   the API is still creating subscribers
 
-    python site_health_check.py                 # run everything, email if anything is not PASS
-    python site_health_check.py --dry-run       # print the result, send nothing
+    python site_health_check.py                 # run everything and send the daily email
+    python site_health_check.py --dry-run       # print the email instead of sending it
     python site_health_check.py --only links,checkout
-    python site_health_check.py --heartbeat     # also send the weekly summary (automatic on Mondays)
 
 A check that does not pass is run a second time before it counts: Wix rate limiting and slow
 GuidedTrack responses both produce convincing false negatives on a single attempt.
 
-The process exits non-zero whenever a check did not pass or the email could not be sent. That is
-deliberate: the run's conclusion is the only record the weekly summary reads, and GitHub's own
-"workflow failed" notification is the backstop when Gmail itself is what broke (the same Google
-token powers both the GA4 check and the sending).
+The process exits non-zero ONLY when the email could not be sent, never because a check failed:
+Igor wants exactly one email a day, and a failed run makes GitHub send its own. GitHub's "workflow
+failed" notification is therefore the backstop for the one case the email cannot cover, Gmail
+itself being down (the same Google token powers both the GA4 check and the sending). A day with
+no email at all means the monitor did not run.
 
 The checkout check creates REAL runs of GuidedTrack program 34235 and real (unpaid, self-expiring)
 Stripe Checkout Sessions, three a day. They are tagged src=healthcheck and use HEALTHCHECK_EMAIL:
@@ -120,8 +121,8 @@ NAMES = {
     "checkout": "Stripe checkout",
     "beehiiv": "beehiiv API subscribers",
 }
-EMAIL_TAG = "[CT site check]"
-WORKFLOW_FILE = "site-health-check.yml"
+EMAIL_SUBJECT = "Website Checks"
+REPORT_TZ = "America/Sao_Paulo"   # Igor's clock: decides the date in the subject
 
 
 @dataclass
@@ -672,70 +673,21 @@ def run_check(key: str, ctx: Context, retry: bool, sleep: Callable = time.sleep)
 # =============================================================================
 # Emails
 # =============================================================================
-def compose_alert(results: list, when: datetime, retried: bool, run_url: str = "") -> Optional[tuple]:
-    """(subject, body) for the alert email, or None when every check passed."""
-    failed = [r for r in results if r.status == FAIL]
-    unknown = [r for r in results if r.status == UNKNOWN]
-    if not failed and not unknown:
-        return None
-    parts = []
-    if failed:
-        parts.append("FAILED: " + ", ".join(r.name for r in failed))
-    if unknown:
-        parts.append(("COULD NOT CHECK: " if not failed else "could not check: ")
-                     + ", ".join(r.name for r in unknown))
-    lines = [f"CT site check, {when:%a %Y-%m-%d %H:%M} UTC", ""]
-    for r in failed + unknown:
-        lines.append(f"{STATUS_LABEL[r.status]}: {r.name}")
-        lines += [f"  - {p}" for p in r.problems]
-        lines.append("")
-    if unknown:
-        lines += ["COULD NOT CHECK means the check itself did not run, not that the site is broken.", ""]
-    lines += [f"OK: {r.name}: {r.summary}" for r in results if r.status == PASS]
-    if retried:
-        lines += ["", f"Every check listed as {STATUS_LABEL[FAIL]} or {STATUS_LABEL[UNKNOWN]} was run twice, "
-                      f"{RETRY_WAIT_SECONDS} seconds apart, before this email was sent."]
-    if run_url:
-        lines += ["", f"Run log: {run_url}"]
-    return f"{EMAIL_TAG} {' | '.join(parts)}", "\n".join(lines)
+def report_date(now: Optional[datetime] = None) -> date:
+    from zoneinfo import ZoneInfo
+
+    return (now or datetime.now(timezone.utc)).astimezone(ZoneInfo(REPORT_TZ)).date()
 
 
-def week_outcomes(runs: list, today: date, today_ok: bool) -> list:
-    """[(day, True passed / False problems / None did not run)] for the 7 days ending today.
-
-    `runs` are GitHub workflow runs (created_at, status, conclusion). A day takes the conclusion
-    of its last completed run; today comes from this process, whose own run is still in progress.
-    """
-    last: dict = {}
-    for run in sorted(runs, key=lambda r: r["created_at"]):
-        if run.get("status") == "completed":
-            last[run["created_at"][:10]] = run.get("conclusion") == "success"
-    days = [today - timedelta(days=i) for i in range(6, 0, -1)]
-    return [(d, last.get(d.isoformat())) for d in days] + [(today, today_ok)]
-
-
-def compose_heartbeat(outcomes: list) -> tuple:
-    ran = [d for d, ok in outcomes if ok is not None]
-    bad = [d for d, ok in outcomes if ok is False]
-    headline = f"{len(ran)} of {len(outcomes)} daily checks ran, "
-    headline += "all passed" if not bad else f"{len(bad)} found problems"
-    word = {True: "passed", False: "problems found (see that day's alert email)", None: "DID NOT RUN"}
-    lines = [headline + ".", ""] + [f"{d:%a %Y-%m-%d}: {word[ok]}" for d, ok in outcomes]
-    if len(ran) < len(outcomes):
-        lines += ["", "A day with no run means the monitor itself was down that day, so nothing "
-                      "was checked. A scheduled run that slipped past midnight UTC also shows up this way."]
-    return f"{EMAIL_TAG} Weekly: {headline}", "\n".join(lines)
-
-
-def fetch_workflow_runs(since: date) -> list:
-    repo, token = os.getenv("GITHUB_REPOSITORY"), os.getenv("GITHUB_TOKEN")
-    if not repo or not token:
-        raise RuntimeError("GITHUB_REPOSITORY / GITHUB_TOKEN not set (run history is only available in CI)")
-    r = requests.get(f"https://api.github.com/repos/{repo}/actions/workflows/{WORKFLOW_FILE}/runs",
-                     headers={"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"},
-                     params={"created": f">={since.isoformat()}", "per_page": 100}, timeout=30)
-    r.raise_for_status()
-    return r.json()["workflow_runs"]
+def compose_email(results: list, day: date) -> tuple:
+    """(subject, body) of the daily email: every check that ran and its status, with the reason
+    indented under any that did not pass."""
+    bad = sum(r.status != PASS for r in results)
+    lines = [f"{bad} of {len(results)} checks did not pass." if bad else f"All {len(results)} checks passed.", ""]
+    for r in results:
+        lines.append(f"{r.name}: {STATUS_LABEL[r.status]}")
+        lines += [f"    {p}" for p in r.problems]
+    return f"{EMAIL_SUBJECT} - {day}", "\n".join(lines)
 
 
 def send(subject: str, body: str) -> bool:
@@ -755,10 +707,9 @@ def send(subject: str, body: str) -> bool:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--dry-run", action="store_true", help="print the result, send no email")
+    ap.add_argument("--dry-run", action="store_true", help="print the email instead of sending it")
     ap.add_argument("--only", help="comma-separated subset of: " + ", ".join(CHECKS))
     ap.add_argument("--no-retry", action="store_true", help="do not re-run a check that did not pass")
-    ap.add_argument("--heartbeat", action="store_true", help="send the weekly summary (automatic on Mondays)")
     args = ap.parse_args()
 
     import secrets_loader
@@ -778,32 +729,11 @@ def main() -> int:
         for p in result.problems:
             print(f"    - {p}")
 
-    now = datetime.now(timezone.utc)
-    all_ok = all(r.status == PASS for r in results)
-    delivered = True
-    run_url = ""
-    if os.getenv("GITHUB_RUN_ID"):
-        run_url = (f"{os.getenv('GITHUB_SERVER_URL', 'https://github.com')}/"
-                   f"{os.getenv('GITHUB_REPOSITORY')}/actions/runs/{os.getenv('GITHUB_RUN_ID')}")
-
-    emails = []
-    alert = compose_alert(results, now, retried=not args.no_retry, run_url=run_url)
-    if alert:
-        emails.append(alert)
-    if args.heartbeat or now.weekday() == 0:
-        try:
-            runs = fetch_workflow_runs(now.date() - timedelta(days=7))
-            emails.append(compose_heartbeat(week_outcomes(runs, now.date(), all_ok)))
-        except Exception as e:  # noqa: BLE001 - the summary must not hide today's result
-            emails.append((f"{EMAIL_TAG} Weekly: summary unavailable",
-                           f"Today's check {'passed' if all_ok else 'found problems'}, but the week's "
-                           f"run history could not be read: {type(e).__name__}: {e}"))
-    for subject, body in emails:
-        if args.dry_run:
-            print(f"\n--- would email ---\nSubject: {subject}\n\n{body}")
-        else:
-            delivered = send(subject, body) and delivered
-    return 0 if all_ok and delivered else 1
+    subject, body = compose_email(results, report_date())
+    if args.dry_run:
+        print(f"\n--- would email ---\nSubject: {subject}\n\n{body}")
+        return 0
+    return 0 if send(subject, body) else 1
 
 
 if __name__ == "__main__":

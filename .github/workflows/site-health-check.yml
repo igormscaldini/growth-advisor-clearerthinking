@@ -6,16 +6,9 @@ on:
     # usually lands around 14:00 UTC; by then GA4 has finished yesterday's (US Eastern) data.
     - cron: "0 10 * * *"
   workflow_dispatch:
-    inputs:
-      heartbeat:
-        description: "Also send the weekly summary email (automatic on Mondays)"
-        type: boolean
-        default: false
 
-# actions: read lets the Monday summary read this workflow's run history.
 permissions:
   contents: read
-  actions: read
 
 concurrency:
   group: site-health-check
@@ -38,10 +31,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt playwright
 
-      # Exits non-zero when any check did not pass or the alert could not be emailed: the run's
-      # conclusion is what the weekly summary reads, and GitHub's failure notification is the
-      # backstop if Gmail itself is down.
-      - name: Run the checks and email Igor if anything is wrong
+      # Sends one "Website Checks - <date>" email whatever the outcome. The step fails only when
+      # that email could not be sent: Igor wants a single email a day, and a failed run would make
+      # GitHub send a second one. A failed run therefore means "Gmail is down", nothing else.
+      - name: Run the checks and email Igor the results
         env:
           GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
           OAUTH_CLIENT_JSON: ${{ secrets.OAUTH_CLIENT_JSON }}
@@ -49,8 +42,7 @@ jobs:
           BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
           BEEHIIV_PUB_CLEARER_THINKING: ${{ secrets.BEEHIIV_PUB_CLEARER_THINKING }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
-          GITHUB_TOKEN: ${{ github.token }}
           # Only used if the email itself cannot be sent.
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_DEFAULT_CHANNEL: ${{ secrets.SLACK_DEFAULT_CHANNEL }}
-        run: python site_health_check.py ${{ inputs.heartbeat && '--heartbeat' || '' }}
+        run: python site_health_check.py

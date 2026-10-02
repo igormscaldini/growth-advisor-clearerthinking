@@ -449,65 +449,63 @@ def test_every_check_has_a_name():
     assert set(shc.NAMES) == set(shc.CHECKS)
 
 
-# ---- emails --------------------------------------------------------------------------------------
-WHEN = datetime(2026, 10, 1, 14, 5, tzinfo=timezone.utc)
+# ---- the daily email --------------------------------------------------------------------------------
+def test_email_when_everything_passes():
+    results = [CheckResult("GA4 key events (site-wide)", PASS, "Viewed 1,735 on 2026-10-01"),
+               CheckResult("Stripe checkout", PASS, "all 3 tiers reach a Stripe checkout")]
+    subject, body = shc.compose_email(results, date(2026, 10, 2))
+    assert subject == "Website Checks - 2026-10-02"
+    assert body == "All 2 checks passed.\n\nGA4 key events (site-wide): OK\nStripe checkout: OK"
 
 
-def test_no_alert_when_everything_passes():
-    assert shc.compose_alert([CheckResult("a", PASS, "fine")], WHEN, retried=True) is None
-
-
-def test_alert_subject_and_body():
+def test_email_lists_every_check_in_run_order_with_reasons_under_the_ones_that_did_not_pass():
     results = [CheckResult("Pages", PASS, "21 pages load"),
-               CheckResult("Checkout", FAIL, "", ["navigator: never reached Stripe"]),
-               CheckResult("beehiiv", UNKNOWN, "", ["HTTPError: 401"])]
-    subject, body = shc.compose_alert(results, WHEN, retried=True, run_url="https://github.com/x/runs/1")
-    assert subject == "[CT site check] FAILED: Checkout | could not check: beehiiv"
-    assert "Thu 2026-10-01 14:05 UTC" in body
-    assert "FAILED: Checkout\n  - navigator: never reached Stripe" in body
-    assert "COULD NOT CHECK: beehiiv\n  - HTTPError: 401" in body
-    assert "OK: Pages: 21 pages load" in body
-    assert "run twice" in body and "https://github.com/x/runs/1" in body
-    assert "—" not in subject + body   # Igor's rule: no em dashes
+               CheckResult("Checkout", FAIL, "", ["navigator: never reached Stripe", "explorer: no price"]),
+               CheckResult("beehiiv", UNKNOWN, "", ["HTTPError: 401"]),
+               CheckResult("Links", PASS, "fine")]
+    subject, body = shc.compose_email(results, date(2026, 10, 2))
+    assert subject == "Website Checks - 2026-10-02"   # the same subject whatever the outcome
+    assert body == ("2 of 4 checks did not pass.\n\n"
+                    "Pages: OK\n"
+                    "Checkout: FAILED\n    navigator: never reached Stripe\n    explorer: no price\n"
+                    "beehiiv: COULD NOT CHECK\n    HTTPError: 401\n"
+                    "Links: OK")
+    assert "\u2014" not in subject + body   # Igor's rule: no em dashes
 
 
-def test_alert_for_could_not_check_only():
-    subject, body = shc.compose_alert([CheckResult("GA4", UNKNOWN, "", ["boom"])], WHEN, retried=False)
-    assert subject == "[CT site check] COULD NOT CHECK: GA4"
-    assert "run twice" not in body and "did not run, not that the site is broken" in body
+def test_report_date_is_igors_local_date():
+    # 01:30 UTC on Oct 3 is still Oct 2 in Sao Paulo (UTC-3).
+    assert shc.report_date(datetime(2026, 10, 3, 1, 30, tzinfo=timezone.utc)) == date(2026, 10, 2)
+    assert shc.report_date(datetime(2026, 10, 3, 3, 0, tzinfo=timezone.utc)) == date(2026, 10, 3)
 
 
-TODAY = date(2026, 10, 5)   # a Monday
+def run_main(monkeypatch, argv, results, delivered=True):
+    """Run main() with the checks and the transport faked; returns (exit code, emails sent)."""
+    sent = []
+    for key, result in zip(shc.CHECKS, results):
+        monkeypatch.setitem(shc.CHECKS, key, lambda ctx, r=result: r)
+    monkeypatch.setattr(shc, "send", lambda subject, body: sent.append((subject, body)) or delivered)
+    monkeypatch.setattr(sys, "argv", ["site_health_check.py", "--no-retry"] + argv)
+    return shc.main(), sent
 
 
-def gh_run(day: str, conclusion: str, status="completed", hour=14) -> dict:
-    return {"created_at": f"{day}T{hour:02d}:00:00Z", "status": status, "conclusion": conclusion}
+def test_main_sends_exactly_one_email_and_exits_zero_even_when_a_check_fails(monkeypatch):
+    results = [CheckResult(shc.NAMES[k], PASS, "") for k in shc.CHECKS]
+    code, sent = run_main(monkeypatch, [], results)
+    assert code == 0 and len(sent) == 1 and sent[0][1].startswith("All 6 checks passed.")
+    results[3] = CheckResult(shc.NAMES["links"], FAIL, "", ["/coaching: bad link"])
+    code, sent = run_main(monkeypatch, [], results)
+    assert code == 0 and len(sent) == 1
+    assert "1 of 6 checks did not pass." in sent[0][1] and "FAILED\n    /coaching: bad link" in sent[0][1]
 
 
-def test_week_outcomes_by_hand():
-    runs = [gh_run("2026-09-29", "success"), gh_run("2026-09-30", "failure"),
-            # two runs on Oct 1: the later one (a re-run after the fix) wins
-            gh_run("2026-10-01", "failure", hour=10), gh_run("2026-10-01", "success", hour=16),
-            gh_run("2026-10-02", "success"), gh_run("2026-10-04", "cancelled"),
-            # today's own run is still in progress and an 8-day-old run is out of the window
-            gh_run("2026-10-05", None, status="in_progress"), gh_run("2026-09-28", "failure")]
-    outcomes = shc.week_outcomes(runs, TODAY, today_ok=True)
-    assert outcomes == [(date(2026, 9, 29), True), (date(2026, 9, 30), False), (date(2026, 10, 1), True),
-                        (date(2026, 10, 2), True), (date(2026, 10, 3), None), (date(2026, 10, 4), False),
-                        (TODAY, True)]
-    subject, body = shc.compose_heartbeat(outcomes)
-    assert subject == "[CT site check] Weekly: 6 of 7 daily checks ran, 2 found problems"
-    assert "Sat 2026-10-03: DID NOT RUN" in body and "Wed 2026-09-30: problems found" in body
+def test_main_exits_non_zero_only_when_the_email_cannot_be_sent(monkeypatch):
+    results = [CheckResult(shc.NAMES[k], PASS, "") for k in shc.CHECKS]
+    code, sent = run_main(monkeypatch, [], results, delivered=False)
+    assert code == 1 and len(sent) == 1
 
 
-def test_heartbeat_all_passed():
-    runs = [gh_run((TODAY - timedelta(days=i)).isoformat(), "success") for i in range(1, 7)]
-    subject, body = shc.compose_heartbeat(shc.week_outcomes(runs, TODAY, today_ok=True))
-    assert subject == "[CT site check] Weekly: 7 of 7 daily checks ran, all passed"
-    assert "DID NOT RUN" not in body and "monitor itself" not in body
-
-
-def test_heartbeat_reflects_todays_own_failure():
-    runs = [gh_run((TODAY - timedelta(days=i)).isoformat(), "success") for i in range(1, 7)]
-    subject, _ = shc.compose_heartbeat(shc.week_outcomes(runs, TODAY, today_ok=False))
-    assert subject.endswith("7 of 7 daily checks ran, 1 found problems")
+def test_dry_run_sends_nothing(monkeypatch, capsys):
+    results = [CheckResult(shc.NAMES[k], PASS, "") for k in shc.CHECKS]
+    code, sent = run_main(monkeypatch, ["--dry-run"], results)
+    assert code == 0 and sent == [] and "Subject: Website Checks - " in capsys.readouterr().out
