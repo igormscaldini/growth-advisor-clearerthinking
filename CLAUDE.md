@@ -175,7 +175,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   To add scopes: edit SCOPES in `auth_ga4.py`, re-run it, then `gh secret set GOOGLE_TOKEN_JSON`.
   As of 2026-10-02 SCOPES lists `documents` but the token was never re-minted with it, so Google Docs
   cannot be edited in place: the Drive connector can only CREATE a doc (upload HTML with
-  `contentMimeType: text/html`), so finish all review rounds before creating one.
+  `contentMimeType: text/html`), so finish all review rounds before creating one. The shared token has no Drive
+  scope at all (checked 2026-10-02), so docs cannot be created from Python either; only the connector works.
   `secrets/slides-token.json` is a separate Slides-only token (presentations scope, same OAuth
   client) for editing Igor's Google Slides decks in place via the Slides API `replaceAllText`;
   the Slides API was enabled on the GCP project in Sep 2026. Keep it out of the CI secret.
