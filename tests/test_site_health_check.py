@@ -295,11 +295,10 @@ def test_clean_signup_links_pass():
     assert shc.signup_link_problems(anchors, NAV) == []
 
 
-def test_pasted_browser_url_is_flagged():
-    # The real /coaching link on 2026-10-01.
+def test_extra_query_parameters_are_not_judged():
+    # The real /coaching link on 2026-10-01: GA ids pasted in. Igor chose to leave it (2026-10-02).
     pasted = button("navigator", "&ga_client_id=629654890.1762726747&ga_session_id=1790187394&_gl=1*ujo3q4")
-    problems = shc.signup_link_problems([pasted, pasted], NAV)
-    assert len(problems) == 1 and "_gl, ga_client_id, ga_session_id" in problems[0]
+    assert shc.signup_link_problems([pasted, pasted], NAV) == []
 
 
 def test_missing_and_wrong_signup_links():
@@ -315,7 +314,7 @@ def test_missing_and_wrong_signup_links():
 
 
 def test_subscribe_link_with_other_button_text_is_still_checked():
-    assert shc.signup_link_problems([button("navigator", "&_gl=1", text="Join now")], NAV) != []
+    assert shc.signup_link_problems([button("platinum", text="Join now")], NAV) != []
 
 
 def signup_page(*anchors):
@@ -328,7 +327,7 @@ def test_evaluate_links():
             shc.COACHING: fetched(shc.COACHING, body=signup_page(button("navigator")))}
     assert shc.evaluate_links(good).status == PASS
     bad = dict(good)
-    bad[shc.COACHING] = fetched(shc.COACHING, body=signup_page(button("navigator", "&_gl=1")))
+    bad[shc.COACHING] = fetched(shc.COACHING, body=signup_page(button("explorer")))
     result = shc.evaluate_links(bad)
     assert result.status == FAIL and result.problems[0].startswith("/coaching:")
     down = dict(good)

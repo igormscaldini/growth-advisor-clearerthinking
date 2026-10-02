@@ -95,7 +95,6 @@ USER_AGENT = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.3
 SUBSCRIBE_RUN = "https://www.guidedtrack.com/programs/1pvomgo/run"   # GT program 34235
 TIERS = ("supporter", "explorer", "navigator")
 SIGNUP_PAGES = {PLUS: frozenset(TIERS), COACHING: frozenset({"navigator"})}   # tiers each must offer
-ALLOWED_LINK_PARAMS = frozenset({"p", "src"})
 HEALTHCHECK_EMAIL = "igormscaldini+healthcheck@gmail.com"
 HEALTHCHECK_SRC = "healthcheck"
 STRIPE_CHECKOUT = "https://checkout.stripe.com/"
@@ -427,8 +426,10 @@ def evaluate_pages(fetches: list, menu_count: int) -> CheckResult:
 
 
 def signup_link_problems(anchors: list, required: frozenset) -> list:
-    """Rules for one page's Sign Up buttons: each must be the bare subscribe-program link for a
-    valid tier, and every required tier must have one."""
+    """Rules for one page's Sign Up buttons: each must point at the subscribe program with a valid
+    tier, and every required tier must have one. Other query parameters are not judged: the
+    /coaching link has GA ids pasted in (ga_client_id, ga_session_id, _gl), which the site
+    replaces with the visitor's own on click, and Igor chose (2026-10-02) to leave it."""
     buttons = [a for a in anchors
                if a.text.lower() == "sign up" or a.href.startswith(SUBSCRIBE_RUN.rsplit("/", 1)[0])]
     if not buttons:
@@ -445,13 +446,6 @@ def signup_link_problems(anchors: list, required: frozenset) -> list:
             problems.append(f"a Sign Up button has tier p={tier or '(missing)'}, not one of {', '.join(TIERS)}")
             continue
         found.add(tier)
-        extra = sorted(set(params) - ALLOWED_LINK_PARAMS)
-        if extra:
-            # The site swaps in each visitor's own GA ids when the button is clicked (verified
-            # 2026-10-02), so baked-in ones only survive when that script cannot run.
-            problems.append(f"the {tier} Sign Up link has extra parameters baked in ({', '.join(extra)}), "
-                            "pasted from someone's browser. Visitors whose browser blocks Google "
-                            "Analytics are all sent to checkout with those same values")
     problems += [f"no Sign Up button for the {t} tier" for t in sorted(required - found)]
     return problems
 
@@ -473,7 +467,7 @@ def evaluate_links(pages: dict) -> CheckResult:
         return CheckResult(name, FAIL, "", problems)
     if unknown:
         return CheckResult(name, UNKNOWN, "", unknown)
-    return CheckResult(name, PASS, "every Sign Up button is the bare subscribe-program link")
+    return CheckResult(name, PASS, "every Sign Up button points at the subscribe program with a valid tier")
 
 
 def fetch_page(url: str) -> Fetched:
