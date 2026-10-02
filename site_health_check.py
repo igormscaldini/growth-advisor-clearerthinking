@@ -447,8 +447,11 @@ def signup_link_problems(anchors: list, required: frozenset) -> list:
         found.add(tier)
         extra = sorted(set(params) - ALLOWED_LINK_PARAMS)
         if extra:
-            problems.append(f"the {tier} Sign Up link carries extra parameters ({', '.join(extra)}): "
-                            "a pasted browser URL, so every visitor is sent with those same values")
+            # The site swaps in each visitor's own GA ids when the button is clicked (verified
+            # 2026-10-02), so baked-in ones only survive when that script cannot run.
+            problems.append(f"the {tier} Sign Up link has extra parameters baked in ({', '.join(extra)}), "
+                            "pasted from someone's browser. Visitors whose browser blocks Google "
+                            "Analytics are all sent to checkout with those same values")
     problems += [f"no Sign Up button for the {t} tier" for t in sorted(required - found)]
     return problems
 
