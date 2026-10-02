@@ -76,6 +76,12 @@ Author the draft as a JSON content spec and build a real `.docx` with `build_wra
 
 Then deliver per Igor's preference (local `.docx` in `~/Downloads/wrap ups/`, or a Google Doc with images which needs the brand images hosted at public URLs first, see the reference). **Always also paste the plain-text draft in chat** so he can review without opening anything.
 
+If Igor asks for the draft on beehiiv, build it as described in step 5 of `references/unattended-run.md` (duplicate the previous "Monthly Debrief" post, then swap the body).
+
+## Unattended mode (monthly routine)
+
+A cloud routine runs this skill on the 1st of each month with nobody at the gates, saves the result as a beehiiv draft and emails Igor. `references/unattended-run.md` is its runbook: how both gates are decided automatically, how the beehiiv draft is built, the email, and the test modes. The routine fetches that file and the two reference files from `main` on every run, so edits take effect once they are pushed.
+
 ## Notes
 - Per user preference, don't add analytical commentary while crawling/wiring sources — just confirm and move to the gate.
 - Ground every claim in content you actually read. Do not invent findings, guest names, or episode numbers.
