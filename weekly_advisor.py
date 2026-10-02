@@ -24,12 +24,20 @@ Every Friday this:
 Robustness ("just send it if everything works, otherwise tell me why"):
   - Every data source is wrapped so one failure can't kill the run; failed sources are
     listed in the email with specific fix instructions.
+  - If Claude can't write the letter, the email leads with what broke and how to fix it,
+    then carries the week's raw numbers (numbers_summary), and the run exits 1 so GitHub
+    shows it red. Five letters in a row went out empty behind green runs in Sep 2026.
+  - `--preflight` (Wednesdays on CI) makes one cheap live call per credential the letter
+    depends on and emails only when one fails, so there are two days to fix it.
+  - The letter is filed in the inbox as unread (mail to yourself otherwise lands in Sent only).
   - If the email transport itself is down (the one thing that can't email you about
     itself), it falls back to a Slack alert with the reason + fix steps.
 
 Run locally:   .venv/bin/python weekly_advisor.py --dry-run        # print, don't send
                .venv/bin/python weekly_advisor.py                  # send for real
-On CI:         .github/workflows/weekly-advisor-email.yml (Fridays 11:00 UTC = 08:00 BRT)
+               .venv/bin/python weekly_advisor.py --preflight --dry-run
+On CI:         .github/workflows/weekly-advisor-email.yml (Fridays 11:00 UTC = 08:00 BRT;
+               preflight Wednesdays 11:00 UTC)
 """
 from __future__ import annotations
 
@@ -517,6 +525,72 @@ def consolidate_memory(conversations_text: str, memory_text: str) -> list[str]:
     return apply_memory_updates(parse_json_array(reply))
 
 
+# --- numbers-only fallback ----------------------------------------------------
+# What the email carries when Claude could not write the letter.
+# (label, week-dict key, is money)
+SUMMARY_ROWS = [
+    ("Total revenue", "revenue_total", True),
+    ("Subscription revenue", "revenue_subscription", True),
+    ("New paid subscriptions", "new_stripe_subscriptions", False),
+    ("Cancelled subscriptions", "cancelled_subscriptions", False),
+    ("PDF sales", "pdf_sales", False),
+    ("Cognitive assessment sales", "cognitive_sales", False),
+    ("Tools finished (GA4 Submitted Email)", "tools_finished", False),
+    ("GA4 users", "ga4_users", False),
+    ("New newsletter subscribers", "new_subscribers", False),
+    ("Newsletter unsubscribes", "unsubscribers", False),
+]
+# (label, GOAL_TARGETS key, is money)
+GOAL_ROWS = [
+    ("Total revenue this year", "gross_revenue_ytd_usd", True),
+    ("Active subscribers", "active_subscribers", False),
+    ("MRR", "mrr_usd", True),
+    ("Average unique opens per campaign", "avg_unique_opens_per_campaign", False),
+    (f'Google position for "{PERSONALITY_KEYWORD}"', "personality_test_google_position", False),
+]
+
+
+def _fmt(v, money: bool = False) -> str:
+    v = _num(v)
+    if v is None:
+        return "n/a"
+    return f"${v:,.0f}" if money else f"{v:,.0f}"
+
+
+def numbers_summary(history: list[dict], goals: dict | None = None) -> str:
+    """Plain-text numbers for an email without a letter: each metric for the current week, the
+    week before and the median of all prior weeks, then the goals and the data-quality flags."""
+    if not history:
+        return ""
+    cur, prior = history[0], history[1:]
+    lines = [f"The week of {cur['start']} to {cur['end']}:"]
+    for label, key, money in SUMMARY_ROWS:
+        line = f"  {label}: {_fmt(cur.get(key), money)}"
+        if prior:
+            prior_vals = [v for v in (_num(w.get(key)) for w in prior) if v is not None]
+            median = statistics.median(prior_vals) if prior_vals else None
+            line += (f" (week before {_fmt(prior[0].get(key), money)}, "
+                     f"median of the prior {len(prior)} weeks {_fmt(median, money)})")
+        lines.append(line)
+
+    if goals:
+        lines += ["", "Goals:"]
+        for label, key, money in GOAL_ROWS:
+            row = goals.get(key) or {}
+            value, target = _num(row.get("current")), row.get("target", GOAL_TARGETS.get(key))
+            if key == "personality_test_google_position":
+                lines.append(f"  {label}: {'n/a' if value is None else f'{value:,.1f}'} (target {target})")
+            else:
+                pct = row.get("progress_pct")
+                lines.append(f"  {label}: {_fmt(value, money)} of {_fmt(target, money)}"
+                             + (f" ({pct}%)" if pct is not None else ""))
+
+    flags = flag_data_anomalies(history)
+    if flags:
+        lines += ["", "Data-quality flags:"] + [f"  {f}" for f in flags]
+    return "\n".join(lines)
+
+
 # --- compose + send ---------------------------------------------------------
 def collect_errors(history: list[dict], *extra: dict) -> dict[str, str]:
     errs: dict[str, str] = dict(history[0].get("errors", {})) if history else {}
@@ -525,29 +599,38 @@ def collect_errors(history: list[dict], *extra: dict) -> dict[str, str]:
     return errs
 
 
-def build_email(history: list[dict], narrative: str, errors: dict[str, str]) -> tuple[str, str]:
+def problem_lines(errors: dict[str, str]) -> list[str]:
+    """One bullet per failed source, each followed by its fix instructions when known."""
+    lines = []
+    for src, msg in errors.items():
+        lines.append(f"  • {src}: {msg}")
+        fix = FIX_INSTRUCTIONS.get(src)
+        if fix:
+            lines.append(f"      Fix: {fix}")
+    return lines
+
+
+def build_email(history: list[dict], narrative: str, errors: dict[str, str],
+                goals: dict | None = None) -> tuple[str, str]:
     cur = history[0]
-    flag = "⚠️ PARTIAL, some sources failed" if errors else ""
+    if not narrative:
+        flag = "⚠️ NO LETTER, numbers only"
+    elif errors:
+        flag = "⚠️ PARTIAL, some sources failed"
+    else:
+        flag = ""
     subject = f"Weekly Growth Report, week of {cur['start']} {flag}".strip()
 
     parts = ["Hi Igor,", ""]
     if narrative:
         parts.append(narrative)
+        if errors:
+            parts += ["", "One more thing: a few pieces didn't come through, so some of the above "
+                          "may be incomplete:", *problem_lines(errors)]
     else:
-        parts.append(
-            "Couldn't pull together my usual read on this week: the write-up failed to "
-            "generate. See the data issue below."
-        )
-
-    if errors:
-        parts.append("")
-        parts.append("One more thing: a few pieces didn't come through, so some of the above "
-                     "may be incomplete:")
-        for src, msg in errors.items():
-            parts.append(f"  • {src}: {msg}")
-            fix = FIX_INSTRUCTIONS.get(src)
-            if fix:
-                parts.append(f"      Fix: {fix}")
+        parts += ["I couldn't write this week's letter, so the raw numbers are below instead. "
+                  "What broke and how to fix it:", *problem_lines(errors), "",
+                  numbers_summary(history, goals)]
 
     parts.append("")
     parts.append(f"Full dashboard: {DASHBOARD_URL}")
@@ -674,8 +757,28 @@ def load_memory_updates(path: Path | None) -> list:
     return parse_json_array(text) if text else []
 
 
-def finish_and_send(history: list[dict], narrative: str, errors: dict[str, str], dry_run: bool) -> int:
-    """Refresh the dashboard, compose the email and send it (or print it under --dry-run)."""
+def send_or_alert(subject: str, body: str, header_tag: str, label: str) -> bool:
+    """Email Igor's inbox; when the email transport itself is down, alert on Slack instead."""
+    try:
+        email_transport.send_email(subject, body, EMAIL_TO, from_label="CT Growth Advisor",
+                                   header_tag=header_tag, to_inbox=True)
+        print("[advisor] email sent.", file=sys.stderr)
+        return True
+    except Exception as e:  # noqa: BLE001
+        reason = f"{type(e).__name__}: {e}"
+        print(f"[error] email send failed: {reason}", file=sys.stderr)
+        traceback.print_exc()
+        extra_fix = "Check GMAIL_APP_PASSWORD (App Password may be revoked/expired) or run `.venv/bin/python weekly_advisor.py --dry-run` to inspect."
+        if email_transport.slack_fallback(reason, label, extra_fix):
+            print("[advisor] notified via Slack fallback.", file=sys.stderr)
+        return False
+
+
+def finish_and_send(history: list[dict], narrative: str, errors: dict[str, str], dry_run: bool,
+                    goals: dict | None = None) -> int:
+    """Refresh the dashboard, compose the email and send it (or print it under --dry-run).
+    Returns 1 when the email could not be sent or went out without a letter, so the run shows
+    red instead of hiding a missing letter behind a green check."""
     errors = dict(errors)
     if dry_run:
         print("[advisor] --dry-run: skipping dashboard snapshot refresh.", file=sys.stderr)
@@ -686,25 +789,78 @@ def finish_and_send(history: list[dict], narrative: str, errors: dict[str, str],
             errors["dashboard"] = dashboard_err
             print(f"[warn] dashboard refresh failed: {dashboard_err}", file=sys.stderr)
 
-    subject, body = build_email(history, narrative, errors)
+    subject, body = build_email(history, narrative, errors, goals)
 
     if dry_run:
         print(f"Subject: {subject}\n")
         print(body)
-        return 0
+        sent = True
+    else:
+        sent = send_or_alert(subject, body, "report", "Weekly growth report")
+    if not narrative:
+        print("[error] the letter was not written; exiting 1 so the run shows as failed.", file=sys.stderr)
+    return 0 if sent and narrative else 1
 
-    try:
-        email_transport.send_email(subject, body, EMAIL_TO, from_label="CT Growth Advisor", header_tag="report")
-        print("[advisor] email sent.", file=sys.stderr)
+
+# --- preflight --------------------------------------------------------------------
+def _claude_ping() -> str:
+    reply = mem.claude_text("Reply with the single word OK.", "ping")
+    if not reply:
+        raise RuntimeError("Claude returned an empty reply")
+    return reply
+
+
+def preflight_checks(ref: date) -> dict:
+    """One cheap live call per credential the Friday letter depends on, keyed by the
+    FIX_INSTRUCTIONS label of what would fail on Friday."""
+    return {
+        "narrative": _claude_ping,
+        "memory": mem.load_durable_memory,
+        "ga4_audience": lambda: ga4_audience_metrics(ref, ref),
+        "goals_active_subscribers": stripe_active_subscriber_count,
+        "beehiiv": lambda: beehiiv_metrics(ref, ref),
+        "goals_personality_test_google_position": lambda: gsc_keyword_position(PERSONALITY_KEYWORD),
+        "inbox": lambda: advisor_inbox.gmail_service().users().getProfile(userId="me").execute(),
+    }
+
+
+def run_preflight(checks: dict) -> dict[str, str]:
+    """Run every check; {label: error} for the ones that raised or returned {"error": ...}."""
+    errors: dict[str, str] = {}
+    for label, fn in checks.items():
+        v = _safe(label, fn)
+        if _is_err(v):
+            errors[label] = v[1]
+        elif isinstance(v, dict) and v.get("error"):
+            errors[label] = str(v["error"])
+    return errors
+
+
+def build_preflight_email(errors: dict[str, str]) -> tuple[str, str]:
+    n = len(errors)
+    subject = f"Growth advisor preflight: {n} thing{'' if n == 1 else 's'} to fix before Friday's letter"
+    body = "\n".join([
+        "Hi Igor,", "",
+        "I tested everything Friday's letter depends on. This did not work:",
+        *problem_lines(errors), "",
+        "Fix it before Friday 11:00 UTC and the letter goes out as usual. To test again:",
+        "  gh workflow run weekly-advisor-email.yml -f preflight=true",
+    ])
+    return subject, body
+
+
+def preflight_mode(ref: date, dry_run: bool) -> int:
+    """Test the letter's dependencies; email only when something is broken. Returns 1 then."""
+    errors = run_preflight(preflight_checks(ref))
+    if not errors:
+        print("[advisor] preflight: everything the letter depends on works.", file=sys.stderr)
         return 0
-    except Exception as e:  # noqa: BLE001
-        reason = f"{type(e).__name__}: {e}"
-        print(f"[error] email send failed: {reason}", file=sys.stderr)
-        traceback.print_exc()
-        extra_fix = "Check GMAIL_APP_PASSWORD (App Password may be revoked/expired) or run `.venv/bin/python weekly_advisor.py --dry-run` to inspect."
-        if email_transport.slack_fallback(reason, "Weekly growth report", extra_fix):
-            print("[advisor] notified via Slack fallback.", file=sys.stderr)
-        return 1
+    subject, body = build_preflight_email(errors)
+    if dry_run:
+        print(f"Subject: {subject}\n\n{body}")
+    else:
+        send_or_alert(subject, body, "preflight", "Growth advisor preflight")
+    return 1
 
 
 def send_letter_mode(args) -> int:
@@ -730,7 +886,7 @@ def send_letter_mode(args) -> int:
             errors["consolidation"] = f"{type(e).__name__}: {e}"
             print(f"[warn] consolidation failed: {e}", file=sys.stderr)
 
-    return finish_and_send(brief["history"], letter, errors, args.dry_run)
+    return finish_and_send(brief["history"], letter, errors, args.dry_run, brief.get("goals"))
 
 
 def parse_args(argv: list[str] | None = None):
@@ -739,6 +895,9 @@ def parse_args(argv: list[str] | None = None):
     ap.add_argument("--dry-run", action="store_true", help="print the email instead of sending")
     ap.add_argument("--ref", help="reference end date YYYY-MM-DD (default: yesterday)")
     ap.add_argument("--skip-consolidate", action="store_true", help="don't update durable memory")
+    ap.add_argument("--preflight", action="store_true",
+                    help="test every credential the letter depends on (Claude login, memory key, GA4, "
+                         "Stripe, beehiiv, Search Console, Gmail); emails only when one fails")
     ap.add_argument("--brief", metavar="PATH",
                     help="routine mode step 1: gather every input into PATH (JSON) without calling "
                          "Claude; nothing is sent")
@@ -761,6 +920,8 @@ def main() -> int:
         return send_letter_mode(args)
 
     ref = date.fromisoformat(args.ref) if args.ref else date.today() - timedelta(days=1)
+    if args.preflight:
+        return preflight_mode(ref, args.dry_run)
     inputs = gather_inputs(args.weeks, ref)
 
     if args.brief:
@@ -776,6 +937,8 @@ def main() -> int:
         narrative = build_narrative(inputs["history"], inputs["goals"], inputs["flags"], inputs["goals_text"],
                                     inputs["memory_text"], inputs["knowledge_text"],
                                     inputs["conversations_text"], inputs["inbox_text"])
+        if not narrative:
+            narrative_err = "Claude returned an empty letter"
     except Exception as e:  # noqa: BLE001
         narrative_err = f"{type(e).__name__}: {e}"
         print(f"[warn] narrative failed: {e}", file=sys.stderr)
@@ -795,7 +958,7 @@ def main() -> int:
 
     errors = collect_errors(inputs["history"], inputs["errors"],
                             {"narrative": narrative_err, "consolidation": consolidation_err})
-    return finish_and_send(inputs["history"], narrative, errors, args.dry_run)
+    return finish_and_send(inputs["history"], narrative, errors, args.dry_run, inputs["goals"])
 
 
 if __name__ == "__main__":

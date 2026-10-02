@@ -2,8 +2,16 @@ name: Weekly growth-advisor email
 
 on:
   schedule:
-    - cron: "0 11 * * 5"  # Fridays 11:00 UTC = 08:00 America/Sao_Paulo
+    - cron: "0 11 * * 5"  # Fridays 11:00 UTC = 08:00 America/Sao_Paulo: the letter
+    # Wednesdays: preflight. Tests every credential the letter depends on and emails only when
+    # one is broken, leaving two days to fix it. Keep this string equal to PREFLIGHT_CRON below.
+    - cron: "0 11 * * 3"
   workflow_dispatch:        # allow manual runs from the Actions UI
+    inputs:
+      preflight:
+        description: "Only test the credentials (no letter is written or sent)"
+        type: boolean
+        default: false
 
 # Before sending, this now refreshes frontend/public/snapshot.json (same as
 # fetch-snapshot.yml) and pushes it if changed, so the dashboard linked in the email is
@@ -66,4 +74,14 @@ jobs:
           # optional Slack fallback when email transport is down
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_DEFAULT_CHANNEL: ${{ secrets.SLACK_DEFAULT_CHANNEL }}
-        run: python weekly_advisor.py
+          PREFLIGHT_CRON: "0 11 * * 3"
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
+          PREFLIGHT_INPUT: ${{ inputs.preflight }}
+        # Exits non-zero when the letter was not written (or a preflight check failed), so the
+        # run shows red and GitHub emails Igor instead of hiding it behind a green check.
+        run: |
+          if [ "$EVENT_SCHEDULE" = "$PREFLIGHT_CRON" ] || [ "$PREFLIGHT_INPUT" = "true" ]; then
+            python weekly_advisor.py --preflight
+          else
+            python weekly_advisor.py
+          fi

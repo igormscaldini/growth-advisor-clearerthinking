@@ -31,7 +31,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   goals table's "Total revenue" = Stripe gross + these lines. To publish an edit without waiting
   for the throttled cron, rewrite `snapshot.json`'s `manual_revenue` with `manual_revenue_block()`.
 - `weekly_advisor.py`: Friday 11:00 UTC letter (results, the week's work, next week's
-  priorities). `advisor_reply.py`: answers Igor's replies with live data tools every 5 min
+  priorities), filed in the inbox as unread. With no letter (Claude call failed) the email is
+  "NO LETTER, numbers only" (reason + fix on top, raw numbers below) and the run exits 1; a
+  failed data source alone is only "PARTIAL" and stays green. `--preflight` (same workflow,
+  Wednesdays, or `gh workflow run weekly-advisor-email.yml -f preflight=true`) tests every
+  credential the letter needs and emails only on failure. `advisor_reply.py`: answers Igor's replies with live data tools every 5 min
   (headless Claude Code whose only tool is Bash, allow-listed to
   `advisor_reply.py --tool <name> '<json>'`). Routine mode (`--brief` then `--send-letter`,
   see `bots/ADVISOR_ROUTINE.md`) is an optional alternative scheduler, not the default.
@@ -182,7 +186,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   The default backend is headless Claude Code (`claude -p`) on Igor's subscription, NOT the
   Anthropic API: an empty credit balance silently killed the letter and 11 days of session
   digests (2026-08-31 to 09-11). CI needs the `CLAUDE_CODE_OAUTH_TOKEN` secret (`claude
-  setup-token` locally, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN`); locally the CLI's own
+  setup-token` locally, an interactive browser login only Igor can do, then `gh secret set
+  CLAUDE_CODE_OAUTH_TOKEN`). The secret was never actually set after the Sep 11 switch, so
+  the letters of Sep 18 to Oct 2 also went out empty ("Not logged in") behind green runs:
+  check `gh secret list` and the run LOG, never the run status, before calling the advisor
+  healthy. The reply handler fails the same way (it logs the error and still exits 0); locally the CLI's own
   login is used (binary via CLAUDE_BIN, CLAUDE_CODE_EXECPATH, PATH or the VS Code extension
   bundle). `ADVISOR_BACKEND=api` opts back into the SDK. The CLI runs with no settings files,
   no MCP connectors (their schemas cost ~80k tokens per call) and no session persistence, so

@@ -135,8 +135,9 @@ def test_send_letter_mode_empty_letter_is_flagged(tmp_path, capsys):
     letter.write_text("\n")
     args = SimpleNamespace(brief=str(brief_path), send_letter=str(letter), memory_updates=None,
                            dry_run=True, skip_consolidate=True)
-    assert wa.send_letter_mode(args) == 0
+    assert wa.send_letter_mode(args) == 1   # no letter: the run must not look like a success
     out = capsys.readouterr().out
-    assert "PARTIAL" in out
+    assert "NO LETTER" in out
     assert "the routine wrote no letter" in out
-    assert "the write-up failed to generate" in out
+    assert "couldn't write this week's letter" in out
+    assert "Total revenue: $1,234 (week before $1,000" in out

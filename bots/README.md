@@ -13,7 +13,7 @@ Last verified: 2026-10-02 (states and last runs below are from that day).
 | [Navigator subscribers sync](#navigator-subscribers-sync) | Upserts CT+ Navigator subscribers from Stripe into a Google Sheet | Every 15 min (nominal) | GitHub Actions | 2026-09-09 | Active, passing |
 | [Stripe cancellations email](#stripe-cancellations-email) | Weekly email of CT+ cancellations | Fridays 11:10 | GitHub Actions | 2026-08-30 | Active. Last run 2026-09-25 passed |
 | [SEO advisor email](#seo-advisor-email) | SEO expert email from Search Console and Ahrefs | Manual only | GitHub Actions | 2026-08-30 | Schedule removed 2026-09-01. Last run 2026-09-01 |
-| [Weekly growth-advisor letter](#weekly-growth-advisor-letter) | Friday letter: results, the week's work, next priorities | Fridays 11:00 | GitHub Actions | 2026-06-14 | Active. Last run 2026-09-25 passed |
+| [Weekly growth-advisor letter](#weekly-growth-advisor-letter) | Friday letter: results, the week's work, next priorities; Wednesday preflight of its credentials | Fridays 11:00 (preflight Wednesdays 11:00) | GitHub Actions | 2026-06-14 | Broken until the `CLAUDE_CODE_OAUTH_TOKEN` secret is set: no letter was written from 2026-09-04 to 2026-10-02 |
 | [Advisor reply handler](#advisor-reply-handler) | Answers Igor's email replies to the letter with live data | Every 5 min (nominal) | GitHub Actions | 2026-06-14 | Active, passing |
 | [Dashboard snapshot](#dashboard-snapshot) | Refreshes the data behind the Vercel dashboard | Every 30 min (nominal) | GitHub Actions | 2026-05-26 | Active, passing |
 | [Newsletter ratings email](#newsletter-ratings-email) | Monday email with the newsletter ratings | Mondays 15:00 | Vercel cron, separate project | Sep 2026 | Not checked from here |
@@ -79,9 +79,11 @@ The Friday letter can also run as a cloud routine instead of through GitHub Acti
 
 ### Weekly growth-advisor letter
 
-- **Does:** gathers GA4, Stripe, beehiiv, Search Console and Ads data plus the advisor's memory, writes the Friday letter with headless Claude Code and emails it through the Gmail API.
-- **Code:** `weekly_advisor.py`, workflow `weekly-advisor-email.yml`. Needs the `CLAUDE_CODE_OAUTH_TOKEN` secret.
-- **Try it safely:** `python weekly_advisor.py --dry-run`.
+- **Does:** gathers GA4, Stripe, beehiiv, Search Console and Ads data plus the advisor's memory, writes the Friday letter with headless Claude Code and emails it through the Gmail API, filed in the inbox as unread.
+- **Code:** `weekly_advisor.py`, workflow `weekly-advisor-email.yml`. Needs the `CLAUDE_CODE_OAUTH_TOKEN` secret: run `claude setup-token` in a terminal, then `gh secret set CLAUDE_CODE_OAUTH_TOKEN` and paste the token. `gh secret list` shows whether it exists.
+- **Preflight (Wednesdays):** the same workflow runs `python weekly_advisor.py --preflight`, one cheap live call per credential the letter depends on (Claude login, memory key, GA4, Stripe, beehiiv, Search Console, Gmail). It emails only when one fails, with the fix, two days before the letter. Run it by hand with `gh workflow run weekly-advisor-email.yml -f preflight=true`.
+- **Where failures show up:** when Claude cannot write the letter, the email still goes out with the subject "NO LETTER, numbers only", the reason and fix at the top and the week's raw numbers below, and the run ends as "failure" so GitHub sends its own alert. A single failed data source only adds "PARTIAL" to the subject and the run stays green.
+- **Try it safely:** `python weekly_advisor.py --dry-run` (add `--preflight` for the credential test).
 
 ### Advisor reply handler
 
