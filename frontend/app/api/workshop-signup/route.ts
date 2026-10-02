@@ -4,7 +4,7 @@
 //
 // Vercel env (production): WORKSHOP_SIGNUP_USER, WORKSHOP_SIGNUP_PASSWORD (what GuidedTrack
 // sends), WORKSHOP_SHEET_ID, GOOGLE_TOKEN_JSON (the same OAuth blob as the GitHub secret;
-// only its spreadsheets scope is used). The backfill / safety net is workshop_signups_sheet.py.
+// only its spreadsheets scope is used). The Python backfill (workshop_signups_sheet.py) was deleted on 2026-10-02.
 
 import { basicAuthOk, findEmailRow, normalizeSignup, parseBody, SHEET_TAB, toRow } from "@/lib/workshop-signup";
 

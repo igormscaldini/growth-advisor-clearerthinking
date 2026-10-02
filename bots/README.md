@@ -1,6 +1,6 @@
 # Bots and recurring routines
 
-Every job that runs on its own for Igor's Clearer Thinking and Positly work: what it does, when it fires, where it runs and how to run or pause it. This folder is the index. The code stays where it already lives (scripts in the repository root, workflows in `.github/workflows/`), because the workflows, tests and scripts import each other by those paths.
+Every job that runs on its own for Igor's Clearer Thinking work: what it does, when it fires, where it runs and how to run or pause it. This folder is the index. The code stays where it already lives (scripts in the repository root, workflows in `.github/workflows/`), because the workflows, tests and scripts import each other by those paths.
 
 Last verified: 2026-10-02 (states and last runs below are from that day).
 
@@ -11,16 +11,12 @@ Last verified: 2026-10-02 (states and last runs below are from that day).
 | [Monthly wrap-up draft](#monthly-wrap-up-draft) | Builds the CT+ "Monthly Debrief" as a beehiiv draft, emails Igor to review it | 1st of month, 12:00 | Claude cloud routine | 2026-10-02 | Enabled. Tested end to end 2026-10-02. First scheduled run 2026-11-01. Podcast, YouTube and clearerthinking.org hosts still blocked in the cloud environment |
 | [Daily site health check](#daily-site-health-check) | Six checks of the CT site; emails only when one does not pass | Daily 10:00 | GitHub Actions | 2026-10-01 | Active. Only run so far (manual, 2026-10-01) reported failed sign-up links on /plus and /coaching |
 | [All Articles hub sync](#all-articles-hub-sync) | Keeps the Wix "All Clearer Thinking Articles" post in step with the sitemap | Mondays 12:20 | GitHub Actions | 2026-09-30 | Active. Two manual runs passed; first scheduled run 2026-10-05 |
-| [Workshop sign-ups sync](#workshop-sign-ups-sync) | Backfills Career Workshop sign-ups into a Google Sheet | Every 6 h | GitHub Actions | 2026-09-16 | Active and passing, but the workshop was held 2026-09-30: candidate to retire |
 | [Navigator subscribers sync](#navigator-subscribers-sync) | Upserts CT+ Navigator subscribers from Stripe into a Google Sheet | Every 15 min (nominal) | GitHub Actions | 2026-09-09 | Active, passing |
 | [Stripe cancellations email](#stripe-cancellations-email) | Weekly email of CT+ cancellations | Fridays 11:10 | GitHub Actions | 2026-08-30 | Active. Last run 2026-09-25 passed |
 | [SEO advisor email](#seo-advisor-email) | SEO expert email from Search Console and Ahrefs | Manual only | GitHub Actions | 2026-08-30 | Schedule removed 2026-09-01. Last run 2026-09-01 |
 | [Weekly growth-advisor letter](#weekly-growth-advisor-letter) | Friday letter: results, the week's work, next priorities | Fridays 11:00 | GitHub Actions | 2026-06-14 | Active. Last run 2026-09-25 passed |
 | [Advisor reply handler](#advisor-reply-handler) | Answers Igor's email replies to the letter with live data | Every 5 min (nominal) | GitHub Actions | 2026-06-14 | Active, passing |
 | [Dashboard snapshot](#dashboard-snapshot) | Refreshes the data behind the Vercel dashboard | Every 30 min (nominal) | GitHub Actions | 2026-05-26 | Active, passing |
-| [Positly Reddit finder](#positly-reddit-finder) | Finds up to two Reddit posts a day and emails reply drafts | Mon to Fri 09:00 local | This Mac (launchd) | 2026-08-30 | Loaded, but its last run exited with code 127 |
-| [Positly Saturday report](#positly-cloud-routines) | Emails the week's outbound campaign numbers | Saturdays 13:00 | Claude cloud routine | 2026-04-21 | Enabled. Last fired 2026-09-26 |
-| [Positly Monday lead import](#positly-cloud-routines) | Adds 100 new leads to the outbound campaign | Mondays 13:00 | Claude cloud routine | 2026-04-21 | Enabled. Last fired 2026-09-28 |
 | [Hourly email responder](#hourly-email-responder) | Drafts Gmail replies in Igor's voice | Hourly | Claude cloud routine | 2026-07-14 | Disabled. Last fired 2026-07-19 |
 | [Newsletter ratings email](#newsletter-ratings-email) | Monday email with the newsletter ratings | Mondays 15:00 | Vercel cron, separate project | Sep 2026 | Not checked from here |
 
@@ -58,15 +54,6 @@ Cloud routines: https://claude.ai/code/routines (run now, pause, edit the prompt
 
 The Friday letter can also run as a cloud routine instead of through GitHub Actions. It is documented in [ADVISOR_ROUTINE.md](ADVISOR_ROUTINE.md) and is not set up as a routine today; the GitHub workflow below is the live path.
 
-### Positly cloud routines
-
-Two routines for the Positly outbound campaign, defined only on claude.ai (no code in this repository):
-
-- **[Positly] Saturday performance report** (`0 13 * * 6`): pulls the last 7 days of campaign analytics from Instantly and emails a report through Resend.
-- **[Positly] Monday lead import** (`0 13 * * 1`): pulls 100 leads matching the target profile from Instantly's lead search into the campaign.
-
-Both keep their API keys as plain text inside the routine prompt. Moving them to the environment's variables would be safer.
-
 ### Hourly email responder
 
 Reads unread Gmail threads and saves draft replies in Igor's voice; it can only draft, never send. Disabled since July 2026.
@@ -84,13 +71,6 @@ Reads unread Gmail threads and saves draft replies in Igor's voice; it can only 
 - **Does:** compares the sitemap with the live Wix blog post that links every article, republishes only when something changed, and emails either way.
 - **Code:** `wix_publish_hub.py --sync`, workflow `wix-hub-sync.yml`. The workflow commits the title cache in `reports/` back to the repository.
 - **Try it safely:** `python wix_publish_hub.py --dry-run`.
-
-### Workshop sign-ups sync
-
-- **Does:** re-reads the Career Change Workshop program's export and appends any sign-up missing from the sheet. It is the safety net behind the live path (GuidedTrack posts each sign-up to the Vercel route `frontend/app/api/workshop-signup`).
-- **Code:** `workshop_signups_sheet.py`, workflow `workshop-signups-sync.yml`.
-- **Try it safely:** `python workshop_signups_sheet.py --dry-run`.
-- **Note:** the workshop took place on 2026-09-30 and the program is now a recording page, so this has nothing new to catch. Pause it with `gh workflow disable workshop-signups-sync.yml` unless sign-ups are reopened.
 
 ### Navigator subscribers sync
 
@@ -127,15 +107,6 @@ Reads unread Gmail threads and saves draft replies in Igor's voice; it can only 
 - **Does:** writes `frontend/public/snapshot.json`, which the dashboard at https://growth-advisor-clearerthinking.vercel.app/ reads, and commits it.
 - **Code:** `fetch_snapshot.py`, workflow `fetch-snapshot.yml`. No dry-run flag: running it locally rewrites the snapshot file.
 
-## On this Mac
-
-### Positly Reddit finder
-
-- **Does:** every weekday looks for up to two Reddit posts (someone recruiting study participants, or researchers discussing recruitment platforms), drafts a reply for each and emails them. Nothing is posted automatically.
-- **Code:** `positly_reddit_recruiter.py`, started by `run_positly_reddit.sh` from the launchd job `com.positly.reddit-finder`. It runs locally because Reddit blocks datacenter addresses.
-- **Try it safely:** `.venv/bin/python positly_reddit_recruiter.py --dry-run`.
-- **State:** on 2026-10-02 launchd reported 15 runs and a last exit code of 127, which usually means a command was not found. The cause is in `~/Library/Logs/positly-reddit-finder.err.log`; it has not been diagnosed.
-
 ## In another project
 
 ### Newsletter ratings email
@@ -144,9 +115,15 @@ A Monday 12:00 São Paulo email with the newsletter rating results, sent by a Ve
 
 ## Automatic, but not on a schedule
 
-- **Workshop sign-up route:** GuidedTrack calls the Vercel route on every sign-up; nothing to schedule.
+- **Workshop sign-up route:** the Vercel route `frontend/app/api/workshop-signup` wrote each Career Workshop sign-up to a Google Sheet. Nothing calls it since the workshop (2026-09-30).
 - **Claude Code stop hook:** `.claude/on-stop.sh` commits and pushes the working tree after every turn and digests the session into the advisor's encrypted memory.
 
 ## Adding a bot
 
 Add a row to the table and a short section here in the same shape (does, code, try it safely). Give every new script a `--dry-run`, and say where failures show up.
+
+## Retired
+
+- **Workshop sign-ups sync** (workflow `workshop-signups-sync.yml`, `workshop_signups_sheet.py`): deleted 2026-10-02, the workshop was over. The code is in git history.
+- **Positly Reddit finder** (`positly_reddit_recruiter.py`, launchd job `com.positly.reddit-finder`): deleted 2026-10-02, job unloaded and its plist removed.
+- **Positly cloud routines** (Saturday performance report, Monday lead import): disabled 2026-10-02, to be deleted on claude.ai.

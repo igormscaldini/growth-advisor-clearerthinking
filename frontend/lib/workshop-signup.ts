@@ -1,6 +1,6 @@
 // Pure helpers for the workshop sign-up endpoint (app/api/workshop-signup/route.ts).
 // Kept free of Next.js imports so they can be unit-tested with `node --test`.
-// Column layout is shared with workshop_signups_sheet.py in the repo root: keep HEADER in step.
+// The column layout (HEADER) lives only here since the Python backfill was deleted on 2026-10-02.
 
 import { timingSafeEqual } from "node:crypto";
 
@@ -32,7 +32,7 @@ export function parseBody(contentType: string | null, text: string): Record<stri
 
 /** Normalise the raw payload; null when there is no usable email address. */
 export function normalizeSignup(raw: Record<string, unknown>): Signup | null {
-  // The trailing dot is dropped for the same reason as in workshop_signups_sheet.py: it is a
+  // The trailing dot is dropped: it is a
   // typo, mail to it bounces, and keeping it would file the person under a second address.
   const email = str(raw.email).toLowerCase().replace(/\.+$/, "");
   if (!email.includes("@")) return null;

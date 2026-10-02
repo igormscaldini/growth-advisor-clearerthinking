@@ -6,8 +6,7 @@ weekly letter, answers replies, and remembers every conversation. Read GOALS.md 
 discussion of goals, targets or priorities: hitting those goals is Igor's 2026 priority.
 
 ## Layout
-- `bots/README.md`: index of every recurring bot (GitHub Actions, Claude cloud routines, the local
-  launchd job) with schedule, code and how to run or pause it. Update it whenever a bot is added,
+- `bots/README.md`: index of every recurring bot (GitHub Actions, Claude cloud routines) with schedule, code and how to run or pause it. Update it whenever a bot is added,
   changed or retired; the code itself stays in the root and `.github/workflows/`.
 - Monthly wrap-up routine (cloud, 1st of month 12:00 UTC, `trig_019Siu4sPCwgnPEnPmdc8Lx9`): builds the
   CT+ debrief as a beehiiv draft and emails Igor. It has no repo checkout (GitHub is not connected to
@@ -43,15 +42,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   owned ones belong to Igor and are never touched. `--rebuild` is the destructive path and
   the cron never passes it. `--sheets` errors without a target rather than creating a stray
   sheet; pass `--new-sheet` to create one deliberately.
-- `workshop_signups_sheet.py` + `frontend/app/api/workshop-signup/route.ts`: Career Workshop
-  sign-ups -> Google Sheet (`WORKSHOP_SHEET_ID`). Live path: GT program 38791's external service
-  "Sign-up sheet" (Settings -> Services, basic auth `WORKSHOP_SIGNUP_USER/PASSWORD`) POSTs each
-  sign-up to the Vercel route, which upserts by email; the script is the backfill / safety net
-  (`workshop-signups-sync.yml`). Vercel env for the route (project growth-advisor-clearerthinking,
-  Spark Wave team): those three + `GOOGLE_TOKEN_JSON`; set from `frontend/` with
-  `npx vercel link` then `npx vercel env add NAME production` (value on stdin), then
-  `npx vercel redeploy growth-advisor-clearerthinking.vercel.app`: env changes only reach NEW deployments. The column
-  layout is duplicated in the TS helpers and the Python script: change both.
+- `frontend/app/api/workshop-signup/route.ts`: Career Workshop sign-ups -> Google Sheet (`WORKSHOP_SHEET_ID`),
+  upsert by email. Unused since the workshop (2026-09-30): GT program 38791 no longer calls it, and the Python
+  backfill and its cron were deleted on 2026-10-02 (git history has them). Vercel env gotcha learned here: set
+  vars from `frontend/` with `npx vercel link` then `npx vercel env add NAME production` (value on stdin), then
+  `npx vercel redeploy growth-advisor-clearerthinking.vercel.app`: env changes only reach NEW deployments.
 - Newsletter ratings dashboard is a SEPARATE project: `~/Documents/Claude/ct-newsletter-ratings` (private repo
   igormscaldini/ct-newsletter-ratings, Vercel project ct-newsletter-ratings on Spark Wave, public page, env in its
   `.env.local`). It pulls GT program 38551's CSV export + beehiiv; its README has the counting rules. Email link

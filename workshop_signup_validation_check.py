@@ -14,9 +14,9 @@ Run this after any change to the program's email check:
 This is a manual tool, not part of pytest: it creates REAL runs. Every address that passes
 validation gets a real confirmation email and a row in the sign-ups sheet, so the addresses
 below are deliberately undeliverable (example.com is reserved by RFC 2606) or Igor's own.
-Runs are tagged src=validationfixtest, which workshop_signups_sheet.py treats as a test
-source, so the sheet sync never files them as sign-ups. Rows written live by the Vercel
-route still need deleting by hand afterwards.
+Runs are tagged src=validationfixtest so they can be told apart from real sign-ups (the sheet
+backfill that used to skip them, workshop_signups_sheet.py, was deleted on 2026-10-02). Rows
+written live by the Vercel route still need deleting by hand afterwards.
 """
 from __future__ import annotations
 
