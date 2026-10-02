@@ -6,6 +6,13 @@ weekly letter, answers replies, and remembers every conversation. Read GOALS.md 
 discussion of goals, targets or priorities: hitting those goals is Igor's 2026 priority.
 
 ## Layout
+- `bots/README.md`: index of every recurring bot (GitHub Actions, Claude cloud routines, the local
+  launchd job) with schedule, code and how to run or pause it. Update it whenever a bot is added,
+  changed or retired; the code itself stays in the root and `.github/workflows/`.
+- Monthly wrap-up routine (cloud, 1st of month 12:00 UTC, `trig_019Siu4sPCwgnPEnPmdc8Lx9`): builds the
+  CT+ debrief as a beehiiv draft and emails Igor. It has no repo checkout (GitHub is not connected to
+  claude.ai), so each run curls its runbook, `.claude/skills/ct-monthly-wrapup/references/unattended-run.md`,
+  from `main`. Cloud routines only reach allow-listed hosts; connectors bypass that list.
 - `data_layer.py`: every metric function (GA4, Stripe, beehiiv, GSC, Ads). Streamlit cache
   decorators are harmless outside Streamlit. `_beehiiv_get` wraps beehiiv calls with
   timeout + retry; route new beehiiv endpoints through it.
@@ -27,7 +34,7 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   priorities). `advisor_reply.py`: answers Igor's replies with live data tools every 5 min
   (headless Claude Code whose only tool is Bash, allow-listed to
   `advisor_reply.py --tool <name> '<json>'`). Routine mode (`--brief` then `--send-letter`,
-  see `ADVISOR_ROUTINE.md`) is an optional alternative scheduler, not the default.
+  see `bots/ADVISOR_ROUTINE.md`) is an optional alternative scheduler, not the default.
   `advisor_inbox.py`: Gmail scan of the week's threads. `advisor_conversations.py`: digests
   Claude Code transcripts. `advisor_memory.py`: the encrypted memory store all of them share.
 - `stripe_navigator_subscribers.py`: Navigator subscribers -> Google Sheet, synced every

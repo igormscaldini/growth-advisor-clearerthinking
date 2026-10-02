@@ -626,7 +626,7 @@ def gather_inputs(weeks: int, ref: date) -> dict:
 # Step 1 (`--brief PATH`): gather every input and write this JSON. Step 2, done by the routine
 # session itself: write the letter and, optionally, the memory updates. Step 3
 # (`--send-letter LETTER --brief PATH [--memory-updates JSON]`): apply, refresh, send.
-# See ADVISOR_ROUTINE.md for the routine's instructions.
+# See bots/ADVISOR_ROUTINE.md for the routine's instructions.
 BRIEF_VERSION = 1
 
 
