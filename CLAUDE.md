@@ -102,6 +102,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   only in the beehiiv UI / MCP connector, not the v2 API; `unique_verified_clicks` is the bot-filtered count.
   Key finding (Aug 2026 split test): the same email got 31% Gmail opens from ohi.clearerthinking.net vs 5%
   from info@clearerthinking.net, so check the sending domain's Gmail reputation first when open rates move.
+- `reports/newsletter_topics_2026-10-02_src/`: 2026 newsletter topic breakdown; `classification.json` is the
+  single source (edition grouping, topic, format, why each other send is excluded). Counting editions from
+  beehiiv: one edition is often 2-3 posts (segment splits, domain splits, re-sends); post names are internal
+  and can be stale (a duplicated post keeps the old name), so read `subject_line`; identify One Helpful Idea
+  by title, not sender, because since Jul 2026 the main newsletter also sends from the ohi domain;
+  `content_tags` are empty and the Wix blog has no topical categories.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
