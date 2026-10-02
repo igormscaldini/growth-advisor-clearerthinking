@@ -1,5 +1,7 @@
 # Unattended monthly run (cloud routine)
 
+**Status (2026-10-02): not scheduled.** The routine that ran this was deleted the day it was built, at Igor's request, to be revisited later. The steps below worked in testing except the crawl of the podcast and YouTube hosts (see Network). To bring it back, create a cloud routine with the beehiiv and Gmail connectors whose prompt sets `MODE` and `EMAIL_TO` and tells the run to fetch and follow this file.
+
 This is the runbook for the scheduled routine that builds the wrap-up with nobody watching. It runs on the 1st of each month in a cloud session that has the beehiiv and Gmail connectors and no checkout of this repository. The result is a **draft** in beehiiv plus an email telling Igor it is ready to review. Igor reviews and sends; the routine never does.
 
 The routine prompt supplies two parameters: `MODE` (`normal`, `preflight` or `test`) and `EMAIL_TO`. Everything else is here and in the files below, which stay the single source for format and voice.

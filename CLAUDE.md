@@ -8,10 +8,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 ## Layout
 - `bots/README.md`: index of every recurring bot (GitHub Actions, Claude cloud routines) with schedule, code and how to run or pause it. Update it whenever a bot is added,
   changed or retired; the code itself stays in the root and `.github/workflows/`.
-- Monthly wrap-up routine (cloud, 1st of month 12:00 UTC, `trig_019Siu4sPCwgnPEnPmdc8Lx9`): builds the
-  CT+ debrief as a beehiiv draft and emails Igor. It has no repo checkout (GitHub is not connected to
-  claude.ai), so each run curls its runbook, `.claude/skills/ct-monthly-wrapup/references/unattended-run.md`,
-  from `main`. Cloud routines only reach allow-listed hosts; connectors bypass that list.
+- Monthly wrap-up routine: tried 2026-10-02 as a Claude cloud routine (beehiiv draft + review email on the 1st),
+  then deleted the same day at Igor's request; he will come back to it. The runbook stays at
+  `.claude/skills/ct-monthly-wrapup/references/unattended-run.md`. What blocked it: cloud routines only reach
+  allow-listed hosts (podcast.clearerthinking.org, www.youtube.com and www.clearerthinking.org returned 403);
+  connectors bypass that list, and with no GitHub connection on claude.ai the run curls the runbook from `main`.
 - `data_layer.py`: every metric function (GA4, Stripe, beehiiv, GSC, Ads). Streamlit cache
   decorators are harmless outside Streamlit. `_beehiiv_get` wraps beehiiv calls with
   timeout + retry; route new beehiiv endpoints through it.

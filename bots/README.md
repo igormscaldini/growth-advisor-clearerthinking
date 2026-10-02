@@ -8,7 +8,6 @@ Last verified: 2026-10-02 (states and last runs below are from that day).
 
 | Bot | What it does | When (UTC) | Runs on | Since | State on 2026-10-02 |
 |---|---|---|---|---|---|
-| [Monthly wrap-up draft](#monthly-wrap-up-draft) | Builds the CT+ "Monthly Debrief" as a beehiiv draft, emails Igor to review it | 1st of month, 12:00 | Claude cloud routine | 2026-10-02 | Enabled. Tested end to end 2026-10-02. First scheduled run 2026-11-01. Podcast, YouTube and clearerthinking.org hosts still blocked in the cloud environment |
 | [Daily site health check](#daily-site-health-check) | Six checks of the CT site; emails only when one does not pass | Daily 10:00 | GitHub Actions | 2026-10-01 | Active. Only run so far (manual, 2026-10-01) reported failed sign-up links on /plus and /coaching |
 | [All Articles hub sync](#all-articles-hub-sync) | Keeps the Wix "All Clearer Thinking Articles" post in step with the sitemap | Mondays 12:20 | GitHub Actions | 2026-09-30 | Active. Two manual runs passed; first scheduled run 2026-10-05 |
 | [Navigator subscribers sync](#navigator-subscribers-sync) | Upserts CT+ Navigator subscribers from Stripe into a Google Sheet | Every 15 min (nominal) | GitHub Actions | 2026-09-09 | Active, passing |
@@ -40,14 +39,7 @@ Cloud routines: https://claude.ai/code/routines (run now, pause, edit the prompt
 
 ## Claude cloud routines
 
-### Monthly wrap-up draft
-
-- **Does:** on the 1st, crawls the previous month's newsletter articles, tool launches, podcast episodes and videos, writes the "Monthly Debrief" in CT's format, saves it as a **draft** in beehiiv by duplicating the previous edition, and emails Igor that it is ready to review. It never schedules or sends the post.
-- **Routine:** `CT monthly wrap-up: beehiiv draft + review email`, https://claude.ai/code/routines/trig_019Siu4sPCwgnPEnPmdc8Lx9, cron `0 12 1 * *` (09:00 São Paulo), connectors beehiiv and Gmail.
-- **Instructions:** [unattended-run.md](../.claude/skills/ct-monthly-wrapup/references/unattended-run.md) in the `ct-monthly-wrapup` skill. The routine downloads it and the skill's format files from `main` at the start of every run, so editing those files changes the next run. The routine's own prompt only holds the mode, the recipient and the hard limits.
-- **Modes:** the prompt's `MODE:` line is `normal`, `preflight` (checks access, changes nothing) or `test` (full run into a draft titled `[ROUTINE TEST] ...`). Set it back to `normal` after testing.
-- **Needs:** the cloud environment's network allow list must include `podcast.clearerthinking.org`, `www.youtube.com`, `www.clearerthinking.org` and `programs.clearerthinking.org`. Until it does, the run builds the draft from the newsletter pieces only and the email says so.
-- **If it already ran:** a post titled `Monthly Debrief - {Month}` created in the last 45 days makes the run skip building and just email the link.
+None are scheduled right now (checked 2026-10-02).
 
 ### Weekly growth-advisor letter as a routine (optional)
 
@@ -122,3 +114,4 @@ Add a row to the table and a short section here in the same shape (does, code, t
 - **Workshop sign-ups sync** (workflow `workshop-signups-sync.yml`, `workshop_signups_sheet.py`): deleted 2026-10-02, the workshop was over. The code is in git history.
 - **Positly Reddit finder** (`positly_reddit_recruiter.py`, launchd job `com.positly.reddit-finder`): deleted 2026-10-02, job unloaded and its plist removed.
 - **Positly cloud routines** (Saturday performance report, Monday lead import) and the **hourly email responder**: deleted on claude.ai by Igor, 2026-10-02.
+- **Monthly wrap-up draft** (cloud routine, 1st of the month: built the CT+ "Monthly Debrief" as a beehiiv draft and emailed Igor): deleted 2026-10-02 at Igor's request, to be revisited later. Its instructions are kept in [unattended-run.md](../.claude/skills/ct-monthly-wrapup/references/unattended-run.md). In testing, everything worked from the cloud (reading beehiiv, duplicating and editing the draft, sending the email) except reading the podcast, YouTube and clearerthinking.org hosts, which the cloud environment's network allow list blocked.

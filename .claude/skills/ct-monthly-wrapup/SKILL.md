@@ -78,9 +78,9 @@ Then deliver per Igor's preference (local `.docx` in `~/Downloads/wrap ups/`, or
 
 If Igor asks for the draft on beehiiv, build it as described in step 5 of `references/unattended-run.md` (duplicate the previous "Monthly Debrief" post, then swap the body).
 
-## Unattended mode (monthly routine)
+## Unattended mode (monthly routine, currently off)
 
-A cloud routine runs this skill on the 1st of each month with nobody at the gates, saves the result as a beehiiv draft and emails Igor. `references/unattended-run.md` is its runbook: how both gates are decided automatically, how the beehiiv draft is built, the email, and the test modes. The routine fetches that file and the two reference files from `main` on every run, so edits take effect once they are pushed.
+Not scheduled at the moment: the cloud routine built on 2026-10-02 was deleted the same day and Igor will come back to it. `references/unattended-run.md` is the runbook for running this skill with nobody at the gates (how both gates are decided automatically, how the beehiiv draft is built, the review email, the test modes) and says what blocked the first attempt.
 
 ## Notes
 - Per user preference, don't add analytical commentary while crawling/wiring sources — just confirm and move to the gate.
