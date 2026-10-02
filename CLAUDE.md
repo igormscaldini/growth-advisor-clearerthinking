@@ -161,6 +161,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   he never sees it arrive. Every report this repo sends behaves that way; pass `to_inbox=True` to
   `email_transport.send_email` (as the site check does) for anything he must notice.
   To add scopes: edit SCOPES in `auth_ga4.py`, re-run it, then `gh secret set GOOGLE_TOKEN_JSON`.
+  As of 2026-10-02 SCOPES lists `documents` but the token was never re-minted with it, so Google Docs
+  cannot be edited in place: the Drive connector can only CREATE a doc (upload HTML with
+  `contentMimeType: text/html`), so finish all review rounds before creating one.
   `secrets/slides-token.json` is a separate Slides-only token (presentations scope, same OAuth
   client) for editing Igor's Google Slides decks in place via the Slides API `replaceAllText`;
   the Slides API was enabled on the GCP project in Sep 2026. Keep it out of the CI secret.
@@ -207,12 +210,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - Headless testing of GT runs: Playwright with `channel: 'chrome'` works (plain headless Chrome
   screenshots render blank); such runs are real runs, not test runs. Scripts from the 2026-09-14
   session live in the scratchpad only; rebuild from `guidedtrack/` notes if needed.
-- Workshop sign-up page (Sep 2026; workshop held 2026-09-30; since 2026-10-01 the program is a RECORDING page,
-  YouTube nlGCK76aEKk + Overcome course CTA, and the sign-up flow lives in git history): program "Career Change Workshop Sign-up" (id 38791, run URL
-  https://www.guidedtrack.com/programs/gg4qpas/run, `?src=` tracks the channel). Settings block at
-  the top (dateKnown/lengthKnown/joinLinkKnown flags); sends a confirmation `*email`. The email's
-  display name and Reply-To are set in GT Settings -> Branding, not in code. Published at
-  https://programs.clearerthinking.org/career-workshop/ via the team repo
+- Career workshop (held 2026-09-30): program "Career Change Workshop Sign-up" (id 38791, run URL
+  https://www.guidedtrack.com/programs/gg4qpas/run, `?src=` tracks the channel) is since 2026-10-01 a
+  RECORDING page (YouTube nlGCK76aEKk + Overcome course CTA); the sign-up flow lives in git history.
+  Published at https://programs.clearerthinking.org/career-workshop/ via the team repo
   `willfind/clearer-thinking-programs-static` (clone in `~/Documents/Claude/`; one YAML per program in
   `src/data/programs/`, Vercel deploys `main`; work on `purpose/YYYY-MM-DD/desc` branches and never
   push `main` from an agent). GT embed "allowed pages" API: `GET/POST /programs/{id}/pages`.
@@ -220,5 +221,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 ## Working conventions
 - Igor's rules: no em dashes anywhere in prose; always ground audience claims in the survey and
   buyer data (see the knowledge base); keep CT+ / paid framing aligned with the mission.
+- Articles written from a talk: every claim must trace to the speaker, the slides or the cited paper
+  (the paper wins over the slide), with each data point linked under the slide's citation label. Then
+  run the `newsletter-source-reviewer` agent (`.claude/agents/`) and deliver a Google Doc for the team.
 - Reports go to `reports/` (HTML, with a timestamp subtitle); scratch work stays out of the root.
 - After substantial work, refresh this file (keep it under ~200 lines).
