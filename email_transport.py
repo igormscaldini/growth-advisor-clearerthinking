@@ -42,7 +42,12 @@ def build_mime(subject: str, body: str, to_addr: str, from_label: str, header_ta
     return msg
 
 
-def send_via_gmail_api(subject: str, body: str, to_addr: str, from_label: str, header_tag: str) -> None:
+def send_via_gmail_api(
+    subject: str, body: str, to_addr: str, from_label: str, header_tag: str, to_inbox: bool = False
+) -> None:
+    """`to_inbox`: Gmail files a message sent from an address to itself under Sent only, with no
+    INBOX or UNREAD label (verified 2026-10-02 on every report this repo sends), so it never
+    shows up as new mail. Pass True for anything Igor must notice, such as an alert."""
     import base64
 
     from google.oauth2.credentials import Credentials
@@ -53,7 +58,14 @@ def send_via_gmail_api(subject: str, body: str, to_addr: str, from_label: str, h
     creds = Credentials.from_authorized_user_file(str(TOKEN_FILE))
     svc = build("gmail", "v1", credentials=creds, cache_discovery=False)
     raw = base64.urlsafe_b64encode(build_mime(subject, body, to_addr, from_label, header_tag).as_bytes()).decode()
-    svc.users().messages().send(userId="me", body={"raw": raw}).execute()
+    sent = svc.users().messages().send(userId="me", body={"raw": raw}).execute()
+    if to_inbox:
+        try:
+            svc.users().messages().modify(
+                userId="me", id=sent["id"], body={"addLabelIds": ["INBOX", "UNREAD"]}
+            ).execute()
+        except Exception as e:  # noqa: BLE001 - the mail is sent; failing here would re-send it by SMTP
+            print(f"[warn] sent, but could not move it to the inbox: {e}", file=sys.stderr)
 
 
 def send_via_smtp(subject: str, body: str, to_addr: str, from_label: str, header_tag: str) -> None:
@@ -74,10 +86,11 @@ def send_email(
     to_addr: str,
     from_label: str = "CT Growth Advisor",
     header_tag: str = "report",
+    to_inbox: bool = False,
 ) -> None:
     """Try the Gmail API first, then SMTP. Raise with both errors if both fail."""
     try:
-        send_via_gmail_api(subject, body, to_addr, from_label, header_tag)
+        send_via_gmail_api(subject, body, to_addr, from_label, header_tag, to_inbox)
         return
     except Exception as api_err:  # noqa: BLE001
         print(f"[warn] Gmail API send failed: {api_err}", file=sys.stderr)

@@ -135,32 +135,68 @@ def test_site_totals_sums_tools_by_hand():
     assert totals == {V: 110 + 140 + 4, A: 150 + 20 + 90, S: 90 + 38}
 
 
+UPT = "programs.clearerthinking.org/personality-test.html"
+BELIEFS = "programs.clearerthinking.org/philosophical_beliefs.html"
+
+
+def tool_page(tool: str, status=200, body=None) -> Fetched:
+    url = "https://" + tool
+    if body is None:
+        body = '<title>Tool</title><script src="/google_analytics_guidedtrack_trigger.js"></script>' + "x" * 600
+    return Fetched(url, status, url, body)
+
+
 def test_tools_healthy_property_passes_despite_events_that_never_fire():
-    assert shc.evaluate_tools(healthy_tools(), DAY).status == PASS
+    assert shc.silent_tools(healthy_tools(), DAY) == []
+    assert shc.evaluate_tools(healthy_tools(), DAY, {}).status == PASS
 
 
-def test_tool_losing_one_expected_event_fails():
+def test_tool_losing_one_expected_event_while_busy_fails():
     tools = healthy_tools()
-    tools["programs.clearerthinking.org/philosophical_beliefs.html"][DAY.isoformat()] = {V: 140, A: 90}
-    result = shc.evaluate_tools(tools, DAY)
+    tools[BELIEFS][DAY.isoformat()] = {V: 140, A: 90}
+    result = shc.evaluate_tools(tools, DAY, {})
     assert result.status == FAIL and len(result.problems) == 1
-    assert "philosophical_beliefs" in result.problems[0] and S in result.problems[0]
+    assert "philosophical_beliefs" in result.problems[0] and S in result.problems[0] and "140 times" in result.problems[0]
 
 
-def test_tool_going_completely_silent_is_reported_once():
+def test_a_handful_of_events_is_too_little_traffic_to_judge():
+    # 29 Viewed and no Accepted: suspicious, but under the 30-event bar. 30 Viewed is enough.
     tools = healthy_tools()
-    del tools["programs.clearerthinking.org/personality-test.html"][DAY.isoformat()]
-    result = shc.evaluate_tools(tools, DAY)
-    assert result.status == FAIL and len(result.problems) == 1
-    assert "no key event at all" in result.problems[0] and "257" in result.problems[0]   # 160 + 97
+    tools[BELIEFS][DAY.isoformat()] = {V: 29}
+    assert shc.silent_tools(tools, DAY) == [] and shc.evaluate_tools(tools, DAY, {}).status == PASS
+    tools[BELIEFS][DAY.isoformat()] = {V: 30}
+    result = shc.evaluate_tools(tools, DAY, {})
+    assert result.status == FAIL and len(result.problems) == 2   # Accepted and Submitted
+
+
+def test_silent_tool_with_a_healthy_page_just_had_no_visitors():
+    # The real 2026-10-01 case: imposter_syndrome.html lost its traffic source, tracking intact.
+    tools = healthy_tools()
+    del tools[UPT][DAY.isoformat()]
+    assert shc.silent_tools(tools, DAY) == [UPT]
+    result = shc.evaluate_tools(tools, DAY, {UPT: tool_page(UPT)})
+    assert result.status == PASS and "no visitors" in result.summary and "personality-test.html" in result.summary
+
+
+def test_silent_tool_whose_page_lost_tracking_or_is_down_fails():
+    tools = healthy_tools()
+    del tools[UPT][DAY.isoformat()]
+    untracked = shc.evaluate_tools(tools, DAY, {UPT: tool_page(UPT, body="<title>Tool</title>" + "x" * 600)})
+    assert untracked.status == FAIL and len(untracked.problems) == 1
+    assert "257 a day" in untracked.problems[0] and "tracking script" in untracked.problems[0]   # 160 + 97
+    down = shc.evaluate_tools(tools, DAY, {UPT: tool_page(UPT, status=404)})
+    assert down.status == FAIL and "HTTP 404" in down.problems[0]
+    moved = Fetched("https://" + UPT, 200, "https://www.guidedtrack.com/programs/x/run", tool_page(UPT).body)
+    assert "another site" in shc.evaluate_tools(tools, DAY, {UPT: moved}).problems[0]
+    assert shc.evaluate_tools(tools, DAY, {UPT: tool_page(UPT, status=429)}).status == UNKNOWN
 
 
 def test_tool_event_below_its_baseline_floor_is_ignored():
     # Baseline exactly 30 is expected; 29 is not.
     assert shc.TOOL_MIN_BASELINE == 30
-    tools = {"t/a": series(DAY, {V: 30, A: 29}, {})}
-    result = shc.evaluate_tools(tools, DAY)
-    assert result.status == FAIL and len(result.problems) == 1
+    tools = {"t/a": series(DAY, {V: 100, A: 30, S: 29}, {V: 100})}
+    result = shc.evaluate_tools(tools, DAY, {})
+    assert result.status == FAIL and len(result.problems) == 1 and A in result.problems[0]
 
 
 def test_partner_campaign_pages_are_not_checked_and_do_not_take_a_top_slot():
@@ -170,16 +206,16 @@ def test_partner_campaign_pages_are_not_checked_and_do_not_take_a_top_slot():
     # Ten busy partner pages whose campaigns just ended, plus one CT tool that lost an event.
     tools = {f"programs.clearerthinking.org/p/partner{i}/quiz/": series(DAY, {V: 5000, A: 4000}, {})
              for i in range(shc.TOP_TOOLS)}
-    assert shc.evaluate_tools(tools, DAY).status == PASS
+    assert shc.silent_tools(tools, DAY) == [] and shc.evaluate_tools(tools, DAY, {}).status == PASS
     tools["programs.clearerthinking.org/small.html"] = series(DAY, {V: 60, A: 40}, {V: 55})
-    result = shc.evaluate_tools(tools, DAY)
+    result = shc.evaluate_tools(tools, DAY, {})
     assert result.status == FAIL and len(result.problems) == 1 and "small.html" in result.problems[0]
 
 
 def test_only_the_top_tools_are_checked():
     tools = {f"t/{i}": series(DAY, {V: 1000 - i}, {V: 1}) for i in range(shc.TOP_TOOLS)}
     tools["t/small"] = series(DAY, {V: 50}, {})   # 11th by volume and silent
-    assert shc.evaluate_tools(tools, DAY).status == PASS
+    assert shc.silent_tools(tools, DAY) == [] and shc.evaluate_tools(tools, DAY, {}).status == PASS
 
 
 # ---- pages ---------------------------------------------------------------------------------------

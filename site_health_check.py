@@ -3,7 +3,8 @@
 Six checks, each ending PASS, FAIL or UNKNOWN (reported as "COULD NOT CHECK"):
 
   ga4       each of the three key events fired yesterday site-wide, and is firing right now
-  tools     each of CT's top tools still fires every event its own history says it should
+  tools     each of CT's top tools still fires every event its own history says it should, and a
+            tool that went completely silent still has a working page with the tracking script
   pages     the homepage and every page linked in the site menu load
   links     the Sign Up buttons on /plus and /coaching point at the CT+ subscribe program
   checkout  that program really ends on a Stripe checkout page, for each tier
@@ -58,9 +59,9 @@ BASELINE_DAYS = 14
 IGNORED_HOSTS = frozenset({"localhost"})
 # Every GA4 rule asks "did an event that should fire, fire at all?", never "is volume down?".
 # Backtest on Oct 2025 - Sep 2026: a "below 30% of the trailing median" rule raised 18 false
-# alarms, every one an ad or partner campaign ending, and no real break. The rules below raised
-# none, and flagged all of Jul 22-28 2026, when the personality test recorded nothing in GA4
-# while its sign-ups kept reaching beehiiv.
+# alarms, every one an ad or partner campaign ending, and no real break. GA4 alone cannot tell a
+# tool that lost its visitors from one whose tracking died (both read as zero), so a tool that goes
+# completely silent is judged by fetching its page: see evaluate_tools.
 # Realtime (last 30 minutes) only speaks when traffic is high enough for a zero to mean something.
 REALTIME_WINDOWS_PER_DAY = 48
 REALTIME_MIN_EXPECTED = 40    # key events expected per window before "all zero" is a failure
@@ -73,6 +74,9 @@ TOOL_MIN_BASELINE = 30
 # Partner campaign pages (/p/<partner>/...) go silent whenever the partner's campaign ends, which
 # GA4 cannot tell apart from broken tracking, so the per-tool check covers CT's own tools only.
 PARTNER_PATH = "/p/"
+# The GuidedTrack-to-GA4 bridge script. Every tool page loads it (all 25 busiest did on 2026-10-02),
+# and it is what loads GTM, so a page without it records nothing at all.
+TRACKING_SCRIPT = "google_analytics_guidedtrack_trigger"
 
 # ---- Pages -----------------------------------------------------------------------------------
 HOME = "https://www.clearerthinking.org"
@@ -201,26 +205,76 @@ def is_partner_page(tool: str) -> bool:
     return tool[tool.find("/"):].startswith(PARTNER_PATH)
 
 
-def evaluate_tools(by_tool: dict, day: date) -> CheckResult:
-    """Per-tool rule: each of CT's TOP_TOOLS (by trailing volume) must still fire every event
-    whose own trailing median is at least TOOL_MIN_BASELINE."""
+def top_tool_medians(by_tool: dict, day: date) -> dict:
+    """{tool: baseline medians} for CT's TOP_TOOLS by trailing volume, partner pages excluded."""
     medians = {tool: baseline_medians(days, day) for tool, days in by_tool.items()
                if not is_partner_page(tool)}
-    top = sorted(medians, key=lambda t: -sum(medians[t].values()))[:TOP_TOOLS]
-    problems = []
-    for tool in top:
-        counts = by_tool[tool].get(day.isoformat(), {})
-        expected = [ev for ev in KEY_EVENTS if medians[tool][ev] >= TOOL_MIN_BASELINE]
-        dead = [ev for ev in expected if counts.get(ev, 0) == 0]
-        if dead and len(dead) == len(expected):
-            usual = sum(medians[tool][ev] for ev in expected)
-            problems.append(f"{tool}: no key event at all on {day} (usually about {_n(usual)} a day). "
-                            "Either the page lost its visitors or its tracking stopped working.")
-        else:
-            problems += [f"{tool}: {ev} was 0 on {day} (trailing median {_n(medians[tool][ev])} a day)"
-                         for ev in dead]
-    return CheckResult(NAMES["tools"], FAIL if problems else PASS,
-                       f"top {len(top)} tools fire every event they usually do", problems)
+    return {t: medians[t] for t in sorted(medians, key=lambda t: -sum(medians[t].values()))[:TOP_TOOLS]}
+
+
+def _tool_state(by_tool: dict, day: date, tool: str, medians: dict) -> tuple:
+    """(dead events, busiest event count, usual daily total) for one tool on `day`. An event is
+    dead when the tool usually fires it (median >= TOOL_MIN_BASELINE) and it did not fire once."""
+    counts = by_tool[tool].get(day.isoformat(), {})
+    expected = [ev for ev in KEY_EVENTS if medians[ev] >= TOOL_MIN_BASELINE]
+    dead = [ev for ev in expected if counts.get(ev, 0) == 0]
+    silent = bool(dead) and len(dead) == len(expected)
+    return dead, max(counts.values(), default=0), sum(medians[ev] for ev in expected), silent
+
+
+def silent_tools(by_tool: dict, day: date) -> list:
+    """Top tools that fired none of the events they usually fire, on a day too quiet to judge
+    from the counts alone. Their pages have to be fetched to tell lost traffic from lost tracking."""
+    out = []
+    for tool, medians in top_tool_medians(by_tool, day).items():
+        _dead, busiest, _usual, silent = _tool_state(by_tool, day, tool, medians)
+        if silent and busiest < TOOL_MIN_BASELINE:
+            out.append(tool)
+    return out
+
+
+def tracking_page_problem(f: "Fetched") -> Optional[str]:
+    why = page_problem(f)
+    if why:
+        return f"its page {why}"
+    if TRACKING_SCRIPT not in f.body:
+        return "its page loads but no longer includes the tracking script"
+    return None
+
+
+def evaluate_tools(by_tool: dict, day: date, pages: dict) -> CheckResult:
+    """Per-tool rules, for each of CT's top tools:
+
+    - It had real traffic (some key event fired TOOL_MIN_BASELINE+ times) but an event it usually
+      fires did not fire once: that event is broken on that tool.
+    - It fired nothing it usually fires: `pages[tool]` (its fetched page) decides. A page that is
+      down, redirects elsewhere or lost the tracking script is a failure; a healthy page means the
+      tool simply had no visitors, which is not this monitor's business.
+    - Anything in between (a handful of events) is too little traffic to judge.
+    """
+    top = top_tool_medians(by_tool, day)
+    problems, limited, quiet = [], [], []
+    for tool, medians in top.items():
+        dead, busiest, usual, silent = _tool_state(by_tool, day, tool, medians)
+        if busiest >= TOOL_MIN_BASELINE:
+            problems += [f"{tool}: {ev} was 0 on {day} (trailing median {_n(medians[ev])} a day) "
+                         f"while another key event fired {_n(busiest)} times" for ev in dead]
+        elif silent and pages[tool].status == 429:
+            limited.append(f"rate limited (HTTP 429) on https://{tool}")
+        elif silent:
+            why = tracking_page_problem(pages[tool])
+            if why:
+                problems.append(f"{tool}: no key event on {day} (usually about {_n(usual)} a day) and {why}")
+            else:
+                quiet.append(tool.split("/", 1)[1])
+    summary = f"top {len(top)} tools fire every event they usually do"
+    if quiet:
+        summary += f" (no visitors on {day}, page and tracking script intact: {', '.join(quiet)})"
+    if problems:
+        return CheckResult(NAMES["tools"], FAIL, "", problems)
+    if limited:
+        return CheckResult(NAMES["tools"], UNKNOWN, "", limited)
+    return CheckResult(NAMES["tools"], PASS, summary)
 
 
 def fetch_ga4_by_tool(day: date) -> dict:
@@ -565,7 +619,9 @@ def run_ga4(ctx: Context) -> CheckResult:
 
 
 def run_tools(ctx: Context) -> CheckResult:
-    return evaluate_tools(ctx.ga4_by_tool(), ctx.day)
+    by_tool = ctx.ga4_by_tool()
+    pages = {tool: ctx.page("https://" + tool) for tool in silent_tools(by_tool, ctx.day)}
+    return evaluate_tools(by_tool, ctx.day, pages)
 
 
 def run_pages(ctx: Context) -> CheckResult:
@@ -686,8 +742,8 @@ def send(subject: str, body: str) -> bool:
     import email_transport
 
     try:
-        email_transport.send_email(subject, body, email_transport.EMAIL_FROM,
-                                   from_label="CT Site Check", header_tag="site-health")
+        email_transport.send_email(subject, body, email_transport.EMAIL_FROM, from_label="CT Site Check",
+                                   header_tag="site-health", to_inbox=True)
         print(f"emailed: {subject}")
         return True
     except Exception as e:  # noqa: BLE001 - report the delivery failure, do not crash on it
