@@ -123,6 +123,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   must be excluded; newsletter-link visits by country are polluted by email scanners in data centres (Ashburn, Moses
   Lake, Des Moines, Singapore), so count `engagedSessions`, not sessions. The "Engaged Reades - Open > 40%" beehiiv
   segment goes stale (recalculates only via the MCP `recalculate_segment`, not the v2 API).
+- beehiiv article drafts from a Google Doc (first done 2026-10-06, "The Supplement Paradox"): `duplicate_post` the
+  latest regular article (keeps logo, audio/takeaways buttons, rating box, footer, email segment), then one
+  `edit_post_content`. Quotes and "Argument" boxes are the team's blue-left-border `htmlSnippet` table. Title, hero,
+  the two buttons and `custom_live_url` all point at the Wix post, which exists only once the team publishes it.
+  Images: `save_image` wants a public URL; relaying bytes as base64 through the model corrupts anything above ~15 KB
+  (verify by downloading + PIL decode) and public hosting via GitHub is blocked by the permission classifier, so reuse
+  wixstatic/beehiiv URLs or leave a placeholder box. Doc export: `curl .../export?format=html` (link-shared, no auth).
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
