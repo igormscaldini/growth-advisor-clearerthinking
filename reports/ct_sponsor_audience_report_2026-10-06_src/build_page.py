@@ -70,34 +70,15 @@ def esc(s: str) -> str:
 CHARTS: list[dict] = []  # collected chart specs, serialised into the page's script
 
 
-def chart(cid: str, title: str, n: int, rows: list[dict], question: str = "", note: str = "",
-          highlight: tuple = (), height: int | None = None, series: list[dict] | None = None, n_label: str = "n",
-          wide: bool = False) -> str:
-    """A section with one horizontal bar chart. Single series: rows; comparison: series=[{name, rows, color}].
-
-    wide=True means the chart spans the page (not a two-column cell), so labels can wrap at a longer width."""
-    count = len(series[0]["rows"]) if series else len(rows)
-    h = height or (count * (38 if series else 30) + 16)
-    spec = {"id": cid, "n": n, "wrap": 48 if (wide or series) else 26}
-    if series:
-        spec["labels"] = [r["label"] for r in series[0]["rows"]]
-        spec["series"] = [{"name": s["name"], "data": [round(r["pct"], 1) for r in s["rows"]], "counts": [r["count"] for r in s["rows"]],
-                           "color": s["color"], "n": s["n"]} for s in series]
-    else:
-        spec["labels"] = [r["label"] for r in rows]
-        spec["data"] = [round(r["pct"], 1) for r in rows]
-        spec["counts"] = [r["count"] for r in rows]
-        spec["colors"] = [ORANGE if r["label"] in highlight else BLUE for r in rows]
-    CHARTS.append(spec)
-    legend = ""
-    if series:
-        legend = '<div class="legend">' + "".join(
-            f'<span><span class="legend-dot" style="background:{s["color"]}"></span>{esc(s["name"])} ({n_label} = {s["n"]:,})</span>'
-            for s in series) + "</div>"
-    return (f'<div class="section-title">{esc(title)}' + (f' <span class="n">({n_label} = {n:,})</span>' if n else "") + "</div>"
-            + (f'<div class="question-wording">{esc(question)}</div>' if question else "")
-            + f'<div class="chart-wrap" style="height:{h}px"><canvas id="{cid}"></canvas></div>' + legend
-            + (f'<div class="note">{note}</div>' if note else ""))
+def chart(s: dict) -> str:
+    """A section with one horizontal bar chart, from a spec made by spec(). Collects the data for Chart.js."""
+    h = len(s["rows"]) * 30 + 16
+    CHARTS.append({"id": s["id"], "n": s["n"], "wrap": 48 if s["wide"] else 26, "labels": [r["label"] for r in s["rows"]],
+                   "data": [round(r["pct"], 1) for r in s["rows"]], "counts": [r["count"] for r in s["rows"]]})
+    return (f'<div class="section-title">{esc(s["title"])}' + (f' <span class="n">(n = {s["n"]:,})</span>' if s["n"] else "") + "</div>"
+            + (f'<div class="question-wording">{esc(s["question"])}</div>' if s["question"] else "")
+            + f'<div class="chart-wrap" style="height:{h}px"><canvas id="{s["id"]}"></canvas></div>'
+            + (f'<div class="note">{s["note"]}</div>' if s["note"] else ""))
 
 
 def two_col(a: str, b: str) -> str:
@@ -116,9 +97,20 @@ def stat_row(items: list[tuple[str, str]]) -> str:
     return '<div class="stats">' + "".join(f'<div class="stat"><div class="v">{v}</div><div class="l">{esc(l)}</div></div>' for v, l in items) + "</div>"
 
 
-# --------------------------------------------------------------------------- page
-def build(stamp: str) -> str:
-    CHARTS.clear()
+# --------------------------------------------------------------------------- content, shared with build_pdf.py
+TITLE = "Clearer Thinking audience breakdown"
+META = "Every chart shows its own sample size. Data from analytics and surveys."
+
+
+def spec(cid: str, title: str, n: int, rows: list[dict], question: str = "", note: str = "", wide: bool = False) -> dict:
+    return {"id": cid, "title": title, "n": n, "rows": rows, "question": question, "note": note, "wide": wide}
+
+
+def content() -> dict:
+    """Everything on the page, numbers and wording, as one structure:
+    {"title", "meta", "summary": [html bullets], "sections": [{"title", "lead", "rows": [[cell, cell] | [cell]]}]}
+    where a cell is a list of chart specs stacked vertically. build() renders it as HTML with Chart.js and
+    build_pdf.py renders the same structure as a PDF, so the wording lives here only."""
     sv, pa = SURVEY, PATHS
     ident_sv = shares(sv["identities"]["rows"], sv["identities"]["n"])
     ident_pa = shares(pa["identities"]["rows"], pa["identities"]["n"])
@@ -148,62 +140,76 @@ def build(stamp: str) -> str:
     impact_sv = next(r["pct"] for r in goals_sv if r["label"].startswith("Have a greater positive impact"))
     comparables = ", ".join(sv["comparables"][:6])
 
-    body = f"""
-<h1>Clearer Thinking audience breakdown</h1>
-<div class="report-meta">Data as of {stamp} · Every chart shows its own sample size. Data from analytics and surveys.</div>
+    summary = [
+        f"Readers describe themselves first as <b>lifelong learners</b> ({ident_sv[0]['pct']:.0f}%) and <b>science enthusiasts</b> ({ident_sv[1]['pct']:.0f}%); {rat_sv:.0f}% call themselves rationalists and {ea_pa:.0f} to {ea_sv:.0f}% effective altruists (aspiring included).",
+        f"About half ({impact_sv:.0f}%) of audience surveys responders in 2026 name <b>having a greater positive impact on the world</b> as a personal goal; the topics they ask for most are critical thinking, psychology and philosophy.",
+        f"Politically they lean progressive ({political[0]['pct']:.0f}% left of centre, {political[2]['pct']:.0f}% right), and the readers we have asked are highly educated ({degree:.0f}% with a bachelor's degree or higher).",
+        f"Readers most often compare Clearer Thinking to {esc(comparables)}.",
+    ]
+    sections = [
+        {"title": "Who they are",
+         "lead": "From the March 2026 audience survey of newsletter readers (539 opened it; each question shows how many answered) and the Clearer Thinking Paths quiz, a self-improvement planning tool completed by 7,889 people between July 2023 and July 2026.",
+         "rows": [
+             [[spec("identSurvey", "How newsletter readers describe themselves", sv["identities"]["n"], ident_sv,
+                    question='"Do any of the following categories apply to you?" Multi-select.')],
+              [spec("identPaths", "How Paths quiz takers describe themselves", pa["identities"]["n"], ident_pa,
+                    question="Same question, asked inside the Paths quiz. Multi-select.")]],
+             [[spec("employment", "Career stage", sv["employment"]["n"], employment,
+                    question='"Which of the following best describes your current primary role?"')],
+              [spec("industry", "Industry", sv["industry"]["n"], industry,
+                    question='"Which field or industry best describes your work?" Top 11 structured options.')]],
+             [[spec("political", "Political self-placement", pol_n, political,
+                    question='"In political matters, where do your views generally fall on the scale from left (progressive) to right (conservative)?" 11-point scale, grouped.')],
+              [spec("education", "Education", edu["n"], education,
+                    question="Career Navigation Survey, September 2026: a smaller survey of readers thinking about a career change, so treat it as indicative.",
+                    note=f"{degree:.0f}% hold a bachelor's degree or higher.")]],
+         ]},
+        {"title": "What they are working on",
+         "lead": "Priorities, goals and obstacles, as readers reported them in the March 2026 survey.",
+         "rows": [
+             [[spec("priorities", "High priorities right now", sv["priorities"]["n"], priorities,
+                    question='"Which of these are high priorities for you right now in your life?" Multi-select.')],
+              [spec("problems", "Biggest challenges right now", sv["problems"]["n"], problems,
+                    question='"Which of these problems is a big challenge for you right now?" Multi-select.')]],
+             [[spec("goals", "Personal goals (top 12 of 46)", sv["goals"]["n"], goals_sv,
+                    question='"Which of these goals are major objectives of yours right now?" Multi-select.', wide=True)]],
+         ]},
+        {"title": "What they want to read, and what worries them", "lead": "",
+         "rows": [
+             [[spec("topics", "Topics readers want more of", sv["topics"]["n"], topics, question="Multi-select, top 15 options.")],
+              [spec("concerns", "World trends that concern them most", sv["concerns"]["n"], concerns,
+                    question='"What trends or changes in the world concern you the most right now?" Multi-select.')]],
+         ]},
+        {"title": "Where they are",
+         "lead": f"Google Analytics, {win_txt}: visits to our website that came from a newsletter link, counted as engaged visits (over ten seconds, or more than one page); n is the number of such visits. Email link scanners create visits from data-centre locations but almost never engaged ones, so this is the cleaner view.",
+         "rows": [
+             [[spec("country", "Country of engaged newsletter visits", country["n"], country["rows"],
+                    note=f"{anglo:.0f}% from the US, UK, Canada, Australia, Ireland or New Zealand.")],
+              [spec("language", "Browser language", language["n"], language["rows"], question="Top 6."),
+               spec("device", "Device", device["n"], device["rows"])]],
+         ]},
+    ]
+    return {"title": TITLE, "meta": META, "summary": summary, "sections": sections}
 
 
-<div class="summary">
-  <div class="summary-title">In short</div>
-  <ul>
-    <li>Readers describe themselves first as <b>lifelong learners</b> ({ident_sv[0]['pct']:.0f}%) and <b>science enthusiasts</b> ({ident_sv[1]['pct']:.0f}%); {rat_sv:.0f}% call themselves rationalists and {ea_pa:.0f} to {ea_sv:.0f}% effective altruists (aspiring included).</li>
-    <li>About half ({impact_sv:.0f}%) of audience surveys responders in 2026 name <b>having a greater positive impact on the world</b> as a personal goal; the topics they ask for most are critical thinking, psychology and philosophy.</li>
-    <li>Politically they lean progressive ({political[0]['pct']:.0f}% left of centre, {political[2]['pct']:.0f}% right), and the readers we have asked are highly educated ({degree:.0f}% with a bachelor's degree or higher).</li>
-    <li>Readers most often compare Clearer Thinking to {esc(comparables)}.</li>
-  </ul>
-</div>
-
-{h2("Who they are", "From the March 2026 audience survey of newsletter readers (539 opened it; each question shows how many answered) and the Clearer Thinking Paths quiz, a self-improvement planning tool completed by 7,889 people between July 2023 and July 2026.")}
-{two_col(
-    chart("identSurvey", "How newsletter readers describe themselves", sv["identities"]["n"], ident_sv,
-          question='"Do any of the following categories apply to you?" Multi-select.'),
-    chart("identPaths", "How Paths quiz takers describe themselves", pa["identities"]["n"], ident_pa,
-          question="Same question, asked inside the Paths quiz. Multi-select."))}
-{divider()}
-{two_col(
-    chart("employment", "Career stage", sv["employment"]["n"], employment, question='"Which of the following best describes your current primary role?"'),
-    chart("industry", "Industry", sv["industry"]["n"], industry, question='"Which field or industry best describes your work?" Top 11 structured options.'))}
-{divider()}
-{two_col(
-    chart("political", "Political self-placement", pol_n, political,
-          question='"In political matters, where do your views generally fall on the scale from left (progressive) to right (conservative)?" 11-point scale, grouped.'),
-    chart("education", "Education", edu["n"], education,
-          question="Career Navigation Survey, September 2026: a smaller survey of readers thinking about a career change, so treat it as indicative.",
-          note=f"{degree:.0f}% hold a bachelor's degree or higher."))}
-
-{divider()}
-{h2("What they are working on", "Priorities, goals and obstacles, as readers reported them in the March 2026 survey.")}
-{two_col(
-    chart("priorities", "High priorities right now", sv["priorities"]["n"], priorities, question='"Which of these are high priorities for you right now in your life?" Multi-select.'),
-    chart("problems", "Biggest challenges right now", sv["problems"]["n"], problems, question='"Which of these problems is a big challenge for you right now?" Multi-select.'))}
-{divider()}
-{chart("goals", "Personal goals (top 12 of 46)", sv["goals"]["n"], goals_sv, question='"Which of these goals are major objectives of yours right now?" Multi-select.', wide=True)}
-
-{divider()}
-{h2("What they want to read, and what worries them")}
-{two_col(
-    chart("topics", "Topics readers want more of", sv["topics"]["n"], topics, question="Multi-select, top 15 options."),
-    chart("concerns", "World trends that concern them most", sv["concerns"]["n"], concerns, question='"What trends or changes in the world concern you the most right now?" Multi-select.'))}
-
-{divider()}
-{h2("Where they are", f"Google Analytics, {win_txt}: visits to our website that came from a newsletter link, counted as engaged visits (over ten seconds, or more than one page); n is the number of such visits. Email link scanners create visits from data-centre locations but almost never engaged ones, so this is the cleaner view.")}
-{two_col(
-    chart("country", "Country of engaged newsletter visits", country["n"], country["rows"],
-          note=f"{anglo:.0f}% from the US, UK, Canada, Australia, Ireland or New Zealand."),
-    chart("language", "Browser language", language["n"], language["rows"], question="Top 6.")
-    + chart("device", "Device", device["n"], device["rows"]))}
-
-"""
+# --------------------------------------------------------------------------- page
+def build(stamp: str) -> str:
+    CHARTS.clear()
+    c = content()
+    parts = [f"<h1>{esc(c['title'])}</h1>",
+             f'<div class="report-meta">Data as of {stamp} · {esc(c["meta"])}</div>',
+             '<div class="summary"><div class="summary-title">In short</div><ul>'
+             + "".join(f"<li>{b}</li>" for b in c["summary"]) + "</ul></div>"]
+    for i, sec in enumerate(c["sections"]):
+        if i:
+            parts.append(divider())
+        parts.append(h2(sec["title"], sec["lead"]))
+        for j, row in enumerate(sec["rows"]):
+            if j:
+                parts.append(divider())
+            cells = ["".join(chart(s) for s in cell) for cell in row]
+            parts.append(two_col(*cells) if len(cells) == 2 else cells[0])
+    body = "\n".join(parts)
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -279,7 +285,7 @@ function draw(spec) {
   const el = document.getElementById(spec.id); if (!el) return;
   const datasets = spec.series
     ? spec.series.map(s => ({ label: s.name, data: s.data, counts: s.counts, n: s.n, backgroundColor: s.color, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 }))
-    : [{ data: spec.data, counts: spec.counts, n: spec.n, backgroundColor: spec.colors, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 }];
+    : [{ data: spec.data, counts: spec.counts, n: spec.n, backgroundColor: '#0885f8', borderRadius: 3, borderSkipped: false, maxBarThickness: 16 }];
   const max = Math.min(100, Math.ceil(Math.max(...datasets.flatMap(d => d.data)) / 10) * 10 + 12);
   new Chart(el, { type: 'bar', data: { labels: spec.labels.map(l => wrap(l, spec.wrap)), datasets }, plugins: [tipLabels],
     options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', layout: { padding: { right: 36 } },

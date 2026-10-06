@@ -77,10 +77,10 @@ def test_group_share(bp):
     assert bp.group_share(rows, ("United States", "Canada", "Ireland")) == pytest.approx(55.0)
 
 
-def test_chart_collects_spec_and_marks_highlight(bp):
+def test_chart_collects_spec(bp):
     bp.CHARTS.clear()
-    html = bp.chart("c1", "Title", 100, bp.shares([("x", 10), ("EA", 20)], 100), highlight=("EA",))
-    assert 'id="c1"' in html and "(n = 100)" in html
+    html = bp.chart(bp.spec("c1", "Title", 100, bp.shares([("x", 10), ("EA", 20)], 100), question="Q?", wide=True))
+    assert 'id="c1"' in html and "(n = 100)" in html and "Q?" in html
     spec = bp.CHARTS[-1]
     assert spec["data"] == [10.0, 20.0] and spec["counts"] == [10, 20]
-    assert spec["colors"] == [bp.BLUE, bp.ORANGE]
+    assert spec["wrap"] == 48 and spec["labels"] == ["x", "EA"]

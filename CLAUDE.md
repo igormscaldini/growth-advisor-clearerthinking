@@ -112,10 +112,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   and can be stale (a duplicated post keeps the old name), so read `subject_line`; identify One Helpful Idea
   by title, not sender, because since Jul 2026 the main newsletter also sends from the ohi domain;
   `content_tags` are empty and the Wix blog has no topical categories.
-- `reports/ct_sponsor_audience_report_2026-10-06_src/`: sponsor-facing "Who reads Clearer Thinking" web page
-  (`fetch_data.py` -> `ga4_datapoints.json` -> `build_page.py` -> `index.html`, Chart.js, styled like the published
-  partner page https://igormscaldini.github.io/ct-audience-profile/). Survey figures come from the personas
-  `datapoints.json`. Igor's rule (2026-10-06): sponsors get WHO the audience is (surveys + GA4 demographics), never
+- `reports/ct_sponsor_audience_report_2026-10-06_src/`: sponsor-facing "Clearer Thinking audience breakdown"
+  (`fetch_data.py` -> `ga4_datapoints.json`; `build_page.py` holds the numbers AND wording in `content()` and renders
+  `index.html` (Chart.js, styled like the published partner page https://igormscaldini.github.io/ct-audience-profile/);
+  `build_pdf.py` renders the same `content()` as an A4 PDF in `~/Downloads` with the personas report's CT styling).
+  Survey figures come from the personas `datapoints.json`; edit wording in `content()` only, then run both builders. Igor's rule (2026-10-06): sponsors get WHO the audience is (surveys + GA4 demographics), never
   send, campaign or performance numbers; a first PDF version with reach and past-sponsor click data was rejected.
   GA4 gotchas learned: age/gender/interests cannot be combined with any session-scoped filter (so no newsletter-only
   demographics); they cover only Google's signed-in subset and are thresholded; Aug 2026 (1.1M one-off viral visitors)

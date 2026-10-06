@@ -68,12 +68,14 @@ def pct(v: float, n: float) -> str:
 
 def bars(title: str, rows: list, n: int | None = None, color: str = "#0885f8",
          note: str = "", value_fmt=None, max_value: float | None = None, unit: str = "",
-         highlight: tuple = (), highlight_color: str = "#f8911b") -> str:
-    """Minimalist horizontal bar chart. rows = [(label, value), ...]; labels in `highlight` get highlight_color."""
+         highlight: tuple = (), highlight_color: str = "#f8911b", sub: str = "") -> str:
+    """Minimalist horizontal bar chart. rows = [(label, value), ...]; labels in `highlight` get highlight_color;
+    `sub` is a muted line under the title (the question as asked, for instance)."""
     values = [r[1] for r in rows]
     mx = max_value or max(values)
     out = [f'<div class="chart avoid"><div class="ch">{esc(title)}'
-           + (f'<span class="n">n = {n:,}</span>' if n else "") + "</div>"]
+           + (f'<span class="n">n = {n:,}</span>' if n else "") + "</div>"
+           + (f'<div class="cq">{esc(sub)}</div>' if sub else "")]
     for label, v in rows:
         if value_fmt:
             right = value_fmt(v)
@@ -421,6 +423,7 @@ b{font-weight:600}
 .chart{margin:0 0 5mm}
 .ch{font-size:8.8pt;font-weight:600;color:var(--navy);margin:0 0 1.6mm;display:flex;justify-content:space-between;gap:3mm;align-items:baseline}
 .ch .n{font-weight:400;color:var(--light);font-size:7.8pt;white-space:nowrap}
+.cq{font-size:7.8pt;color:var(--muted);font-style:italic;margin:-0.6mm 0 1.8mm;line-height:1.35}
 .bar{display:grid;grid-template-columns:minmax(0,54%) 1fr 17mm;align-items:center;gap:0 2mm;margin:0 0 1.15mm;font-size:8.2pt;line-height:1.15}
 .g4 .bar{grid-template-columns:minmax(0,60%) 1fr 13mm;font-size:7.6pt}
 .g3 .bar{grid-template-columns:minmax(0,58%) 1fr 14mm;font-size:7.8pt}
