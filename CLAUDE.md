@@ -112,6 +112,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   and can be stale (a duplicated post keeps the old name), so read `subject_line`; identify One Helpful Idea
   by title, not sender, because since Jul 2026 the main newsletter also sends from the ohi domain;
   `content_tags` are empty and the Wix blog has no topical categories.
+- `reports/ct_sponsor_audience_report_2026-10-06_src/`: sponsor-facing audience PDF (`fetch_data.py` -> `data/`
+  (gitignored) -> `analysis.py` -> `datapoints.json` -> `build_report.py` -> HTML in `reports/` + PDF in `~/Downloads`).
+  Reuses the personas builder's helpers, CSS and `render_pdf`; survey figures come from the personas `datapoints.json`.
+  beehiiv stores one edition as 2-3 posts, so `analysis.py` merges same-subject posts within 3 days; tool announcements
+  are excluded from the reach stats. Past sponsors are anonymized (`ANONYMIZE`). The "Engaged Reades - Open > 40%"
+  segment count goes stale (beehiiv recalculates only on request, the v2 API cannot): run the beehiiv MCP
+  `recalculate_segment` on it before refetching.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
