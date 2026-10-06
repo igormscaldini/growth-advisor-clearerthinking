@@ -136,10 +136,6 @@ def build(stamp: str) -> str:
     edu = CAREER["education"]
     education = shares(edu["rows"], edu["n"])
     degree = sum(r["pct"] for r in education if r["label"] in ("Bachelor's degree", "Master's degree", "Doctorate"))
-    age_main = demographic_shares(GA4["demographics"]["age"], MAIN_HOST, order=["18-24", "25-34", "35-44", "45-54", "55-64", "65+"])
-    age_tools = demographic_shares(GA4["demographics"]["age"], TOOLS_HOST, order=age_main and [r["label"] for r in age_main["rows"]])
-    gen_main = demographic_shares(GA4["demographics"]["gender"], MAIN_HOST, order=["female", "male"])
-    gen_tools = demographic_shares(GA4["demographics"]["gender"], TOOLS_HOST, order=["female", "male"])
     country = engaged_shares(GA4["newsletter"]["country"], top=12)
     anglo = group_share(engaged_shares(GA4["newsletter"]["country"])["rows"], ANGLOSPHERE)
     device = engaged_shares(GA4["newsletter"]["device"])
@@ -150,35 +146,29 @@ def build(stamp: str) -> str:
     ea_pa = next(r["pct"] for r in ident_pa if r["label"] == EA)
     rat_sv = next(r["pct"] for r in ident_sv if r["label"].startswith("Rationalist"))
     impact_sv = next(r["pct"] for r in goals_sv if r["label"].startswith("Have a greater positive impact"))
-    impact_pa = next(r["pct"] for r in shares(pa["goals"]["rows"], pa["goals"]["n"]) if r["label"].startswith("Greater positive impact"))
-    young_main = next(r["pct"] for r in age_main["rows"] if r["label"] == "18-24")
-    young_tools = next(r["pct"] for r in age_tools["rows"] if r["label"] == "18-24")
-    over45_main = sum(r["pct"] for r in age_main["rows"] if r["label"] in ("45-54", "55-64", "65+"))
     comparables = ", ".join(sv["comparables"][:6])
 
     body = f"""
-<h1>Who reads Clearer Thinking</h1>
-<div class="report-meta">Audience profile for partners and sponsors · Data as of {stamp} · Every chart shows its own sample size</div>
+<h1>Clearer Thinking audience breakdown</h1>
+<div class="report-meta">Data as of {stamp} · Every chart shows its own sample size. Data from analytics and surveys.</div>
 
-<p class="lead">Clearer Thinking publishes a free email newsletter and free interactive tools on decision-making, psychology and thinking clearly. This page describes the people on the other end: who they say they are, what they are working on and worried about, and where they are. It draws on two reader surveys and on Google Analytics, and the last section explains what each source can and cannot tell you.</p>
 
 <div class="summary">
   <div class="summary-title">In short</div>
   <ul>
     <li>Readers describe themselves first as <b>lifelong learners</b> ({ident_sv[0]['pct']:.0f}%) and <b>science enthusiasts</b> ({ident_sv[1]['pct']:.0f}%); {rat_sv:.0f}% call themselves rationalists and {ea_pa:.0f} to {ea_sv:.0f}% effective altruists (aspiring included).</li>
-    <li>About half ({impact_sv:.0f}% in the survey, {impact_pa:.0f}% in the Paths quiz) name <b>having a greater positive impact on the world</b> as a personal goal; the topics they ask for most are critical thinking, psychology and philosophy.</li>
-    <li>They are mostly in the <b>US, UK, Canada and Australia</b> ({anglo:.0f}% of engaged newsletter visits) and read in English ({language['rows'][0]['pct']:.0f}%).</li>
+    <li>About half ({impact_sv:.0f}%) of audience surveys responders in 2026 name <b>having a greater positive impact on the world</b> as a personal goal; the topics they ask for most are critical thinking, psychology and philosophy.</li>
     <li>Politically they lean progressive ({political[0]['pct']:.0f}% left of centre, {political[2]['pct']:.0f}% right), and the readers we have asked are highly educated ({degree:.0f}% with a bachelor's degree or higher).</li>
-    <li>Website visitors skew young: of those Google can classify, {young_main:.0f}% on the main site and {young_tools:.0f}% on the free tools are 18 to 24, with {over45_main:.0f}% of main-site visitors over 45. Gender splits about evenly. Readers most often compare Clearer Thinking to {esc(comparables)}.</li>
+    <li>Readers most often compare Clearer Thinking to {esc(comparables)}.</li>
   </ul>
 </div>
 
 {h2("Who they are", "From the March 2026 audience survey of newsletter readers (539 opened it; each question shows how many answered) and the Clearer Thinking Paths quiz, a self-improvement planning tool completed by 7,889 people between July 2023 and July 2026.")}
 {two_col(
     chart("identSurvey", "How newsletter readers describe themselves", sv["identities"]["n"], ident_sv,
-          question='"Do any of the following categories apply to you?" Multi-select.', highlight=(EA,)),
+          question='"Do any of the following categories apply to you?" Multi-select.'),
     chart("identPaths", "How Paths quiz takers describe themselves", pa["identities"]["n"], ident_pa,
-          question="Same question, asked inside the Paths quiz. Multi-select.", highlight=(EA,)))}
+          question="Same question, asked inside the Paths quiz. Multi-select."))}
 {divider()}
 {two_col(
     chart("employment", "Career stage", sv["employment"]["n"], employment, question='"Which of the following best describes your current primary role?"'),
@@ -197,13 +187,12 @@ def build(stamp: str) -> str:
     chart("priorities", "High priorities right now", sv["priorities"]["n"], priorities, question='"Which of these are high priorities for you right now in your life?" Multi-select.'),
     chart("problems", "Biggest challenges right now", sv["problems"]["n"], problems, question='"Which of these problems is a big challenge for you right now?" Multi-select.'))}
 {divider()}
-{chart("goals", "Personal goals (top 12 of 46)", sv["goals"]["n"], goals_sv, question='"Which of these goals are major objectives of yours right now?" Multi-select.',
-       highlight=("Have a greater positive impact on the world",), wide=True)}
+{chart("goals", "Personal goals (top 12 of 46)", sv["goals"]["n"], goals_sv, question='"Which of these goals are major objectives of yours right now?" Multi-select.', wide=True)}
 
 {divider()}
 {h2("What they want to read, and what worries them")}
 {two_col(
-    chart("topics", "Topics readers want more of", sv["topics"]["n"], topics, question="Multi-select, top 15 options.", highlight=("How to improve the world",)),
+    chart("topics", "Topics readers want more of", sv["topics"]["n"], topics, question="Multi-select, top 15 options."),
     chart("concerns", "World trends that concern them most", sv["concerns"]["n"], concerns, question='"What trends or changes in the world concern you the most right now?" Multi-select.'))}
 
 {divider()}
@@ -214,30 +203,13 @@ def build(stamp: str) -> str:
     chart("language", "Browser language", language["n"], language["rows"], question="Top 6.")
     + chart("device", "Device", device["n"], device["rows"]))}
 
-{divider()}
-{h2("Website visitors: age and gender", f"Google Analytics, {win_txt} excluding August 2026 (a one-off viral wave). Google reports age and gender only for visitors who are signed in with ads personalisation on, a few percent of all visitors, and it withholds small cells, so read these as the profile of a sample. The main site hosts the articles and newsletter pages; the free tools (quizzes and tests) live on their own subdomain and draw a broader, younger crowd.")}
-{chart("age", "Age of website visitors Google can classify", 0, [], series=[
-    {"name": "Main site (www.clearerthinking.org)", "rows": age_main["rows"], "color": BLUE, "n": age_main["n"]},
-    {"name": "Free tools (programs.clearerthinking.org)", "rows": age_tools["rows"], "color": GREY, "n": age_tools["n"]}])}
-{stat_row([(f"{gen_main['rows'][0]['pct']:.0f}% / {gen_main['rows'][1]['pct']:.0f}%", f"female / male, main site (n = {gen_main['n']:,})"),
-           (f"{gen_tools['rows'][0]['pct']:.0f}% / {gen_tools['rows'][1]['pct']:.0f}%", f"female / male, free tools (n = {gen_tools['n']:,})")])}
-
-{divider()}
-{h2("Sources and limits")}
-<ul class="limits">
-  <li><b>Audience survey, March 2026.</b> Sent to the newsletter list; 539 people opened it and 132 to 181 answered each question. Respondents are self-selected (the more engaged readers), so treat the shares as describing the core readership rather than every subscriber. Multi-select questions do not sum to 100%.</li>
-  <li><b>Clearer Thinking Paths quiz, Jul 2023 to Jul 2026.</b> 7,889 people completed its self-assessment. Also self-selected: people planning self-improvement, not a random slice of the list.</li>
-  <li><b>Career Navigation Survey, September 2026.</b> 113 to 143 readers considering a career change; used only for education.</li>
-  <li><b>Google Analytics 4, {win_txt}.</b> Country, language and device come from engaged visits that arrived via a newsletter link; they describe readers who click, not readers who only open. Age and gender come from Google's classified subset of visitors and are thresholded; August 2026 is excluded because a viral wave brought 1.1 million one-off visitors that month. Readers who block analytics are not counted.</li>
-  <li>This page describes who the audience is. Reach and engagement figures for a specific placement are provided separately on request.</li>
-</ul>
 """
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Who reads Clearer Thinking: audience profile</title>
+<title>Clearer Thinking audience breakdown</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>{CSS}</style>
 </head>
