@@ -67,8 +67,9 @@ def pct(v: float, n: float) -> str:
 
 
 def bars(title: str, rows: list, n: int | None = None, color: str = "#0885f8",
-         note: str = "", value_fmt=None, max_value: float | None = None, unit: str = "") -> str:
-    """Minimalist horizontal bar chart. rows = [(label, value), ...]."""
+         note: str = "", value_fmt=None, max_value: float | None = None, unit: str = "",
+         highlight: tuple = (), highlight_color: str = "#f8911b") -> str:
+    """Minimalist horizontal bar chart. rows = [(label, value), ...]; labels in `highlight` get highlight_color."""
     values = [r[1] for r in rows]
     mx = max_value or max(values)
     out = [f'<div class="chart avoid"><div class="ch">{esc(title)}'
@@ -81,9 +82,10 @@ def bars(title: str, rows: list, n: int | None = None, color: str = "#0885f8",
         else:
             right = f"{v:,}{unit}"
         w = max(1.5, v / mx * 100)
+        fill = highlight_color if label in highlight else color
         out.append(
             f'<div class="bar"><div class="lb">{esc(label)}</div>'
-            f'<div class="track"><div class="fill" style="width:{w:.1f}%;background:{color}"></div></div>'
+            f'<div class="track"><div class="fill" style="width:{w:.1f}%;background:{fill}"></div></div>'
             f'<div class="val">{right}</div></div>'
         )
     if note:
@@ -522,13 +524,14 @@ def build_html(stamp: str) -> str:
 </body></html>"""
 
 
-def render_pdf(html_path: Path, pdf_path: Path, stamp: str) -> None:
+def render_pdf(html_path: Path, pdf_path: Path, stamp: str, footer_label: str = "Who we are talking to") -> None:
+    """Print the HTML to an A4 PDF with Chrome. Other report builders reuse this with their own footer_label."""
     from playwright.sync_api import sync_playwright
 
     footer = (
         '<div style="width:100%;font-family:Helvetica,Arial,sans-serif;font-size:7pt;color:#a6a6a6;'
         'padding:0 16mm;display:flex;justify-content:space-between">'
-        f'<span>Clearer Thinking · Who we are talking to · {stamp[:10]}</span>'
+        f'<span>Clearer Thinking · {footer_label} · {stamp[:10]}</span>'
         '<span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span></div>'
     )
     with sync_playwright() as pw:
