@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Who reads Clearer Thinking: audience profile</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f4f0; color: #1a1a18; line-height: 1.6; }
+.page { max-width: 860px; margin: 0 auto; padding: 2.5rem 2rem 4rem; }
+h1 { font-size: 26px; font-weight: 600; margin-bottom: 4px; }
+h2 { font-size: 20px; font-weight: 600; margin: 2.5rem 0 6px; }
+.report-meta { font-size: 13px; color: #73726c; margin-bottom: 1.5rem; }
+.lead { font-size: 15px; margin-bottom: 1.5rem; }
+.section-lead { font-size: 13px; color: #73726c; margin-bottom: 1rem; }
+.summary { background: #fff; border: 1px solid #d3d1c7; border-left: 3px solid #0885f8; border-radius: 8px; padding: 14px 18px; margin-bottom: 1rem; }
+.summary-title { font-size: 13px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: #73726c; margin-bottom: 6px; }
+.summary ul { padding-left: 18px; font-size: 14px; }
+.summary li { margin-bottom: 5px; }
+.section-title { font-size: 15px; font-weight: 600; color: #1a1a18; border-bottom: 1px solid #d3d1c7; padding-bottom: 6px; margin: 1.5rem 0 4px; }
+.section-title .n { font-weight: 400; color: #888780; font-size: 12px; }
+.question-wording { font-size: 12px; color: #888780; font-style: italic; margin-bottom: 8px; line-height: 1.5; }
+.note { font-size: 12px; color: #73726c; margin-top: 6px; }
+.chart-wrap { position: relative; width: 100%; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 8px; font-size: 12px; color: #73726c; }
+.legend span { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.divider { height: 1px; background: #d3d1c7; margin: 2rem 0; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.stat { background: #fff; border: 1px solid #d3d1c7; border-radius: 8px; padding: 12px 14px; }
+.stat .v { font-size: 22px; font-weight: 600; }
+.stat .l { font-size: 12px; color: #73726c; }
+.limits { padding-left: 18px; font-size: 13px; color: #1a1a18; }
+.limits li { margin-bottom: 8px; }
+@media (max-width: 640px) { .two-col, .stats { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>Who reads Clearer Thinking</h1>
+<div class="report-meta">Audience profile for partners and sponsors · Data as of 2026-10-06 03:04pm · Every chart shows its own sample size</div>
+
+<p class="lead">Clearer Thinking publishes a free email newsletter and free interactive tools on decision-making, psychology and thinking clearly. This page describes the people on the other end: who they say they are, what they are working on and worried about, and where they are. It draws on two reader surveys and on Google Analytics, and the last section explains what each source can and cannot tell you.</p>
+
+<div class="summary">
+  <div class="summary-title">In short</div>
+  <ul>
+    <li>Readers describe themselves first as <b>lifelong learners</b> (81%) and <b>science enthusiasts</b> (45%); 34% call themselves rationalists and 18 to 26% effective altruists (aspiring included).</li>
+    <li>About half (46% in the survey, 51% in the Paths quiz) name <b>having a greater positive impact on the world</b> as a personal goal; the topics they ask for most are critical thinking, psychology and philosophy.</li>
+    <li>They are mostly in the <b>US, UK, Canada and Australia</b> (67% of engaged newsletter visits) and read in English (89%).</li>
+    <li>Politically they lean progressive (63% left of centre, 19% right), and the readers we have asked are highly educated (73% with a bachelor's degree or higher).</li>
+    <li>Website visitors skew young: of those Google can classify, 39% on the main site and 53% on the free tools are 18 to 24, with 30% of main-site visitors over 45. Gender splits about evenly. Readers most often compare Clearer Thinking to 80,000 Hours, LessWrong, Astral Codex Ten, Hidden Brain, You Are Not So Smart, The School of Life.</li>
+  </ul>
+</div>
+
+<h2>Who they are</h2><p class="section-lead">From the March 2026 audience survey of newsletter readers (539 opened it; each question shows how many answered) and the Clearer Thinking Paths quiz, a self-improvement planning tool completed by 7,889 people between July 2023 and July 2026.</p>
+<div class="two-col"><div><div class="section-title">How newsletter readers describe themselves <span class="n">(n = 154)</span></div><div class="question-wording">"Do any of the following categories apply to you?" Multi-select.</div><div class="chart-wrap" style="height:406px"><canvas id="identSurvey"></canvas></div></div><div><div class="section-title">How Paths quiz takers describe themselves <span class="n">(n = 7,889)</span></div><div class="question-wording">Same question, asked inside the Paths quiz. Multi-select.</div><div class="chart-wrap" style="height:406px"><canvas id="identPaths"></canvas></div></div></div>
+<div class="divider"></div>
+<div class="two-col"><div><div class="section-title">Career stage <span class="n">(n = 148)</span></div><div class="question-wording">"Which of the following best describes your current primary role?"</div><div class="chart-wrap" style="height:286px"><canvas id="employment"></canvas></div></div><div><div class="section-title">Industry <span class="n">(n = 145)</span></div><div class="question-wording">"Which field or industry best describes your work?" Top 11 structured options.</div><div class="chart-wrap" style="height:346px"><canvas id="industry"></canvas></div></div></div>
+<div class="divider"></div>
+<div class="two-col"><div><div class="section-title">Political self-placement <span class="n">(n = 152)</span></div><div class="question-wording">"In political matters, where do your views generally fall on the scale from left (progressive) to right (conservative)?" 11-point scale, grouped.</div><div class="chart-wrap" style="height:106px"><canvas id="political"></canvas></div></div><div><div class="section-title">Education <span class="n">(n = 113)</span></div><div class="question-wording">Career Navigation Survey, September 2026: a smaller survey of readers thinking about a career change, so treat it as indicative.</div><div class="chart-wrap" style="height:226px"><canvas id="education"></canvas></div><div class="note">73% hold a bachelor's degree or higher.</div></div></div>
+
+<div class="divider"></div>
+<h2>What they are working on</h2><p class="section-lead">Priorities, goals and obstacles, as readers reported them in the March 2026 survey.</p>
+<div class="two-col"><div><div class="section-title">High priorities right now <span class="n">(n = 153)</span></div><div class="question-wording">"Which of these are high priorities for you right now in your life?" Multi-select.</div><div class="chart-wrap" style="height:196px"><canvas id="priorities"></canvas></div></div><div><div class="section-title">Biggest challenges right now <span class="n">(n = 153)</span></div><div class="question-wording">"Which of these problems is a big challenge for you right now?" Multi-select.</div><div class="chart-wrap" style="height:256px"><canvas id="problems"></canvas></div></div></div>
+<div class="divider"></div>
+<div class="section-title">Personal goals (top 12 of 46) <span class="n">(n = 155)</span></div><div class="question-wording">"Which of these goals are major objectives of yours right now?" Multi-select.</div><div class="chart-wrap" style="height:376px"><canvas id="goals"></canvas></div>
+
+<div class="divider"></div>
+<h2>What they want to read, and what worries them</h2>
+<div class="two-col"><div><div class="section-title">Topics readers want more of <span class="n">(n = 173)</span></div><div class="question-wording">Multi-select, top 15 options.</div><div class="chart-wrap" style="height:466px"><canvas id="topics"></canvas></div></div><div><div class="section-title">World trends that concern them most <span class="n">(n = 151)</span></div><div class="question-wording">"What trends or changes in the world concern you the most right now?" Multi-select.</div><div class="chart-wrap" style="height:376px"><canvas id="concerns"></canvas></div></div></div>
+
+<div class="divider"></div>
+<h2>Where they are</h2><p class="section-lead">Google Analytics, Oct 2025 to Sep 2026: visits to our website that came from a newsletter link, counted as engaged visits (over ten seconds, or more than one page); n is the number of such visits. Email link scanners create visits from data-centre locations but almost never engaged ones, so this is the cleaner view.</p>
+<div class="two-col"><div><div class="section-title">Country of engaged newsletter visits <span class="n">(n = 68,994)</span></div><div class="chart-wrap" style="height:376px"><canvas id="country"></canvas></div><div class="note">67% from the US, UK, Canada, Australia, Ireland or New Zealand.</div></div><div><div class="section-title">Browser language <span class="n">(n = 70,558)</span></div><div class="question-wording">Top 6.</div><div class="chart-wrap" style="height:196px"><canvas id="language"></canvas></div><div class="section-title">Device <span class="n">(n = 70,605)</span></div><div class="chart-wrap" style="height:106px"><canvas id="device"></canvas></div></div></div>
+
+<div class="divider"></div>
+<h2>Website visitors: age and gender</h2><p class="section-lead">Google Analytics, Oct 2025 to Sep 2026 excluding August 2026 (a one-off viral wave). Google reports age and gender only for visitors who are signed in with ads personalisation on, a few percent of all visitors, and it withholds small cells, so read these as the profile of a sample. The main site hosts the articles and newsletter pages; the free tools (quizzes and tests) live on their own subdomain and draw a broader, younger crowd.</p>
+<div class="section-title">Age of website visitors Google can classify</div><div class="chart-wrap" style="height:244px"><canvas id="age"></canvas></div><div class="legend"><span><span class="legend-dot" style="background:#0885f8"></span>Main site (www.clearerthinking.org) (n = 59,091)</span><span><span class="legend-dot" style="background:#a6a6a6"></span>Free tools (programs.clearerthinking.org) (n = 365,201)</span></div>
+<div class="stats"><div class="stat"><div class="v">51% / 49%</div><div class="l">female / male, main site (n = 66,607)</div></div><div class="stat"><div class="v">50% / 50%</div><div class="l">female / male, free tools (n = 445,551)</div></div></div>
+
+<div class="divider"></div>
+<h2>Sources and limits</h2>
+<ul class="limits">
+  <li><b>Audience survey, March 2026.</b> Sent to the newsletter list; 539 people opened it and 132 to 181 answered each question. Respondents are self-selected (the more engaged readers), so treat the shares as describing the core readership rather than every subscriber. Multi-select questions do not sum to 100%.</li>
+  <li><b>Clearer Thinking Paths quiz, Jul 2023 to Jul 2026.</b> 7,889 people completed its self-assessment. Also self-selected: people planning self-improvement, not a random slice of the list.</li>
+  <li><b>Career Navigation Survey, September 2026.</b> 113 to 143 readers considering a career change; used only for education.</li>
+  <li><b>Google Analytics 4, Oct 2025 to Sep 2026.</b> Country, language and device come from engaged visits that arrived via a newsletter link; they describe readers who click, not readers who only open. Age and gender come from Google's classified subset of visitors and are thresholded; August 2026 is excluded because a viral wave brought 1.1 million one-off visitors that month. Readers who block analytics are not counted.</li>
+  <li>This page describes who the audience is. Reach and engagement figures for a specific placement are provided separately on request.</li>
+</ul>
+
+</div>
+<script>
+const CHARTS = [{"id": "identSurvey", "n": 154, "wrap": 26, "labels": ["Lifelong learner", "Science enthusiast", "Self-improvement enthusiast", "Rationalist (or aspiring)", "Writer (or aspiring)", "Health / exercise enthusiast", "Effective Altruist (or aspiring)", "Retiree", "Student", "Philosopher (or aspiring)", "Career focused", "Entrepreneur (or aspiring)", "Academic / professor"], "data": [80.5, 45.5, 37.0, 34.4, 32.5, 31.8, 26.0, 24.0, 20.1, 20.1, 20.1, 16.9, 9.7], "counts": [124, 70, 57, 53, 50, 49, 40, 37, 31, 31, 31, 26, 15], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#f8911b", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "identPaths", "n": 7889, "wrap": 26, "labels": ["Lifelong learner", "Self-improvement enthusiast", "Science enthusiast", "Rationalist (or aspiring)", "Entrepreneur (or aspiring)", "Health / nutrition / exercise enthusiast", "Career focused", "Philosopher (or aspiring)", "Effective Altruist (or aspiring)", "Student (college / grad)", "Software engineer", "Academic or professor", "Retiree / no longer working"], "data": [54.3, 40.9, 28.2, 26.2, 24.0, 23.6, 21.9, 21.6, 18.3, 18.3, 10.7, 8.6, 5.7], "counts": [4287, 3227, 2221, 2068, 1895, 1863, 1727, 1706, 1447, 1444, 848, 681, 450], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#f8911b", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "employment", "n": 148, "wrap": 26, "labels": ["Not employed", "Mid-career (6 to 15 years)", "Undergraduate student", "Freelancer", "Senior / executive", "Graduate / PhD student", "Academic / researcher", "Founder", "Early-career (0 to 5 years)"], "data": [29.7, 20.3, 14.2, 8.1, 8.1, 6.1, 5.4, 4.1, 4.1], "counts": [44, 30, 21, 12, 12, 9, 8, 6, 6], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "industry", "n": 145, "wrap": 26, "labels": ["Education", "Academia / research", "Technology / AI / data", "Healthcare / medicine", "Creative fields", "Consulting", "Engineering", "Finance / investing", "Nonprofit / social impact", "Government / policy", "Marketing / media"], "data": [12.4, 10.3, 9.7, 9.7, 8.3, 7.6, 6.9, 4.8, 3.4, 3.4, 2.1], "counts": [18, 15, 14, 14, 12, 11, 10, 7, 5, 5, 3], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "political", "n": 152, "wrap": 26, "labels": ["Progressive (-5 to -1)", "Center (0)", "Conservative (+1 to +5)"], "data": [63.2, 17.8, 19.1], "counts": [96, 27, 29], "colors": ["#0885f8", "#0885f8", "#0885f8"]}, {"id": "education", "n": 113, "wrap": 26, "labels": ["High school or less", "Some college / studying", "Vocational certification", "Bachelor's degree", "Master's degree", "Doctorate", "Other"], "data": [6.2, 9.7, 7.1, 30.1, 31.0, 12.4, 3.5], "counts": [7, 11, 8, 34, 35, 14, 4], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "priorities", "n": 153, "wrap": 26, "labels": ["Communication and relationships", "Productivity and effectiveness", "Rationality and critical thinking", "Better decision-making", "Improving mood / happiness", "Goal-setting and planning"], "data": [54.9, 50.3, 42.5, 41.2, 41.2, 39.2], "counts": [84, 77, 65, 63, 63, 60], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "problems", "n": 153, "wrap": 26, "labels": ["Procrastination", "Uncertainty about career", "Poor focus / attention span", "Trouble with time management", "Lack of motivation", "Feeling anxious / stressed", "Not enough self-control", "Feeling depressed / sad"], "data": [52.3, 41.2, 39.9, 39.2, 39.2, 37.3, 30.7, 30.1], "counts": [80, 63, 61, 60, 60, 57, 47, 46], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "goals", "n": 155, "wrap": 48, "labels": ["Become a better version of myself", "Improve my physical fitness or strength", "Have a greater positive impact on the world", "Get better at figuring out the truth on complex issues", "Learn a new skill", "Improve my mental health", "Improve my communication or social skills", "Become more productive", "Become happier", "Become a better decision maker", "Write more", "Become more mindful or meditate regularly"], "data": [54.8, 47.1, 45.8, 44.5, 41.9, 39.4, 38.7, 36.8, 36.8, 34.8, 34.2, 32.9], "counts": [85, 73, 71, 69, 65, 61, 60, 57, 57, 54, 53, 51], "colors": ["#0885f8", "#0885f8", "#f8911b", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "topics", "n": 173, "wrap": 26, "labels": ["Critical thinking / rationality", "Psychology", "Philosophy", "Scientific findings", "Original research by CT", "Self-help / mental health", "Science literacy", "How to improve the world", "Self-improvement / goals", "Puzzles / paradoxes of thought", "Decision making", "Artificial intelligence", "Statistics", "Meta-science", "Current affairs"], "data": [68.8, 59.5, 50.9, 49.1, 49.1, 48.0, 48.0, 46.2, 45.7, 45.1, 44.5, 39.3, 35.8, 34.7, 30.6], "counts": [119, 103, 88, 85, 85, 83, 83, 80, 79, 78, 77, 68, 62, 60, 53], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#f8911b", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "concerns", "n": 151, "wrap": 26, "labels": ["Misinformation / declining trust", "Political polarization", "Economic inequality", "Climate change", "Global conflict", "AI impacts on society", "Cultural fragmentation", "Loss of meaning / shared values", "Tech change outpacing regulation", "Mental health and loneliness", "Job security / future of work", "Public health / pandemics"], "data": [63.6, 60.3, 58.3, 54.3, 53.6, 51.0, 45.0, 43.0, 39.1, 36.4, 33.8, 31.1], "counts": [96, 91, 88, 82, 81, 77, 68, 65, 59, 55, 51, 47], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "country", "n": 68994, "wrap": 26, "labels": ["United States", "United Kingdom", "Canada", "Australia", "India", "Germany", "France", "Singapore", "Brazil", "Spain", "Netherlands", "Philippines"], "data": [47.3, 8.0, 6.0, 4.5, 3.3, 2.7, 1.7, 1.5, 1.4, 1.4, 1.3, 0.9], "counts": [32607, 5513, 4107, 3089, 2282, 1859, 1161, 1059, 986, 968, 925, 630], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "language", "n": 70558, "wrap": 26, "labels": ["English", "German", "Spanish", "French", "Dutch", "Portuguese"], "data": [88.8, 2.1, 1.6, 1.6, 0.7, 0.7], "counts": [62674, 1450, 1132, 1124, 524, 494], "colors": ["#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8", "#0885f8"]}, {"id": "device", "n": 70605, "wrap": 26, "labels": ["desktop", "mobile", "tablet"], "data": [58.3, 39.9, 1.9], "counts": [41150, 28137, 1318], "colors": ["#0885f8", "#0885f8", "#0885f8"]}, {"id": "age", "n": 0, "wrap": 48, "labels": ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"], "series": [{"name": "Main site (www.clearerthinking.org)", "data": [38.9, 18.2, 12.7, 11.1, 8.7, 10.4], "counts": [22969, 10773, 7522, 6543, 5126, 6158], "color": "#0885f8", "n": 59091}, {"name": "Free tools (programs.clearerthinking.org)", "data": [52.6, 16.6, 13.9, 8.3, 4.5, 4.1], "counts": [191954, 60734, 50903, 30245, 16332, 15033], "color": "#a6a6a6", "n": 365201}]}];
+
+const tc = '#73726c';
+// Percent labels at the bar tips, so no axis or gridlines are needed.
+const tipLabels = { id: 'tipLabels', afterDatasetsDraw(c) {
+  const { ctx } = c; ctx.save(); ctx.font = '11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.fillStyle = tc; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  c.data.datasets.forEach((ds, i) => c.getDatasetMeta(i).data.forEach((bar, j) => ctx.fillText(ds.data[j].toFixed(0) + '%', bar.x + 5, bar.y)));
+  ctx.restore(); } };
+// Long category labels are split onto two lines so they never clip at the canvas edge.
+function wrap(label, width = 26) {
+  if (label.length <= width) return label;
+  const words = label.split(' '), lines = [''];
+  for (const w of words) {
+    if (lines[lines.length - 1].length + w.length + 1 > width && lines[lines.length - 1]) lines.push(w);
+    else lines[lines.length - 1] = (lines[lines.length - 1] + ' ' + w).trim();
+  }
+  return lines;
+}
+function draw(spec) {
+  const el = document.getElementById(spec.id); if (!el) return;
+  const datasets = spec.series
+    ? spec.series.map(s => ({ label: s.name, data: s.data, counts: s.counts, n: s.n, backgroundColor: s.color, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 }))
+    : [{ data: spec.data, counts: spec.counts, n: spec.n, backgroundColor: spec.colors, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 }];
+  const max = Math.min(100, Math.ceil(Math.max(...datasets.flatMap(d => d.data)) / 10) * 10 + 12);
+  new Chart(el, { type: 'bar', data: { labels: spec.labels.map(l => wrap(l, spec.wrap)), datasets }, plugins: [tipLabels],
+    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', layout: { padding: { right: 36 } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => {
+        const d = ctx.dataset; return `${d.counts[ctx.dataIndex].toLocaleString()} of ${d.n.toLocaleString()} (${ctx.parsed.x}%)`; } } } },
+      scales: { x: { display: false, min: 0, max }, y: { ticks: { color: tc, font: { size: 11 }, autoSkip: false }, grid: { display: false }, border: { display: false } } } } });
+}
+CHARTS.forEach(draw);
+
+</script>
+</body>
+</html>

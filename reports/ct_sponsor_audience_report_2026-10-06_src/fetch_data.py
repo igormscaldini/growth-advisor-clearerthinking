@@ -1,20 +1,24 @@
-"""Refresh data/ for the sponsor-facing audience report.
+"""Pull the GA4 audience data behind the sponsor-facing audience page into ga4_datapoints.json.
 
     .venv/bin/python reports/ct_sponsor_audience_report_2026-10-06_src/fetch_data.py
 
-Pulls (needs .env: BEEHIIV_API_KEY, BEEHIIV_PUB_CLEARER_THINKING, GA4 token):
-  data/posts.json         every confirmed beehiiv email send with its email stats and the
-                          top links by unique clicks, plus any link on a known sponsor domain
-  data/engaged.json       size of beehiiv's "Engaged Reades - Open > 40%" segment
-  data/ga4_country.json   GA4 sessions from newsletter links (sessionSource contains "beehiiv")
-                          by country, last 90 days
-Survey and Paths figures are NOT pulled here: the single source for those stays
+Two populations, 12 full months (WINDOW):
+  demographics  age bracket and gender of website visitors, by month and host. Only visitors Google can
+                classify (signed in, ads personalisation on) have a value; GA4 thresholds the rest, so
+                these rows are a sample of a few percent of users. Kept by month so the August 2026
+                viral wave can be excluded downstream, and by host so the main site and the free tools
+                (programs.clearerthinking.org) can be compared.
+  newsletter    sessions whose source contains "beehiiv" (clicks from newsletter links) by country,
+                device and language, with engaged sessions alongside raw sessions: email link scanners
+                register sessions from data-centre locations but almost never engaged ones.
+GA4 refuses to combine age/gender with any session-scoped filter, so the newsletter population has
+no age or gender breakdown; the survey covers that side.
+Survey and Paths figures are NOT pulled here: their single source stays
 reports/ct_audience_personas_2026-09-25_src/datapoints.json.
 """
 from __future__ import annotations
 
 import json
-import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -22,77 +26,45 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(ROOT))
-DATA = HERE / "data"
-POST_KEYS = ["id", "title", "subject_line", "slug", "publish_date", "audience", "platform",
-             "split_tested", "from_address", "web_url"]
-# Links on these domains are sponsor or partner links; keep every one of them, not just the top links.
-SPONSOR_DOMAINS = ("80000hours.org", "kickstarter.com", "animalcharityevaluators.org", "farmkind.giving",
-                   "hive", "givingwhatwecan.org", "givewell.org")
-TOP_LINKS = 15
-
-
-def slim_post(p: dict) -> dict:
-    d = {k: p.get(k) for k in POST_KEYS}
-    st = p.get("stats") or {}
-    d["email"] = st.get("email") or {}
-    clicks = sorted(st.get("clicks") or [], key=lambda c: -(c.get("total_unique_clicks") or 0))
-    keep = clicks[:TOP_LINKS] + [c for c in clicks[TOP_LINKS:]
-                                 if any(dom in (c.get("base_url") or "") for dom in SPONSOR_DOMAINS)]
-    d["links"] = [{"url": c.get("base_url"), "unique_clicks": c.get("total_unique_clicks"),
-                   "clicks": c.get("total_clicks")} for c in keep]
-    return d
-
-
-def pull_posts() -> list[dict]:
-    from data_layer import BEEHIIV_BASE, _beehiiv_get
-    h = {"Authorization": f"Bearer {os.getenv('BEEHIIV_API_KEY').strip()}"}
-    pub = os.getenv("BEEHIIV_PUB_CLEARER_THINKING").strip()
-    posts, page = [], 1
-    while True:
-        r = _beehiiv_get(f"{BEEHIIV_BASE}/publications/{pub}/posts", headers=h,
-                         params={"page": page, "limit": 100, "expand[]": "stats", "status": "confirmed"})
-        r.raise_for_status()
-        d = r.json()
-        posts += d.get("data", [])
-        if page >= d.get("total_pages", 1):
-            break
-        page += 1
-    return posts
-
-
-def pull_ga4_country(days: int = 90) -> dict:
-    from google.analytics.data_v1beta.types import DateRange, Dimension, Filter, FilterExpression, Metric, RunReportRequest
-
-    from ga4_client import get_client, property_path
-    req = RunReportRequest(
-        property=property_path(), dimensions=[Dimension(name="country")],
-        metrics=[Metric(name="sessions"), Metric(name="totalUsers")],
-        date_ranges=[DateRange(start_date=f"{days}daysAgo", end_date="yesterday")],
-        dimension_filter=FilterExpression(filter=Filter(
-            field_name="sessionSource", string_filter=Filter.StringFilter(match_type="CONTAINS", value="beehiiv"))),
-        limit=250)
-    rows = [(r.dimension_values[0].value, int(r.metric_values[0].value), int(r.metric_values[1].value))
-            for r in get_client().run_report(req).rows]
-    rows.sort(key=lambda x: -x[1])
-    return {"window_days": days, "pulled": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "total_sessions": sum(r[1] for r in rows), "total_users": sum(r[2] for r in rows),
-            "rows": [{"country": c, "sessions": s, "users": u} for c, s, u in rows]}
+OUT = HERE / "ga4_datapoints.json"
+WINDOW = ("2025-10-01", "2026-09-30")
+HOSTS = ("www.clearerthinking.org", "programs.clearerthinking.org")
 
 
 def main() -> None:
     from dotenv import load_dotenv
     load_dotenv(ROOT / ".env")
-    from data_layer import beehiiv_engaged_readers
-    DATA.mkdir(exist_ok=True)
+    from google.analytics.data_v1beta.types import DateRange, Dimension, Filter, FilterExpression, Metric, RunReportRequest
 
-    posts = [slim_post(p) for p in pull_posts()]
-    posts.sort(key=lambda p: p.get("publish_date") or 0)
-    json.dump({"pulled": datetime.now(timezone.utc).isoformat(timespec="seconds"), "posts": posts},
-              open(DATA / "posts.json", "w"), indent=0)
-    json.dump(beehiiv_engaged_readers(), open(DATA / "engaged.json", "w"), indent=1)
-    json.dump(pull_ga4_country(), open(DATA / "ga4_country.json", "w"), indent=1)
-    print("posts", len(posts), "| engaged", json.load(open(DATA / "engaged.json")),
-          "| ga4 sessions", json.load(open(DATA / "ga4_country.json"))["total_sessions"])
+    from ga4_client import get_client, property_path
+    client, prop = get_client(), property_path()
+    rng = [DateRange(start_date=WINDOW[0], end_date=WINDOW[1])]
+
+    def report(dims, metrics, flt=None, limit=20000):
+        r = client.run_report(RunReportRequest(property=prop, dimensions=[Dimension(name=d) for d in dims],
+                                               metrics=[Metric(name=m) for m in metrics], date_ranges=rng,
+                                               dimension_filter=flt, limit=limit))
+        rows = [[d.value for d in x.dimension_values] + [int(m.value) for m in x.metric_values] for x in r.rows]
+        return rows, r.metadata.subject_to_thresholding
+
+    out = {"pulled": datetime.now(timezone.utc).isoformat(timespec="seconds"), "window": {"start": WINDOW[0], "end": WINDOW[1]},
+           "demographics": {}, "newsletter": {}}
+    for key, dim in (("age", "userAgeBracket"), ("gender", "userGender")):
+        rows, th = report(["yearMonth", "hostName", dim], ["totalUsers"])
+        out["demographics"][key] = [{"month": m, "host": h, "value": v, "users": u} for m, h, v, u in rows if h in HOSTS]
+        out["demographics"][f"{key}_thresholded"] = th
+
+    newsletter = FilterExpression(filter=Filter(field_name="sessionSource",
+                                                string_filter=Filter.StringFilter(match_type="CONTAINS", value="beehiiv")))
+    for key, dim in (("country", "country"), ("device", "deviceCategory"), ("language", "language")):
+        rows, _ = report([dim], ["sessions", "engagedSessions"], newsletter)
+        out["newsletter"][key] = sorted(({"value": v, "sessions": s, "engaged_sessions": e} for v, s, e in rows),
+                                        key=lambda r: -r["engaged_sessions"])
+
+    OUT.write_text(json.dumps(out, indent=1))
+    nl = out["newsletter"]["country"]
+    print(f"age rows {len(out['demographics']['age'])}, gender rows {len(out['demographics']['gender'])}, "
+          f"newsletter sessions {sum(r['sessions'] for r in nl):,} (engaged {sum(r['engaged_sessions'] for r in nl):,})")
 
 
 if __name__ == "__main__":
