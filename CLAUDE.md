@@ -112,13 +112,16 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   and can be stale (a duplicated post keeps the old name), so read `subject_line`; identify One Helpful Idea
   by title, not sender, because since Jul 2026 the main newsletter also sends from the ohi domain;
   `content_tags` are empty and the Wix blog has no topical categories.
-- `reports/ct_sponsor_audience_report_2026-10-06_src/`: sponsor-facing audience PDF (`fetch_data.py` -> `data/`
-  (gitignored) -> `analysis.py` -> `datapoints.json` -> `build_report.py` -> HTML in `reports/` + PDF in `~/Downloads`).
-  Reuses the personas builder's helpers, CSS and `render_pdf`; survey figures come from the personas `datapoints.json`.
-  beehiiv stores one edition as 2-3 posts, so `analysis.py` merges same-subject posts within 3 days; tool announcements
-  are excluded from the reach stats. Past sponsors are anonymized (`ANONYMIZE`). The "Engaged Reades - Open > 40%"
-  segment count goes stale (beehiiv recalculates only on request, the v2 API cannot): run the beehiiv MCP
-  `recalculate_segment` on it before refetching.
+- `reports/ct_sponsor_audience_report_2026-10-06_src/`: sponsor-facing "Who reads Clearer Thinking" web page
+  (`fetch_data.py` -> `ga4_datapoints.json` -> `build_page.py` -> `index.html`, Chart.js, styled like the published
+  partner page https://igormscaldini.github.io/ct-audience-profile/). Survey figures come from the personas
+  `datapoints.json`. Igor's rule (2026-10-06): sponsors get WHO the audience is (surveys + GA4 demographics), never
+  send, campaign or performance numbers; a first PDF version with reach and past-sponsor click data was rejected.
+  GA4 gotchas learned: age/gender/interests cannot be combined with any session-scoped filter (so no newsletter-only
+  demographics); they cover only Google's signed-in subset and are thresholded; Aug 2026 (1.1M one-off viral visitors)
+  must be excluded; newsletter-link visits by country are polluted by email scanners in data centres (Ashburn, Moses
+  Lake, Des Moines, Singapore), so count `engagedSessions`, not sessions. The "Engaged Reades - Open > 40%" beehiiv
+  segment goes stale (recalculates only via the MCP `recalculate_segment`, not the v2 API).
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
