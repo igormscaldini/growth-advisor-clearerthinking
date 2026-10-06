@@ -25,7 +25,26 @@ OUT = HERE / "index.html"
 
 MAIN_HOST, TOOLS_HOST = "www.clearerthinking.org", "programs.clearerthinking.org"
 EXCLUDE_MONTHS = ("202608",)  # the August 2026 viral wave: 1.1M one-off visitors in a single month
-ANGLOSPHERE = ("United States", "United Kingdom", "Canada", "Australia", "Ireland", "New Zealand")
+# Country buckets for the "Where they are" chart (GA4 country names). Anything else is "Other"
+# (Australia, New Zealand, Latin America, Africa).
+EUROPE = {
+    "Germany", "France", "Netherlands", "Spain", "Ireland", "Italy", "Sweden", "Poland", "Switzerland", "Belgium",
+    "Austria", "Denmark", "Norway", "Finland", "Portugal", "Czechia", "Greece", "Hungary", "Romania", "Ukraine", "Russia",
+    "Croatia", "Slovakia", "Slovenia", "Bulgaria", "Serbia", "Lithuania", "Latvia", "Estonia", "Luxembourg", "Iceland",
+    "Malta", "Bosnia & Herzegovina", "North Macedonia", "Albania", "Montenegro", "Moldova", "Belarus", "Kosovo", "Cyprus",
+    "Andorra", "Monaco", "Liechtenstein", "San Marino", "Vatican City", "Gibraltar", "Isle of Man", "Jersey", "Guernsey",
+    "Faroe Islands", "Åland Islands",
+}
+ASIA = {
+    "India", "Singapore", "Philippines", "Japan", "China", "Hong Kong", "Taiwan", "South Korea", "Indonesia", "Malaysia",
+    "Thailand", "Vietnam", "Pakistan", "Bangladesh", "Sri Lanka", "Nepal", "Israel", "United Arab Emirates", "Saudi Arabia",
+    "Qatar", "Türkiye", "Turkey", "Iran", "Iraq", "Jordan", "Lebanon", "Kuwait", "Bahrain", "Oman", "Kazakhstan",
+    "Uzbekistan", "Kyrgyzstan", "Tajikistan", "Turkmenistan", "Cambodia", "Myanmar (Burma)", "Laos", "Mongolia", "Macao",
+    "Bhutan", "Maldives", "Brunei", "Timor-Leste", "Afghanistan", "Armenia", "Azerbaijan", "Georgia", "Yemen", "Syria",
+    "Palestine", "North Korea",
+}
+REGION_ORDER = ["United States", "Canada", "United Kingdom", "Europe", "Asia", "Other"]
+LANGUAGES = ("English", "German", "Spanish")
 EA = "Effective Altruist (or aspiring)"
 BLUE, ORANGE, GREY = "#0885f8", "#f8911b", "#a6a6a6"
 
@@ -58,8 +77,28 @@ def engaged_shares(rows: list[dict], top: int | None = None, drop: tuple = ("(no
     return {"n": n, "rows": out[:top] if top else out}
 
 
-def group_share(rows: list[dict], labels: tuple) -> float:
-    return sum(r["pct"] for r in rows if r["label"] in labels)
+def region(country: str) -> str:
+    if country in ("United States", "Canada", "United Kingdom"):
+        return country
+    if country in EUROPE:
+        return "Europe"
+    if country in ASIA:
+        return "Asia"
+    return "Other"
+
+
+def language_bucket(language: str) -> str:
+    return language if language in LANGUAGES else "Others"
+
+
+def bucket_shares(rows: list[dict], bucket, order: list[str], drop: tuple = ("(not set)", "(other)")) -> dict:
+    """Engaged newsletter sessions summed into buckets, listed in `order` (empty buckets omitted)."""
+    agg: dict[str, int] = defaultdict(int)
+    for r in rows:
+        if r["value"] not in drop:
+            agg[bucket(r["value"])] += r["engaged_sessions"]
+    n = sum(agg.values())
+    return {"n": n, "rows": [{"label": k, "count": agg[k], "pct": agg[k] / n * 100 if n else 0.0} for k in order if k in agg]}
 
 
 # --------------------------------------------------------------------------- html pieces
@@ -128,12 +167,9 @@ def content() -> dict:
     edu = CAREER["education"]
     education = shares(edu["rows"], edu["n"])
     degree = sum(r["pct"] for r in education if r["label"] in ("Bachelor's degree", "Master's degree", "Doctorate"))
-    country = engaged_shares(GA4["newsletter"]["country"], top=12)
-    anglo = group_share(engaged_shares(GA4["newsletter"]["country"])["rows"], ANGLOSPHERE)
+    country = bucket_shares(GA4["newsletter"]["country"], region, REGION_ORDER)
     device = engaged_shares(GA4["newsletter"]["device"])
-    language = engaged_shares(GA4["newsletter"]["language"], top=6)
-    win = GA4["window"]
-    win_txt = f"{dt.date.fromisoformat(win['start']):%b %Y} to {dt.date.fromisoformat(win['end']):%b %Y}"
+    language = bucket_shares(GA4["newsletter"]["language"], language_bucket, [*LANGUAGES, "Others"])
     ea_sv = next(r["pct"] for r in ident_sv if r["label"] == EA)
     ea_pa = next(r["pct"] for r in ident_pa if r["label"] == EA)
     rat_sv = next(r["pct"] for r in ident_sv if r["label"].startswith("Rationalist"))
@@ -180,12 +216,10 @@ def content() -> dict:
               [spec("concerns", "World trends that concern them most", sv["concerns"]["n"], concerns,
                     question='"What trends or changes in the world concern you the most right now?" Multi-select.')]],
          ]},
-        {"title": "Where they are",
-         "lead": f"Google Analytics, {win_txt}: visits to our website that came from a newsletter link, counted as engaged visits (over ten seconds, or more than one page); n is the number of such visits. Email link scanners create visits from data-centre locations but almost never engaged ones, so this is the cleaner view.",
+        {"title": "Where they are", "lead": "",
          "rows": [
-             [[spec("country", "Country of engaged newsletter visits", country["n"], country["rows"],
-                    note=f"{anglo:.0f}% from the US, UK, Canada, Australia, Ireland or New Zealand.")],
-              [spec("language", "Browser language", language["n"], language["rows"], question="Top 6."),
+             [[spec("country", "Country of engaged readers", country["n"], country["rows"])],
+              [spec("language", "Browser language", language["n"], language["rows"]),
                spec("device", "Device", device["n"], device["rows"])]],
          ]},
     ]

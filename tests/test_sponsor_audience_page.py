@@ -72,9 +72,33 @@ def test_engaged_shares_uses_engaged_sessions_and_drops_not_set(bp):
     assert [(r["label"], r["pct"]) for r in out["rows"]] == [("United States", 75.0), ("Ashburn-like scanner land", 0.0)]
 
 
-def test_group_share(bp):
-    rows = [{"label": "United States", "pct": 50.0}, {"label": "Canada", "pct": 5.0}, {"label": "Germany", "pct": 3.0}]
-    assert bp.group_share(rows, ("United States", "Canada", "Ireland")) == pytest.approx(55.0)
+@pytest.mark.parametrize("country,bucket", [
+    ("United States", "United States"), ("Canada", "Canada"), ("United Kingdom", "United Kingdom"),
+    ("Germany", "Europe"), ("Ireland", "Europe"), ("Russia", "Europe"), ("India", "Asia"), ("Singapore", "Asia"),
+    ("Türkiye", "Asia"), ("Australia", "Other"), ("Brazil", "Other"), ("South Africa", "Other"),
+])
+def test_region(bp, country, bucket):
+    assert bp.region(country) == bucket
+
+
+def test_language_bucket(bp):
+    assert [bp.language_bucket(l) for l in ("English", "German", "Spanish", "French", "Dutch")] == \
+        ["English", "German", "Spanish", "Others", "Others"]
+
+
+def test_bucket_shares_sums_engaged_sessions_in_order_and_drops_not_set(bp):
+    rows = [
+        {"value": "Germany", "sessions": 50, "engaged_sessions": 20},
+        {"value": "United States", "sessions": 500, "engaged_sessions": 100},
+        {"value": "France", "sessions": 50, "engaged_sessions": 30},
+        {"value": "India", "sessions": 80, "engaged_sessions": 40},
+        {"value": "Australia", "sessions": 10, "engaged_sessions": 10},
+        {"value": "(not set)", "sessions": 900, "engaged_sessions": 300},
+    ]
+    out = bp.bucket_shares(rows, bp.region, bp.REGION_ORDER)
+    assert out["n"] == 200
+    assert [(r["label"], r["count"]) for r in out["rows"]] == [("United States", 100), ("Europe", 50), ("Asia", 40), ("Other", 10)]
+    assert [r["pct"] for r in out["rows"]] == pytest.approx([50.0, 25.0, 20.0, 5.0])
 
 
 def test_chart_collects_spec(bp):
