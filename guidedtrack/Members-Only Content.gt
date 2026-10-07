@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
--- NAME: CT Plus Newsletter Paywall
+-- NAME: Members-Only Content
 -- Landing page behind the newsletter paywall: sells Clearer Thinking Plus (Supporter,
 -- $9/month) to readers who hit the members-only cut in an article.
 -- Built 2026-10-07 from landing_pages/ct_plus_supplement_paradox.html (growth-advisor repo).
@@ -19,7 +19,7 @@
 -- TEST MODE: while testMode = 1 the Sign Up button skips checkout and opens the full-version
 -- page below, so the whole reader journey can be tried. Set testMode = 0 before going live.
 >> testMode = 1
->> fullVersionUrl = "https://programs.clearerthinking.org/members-only-content/"
+>> fullVersionUrl = "https://programs.clearerthinking.org/members-only-content-supplement-paradox/"
 ---------------------------------------------------------------------------------
 
 -- URL parameters. An empty string is TRUTHY in GuidedTrack, so test both cases.
@@ -72,6 +72,9 @@
 		.program_container p.ct-price .ct-cancel { display: block; font-size: 15px; font-weight: 400; color: #555555; margin-top: 4px; }
 		.program_container a.ct-cta { display: block; background-color: #F8911B; color: #ffffff !important; text-decoration: none !important; text-align: center; font-weight: 700; font-size: 18px; padding: 16px 24px; border-radius: 8px; }
 		.program_container a.ct-cta:hover, .program_container a.ct-cta:focus { background-color: #E5820F; }
+		.program_container .ct-card a.ct-cta, .program_container .ct-card a.ct-cta:link, .program_container .ct-card a.ct-cta:visited, .program_container .ct-card a.ct-cta:hover { color: #ffffff !important; text-decoration: none !important; }
+		.program_container p.ct-help { grid-column: 1 / -1; text-align: center; font-size: 14px; line-height: 1.5; color: #777777; margin: 4px 0 0 0; }
+		.program_container p.ct-help a { color: #0885F8; }
 		@media (max-width: 860px) { .program_container .main { padding: 64px 16px 40px 16px; } .program_container .ct-grid { grid-template-columns: 1fr; gap: 28px; } .program_container .ct-left { text-align: center; } .program_container .ct-brand { justify-content: center; margin: 0 0 22px 0; } .program_container .ct-word { font-size: 18px; } .program_container p.ct-note { text-align: left; } .program_container h1.ct-title { font-size: 28px !important; } .program_container p.ct-lede { font-size: 16px; } .program_container .ct-card { padding: 24px 20px 26px 20px; } }
 	</style>
 
@@ -95,4 +98,5 @@
 			<p class="ct-price">All for only <span class="ct-amt">{priceText}</span><span class="ct-cancel">Cancel anytime.</span></p>
 			<a class="ct-cta" href="{signupUrl}" target="_top">Sign Up</a>
 		</div>
+		<p class="ct-help">Already a member but can’t access this content? Email us at <a href="mailto:info@clearerthinking.org">info@clearerthinking.org</a> and we’ll sort it out.</p>
 	</div>
