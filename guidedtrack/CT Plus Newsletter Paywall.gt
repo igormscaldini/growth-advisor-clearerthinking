@@ -1,0 +1,98 @@
+--------------------------------------------------------------------------------
+-- NAME: CT Plus Newsletter Paywall
+-- Landing page behind the newsletter paywall: sells Clearer Thinking Plus (Supporter,
+-- $9/month) to readers who hit the members-only cut in an article.
+-- Built 2026-10-07 from landing_pages/ct_plus_supplement_paradox.html (growth-advisor repo).
+--
+-- URL PARAMETERS
+--   ?newsletter=The%20Supplement%20Paradox   article name shown on the page (required in practice)
+--   &src=supplement-paradox                  optional tracking tag, passed on to the sign-up link
+-- Without ?newsletter= the page falls back to generic "the article" wording.
+--
+-- GOTCHAS: <img> is stripped from *html, so the CT+ logo is a CSS background image (inline SVG
+-- data URI); {variable} is not interpolated inside <style>.
+--------------------------------------------------------------------------------
+
+-- SETTINGS (edit these) ---------------------------------------------------------
+>> signupBaseUrl = "https://www.guidedtrack.com/programs/1pvomgo/run?p=supporter"
+>> priceText = "$9/month"
+-- TEST MODE: while testMode = 1 the Sign Up button skips checkout and opens the full-version
+-- page below, so the whole reader journey can be tried. Set testMode = 0 before going live.
+>> testMode = 1
+>> fullVersionUrl = "https://www.guidedtrack.com/programs/yck8gb0/run"
+---------------------------------------------------------------------------------
+
+-- URL parameters. An empty string is TRUTHY in GuidedTrack, so test both cases.
+*if: not newsletter
+	>> newsletter = ""
+*if: not src
+	>> src = ""
+*if: src = ""
+	>> src = "newsletter-paywall"
+
+-- Wording with and without an article name
+>> headlineName = "article"
+>> perkName = "article"
+>> noteName = "the article"
+*if: not (newsletter = "")
+	>> headlineName = "<span class='ct-hl'>“{newsletter}”</span>"
+	>> perkName = "<b>“{newsletter}”</b> article"
+	>> noteName = "“{newsletter}”"
+
+>> signupUrl = "{signupBaseUrl}&src={src}"
+*if: testMode = 1
+	>> signupUrl = fullVersionUrl
+
+*settings
+	*menu: no
+	*back: no
+
+*html
+	<style>
+		.program_container { max-width: 1120px !important; }
+		.program_container .main { max-width: 1120px !important; margin-left: auto; margin-right: auto; padding-top: 40px; padding-bottom: 60px; }
+		.program_container p, .program_container li { font-weight: 400 !important; }
+		.program_container .ct-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; font-family: "Avenir Next", Avenir, "Nunito Sans", Helvetica, Arial, sans-serif; color: #2D2D2D; }
+		.program_container .ct-brand { display: flex; align-items: center; gap: 10px; margin: 0 0 28px 0; }
+		.program_container .ct-mark { display: inline-block; width: 38px; height: 38px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
+		.program_container .ct-word { font-family: "Avenir Next", Avenir, "Nunito Sans", Helvetica, Arial, sans-serif; font-size: 22px; letter-spacing: 0.04em; color: #303030; font-weight: 400; }
+		.program_container .ct-word b { color: #FECB02; font-weight: 700; }
+		.program_container h1.ct-title { color: #2D2D2D !important; font-size: 36px !important; line-height: 1.25 !important; font-weight: 700 !important; margin: 0 0 18px 0 !important; }
+		.program_container h1.ct-title .ct-hl { color: #0885F8; }
+		.program_container p.ct-lede { font-size: 18px; line-height: 1.6; color: #555555; margin: 0 0 24px 0; }
+		.program_container p.ct-note { font-size: 15px; line-height: 1.55; color: #2D2D2D; margin: 0; background: #EAF3FE; border: 1px solid #BBD8F7; border-radius: 10px; padding: 14px 18px; }
+		.program_container .ct-card { background: #FFF5E8; border: 1px solid #F5D9B8; border-radius: 12px; padding: 30px 32px 32px 32px; }
+		.program_container .ct-card h2 { color: #2D2D2D !important; font-size: 19px !important; font-weight: 700 !important; margin: 0 0 12px 0 !important; }
+		.program_container ul.ct-perks { list-style: none; margin: 0 0 22px 0; padding: 0; }
+		.program_container ul.ct-perks li { position: relative; font-size: 16px; line-height: 1.45; color: #2D2D2D; padding: 8px 0 8px 32px; border-bottom: 1px solid #F5D9B8; margin: 0; }
+		.program_container ul.ct-perks li:last-child { border-bottom: 0; }
+		.program_container ul.ct-perks li::before { content: "\2713"; position: absolute; left: 4px; top: 8px; color: #F8911B; font-weight: 700; font-size: 17px; }
+		.program_container p.ct-price { font-size: 22px; font-weight: 700 !important; text-align: center; color: #2D2D2D; margin: 0 0 18px 0; }
+		.program_container p.ct-price .ct-amt { color: #0885F8; }
+		.program_container p.ct-price .ct-cancel { display: block; font-size: 15px; font-weight: 400; color: #555555; margin-top: 4px; }
+		.program_container a.ct-cta { display: block; background-color: #F8911B; color: #ffffff !important; text-decoration: none !important; text-align: center; font-weight: 700; font-size: 18px; padding: 16px 24px; border-radius: 8px; }
+		.program_container a.ct-cta:hover, .program_container a.ct-cta:focus { background-color: #E5820F; }
+		@media (max-width: 860px) { .program_container .main { padding: 64px 16px 40px 16px; } .program_container .ct-grid { grid-template-columns: 1fr; gap: 28px; } .program_container .ct-left { text-align: center; } .program_container .ct-brand { justify-content: center; margin: 0 0 22px 0; } .program_container .ct-word { font-size: 18px; } .program_container p.ct-note { text-align: left; } .program_container h1.ct-title { font-size: 28px !important; } .program_container p.ct-lede { font-size: 16px; } .program_container .ct-card { padding: 24px 20px 26px 20px; } }
+	</style>
+
+*html
+	<div class="ct-grid">
+		<div class="ct-left">
+			<div class="ct-brand"><span class="ct-mark"></span><span class="ct-word">CLEARER THINKING <b>PLUS</b></span></div>
+			<h1 class="ct-title">Read the full {headlineName}, and unlock more perks</h1>
+			<p class="ct-lede">Members fund our research and tools, and keep them free for everyone. Join to read the rest of the article and get everything else that comes with membership.</p>
+			<p class="ct-note">After checkout, we’ll take you straight to the full version of {noteName} and send you a welcome email explaining how to access your other perks.</p>
+		</div>
+		<div class="ct-card">
+			<h2>What you get</h2>
+			<ul class="ct-perks">
+				<li>The full {perkName}, plus all future members-only content</li>
+				<li>Ad-Free Podcasts</li>
+				<li>Over 10 Hours of Bonus Content</li>
+				<li>Monthly Email Wrap-Up</li>
+				<li>Early Access to Future Tools</li>
+			</ul>
+			<p class="ct-price">All for only <span class="ct-amt">{priceText}</span><span class="ct-cancel">Cancel anytime.</span></p>
+			<a class="ct-cta" href="{signupUrl}" target="_top">Sign Up</a>
+		</div>
+	</div>
