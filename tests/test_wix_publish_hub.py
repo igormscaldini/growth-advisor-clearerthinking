@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from seo_hub_pages import render_ricos  # noqa: E402
-from wix_publish_hub import HUB_URL, linked_urls  # noqa: E402
+from wix_publish_hub import HUB_URL, linked_urls, linked_urls_in_order  # noqa: E402
 
 
 def test_linked_urls_round_trips_a_rendered_document():
@@ -17,6 +17,14 @@ def test_linked_urls_round_trips_a_rendered_document():
 def test_linked_urls_ignores_headings_and_intro():
     doc = render_ricos("intro text", [("2026", [{"title": "A", "url": "https://x.org/a"}])])
     assert linked_urls(doc) == {"https://x.org/a"}
+
+
+def test_linked_urls_in_order_preserves_document_order():
+    """sync() compares these lists to catch a pure reorder, which the set diff cannot see."""
+    a, b = {"title": "A", "url": "https://x.org/a"}, {"title": "B", "url": "https://x.org/b"}
+    assert linked_urls_in_order(render_ricos("i", [("2026", [a, b])])) == ["https://x.org/a", "https://x.org/b"]
+    assert linked_urls_in_order(render_ricos("i", [("2026", [b, a])])) == ["https://x.org/b", "https://x.org/a"]
+    assert linked_urls_in_order(None) == []
 
 
 def test_linked_urls_on_empty_and_missing_content():

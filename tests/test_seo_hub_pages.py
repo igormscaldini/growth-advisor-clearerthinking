@@ -82,7 +82,7 @@ def test_year_of_falls_back_to_lastmod_then_undated():
 
 def test_group_by_year_worked_by_hand():
     """Three posts across two years plus one undated. Newest year first, undated last,
-    titles alphabetical (case-insensitive) within each year."""
+    newest post first within each year."""
     items = [
         {"url": "u1", "title": "Zebra", "published": "2024-01-02", "lastmod": None},
         {"url": "u2", "title": "apple", "published": "2024-11-30", "lastmod": None},
@@ -90,10 +90,36 @@ def test_group_by_year_worked_by_hand():
         {"url": "u4", "title": "Mystery", "published": None, "lastmod": None},
     ]
     assert group_by_year(items) == [
-        ("2024", [items[1], items[0]]),  # apple before Zebra
+        ("2024", [items[1], items[0]]),  # Nov 30 before Jan 2
         ("2019", [items[2]]),
         ("Undated", [items[3]]),
     ]
+
+
+def test_newest_first_orders_by_date_not_title():
+    """Worked by hand: alphabetical order would be A, B, C; by date it is C, A, B."""
+    items = [
+        {"url": "a", "title": "A", "published": "2025-03-01"},
+        {"url": "b", "title": "B", "published": "2025-01-15"},
+        {"url": "c", "title": "C", "published": "2025-12-31"},
+    ]
+    assert [i["url"] for i in group_by_year(items)[0][1]] == ["c", "a", "b"]
+
+
+def test_newest_first_breaks_date_ties_by_title_and_puts_undated_last():
+    from seo_hub_pages import newest_first
+    items = [
+        {"url": "z", "title": "zeta", "published": "2025-05-05"},
+        {"url": "n", "title": "No date", "published": None},
+        {"url": "a", "title": "Alpha", "published": "2025-05-05"},
+        {"url": "m", "title": "Middle", "published": "2025-06-01"},
+    ]
+    assert [i["url"] for i in newest_first(items)] == ["m", "a", "z", "n"]
+
+
+def test_newest_first_empty():
+    from seo_hub_pages import newest_first
+    assert newest_first([]) == []
 
 
 def test_group_by_year_keeps_every_item():

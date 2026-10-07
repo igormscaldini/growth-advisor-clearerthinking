@@ -84,15 +84,23 @@ def year_of(item: dict) -> str:
     return "Undated"
 
 
+def newest_first(items: list[dict]) -> list[dict]:
+    """Most recently published first. Ties, and items with no publish date (which go last),
+    fall back to the title, case-insensitive, so the order is fully deterministic."""
+    by_title = sorted(items, key=lambda i: i["title"].lower())
+    dated = sorted((i for i in by_title if i.get("published")), key=lambda i: i["published"], reverse=True)
+    return dated + [i for i in by_title if not i.get("published")]
+
+
 def group_by_year(items: list[dict]) -> list[tuple[str, list[dict]]]:
-    """Group newest year first; 'Undated' always sorts last. Titles sorted within a year."""
+    """Group newest year first; 'Undated' always sorts last. Within a year, newest post first."""
     buckets: dict[str, list[dict]] = defaultdict(list)
     for it in items:
         buckets[year_of(it)].append(it)
     years = sorted((y for y in buckets if y != "Undated"), reverse=True)
     if "Undated" in buckets:
         years.append("Undated")
-    return [(y, sorted(buckets[y], key=lambda i: i["title"].lower())) for y in years]
+    return [(y, newest_first(buckets[y])) for y in years]
 
 
 def render_links(items: list[dict]) -> str:
@@ -288,7 +296,7 @@ def main() -> None:
     posts = enrich(fetch_sitemap(BLOG_SITEMAP), use_cache=not args.no_cache)
     blog_html = render_hub(
         "All Clearer Thinking articles",
-        f"Every article we have published, {len(posts)} in total, newest year first.",
+        f"Every article we have published, {len(posts)} in total, newest first.",
         group_by_year(posts),
     )
     blog_file = out_dir / f"all-articles_PASTE-INTO-WIX_{stamp}.html"

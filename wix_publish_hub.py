@@ -86,7 +86,7 @@ def build_payload() -> tuple[dict, int]:
     posts = [p for p in hub.enrich(hub.fetch_sitemap(hub.BLOG_SITEMAP))
              if p["url"].rstrip("/") != HUB_URL]
     intro = (f"Every article Clearer Thinking has published, {len(posts)} in total, "
-             "grouped by year with the newest first.")
+             "grouped by year with the most recent first.")
     body = {"draftPost": {
         "title": POST_TITLE,
         "excerpt": f"A complete index of all {len(posts)} Clearer Thinking articles, grouped by year.",
@@ -118,16 +118,21 @@ def find_hub_post() -> dict:
     return found[0]
 
 
-def linked_urls(rich_content: dict) -> set[str]:
-    """Every URL currently linked from a Ricos document."""
-    out = set()
+def linked_urls_in_order(rich_content: dict) -> list[str]:
+    """Every URL linked from a Ricos document, in document order (duplicates kept)."""
+    out = []
     for node in (rich_content or {}).get("nodes", []):
         for child in node.get("nodes", []):
             for dec in child.get("textData", {}).get("decorations", []):
                 url = dec.get("linkData", {}).get("link", {}).get("url")
                 if url:
-                    out.add(url)
+                    out.append(url)
     return out
+
+
+def linked_urls(rich_content: dict) -> set[str]:
+    """Every URL currently linked from a Ricos document."""
+    return set(linked_urls_in_order(rich_content))
 
 
 def verify(url: str, expected: int) -> int:
@@ -157,7 +162,10 @@ def sync() -> tuple[str, str]:
     url = (post.get("url") or {}).get("base", "") + (post.get("url") or {}).get("path", "")
 
     added, removed = sorted(wanted - live), sorted(live - wanted)
-    if not added and not removed:
+    # Same links in a different order (e.g. the sort rule changed) still needs a write.
+    reordered = (not added and not removed and
+                 linked_urls_in_order(body["draftPost"]["richContent"]) != linked_urls_in_order(post.get("richContent")))
+    if not added and not removed and not reordered:
         return (f"All Articles hub: no change ({total} articles)",
                 f"Checked {total} articles in the sitemap. Nothing new since the last run, so the "
                 f"post was left untouched.\n\n{url}\n")
@@ -175,6 +183,8 @@ def sync() -> tuple[str, str]:
     now_linked = len(linked_urls(after.get("richContent")))
     lines = [f"Updated the All Articles hub: {total} articles now linked "
              f"(was {len(live)}, the post reports {now_linked}).", "", url, ""]
+    if reordered:
+        lines.append("No articles added or removed; the order changed (newest first within each year).")
     if added:
         lines.append(f"Added ({len(added)}):")
         lines += [f"  + {u}" for u in added]
@@ -186,7 +196,9 @@ def sync() -> tuple[str, str]:
                      "Check the post before trusting this run.")
     lines.append(f"\nfirstPublishedDate is still {after.get('firstPublishedDate')} "
                  "(the backdate should not move).")
-    return f"All Articles hub: +{len(added)} article(s), {total} total", "\n".join(lines)
+    subject = (f"All Articles hub: reordered, {total} total" if reordered
+               else f"All Articles hub: +{len(added)} article(s), {total} total")
+    return subject, "\n".join(lines)
 
 
 def _email(subject: str, body: str) -> bool:
