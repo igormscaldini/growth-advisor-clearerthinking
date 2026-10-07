@@ -34,10 +34,14 @@
 		.program_container .ct-thanks p.ct-thanks-head { font-weight: 700 !important; font-size: 18px !important; margin: 0 0 6px 0 !important; }
 		.program_container p.ct-btnrow { text-align: center; margin: 8px 0 28px 0 !important; }
 		.program_container a.ct-cta { display: inline-block; background: #05B4FB; color: #ffffff !important; text-decoration: none !important; font-family: Helvetica, Arial, sans-serif; font-weight: 700; font-size: 17px; padding: 14px 26px; border-radius: 8px; }
+		.program_container .ct-coach { font-family: "Avenir Next", Avenir, Helvetica, Arial, sans-serif; background: #EAF3FE; border: 1px solid #BBD8F7; border-radius: 12px; padding: 26px 28px; margin: 40px 0 0 0; text-align: center; }
+		.program_container .ct-coach p { font-family: inherit; font-size: 17px !important; line-height: 1.55 !important; margin: 0 0 18px 0 !important; }
+		.program_container .ct-coach p.ct-coach-head { font-size: 22px !important; font-weight: 700 !important; margin: 0 0 10px 0 !important; }
+		.program_container .ct-coach a.ct-coach-btn { display: inline-block; background: #F8911B; color: #ffffff !important; text-decoration: none !important; font-weight: 700; font-size: 17px; padding: 14px 28px; border-radius: 8px; }
 	</style>
 
 *html
-	<div class="ct-thanks"><p class="ct-thanks-head">Thank you for being a Clearer Thinking Plus member!</p><p>Your support funds our research and keeps our tools and articles free for everyone. If you run into any issue or have a question, email us at <a href="mailto:info@clearerthinking.org">info@clearerthinking.org</a>.</p></div>
+	<div class="ct-thanks"><p class="ct-thanks-head">Thank you for being a Clearer Thinking Plus member!</p><p>Your support funds our research and keeps our tools and articles free for everyone.</p></div>
 	<h1 class="ct-title">The Supplement Paradox: Why are so many claims about supplements B.S.?</h1>
 	<p class="ct-byline">By Spencer Greenberg and Travis M.</p>
 
@@ -123,3 +127,6 @@
 	<p><sup><strong>2</strong></sup><strong> Some of the cited studies have been superseded:</strong> For example, that same study of vitamin D supplementation included trials up to February 2012, but more recent evidence undermines the generalized claim the infographic makes. For example, <a target="_blank" rel="noopener" href="https://doi.org/10.1210/clinem/dgae312">a recent systematic review</a> found that “there was no evidence to support empiric vitamin D supplementation [...] in healthy adults aged 19 to 75” (but it did find some benefits for people aged 75+ and those with high-risk prediabetes).</p>
 	<p><strong><em>Note:</em></strong><em> The authors of this article are not medical professionals and this article is not intended to constitute medical advice. </em></p>
 
+-- Coaching CTA (for members who are not on the Navigator tier)
+*html
+	<div class="ct-coach"><p class="ct-coach-head">Want help putting ideas like these into practice?</p><p>Our coaching program pairs you with a coach who helps you work through your goals, decisions and habits. Clearer Thinking Plus Navigator members get two coaching sessions every month.</p><a class="ct-coach-btn" href="https://www.clearerthinking.org/coaching?src=supplement-paradox-full" target="_blank" rel="noopener">Explore coaching</a></div>
