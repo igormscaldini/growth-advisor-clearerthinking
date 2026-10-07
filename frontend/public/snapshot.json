@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-06T23:12:23.162898+00:00",
-  "today": "2026-10-06",
+  "generated_at": "2026-10-07T02:35:38.518693+00:00",
+  "today": "2026-10-07",
   "snapshots": {
     "current_mrr": 4040.5,
     "active_subscribers": 75,
-    "total_subscribers": 650179,
+    "total_subscribers": 650193,
     "engaged_readers": {
       "engaged": 127117,
       "segment_name": "Engaged Reades - Open > 40%",
@@ -12,15 +12,15 @@
       "error": null
     },
     "avg_unique_opens_per_campaign": {
-      "avg_unique_opens": 83099,
+      "avg_unique_opens": 83110,
       "campaigns_count": 106,
       "min_recipients": 100000,
       "error": null
     },
     "keyword_overall": {
-      "position": 8.548258441903748,
-      "clicks": 834,
-      "impressions": 191811,
+      "position": 8.580124432486969,
+      "clicks": 808,
+      "impressions": 190304,
       "keyword": "personality test"
     },
     "new_subscribers_monthly_alltime": [
@@ -178,28 +178,20 @@
   },
   "periods": {
     "7d": {
-      "start": "2026-09-30",
-      "end": "2026-10-06",
-      "prior_start": "2026-09-23",
-      "prior_end": "2026-09-29",
+      "start": "2026-10-01",
+      "end": "2026-10-07",
+      "prior_start": "2026-09-24",
+      "prior_end": "2026-09-30",
       "days": 7,
       "current": {
         "ga4": {
-          "users": 93671,
-          "sessions": 18739,
-          "pageviews": 44174,
-          "modules_started": 9113,
-          "modules_finished": 3309
+          "users": 90065,
+          "sessions": 15158,
+          "pageviews": 36015,
+          "modules_started": 7505,
+          "modules_finished": 2662
         },
         "ga4_daily": [
-          {
-            "date": "2026-09-30",
-            "users": 9365,
-            "first_visit": 3080,
-            "modules_started": 1894,
-            "accepted_privacy": 1271,
-            "modules_finished": 728
-          },
           {
             "date": "2026-10-01",
             "users": 6042,
@@ -242,24 +234,20 @@
           },
           {
             "date": "2026-10-06",
-            "users": 24299,
-            "first_visit": 600,
-            "modules_started": 397,
-            "accepted_privacy": 262,
-            "modules_finished": 134
+            "users": 29695,
+            "first_visit": 1015,
+            "modules_started": 683,
+            "accepted_privacy": 425,
+            "modules_finished": 215
           }
         ],
         "stripe_m": {
-          "revenue_usd": 1408.7,
-          "gross_usd": 1508.7,
+          "revenue_usd": 1190.7,
+          "gross_usd": 1290.7,
           "refunded_usd": 100.0,
-          "subscription_usd": 1363.7,
-          "non_subscription_usd": 45.0,
+          "subscription_usd": 1165.7,
+          "non_subscription_usd": 25.0,
           "daily": [
-            {
-              "date": "2026-09-30",
-              "revenue": 227.0
-            },
             {
               "date": "2026-10-01",
               "revenue": 262.9
@@ -283,15 +271,13 @@
             {
               "date": "2026-10-06",
               "revenue": 38.0
+            },
+            {
+              "date": "2026-10-07",
+              "revenue": 9.0
             }
           ],
           "daily_split": [
-            {
-              "date": "2026-09-30",
-              "subscription": 198.0,
-              "non_subscription": 29.0,
-              "total": 227.0
-            },
             {
               "date": "2026-10-01",
               "subscription": 262.9,
@@ -327,14 +313,16 @@
               "subscription": 29.0,
               "non_subscription": 9.0,
               "total": 38.0
+            },
+            {
+              "date": "2026-10-07",
+              "subscription": 0.0,
+              "non_subscription": 9.0,
+              "total": 9.0
             }
           ]
         },
         "mrr_history": [
-          {
-            "date": "2026-09-30",
-            "mrr": 4060.4
-          },
           {
             "date": "2026-10-01",
             "mrr": 4060.4
@@ -358,32 +346,36 @@
           {
             "date": "2026-10-06",
             "mrr": 4060.4
+          },
+          {
+            "date": "2026-10-07",
+            "mrr": 4040.5
           }
         ],
         "bh": {
           "error": null,
-          "total_subscribers": 650179,
+          "total_subscribers": 650193,
           "new_subscribers": 0,
-          "campaigns_count": 7,
-          "emails_sent": 379615,
-          "email_opens": 103528,
-          "email_clicks": 4475,
-          "open_rate": 0.27271841207539216,
-          "click_rate": 0.011788259157304111,
-          "unsubscribes": 778,
-          "unsubscribe_rate": 0.0020494448322642676,
-          "engaged_readers": 177315,
-          "opens_per_campaign": 14789,
+          "campaigns_count": 5,
+          "emails_sent": 376767,
+          "email_opens": 102555,
+          "email_clicks": 4232,
+          "open_rate": 0.27219740582375845,
+          "click_rate": 0.011232406235153291,
+          "unsubscribes": 790,
+          "unsubscribe_rate": 0.0020967866081689746,
+          "engaged_readers": 176980,
+          "opens_per_campaign": 20511,
           "per_campaign": [
             {
               "title": "One Helpful Idea: Weighty Decision",
               "date": "2026-10-06",
               "sent": 375151,
-              "opens": 98609,
-              "clicks": 3723,
-              "open_rate": 0.2628514917993022,
-              "click_rate": 0.009924003934415742,
-              "unsubs": 772
+              "opens": 100428,
+              "clicks": 3743,
+              "open_rate": 0.2677002060503637,
+              "click_rate": 0.009977315800837529,
+              "unsubs": 787
             },
             {
               "title": "Monthly Debrief - Testing Paywall",
@@ -419,30 +411,10 @@
               "title": "Recording + FollowUp - Thinking Clearly About Career Change",
               "date": "2026-10-01",
               "sent": 1483,
-              "opens": 1983,
-              "clicks": 475,
-              "open_rate": 1.337154416722859,
-              "click_rate": 0.3202966958867161,
-              "unsubs": 3
-            },
-            {
-              "title": "Reminder (6h) - Thinking Clearly About Career Change",
-              "date": "2026-09-30",
-              "sent": 1424,
-              "opens": 1367,
-              "clicks": 82,
-              "open_rate": 0.9599719101123596,
-              "click_rate": 0.05758426966292135,
-              "unsubs": 0
-            },
-            {
-              "title": "Reminder (10min) - Thinking Clearly About Career Change",
-              "date": "2026-09-30",
-              "sent": 1424,
-              "opens": 1432,
-              "clicks": 182,
-              "open_rate": 1.0056179775280898,
-              "click_rate": 0.12780898876404495,
+              "opens": 1990,
+              "clicks": 476,
+              "open_rate": 1.341874578556979,
+              "click_rate": 0.3209710047201618,
               "unsubs": 3
             }
           ],
@@ -450,15 +422,9 @@
         },
         "bh_daily_rates": [
           {
-            "date": "2026-09-30",
-            "open_rate": 0.9827949438202247,
-            "click_rate": 0.09269662921348315,
-            "unsubscribe_rate": 0.001053370786516854
-          },
-          {
             "date": "2026-10-01",
-            "open_rate": 1.337154416722859,
-            "click_rate": 0.3202966958867161,
+            "open_rate": 1.341874578556979,
+            "click_rate": 0.3209710047201618,
             "unsubscribe_rate": 0.0020229265003371545
           },
           {
@@ -469,18 +435,14 @@
           },
           {
             "date": "2026-10-06",
-            "open_rate": 0.2628645454327365,
-            "click_rate": 0.009926457848538886,
-            "unsubscribe_rate": 0.002057794161942003
+            "open_rate": 0.26771315628840037,
+            "click_rate": 0.009979768578122876,
+            "unsubscribe_rate": 0.0020977772091299958
           }
         ],
         "new_subs_daily": {
-          "total": 3989,
+          "total": 3240,
           "daily": [
-            {
-              "date": "2026-09-30",
-              "count": 798
-            },
             {
               "date": "2026-10-01",
               "count": 776
@@ -503,7 +465,11 @@
             },
             {
               "date": "2026-10-06",
-              "count": 372
+              "count": 388
+            },
+            {
+              "date": "2026-10-07",
+              "count": 33
             }
           ],
           "error": null,
@@ -512,10 +478,6 @@
         "cog_sales": {
           "total": 2,
           "daily": [
-            {
-              "date": "2026-09-30",
-              "count": 0
-            },
             {
               "date": "2026-10-01",
               "count": 1
@@ -539,16 +501,16 @@
             {
               "date": "2026-10-06",
               "count": 0
+            },
+            {
+              "date": "2026-10-07",
+              "count": 0
             }
           ]
         },
         "pdf_sales": {
-          "total": 5,
+          "total": 6,
           "daily": [
-            {
-              "date": "2026-09-30",
-              "count": 0
-            },
             {
               "date": "2026-10-01",
               "count": 0
@@ -572,22 +534,19 @@
             {
               "date": "2026-10-06",
               "count": 1
+            },
+            {
+              "date": "2026-10-07",
+              "count": 1
             }
           ]
         },
         "ads": {
-          "spend_usd": 545.7241779999999,
-          "impressions": 27455,
-          "clicks": 867,
-          "conversions": 197.634506,
+          "spend_usd": 424.86978999999997,
+          "impressions": 21749,
+          "clicks": 745,
+          "conversions": 163.889746,
           "daily": [
-            {
-              "date": "2026-09-30",
-              "spend": 127.058673,
-              "impressions": 6139,
-              "clicks": 140,
-              "conversions": 41.187998
-            },
             {
               "date": "2026-10-01",
               "spend": 149.209892,
@@ -625,10 +584,10 @@
             },
             {
               "date": "2026-10-06",
-              "spend": 37.041149,
-              "impressions": 3705,
-              "clicks": 92,
-              "conversions": 3.0
+              "spend": 43.245434,
+              "impressions": 4138,
+              "clicks": 110,
+              "conversions": 10.443238
             }
           ],
           "error": null
@@ -636,35 +595,35 @@
         "modules_by_channel": [
           {
             "channel": "Direct",
-            "count": 1981
+            "count": 1582
           },
           {
             "channel": "Organic Search",
-            "count": 541
+            "count": 452
           },
           {
             "channel": "Unassigned",
-            "count": 377
+            "count": 261
           },
           {
             "channel": "Cross-network",
-            "count": 182
+            "count": 167
           },
           {
             "channel": "Referral",
-            "count": 130
+            "count": 119
           },
           {
             "channel": "Organic Social",
-            "count": 55
+            "count": 40
           },
           {
             "channel": "Email",
-            "count": 19
+            "count": 18
           },
           {
             "channel": "AI Assistant",
-            "count": 12
+            "count": 11
           },
           {
             "channel": "Organic Video",
@@ -682,67 +641,63 @@
         "modules_by_campaign": [
           {
             "campaign": "(direct)",
-            "count": 1981
+            "count": 1582
           },
           {
             "campaign": "(organic)",
-            "count": 540
-          },
-          {
-            "campaign": "(not set)",
-            "count": 238
+            "count": 451
           },
           {
             "campaign": "(referral)",
-            "count": 197
+            "count": 171
+          },
+          {
+            "campaign": "(not set)",
+            "count": 162
           },
           {
             "campaign": "[PMAX] Rationality Test",
-            "count": 175
-          },
-          {
-            "campaign": "in-defense-of-unanswerable-questions-they-are-not-pointless-or-unscientific",
-            "count": 34
+            "count": 156
           },
           {
             "campaign": "my-favorite-tools-to-become-a-better-thinker",
-            "count": 24
-          },
-          {
-            "campaign": "discover-who-attracts-you-50-100-or",
             "count": 19
           },
           {
+            "campaign": "discover-who-attracts-you-50-100-or",
+            "count": 17
+          },
+          {
+            "campaign": "in-defense-of-unanswerable-questions-they-are-not-pointless-or-unscientific",
+            "count": 16
+          },
+          {
             "campaign": "(ai-assistant)",
-            "count": 12
-          },
-          {
-            "campaign": "welcome_email",
-            "count": 12
-          },
-          {
-            "campaign": "discover-who-attracts-you-re-launch",
             "count": 11
           },
           {
-            "campaign": "what-our-scientific-findings-can-teach-you-about-happiness",
-            "count": 8
+            "campaign": "(cross-network)",
+            "count": 11
           },
           {
-            "campaign": "(cross-network)",
-            "count": 7
+            "campaign": "welcome_email",
+            "count": 11
+          },
+          {
+            "campaign": "discover-who-attracts-you-re-launch",
+            "count": 9
           },
           {
             "campaign": "discover-who-attracts-you-everyone-else",
-            "count": 7
+            "count": 6
           },
           {
             "campaign": "menu_home",
             "count": 6
           },
           {
-            "campaign": "inviting-readers-to-overcome-event",
-            "count": 5
+            "campaign": "what-our-scientific-findings-can-teach-you-about-happiness",
+            "count": 6
           },
           {
             "campaign": "what-s-next-about-our-dating-app",
@@ -757,20 +712,12 @@
             "count": 3
           },
           {
-            "campaign": "one-helpful-idea-emotion-questions",
-            "count": 3
-          },
-          {
-            "campaign": "one-helpful-idea-the-unsaid-obvious",
+            "campaign": "(not set)",
             "count": 2
           },
           {
             "campaign": "thanks-for-your-help",
             "count": 2
-          },
-          {
-            "campaign": "(not set)",
-            "count": 1
           },
           {
             "campaign": "2e8cd2814f-EMAIL_CAMPAIGN_2025_PERSUASION",
@@ -797,11 +744,11 @@
             "count": 1
           },
           {
-            "campaign": "day-1-the-scout-mindset",
+            "campaign": "in-case-you-missed-it-here-is-our-most-popular-content-from-2025",
             "count": 1
           },
           {
-            "campaign": "in-case-you-missed-it-here-is-our-most-popular-content-from-2025",
+            "campaign": "inviting-readers-to-overcome-event",
             "count": 1
           },
           {
@@ -817,22 +764,12 @@
             "count": 1
           },
           {
-            "campaign": "website_menu",
-            "count": 1
-          },
-          {
             "campaign": "what-stands-between-you-and-reality-1",
             "count": 1
           }
         ],
         "kw_pos": {
           "daily": [
-            {
-              "date": "2026-09-30",
-              "position": 8.692457737321195,
-              "clicks": 8,
-              "impressions": 3076
-            },
             {
               "date": "2026-10-01",
               "position": 9.070628768303187,
@@ -850,16 +787,22 @@
               "position": 9.46703995927717,
               "clicks": 6,
               "impressions": 3929
+            },
+            {
+              "date": "2026-10-04",
+              "position": 8.784941675503712,
+              "clicks": 14,
+              "impressions": 4715
             }
           ],
-          "avg_position": 8.89622587150677,
-          "clicks": 39,
-          "impressions": 17355,
+          "avg_position": 8.901600505422765,
+          "clicks": 45,
+          "impressions": 18994,
           "keyword": "personality test"
         },
         "revenue_cat": {
-          "subscriptions": 1293.7,
-          "pdf": 45.0,
+          "subscriptions": 1066.7,
+          "pdf": 54.0,
           "cognitive": 70.0,
           "other": 0.0
         },
@@ -876,21 +819,13 @@
       },
       "prior": {
         "ga4": {
-          "users": 110750,
-          "sessions": 25273,
-          "pageviews": 59852,
-          "modules_started": 12102,
-          "modules_finished": 4925
+          "users": 112552,
+          "sessions": 26118,
+          "pageviews": 61880,
+          "modules_started": 12470,
+          "modules_finished": 5084
         },
         "ga4_daily": [
-          {
-            "date": "2026-09-23",
-            "users": 8094,
-            "first_visit": 2201,
-            "modules_started": 1526,
-            "accepted_privacy": 990,
-            "modules_finished": 569
-          },
           {
             "date": "2026-09-24",
             "users": 6071,
@@ -938,19 +873,23 @@
             "modules_started": 1826,
             "accepted_privacy": 1208,
             "modules_finished": 721
+          },
+          {
+            "date": "2026-09-30",
+            "users": 9365,
+            "first_visit": 3080,
+            "modules_started": 1894,
+            "accepted_privacy": 1271,
+            "modules_finished": 728
           }
         ],
         "stripe_m": {
-          "revenue_usd": 1143.6,
-          "gross_usd": 1242.6,
-          "refunded_usd": 99.0,
-          "subscription_usd": 1127.6,
-          "non_subscription_usd": 16.0,
+          "revenue_usd": 1350.7,
+          "gross_usd": 1350.7,
+          "refunded_usd": 0.0,
+          "subscription_usd": 1206.7,
+          "non_subscription_usd": 144.0,
           "daily": [
-            {
-              "date": "2026-09-23",
-              "revenue": 19.9
-            },
             {
               "date": "2026-09-24",
               "revenue": 261.9
@@ -974,15 +913,13 @@
             {
               "date": "2026-09-29",
               "revenue": 108.0
+            },
+            {
+              "date": "2026-09-30",
+              "revenue": 227.0
             }
           ],
           "daily_split": [
-            {
-              "date": "2026-09-23",
-              "subscription": 19.9,
-              "non_subscription": 0.0,
-              "total": 19.9
-            },
             {
               "date": "2026-09-24",
               "subscription": 217.9,
@@ -1018,14 +955,16 @@
               "subscription": 99.0,
               "non_subscription": 9.0,
               "total": 108.0
+            },
+            {
+              "date": "2026-09-30",
+              "subscription": 198.0,
+              "non_subscription": 29.0,
+              "total": 227.0
             }
           ]
         },
         "mrr_history": [
-          {
-            "date": "2026-09-23",
-            "mrr": 4258.4
-          },
           {
             "date": "2026-09-24",
             "mrr": 4159.4
@@ -1049,50 +988,74 @@
           {
             "date": "2026-09-29",
             "mrr": 4060.4
+          },
+          {
+            "date": "2026-09-30",
+            "mrr": 4060.4
           }
         ],
         "bh": {
           "error": null,
-          "total_subscribers": 650179,
+          "total_subscribers": 650193,
           "new_subscribers": 0,
-          "campaigns_count": 5,
-          "emails_sent": 1128312,
-          "email_opens": 429505,
-          "email_clicks": 17512,
-          "open_rate": 0.38066155460546375,
-          "click_rate": 0.015520529782542418,
-          "unsubscribes": 3500,
-          "unsubscribe_rate": 0.0031019788852728676,
-          "engaged_readers": 247498,
-          "opens_per_campaign": 85901,
+          "campaigns_count": 7,
+          "emails_sent": 1131160,
+          "email_opens": 432709,
+          "email_clicks": 17778,
+          "open_rate": 0.38253562714381695,
+          "click_rate": 0.015716609498214223,
+          "unsubscribes": 3508,
+          "unsubscribe_rate": 0.003101241203720075,
+          "engaged_readers": 248721,
+          "opens_per_campaign": 61815,
           "per_campaign": [
+            {
+              "title": "Reminder (6h) - Thinking Clearly About Career Change",
+              "date": "2026-09-30",
+              "sent": 1424,
+              "opens": 1368,
+              "clicks": 82,
+              "open_rate": 0.9606741573033708,
+              "click_rate": 0.05758426966292135,
+              "unsubs": 0
+            },
+            {
+              "title": "Reminder (10min) - Thinking Clearly About Career Change",
+              "date": "2026-09-30",
+              "sent": 1424,
+              "opens": 1435,
+              "clicks": 182,
+              "open_rate": 1.0077247191011236,
+              "click_rate": 0.12780898876404495,
+              "unsubs": 3
+            },
             {
               "title": "In Defense of Unanswerable Questions (They Are Not Pointless or Unscientific)",
               "date": "2026-09-29",
               "sent": 333177,
-              "opens": 119706,
+              "opens": 119820,
               "clicks": 5740,
-              "open_rate": 0.359286505371019,
+              "open_rate": 0.359628665844281,
               "click_rate": 0.017228079969505698,
-              "unsubs": 1011
+              "unsubs": 1014
             },
             {
               "title": "One Helpful Idea: Emotion Questions",
               "date": "2026-09-28",
               "sent": 376180,
-              "opens": 126725,
+              "opens": 126868,
               "clicks": 4511,
-              "open_rate": 0.33687330533255355,
+              "open_rate": 0.3372534425009304,
               "click_rate": 0.011991599766069436,
-              "unsubs": 1132
+              "unsubs": 1133
             },
             {
               "title": "Inviting readers to Overcome event",
               "date": "2026-09-26",
               "sent": 77647,
-              "opens": 48684,
+              "opens": 48741,
               "clicks": 2297,
-              "open_rate": 0.6269913840843819,
+              "open_rate": 0.6277254755496027,
               "click_rate": 0.029582598168634976,
               "unsubs": 258
             },
@@ -1110,11 +1073,11 @@
               "title": "Career Advice from  Conversations With Experts (1)",
               "date": "2026-09-24",
               "sent": 341304,
-              "opens": 134385,
-              "clicks": 4963,
-              "open_rate": 0.3937398917094438,
-              "click_rate": 0.014541288704498043,
-              "unsubs": 1099
+              "opens": 134472,
+              "clicks": 4965,
+              "open_rate": 0.39399479642781804,
+              "click_rate": 0.014547148583081359,
+              "unsubs": 1100
             }
           ],
           "period_used_for_new_subs": "last_7_days"
@@ -1122,36 +1085,38 @@
         "bh_daily_rates": [
           {
             "date": "2026-09-24",
-            "open_rate": 0.39374992675237613,
-            "click_rate": 0.014544048191076681,
-            "unsubscribe_rate": 0.0032199655443177423
+            "open_rate": 0.394004828483364,
+            "click_rate": 0.014549908000984449,
+            "unsubscribe_rate": 0.0032228954492716255
           },
           {
             "date": "2026-09-26",
-            "open_rate": 0.6269913840843819,
+            "open_rate": 0.6277254755496027,
             "click_rate": 0.029582598168634976,
             "unsubscribe_rate": 0.0033227297899468106
           },
           {
             "date": "2026-09-28",
-            "open_rate": 0.33687330533255355,
+            "open_rate": 0.3372534425009304,
             "click_rate": 0.011991599766069436,
-            "unsubscribe_rate": 0.0030091977244935935
+            "unsubscribe_rate": 0.0030118560263703545
           },
           {
             "date": "2026-09-29",
-            "open_rate": 0.359286505371019,
+            "open_rate": 0.359628665844281,
             "click_rate": 0.017228079969505698,
-            "unsubscribe_rate": 0.0030344231444547494
+            "unsubscribe_rate": 0.003043427367435327
+          },
+          {
+            "date": "2026-09-30",
+            "open_rate": 0.9841994382022472,
+            "click_rate": 0.09269662921348315,
+            "unsubscribe_rate": 0.001053370786516854
           }
         ],
         "new_subs_daily": {
-          "total": 5866,
+          "total": 6129,
           "daily": [
-            {
-              "date": "2026-09-23",
-              "count": 535
-            },
             {
               "date": "2026-09-24",
               "count": 632
@@ -1175,6 +1140,10 @@
             {
               "date": "2026-09-29",
               "count": 798
+            },
+            {
+              "date": "2026-09-30",
+              "count": 798
             }
           ],
           "error": null,
@@ -1183,10 +1152,6 @@
         "cog_sales": {
           "total": 2,
           "daily": [
-            {
-              "date": "2026-09-23",
-              "count": 0
-            },
             {
               "date": "2026-09-24",
               "count": 1
@@ -1210,16 +1175,16 @@
             {
               "date": "2026-09-29",
               "count": 0
+            },
+            {
+              "date": "2026-09-30",
+              "count": 0
             }
           ]
         },
         "pdf_sales": {
           "total": 5,
           "daily": [
-            {
-              "date": "2026-09-23",
-              "count": 0
-            },
             {
               "date": "2026-09-24",
               "count": 1
@@ -1243,22 +1208,19 @@
             {
               "date": "2026-09-29",
               "count": 1
+            },
+            {
+              "date": "2026-09-30",
+              "count": 0
             }
           ]
         },
         "ads": {
-          "spend_usd": 845.186545,
-          "impressions": 22653,
-          "clicks": 796,
-          "conversions": 249.19428,
+          "spend_usd": 946.0574859999999,
+          "impressions": 26915,
+          "clicks": 894,
+          "conversions": 263.91774,
           "daily": [
-            {
-              "date": "2026-09-23",
-              "spend": 26.187732,
-              "impressions": 1877,
-              "clicks": 42,
-              "conversions": 26.464538
-            },
             {
               "date": "2026-09-24",
               "spend": 35.823084,
@@ -1300,6 +1262,13 @@
               "impressions": 2522,
               "clicks": 107,
               "conversions": 40.940204
+            },
+            {
+              "date": "2026-09-30",
+              "spend": 127.058673,
+              "impressions": 6139,
+              "clicks": 140,
+              "conversions": 41.187998
             }
           ],
           "error": null
@@ -1307,42 +1276,34 @@
         "modules_by_channel": [
           {
             "channel": "Direct",
-            "count": 3096
+            "count": 3198
           },
           {
             "channel": "Organic Search",
-            "count": 827
+            "count": 843
           },
           {
             "channel": "Unassigned",
-            "count": 358
+            "count": 458
           },
           {
             "channel": "Cross-network",
-            "count": 199
+            "count": 211
           },
           {
             "channel": "Referral",
-            "count": 138
-          },
-          {
-            "channel": "Paid Social",
-            "count": 137
+            "count": 128
           },
           {
             "channel": "Organic Social",
+            "count": 91
+          },
+          {
+            "channel": "Paid Social",
             "count": 83
           },
           {
             "channel": "Organic Video",
-            "count": 22
-          },
-          {
-            "channel": "Email",
-            "count": 21
-          },
-          {
-            "channel": "Display",
             "count": 18
           },
           {
@@ -1350,38 +1311,46 @@
             "count": 17
           },
           {
+            "channel": "Display",
+            "count": 17
+          },
+          {
+            "channel": "Email",
+            "count": 13
+          },
+          {
             "channel": "Paid Search",
-            "count": 7
+            "count": 6
           },
           {
             "channel": "Paid Other",
-            "count": 2
+            "count": 1
           }
         ],
         "modules_by_campaign": [
           {
             "campaign": "(direct)",
-            "count": 3096
+            "count": 3198
           },
           {
             "campaign": "(organic)",
-            "count": 827
+            "count": 843
           },
           {
             "campaign": "(referral)",
-            "count": 243
+            "count": 237
           },
           {
             "campaign": "[PMAX] Rationality Test",
-            "count": 177
+            "count": 197
           },
           {
             "campaign": "(not set)",
-            "count": 117
+            "count": 190
           },
           {
             "campaign": "unique_traits_meta",
-            "count": 98
+            "count": 59
           },
           {
             "campaign": "career-advice-from-conversations-with-experts-1",
@@ -1393,14 +1362,14 @@
           },
           {
             "campaign": "discover-who-attracts-you-50-100-or",
-            "count": 37
+            "count": 34
+          },
+          {
+            "campaign": "in-defense-of-unanswerable-questions-they-are-not-pointless-or-unscientific",
+            "count": 32
           },
           {
             "campaign": "rationality_test_meta",
-            "count": 31
-          },
-          {
-            "campaign": "discover-who-attracts-you-everyone-else",
             "count": 19
           },
           {
@@ -1409,15 +1378,19 @@
           },
           {
             "campaign": "discover-who-attracts-you-re-launch",
-            "count": 16
+            "count": 17
           },
           {
-            "campaign": "in-defense-of-unanswerable-questions-they-are-not-pointless-or-unscientific",
-            "count": 14
+            "campaign": "discover-who-attracts-you-everyone-else",
+            "count": 15
           },
           {
-            "campaign": "[ACQ] Imposter Syndrome",
-            "count": 13
+            "campaign": "inviting-readers-to-overcome-event",
+            "count": 11
+          },
+          {
+            "campaign": "my-favorite-tools-to-become-a-better-thinker",
+            "count": 11
           },
           {
             "campaign": "what-our-scientific-findings-can-teach-you-about-happiness",
@@ -1425,30 +1398,18 @@
           },
           {
             "campaign": "coaching_floating_button",
-            "count": 9
+            "count": 8
           },
           {
             "campaign": "(cross-network)",
-            "count": 8
-          },
-          {
-            "campaign": "imposter_syndrome_meta",
-            "count": 8
-          },
-          {
-            "campaign": "school_of_thought_astro",
-            "count": 8
-          },
-          {
-            "campaign": "inviting-readers-to-overcome-event",
             "count": 7
           },
           {
-            "campaign": "my-favorite-tools-to-become-a-better-thinker",
+            "campaign": "one-helpful-idea-emotion-questions",
             "count": 7
           },
           {
-            "campaign": "dating-app-email-w-updates",
+            "campaign": "[ACQ] Imposter Syndrome",
             "count": 6
           },
           {
@@ -1456,11 +1417,19 @@
             "count": 6
           },
           {
-            "campaign": "thanks-for-your-help",
+            "campaign": "website_menu",
+            "count": 6
+          },
+          {
+            "campaign": "dating-app-email-w-updates",
             "count": 5
           },
           {
-            "campaign": "website_menu",
+            "campaign": "imposter_syndrome_meta",
+            "count": 5
+          },
+          {
+            "campaign": "thanks-for-your-help",
             "count": 5
           },
           {
@@ -1468,15 +1437,19 @@
             "count": 4
           },
           {
-            "campaign": "one-helpful-idea-emotion-questions",
-            "count": 4
-          },
-          {
             "campaign": "ct_product_grid_cognitive",
             "count": 3
           },
           {
+            "campaign": "one-helpful-idea-the-unsaid-obvious",
+            "count": 3
+          },
+          {
             "campaign": "personality_max_all_territories",
+            "count": 3
+          },
+          {
+            "campaign": "welcome_email",
             "count": 3
           },
           {
@@ -1493,14 +1466,6 @@
           },
           {
             "campaign": "psychology-words-that-don-t-mean-what-you-think",
-            "count": 2
-          },
-          {
-            "campaign": "upt_pmax",
-            "count": 2
-          },
-          {
-            "campaign": "welcome_email",
             "count": 2
           },
           {
@@ -1532,11 +1497,11 @@
             "count": 1
           },
           {
-            "campaign": "discover-your-unusual-traits-with-our-new-tool",
+            "campaign": "day-1-the-scout-mindset",
             "count": 1
           },
           {
-            "campaign": "early-access-discover-who-attracts-you",
+            "campaign": "discover-your-unusual-traits-with-our-new-tool",
             "count": 1
           },
           {
@@ -1560,10 +1525,6 @@
             "count": 1
           },
           {
-            "campaign": "one-helpful-idea-the-unsaid-obvious",
-            "count": 1
-          },
-          {
             "campaign": "productivity-equation-event-invitation",
             "count": 1
           },
@@ -1576,18 +1537,16 @@
             "count": 1
           },
           {
+            "campaign": "upt_pmax",
+            "count": 1
+          },
+          {
             "campaign": "what-capitalists-and-marxists-agree-and-disagree-about-1",
             "count": 1
           }
         ],
         "kw_pos": {
           "daily": [
-            {
-              "date": "2026-09-23",
-              "position": 8.106062863101446,
-              "clicks": 29,
-              "impressions": 6713
-            },
             {
               "date": "2026-09-24",
               "position": 7.714918032786885,
@@ -1623,26 +1582,28 @@
               "position": 8.634109691960932,
               "clicks": 23,
               "impressions": 3993
+            },
+            {
+              "date": "2026-09-30",
+              "position": 8.692457737321195,
+              "clicks": 8,
+              "impressions": 3076
             }
           ],
-          "avg_position": 8.323778796928327,
-          "clicks": 191,
-          "impressions": 37504,
+          "avg_position": 8.40041928721174,
+          "clicks": 170,
+          "impressions": 33867,
           "keyword": "personality test"
         },
         "revenue_cat": {
-          "subscriptions": 1028.6,
+          "subscriptions": 1235.7,
           "pdf": 45.0,
           "cognitive": 70.0,
           "other": 0.0
         },
         "new_stripe_subs": {
-          "total": 3,
+          "total": 2,
           "daily": [
-            {
-              "date": "2026-09-23",
-              "count": 1
-            },
             {
               "date": "2026-09-25",
               "count": 2
@@ -1653,28 +1614,20 @@
       }
     },
     "30d": {
-      "start": "2026-09-07",
-      "end": "2026-10-06",
-      "prior_start": "2026-08-08",
-      "prior_end": "2026-09-06",
+      "start": "2026-09-08",
+      "end": "2026-10-07",
+      "prior_start": "2026-08-09",
+      "prior_end": "2026-09-07",
       "days": 30,
       "current": {
         "ga4": {
-          "users": 423075,
-          "sessions": 129448,
-          "pageviews": 391136,
-          "modules_started": 68889,
-          "modules_finished": 31470
+          "users": 425318,
+          "sessions": 125794,
+          "pageviews": 379642,
+          "modules_started": 67166,
+          "modules_finished": 30606
         },
         "ga4_daily": [
-          {
-            "date": "2026-09-07",
-            "users": 5507,
-            "first_visit": 2832,
-            "modules_started": 2009,
-            "accepted_privacy": 1462,
-            "modules_finished": 945
-          },
           {
             "date": "2026-09-08",
             "users": 5321,
@@ -1901,24 +1854,20 @@
           },
           {
             "date": "2026-10-06",
-            "users": 24299,
-            "first_visit": 600,
-            "modules_started": 397,
-            "accepted_privacy": 262,
-            "modules_finished": 134
+            "users": 29695,
+            "first_visit": 1015,
+            "modules_started": 683,
+            "accepted_privacy": 425,
+            "modules_finished": 215
           }
         ],
         "stripe_m": {
-          "revenue_usd": 6271.29,
-          "gross_usd": 6640.29,
+          "revenue_usd": 6025.39,
+          "gross_usd": 6394.39,
           "refunded_usd": 369.0,
-          "subscription_usd": 4526.29,
-          "non_subscription_usd": 1745.0,
+          "subscription_usd": 4332.39,
+          "non_subscription_usd": 1693.0,
           "daily": [
-            {
-              "date": "2026-09-07",
-              "revenue": 254.9
-            },
             {
               "date": "2026-09-08",
               "revenue": 1594.9
@@ -2034,15 +1983,13 @@
             {
               "date": "2026-10-06",
               "revenue": 38.0
+            },
+            {
+              "date": "2026-10-07",
+              "revenue": 9.0
             }
           ],
           "daily_split": [
-            {
-              "date": "2026-09-07",
-              "subscription": 193.9,
-              "non_subscription": 61.0,
-              "total": 254.9
-            },
             {
               "date": "2026-09-08",
               "subscription": 85.9,
@@ -2216,14 +2163,16 @@
               "subscription": 29.0,
               "non_subscription": 9.0,
               "total": 38.0
+            },
+            {
+              "date": "2026-10-07",
+              "subscription": 0.0,
+              "non_subscription": 9.0,
+              "total": 9.0
             }
           ]
         },
         "mrr_history": [
-          {
-            "date": "2026-09-07",
-            "mrr": 4278.4
-          },
           {
             "date": "2026-09-08",
             "mrr": 4179.4
@@ -2339,32 +2288,36 @@
           {
             "date": "2026-10-06",
             "mrr": 4060.4
+          },
+          {
+            "date": "2026-10-07",
+            "mrr": 4040.5
           }
         ],
         "bh": {
           "error": null,
-          "total_subscribers": 650179,
+          "total_subscribers": 650193,
           "new_subscribers": 0,
-          "campaigns_count": 22,
-          "emails_sent": 2971614,
-          "email_opens": 983982,
-          "email_clicks": 44348,
-          "open_rate": 0.3311271248553816,
-          "click_rate": 0.014923876385021743,
-          "unsubscribes": 8327,
-          "unsubscribe_rate": 0.0028021809023648426,
-          "engaged_readers": 215291,
-          "opens_per_campaign": 44726,
+          "campaigns_count": 18,
+          "emails_sent": 2971472,
+          "email_opens": 986277,
+          "email_clicks": 44338,
+          "open_rate": 0.33191529316109997,
+          "click_rate": 0.01492122422826128,
+          "unsubscribes": 8349,
+          "unsubscribe_rate": 0.0028097185502673422,
+          "engaged_readers": 215809,
+          "opens_per_campaign": 54793,
           "per_campaign": [
             {
               "title": "One Helpful Idea: Weighty Decision",
               "date": "2026-10-06",
               "sent": 375151,
-              "opens": 98614,
-              "clicks": 3723,
-              "open_rate": 0.2628648197659076,
-              "click_rate": 0.009924003934415742,
-              "unsubs": 772
+              "opens": 100432,
+              "clicks": 3743,
+              "open_rate": 0.26771086842364805,
+              "click_rate": 0.009977315800837529,
+              "unsubs": 787
             },
             {
               "title": "Monthly Debrief - Testing Paywall",
@@ -2400,19 +2353,19 @@
               "title": "Recording + FollowUp - Thinking Clearly About Career Change",
               "date": "2026-10-01",
               "sent": 1483,
-              "opens": 1983,
-              "clicks": 475,
-              "open_rate": 1.337154416722859,
-              "click_rate": 0.3202966958867161,
+              "opens": 1990,
+              "clicks": 476,
+              "open_rate": 1.341874578556979,
+              "click_rate": 0.3209710047201618,
               "unsubs": 3
             },
             {
               "title": "Reminder (6h) - Thinking Clearly About Career Change",
               "date": "2026-09-30",
               "sent": 1424,
-              "opens": 1367,
+              "opens": 1368,
               "clicks": 82,
-              "open_rate": 0.9599719101123596,
+              "open_rate": 0.9606741573033708,
               "click_rate": 0.05758426966292135,
               "unsubs": 0
             },
@@ -2420,9 +2373,9 @@
               "title": "Reminder (10min) - Thinking Clearly About Career Change",
               "date": "2026-09-30",
               "sent": 1424,
-              "opens": 1432,
+              "opens": 1435,
               "clicks": 182,
-              "open_rate": 1.0056179775280898,
+              "open_rate": 1.0077247191011236,
               "click_rate": 0.12780898876404495,
               "unsubs": 3
             },
@@ -2430,29 +2383,29 @@
               "title": "In Defense of Unanswerable Questions (They Are Not Pointless or Unscientific)",
               "date": "2026-09-29",
               "sent": 333177,
-              "opens": 119706,
+              "opens": 119820,
               "clicks": 5740,
-              "open_rate": 0.359286505371019,
+              "open_rate": 0.359628665844281,
               "click_rate": 0.017228079969505698,
-              "unsubs": 1011
+              "unsubs": 1014
             },
             {
               "title": "One Helpful Idea: Emotion Questions",
               "date": "2026-09-28",
               "sent": 376180,
-              "opens": 126725,
+              "opens": 126868,
               "clicks": 4511,
-              "open_rate": 0.33687330533255355,
+              "open_rate": 0.3372534425009304,
               "click_rate": 0.011991599766069436,
-              "unsubs": 1132
+              "unsubs": 1133
             },
             {
               "title": "Inviting readers to Overcome event",
               "date": "2026-09-26",
               "sent": 77647,
-              "opens": 48684,
+              "opens": 48741,
               "clicks": 2297,
-              "open_rate": 0.6269913840843819,
+              "open_rate": 0.6277254755496027,
               "click_rate": 0.029582598168634976,
               "unsubs": 258
             },
@@ -2470,49 +2423,49 @@
               "title": "Career Advice from  Conversations With Experts (1)",
               "date": "2026-09-24",
               "sent": 341304,
-              "opens": 134385,
-              "clicks": 4963,
-              "open_rate": 0.3937398917094438,
-              "click_rate": 0.014541288704498043,
-              "unsubs": 1099
+              "opens": 134472,
+              "clicks": 4965,
+              "open_rate": 0.39399479642781804,
+              "click_rate": 0.014547148583081359,
+              "unsubs": 1100
             },
             {
               "title": "One Helpful Idea: The Unsaid Obvious",
               "date": "2026-09-21",
               "sent": 340134,
-              "opens": 120089,
-              "clicks": 3378,
-              "open_rate": 0.35306379250530673,
-              "click_rate": 0.009931379985535112,
+              "opens": 120172,
+              "clicks": 3379,
+              "open_rate": 0.3533078139791964,
+              "click_rate": 0.009934320003292819,
               "unsubs": 1092
             },
             {
               "title": "What our scientific findings can teach you about happiness",
               "date": "2026-09-18",
               "sent": 336296,
-              "opens": 146982,
-              "clicks": 5137,
-              "open_rate": 0.4370613982919809,
-              "click_rate": 0.015275233722672884,
-              "unsubs": 1686
+              "opens": 147049,
+              "clicks": 5138,
+              "open_rate": 0.43726062754240314,
+              "click_rate": 0.015278207293574708,
+              "unsubs": 1687
             },
             {
               "title": "Discover who attracts you - Re-launch",
               "date": "2026-09-14",
               "sent": 232000,
-              "opens": 16936,
-              "clicks": 2875,
-              "open_rate": 0.073,
-              "click_rate": 0.012392241379310345,
-              "unsubs": 107
+              "opens": 16944,
+              "clicks": 2876,
+              "open_rate": 0.07303448275862069,
+              "click_rate": 0.01239655172413793,
+              "unsubs": 108
             },
             {
               "title": "Discover who attracts you - 50 - 100% OR",
               "date": "2026-09-10",
               "sent": 79482,
-              "opens": 38198,
+              "opens": 38208,
               "clicks": 4976,
-              "open_rate": 0.4805867995269369,
+              "open_rate": 0.48071261417679473,
               "click_rate": 0.06260536976925593,
               "unsubs": 104
             },
@@ -2520,9 +2473,9 @@
               "title": "Discover who attracts you - Everyone else",
               "date": "2026-09-10",
               "sent": 199028,
-              "opens": 22070,
+              "opens": 22076,
               "clicks": 2772,
-              "open_rate": 0.11088892015193842,
+              "open_rate": 0.11091906666398697,
               "click_rate": 0.013927688566432863,
               "unsubs": 257
             },
@@ -2530,126 +2483,80 @@
               "title": "One Helpful Idea: Dating App Incentives",
               "date": "2026-09-09",
               "sent": 276605,
-              "opens": 106522,
+              "opens": 106560,
               "clicks": 3187,
-              "open_rate": 0.38510511379042317,
+              "open_rate": 0.385242493808861,
               "click_rate": 0.01152184523056344,
               "unsubs": 803
-            },
-            {
-              "title": "(Early Access) Discover who attracts you",
-              "date": "2026-09-07",
-              "sent": 130,
-              "opens": 125,
-              "clicks": 36,
-              "open_rate": 0.9615384615384616,
-              "click_rate": 0.27692307692307694,
-              "unsubs": 0
-            },
-            {
-              "title": "[Igor Testing Width Issue] [Regular Email] Psychology Words That Don\u2019t Mean What You Think (2)",
-              "date": "2026-09-07",
-              "sent": 4,
-              "opens": 8,
-              "clicks": 0,
-              "open_rate": 2.0,
-              "click_rate": 0.0,
-              "unsubs": 0
-            },
-            {
-              "title": "[Igor Testing Width Issue] [No HTML] Psychology Words That Don\u2019t Mean What You Think ",
-              "date": "2026-09-07",
-              "sent": 4,
-              "opens": 10,
-              "clicks": 0,
-              "open_rate": 2.5,
-              "click_rate": 0.0,
-              "unsubs": 0
-            },
-            {
-              "title": "[Igor Testing] [Regular] Launching Demystifying Meditation ",
-              "date": "2026-09-07",
-              "sent": 4,
-              "opens": 4,
-              "clicks": 0,
-              "open_rate": 1.0,
-              "click_rate": 0.0,
-              "unsubs": 0
             }
           ],
           "period_used_for_new_subs": "last_4_weeks"
         },
         "bh_daily_rates": [
           {
-            "date": "2026-09-07",
-            "open_rate": 1.0352112676056338,
-            "click_rate": 0.2535211267605634,
-            "unsubscribe_rate": 0.0
-          },
-          {
             "date": "2026-09-09",
-            "open_rate": 0.38510511379042317,
+            "open_rate": 0.385242493808861,
             "click_rate": 0.01152184523056344,
             "unsubscribe_rate": 0.002903056705410242
           },
           {
             "date": "2026-09-10",
-            "open_rate": 0.21639438440271444,
+            "open_rate": 0.21645183296829557,
             "click_rate": 0.027819467882661306,
             "unsubscribe_rate": 0.0012961832609242037
           },
           {
             "date": "2026-09-14",
-            "open_rate": 0.073,
-            "click_rate": 0.012392241379310345,
-            "unsubscribe_rate": 0.0004612068965517241
+            "open_rate": 0.07303448275862069,
+            "click_rate": 0.01239655172413793,
+            "unsubscribe_rate": 0.00046551724137931035
           },
           {
             "date": "2026-09-18",
-            "open_rate": 0.4370613982919809,
-            "click_rate": 0.015275233722672884,
-            "unsubscribe_rate": 0.005013440540476247
+            "open_rate": 0.43726062754240314,
+            "click_rate": 0.015278207293574708,
+            "unsubscribe_rate": 0.005016414111378072
           },
           {
             "date": "2026-09-21",
-            "open_rate": 0.35306379250530673,
-            "click_rate": 0.009931379985535112,
+            "open_rate": 0.3533078139791964,
+            "click_rate": 0.009934320003292819,
             "unsubscribe_rate": 0.003210499391416324
           },
           {
             "date": "2026-09-24",
-            "open_rate": 0.39374992675237613,
-            "click_rate": 0.014544048191076681,
-            "unsubscribe_rate": 0.0032199655443177423
+            "open_rate": 0.394004828483364,
+            "click_rate": 0.014549908000984449,
+            "unsubscribe_rate": 0.0032228954492716255
           },
           {
             "date": "2026-09-26",
-            "open_rate": 0.6269913840843819,
+            "open_rate": 0.6277254755496027,
             "click_rate": 0.029582598168634976,
             "unsubscribe_rate": 0.0033227297899468106
           },
           {
             "date": "2026-09-28",
-            "open_rate": 0.33687330533255355,
+            "open_rate": 0.3372534425009304,
             "click_rate": 0.011991599766069436,
-            "unsubscribe_rate": 0.0030091977244935935
+            "unsubscribe_rate": 0.0030118560263703545
           },
           {
             "date": "2026-09-29",
-            "open_rate": 0.359286505371019,
+            "open_rate": 0.359628665844281,
             "click_rate": 0.017228079969505698,
-            "unsubscribe_rate": 0.0030344231444547494
+            "unsubscribe_rate": 0.003043427367435327
           },
           {
             "date": "2026-09-30",
-            "open_rate": 0.9827949438202247,
+            "open_rate": 0.9841994382022472,
             "click_rate": 0.09269662921348315,
             "unsubscribe_rate": 0.001053370786516854
           },
           {
             "date": "2026-10-01",
-            "open_rate": 1.337154416722859,
-            "click_rate": 0.3202966958867161,
+            "open_rate": 1.341874578556979,
+            "click_rate": 0.3209710047201618,
             "unsubscribe_rate": 0.0020229265003371545
           },
           {
@@ -2660,18 +2567,14 @@
           },
           {
             "date": "2026-10-06",
-            "open_rate": 0.2628778731151325,
-            "click_rate": 0.009926457848538886,
-            "unsubscribe_rate": 0.002057794161942003
+            "open_rate": 0.2677238184343172,
+            "click_rate": 0.009979768578122876,
+            "unsubscribe_rate": 0.0020977772091299958
           }
         ],
         "new_subs_daily": {
-          "total": 39648,
+          "total": 38777,
           "daily": [
-            {
-              "date": "2026-09-07",
-              "count": 920
-            },
             {
               "date": "2026-09-08",
               "count": 885
@@ -2786,7 +2689,11 @@
             },
             {
               "date": "2026-10-06",
-              "count": 372
+              "count": 388
+            },
+            {
+              "date": "2026-10-07",
+              "count": 33
             }
           ],
           "error": null,
@@ -2795,10 +2702,6 @@
         "cog_sales": {
           "total": 9,
           "daily": [
-            {
-              "date": "2026-09-07",
-              "count": 0
-            },
             {
               "date": "2026-09-08",
               "count": 0
@@ -2914,16 +2817,16 @@
             {
               "date": "2026-10-06",
               "count": 0
+            },
+            {
+              "date": "2026-10-07",
+              "count": 0
             }
           ]
         },
         "pdf_sales": {
-          "total": 22,
+          "total": 23,
           "daily": [
-            {
-              "date": "2026-09-07",
-              "count": 0
-            },
             {
               "date": "2026-09-08",
               "count": 1
@@ -3039,22 +2942,19 @@
             {
               "date": "2026-10-06",
               "count": 1
+            },
+            {
+              "date": "2026-10-07",
+              "count": 1
             }
           ]
         },
         "ads": {
-          "spend_usd": 2112.895914,
-          "impressions": 83152,
-          "clicks": 2965,
-          "conversions": 1028.350606,
+          "spend_usd": 2028.2120639999998,
+          "impressions": 82004,
+          "clicks": 2841,
+          "conversions": 982.4605869999999,
           "daily": [
-            {
-              "date": "2026-09-07",
-              "spend": 90.888135,
-              "impressions": 1579,
-              "clicks": 142,
-              "conversions": 53.333257
-            },
             {
               "date": "2026-09-08",
               "spend": 52.342989,
@@ -3253,10 +3153,10 @@
             },
             {
               "date": "2026-10-06",
-              "spend": 37.041149,
-              "impressions": 3707,
-              "clicks": 92,
-              "conversions": 3.0
+              "spend": 43.245434,
+              "impressions": 4138,
+              "clicks": 110,
+              "conversions": 10.443238
             }
           ],
           "error": null
@@ -3264,47 +3164,47 @@
         "modules_by_channel": [
           {
             "channel": "Direct",
-            "count": 12630
+            "count": 12485
           },
           {
             "channel": "Referral",
-            "count": 7105
+            "count": 6634
           },
           {
             "channel": "Organic Search",
-            "count": 4532
+            "count": 4442
           },
           {
             "channel": "Unassigned",
-            "count": 3702
+            "count": 3666
           },
           {
             "channel": "Organic Social",
-            "count": 1165
+            "count": 1144
           },
           {
             "channel": "Paid Social",
-            "count": 1109
+            "count": 1060
           },
           {
             "channel": "Cross-network",
-            "count": 823
+            "count": 782
           },
           {
             "channel": "Paid Search",
-            "count": 126
+            "count": 125
           },
           {
             "channel": "Organic Video",
-            "count": 84
-          },
-          {
-            "channel": "Email",
-            "count": 67
+            "count": 83
           },
           {
             "channel": "AI Assistant",
-            "count": 66
+            "count": 65
+          },
+          {
+            "channel": "Email",
+            "count": 60
           },
           {
             "channel": "Display",
@@ -3316,33 +3216,33 @@
           },
           {
             "channel": "Organic Shopping",
-            "count": 2
+            "count": 1
           }
         ],
         "modules_by_campaign": [
           {
             "campaign": "(direct)",
-            "count": 12630
+            "count": 12485
           },
           {
             "campaign": "(referral)",
-            "count": 8368
+            "count": 7874
           },
           {
             "campaign": "(organic)",
-            "count": 4522
+            "count": 4432
           },
           {
             "campaign": "discover-who-attracts-you-50-100-or",
-            "count": 1280
+            "count": 1282
           },
           {
             "campaign": "unique_traits_meta",
-            "count": 784
+            "count": 754
           },
           {
             "campaign": "(not set)",
-            "count": 682
+            "count": 670
           },
           {
             "campaign": "discover-who-attracts-you-everyone-else",
@@ -3350,7 +3250,7 @@
           },
           {
             "campaign": "[PMAX] Rationality Test",
-            "count": 396
+            "count": 401
           },
           {
             "campaign": "discover-who-attracts-you-re-launch",
@@ -3358,7 +3258,7 @@
           },
           {
             "campaign": "[ACQ] Personality Test - UPT",
-            "count": 244
+            "count": 211
           },
           {
             "campaign": "rationality_test_meta",
@@ -3369,28 +3269,28 @@
             "count": 135
           },
           {
-            "campaign": "[ACQ] Unique Traits Test - UTT",
-            "count": 125
-          },
-          {
             "campaign": "menu_home",
-            "count": 117
+            "count": 113
           },
           {
             "campaign": "rationality_max_all_territories",
             "count": 113
           },
           {
-            "campaign": "upt_meta_ads",
-            "count": 101
+            "campaign": "[ACQ] Unique Traits Test - UTT",
+            "count": 108
           },
           {
             "campaign": "my-favorite-tools-to-become-a-better-thinker",
-            "count": 98
+            "count": 96
+          },
+          {
+            "campaign": "upt_meta_ads",
+            "count": 82
           },
           {
             "campaign": "(ai-assistant)",
-            "count": 66
+            "count": 65
           },
           {
             "campaign": "imposter_syndrome_meta",
@@ -3405,12 +3305,12 @@
             "count": 50
           },
           {
-            "campaign": "dating-app-email-w-updates",
+            "campaign": "in-defense-of-unanswerable-questions-they-are-not-pointless-or-unscientific",
             "count": 48
           },
           {
-            "campaign": "in-defense-of-unanswerable-questions-they-are-not-pointless-or-unscientific",
-            "count": 48
+            "campaign": "dating-app-email-w-updates",
+            "count": 38
           },
           {
             "campaign": "[ACQ] Imposter Syndrome",
@@ -3426,7 +3326,7 @@
           },
           {
             "campaign": "(cross-network)",
-            "count": 22
+            "count": 26
           },
           {
             "campaign": "school_of_thought_astro",
@@ -3441,10 +3341,6 @@
             "count": 14
           },
           {
-            "campaign": "early-access-discover-who-attracts-you",
-            "count": 13
-          },
-          {
             "campaign": "website_menu",
             "count": 13
           },
@@ -3455,18 +3351,6 @@
           {
             "campaign": "what-stands-between-you-and-reality-1",
             "count": 9
-          },
-          {
-            "campaign": "society_explained",
-            "count": 8
-          },
-          {
-            "campaign": "thanks-for-your-help",
-            "count": 8
-          },
-          {
-            "campaign": "upt_pmax",
-            "count": 8
           },
           {
             "campaign": "big-news",
@@ -3481,6 +3365,14 @@
             "count": 7
           },
           {
+            "campaign": "thanks-for-your-help",
+            "count": 7
+          },
+          {
+            "campaign": "upt_pmax",
+            "count": 7
+          },
+          {
             "campaign": "end_of_tools_banner",
             "count": 6
           },
@@ -3489,8 +3381,8 @@
             "count": 5
           },
           {
-            "campaign": "cba6aec065-EMAIL_CAMPAIGN_FLOW_STATE_COPY_01",
-            "count": 4
+            "campaign": "early-access-discover-who-attracts-you",
+            "count": 5
           },
           {
             "campaign": "ct_product_grid_plus",
@@ -3517,6 +3409,10 @@
             "count": 4
           },
           {
+            "campaign": "cba6aec065-EMAIL_CAMPAIGN_FLOW_STATE_COPY_01",
+            "count": 3
+          },
+          {
             "campaign": "f138b0d4c9-EMAIL_CAMPAIGN_FAKE_EXPERTISE_COPY_01",
             "count": 3
           },
@@ -3527,6 +3423,10 @@
           {
             "campaign": "personality_max_all_territories",
             "count": 3
+          },
+          {
+            "campaign": "(not set)",
+            "count": 2
           },
           {
             "campaign": "discover-your-unusual-traits-with-our-new-tool",
@@ -3553,8 +3453,8 @@
             "count": 2
           },
           {
-            "campaign": "(not set)",
-            "count": 1
+            "campaign": "society_explained",
+            "count": 2
           },
           {
             "campaign": "02aabd24b9-New_Subscribers_11_Rationality_Quiz_II",
@@ -3578,10 +3478,6 @@
           },
           {
             "campaign": "a-personal-ask-before-launch-day-plus-a-q-a-for-groups",
-            "count": 1
-          },
-          {
-            "campaign": "c6d30a994d-EMAIL_CAMPAIGN_2025_GIANT_IQ",
             "count": 1
           },
           {
@@ -3653,10 +3549,6 @@
             "count": 1
           },
           {
-            "campaign": "what-you-should-know-about-one-of-the-most-common-and-least-known-mental-health-disorders",
-            "count": 1
-          },
-          {
             "campaign": "why-scams-succeed-and-cures-fail-understanding-hype-vs-value-1",
             "count": 1
           },
@@ -3671,12 +3563,6 @@
         ],
         "kw_pos": {
           "daily": [
-            {
-              "date": "2026-09-07",
-              "position": 8.733465885307659,
-              "clicks": 50,
-              "impressions": 9556
-            },
             {
               "date": "2026-09-08",
               "position": 9.427608440797187,
@@ -3832,26 +3718,28 @@
               "position": 9.46703995927717,
               "clicks": 6,
               "impressions": 3929
+            },
+            {
+              "date": "2026-10-04",
+              "position": 8.784941675503712,
+              "clicks": 14,
+              "impressions": 4715
             }
           ],
-          "avg_position": 8.574920927425655,
-          "clicks": 794,
-          "impressions": 185589,
+          "avg_position": 8.57201739438334,
+          "clicks": 758,
+          "impressions": 180748,
           "keyword": "personality test"
         },
         "revenue_cat": {
-          "subscriptions": 4328.29,
-          "pdf": 198.0,
+          "subscriptions": 4073.39,
+          "pdf": 207.0,
           "cognitive": 245.0,
           "other": 1500.0
         },
         "new_stripe_subs": {
-          "total": 8,
+          "total": 7,
           "daily": [
-            {
-              "date": "2026-09-07",
-              "count": 1
-            },
             {
               "date": "2026-09-09",
               "count": 1
@@ -3882,21 +3770,13 @@
       },
       "prior": {
         "ga4": {
-          "users": 946219,
-          "sessions": 740552,
-          "pageviews": 2703070,
-          "modules_started": 43019,
-          "modules_finished": 19660
+          "users": 636693,
+          "sessions": 365911,
+          "pageviews": 1465758,
+          "modules_started": 39384,
+          "modules_finished": 18698
         },
         "ga4_daily": [
-          {
-            "date": "2026-08-08",
-            "users": 330918,
-            "first_visit": 310433,
-            "modules_started": 5644,
-            "accepted_privacy": 3845,
-            "modules_finished": 1907
-          },
           {
             "date": "2026-08-09",
             "users": 118893,
@@ -4128,19 +4008,23 @@
             "modules_started": 1692,
             "accepted_privacy": 1197,
             "modules_finished": 653
+          },
+          {
+            "date": "2026-09-07",
+            "users": 5507,
+            "first_visit": 2832,
+            "modules_started": 2009,
+            "accepted_privacy": 1462,
+            "modules_finished": 945
           }
         ],
         "stripe_m": {
-          "revenue_usd": 4910.5,
-          "gross_usd": 5207.5,
+          "revenue_usd": 5061.5,
+          "gross_usd": 5358.5,
           "refunded_usd": 297.0,
-          "subscription_usd": 4422.5,
-          "non_subscription_usd": 488.0,
+          "subscription_usd": 4530.5,
+          "non_subscription_usd": 531.0,
           "daily": [
-            {
-              "date": "2026-08-08",
-              "revenue": 103.9
-            },
             {
               "date": "2026-08-09",
               "revenue": 192.8
@@ -4256,15 +4140,13 @@
             {
               "date": "2026-09-06",
               "revenue": 65.0
+            },
+            {
+              "date": "2026-09-07",
+              "revenue": 254.9
             }
           ],
           "daily_split": [
-            {
-              "date": "2026-08-08",
-              "subscription": 85.9,
-              "non_subscription": 18.0,
-              "total": 103.9
-            },
             {
               "date": "2026-08-09",
               "subscription": 148.8,
@@ -4438,14 +4320,16 @@
               "subscription": 29.0,
               "non_subscription": 36.0,
               "total": 65.0
+            },
+            {
+              "date": "2026-09-07",
+              "subscription": 193.9,
+              "non_subscription": 61.0,
+              "total": 254.9
             }
           ]
         },
         "mrr_history": [
-          {
-            "date": "2026-08-08",
-            "mrr": 4092.4
-          },
           {
             "date": "2026-08-09",
             "mrr": 3993.4
@@ -4561,23 +4445,67 @@
           {
             "date": "2026-09-06",
             "mrr": 4179.4
+          },
+          {
+            "date": "2026-09-07",
+            "mrr": 4278.4
           }
         ],
         "bh": {
           "error": null,
-          "total_subscribers": 650179,
+          "total_subscribers": 650193,
           "new_subscribers": 0,
-          "campaigns_count": 22,
-          "emails_sent": 2980869,
-          "email_opens": 1214960,
-          "email_clicks": 57016,
-          "open_rate": 0.4075858415784122,
-          "click_rate": 0.01912730817758177,
-          "unsubscribes": 11402,
-          "unsubscribe_rate": 0.003825059068345506,
-          "engaged_readers": 265003,
-          "opens_per_campaign": 55225,
+          "campaigns_count": 24,
+          "emails_sent": 2887119,
+          "email_opens": 1144496,
+          "email_clicks": 52635,
+          "open_rate": 0.3964145572108389,
+          "click_rate": 0.018230976970467792,
+          "unsubscribes": 11229,
+          "unsubscribe_rate": 0.003889344360242858,
+          "engaged_readers": 257745,
+          "opens_per_campaign": 47687,
           "per_campaign": [
+            {
+              "title": "(Early Access) Discover who attracts you",
+              "date": "2026-09-07",
+              "sent": 130,
+              "opens": 125,
+              "clicks": 36,
+              "open_rate": 0.9615384615384616,
+              "click_rate": 0.27692307692307694,
+              "unsubs": 0
+            },
+            {
+              "title": "[Igor Testing Width Issue] [Regular Email] Psychology Words That Don\u2019t Mean What You Think (2)",
+              "date": "2026-09-07",
+              "sent": 4,
+              "opens": 8,
+              "clicks": 0,
+              "open_rate": 2.0,
+              "click_rate": 0.0,
+              "unsubs": 0
+            },
+            {
+              "title": "[Igor Testing Width Issue] [No HTML] Psychology Words That Don\u2019t Mean What You Think ",
+              "date": "2026-09-07",
+              "sent": 4,
+              "opens": 10,
+              "clicks": 0,
+              "open_rate": 2.5,
+              "click_rate": 0.0,
+              "unsubs": 0
+            },
+            {
+              "title": "[Igor Testing] [Regular] Launching Demystifying Meditation ",
+              "date": "2026-09-07",
+              "sent": 4,
+              "opens": 4,
+              "clicks": 0,
+              "open_rate": 1.0,
+              "click_rate": 0.0,
+              "unsubs": 0
+            },
             {
               "title": "Monthly Debrief - August",
               "date": "2026-09-05",
@@ -4602,9 +4530,9 @@
               "title": "What Capitalists and Marxists Agree and Disagree About (1)",
               "date": "2026-09-03",
               "sent": 301885,
-              "opens": 125734,
+              "opens": 125751,
               "clicks": 5332,
-              "open_rate": 0.4164963479470659,
+              "open_rate": 0.4165526607814234,
               "click_rate": 0.01766235487023204,
               "unsubs": 1003
             },
@@ -4612,19 +4540,19 @@
               "title": "One Helpful Idea: Different Minds",
               "date": "2026-09-02",
               "sent": 330005,
-              "opens": 154940,
-              "clicks": 1346,
-              "open_rate": 0.46950803775700367,
-              "click_rate": 0.00407872607990788,
+              "opens": 154950,
+              "clicks": 1347,
+              "open_rate": 0.4695383403281769,
+              "click_rate": 0.0040817563370251966,
               "unsubs": 1259
             },
             {
               "title": "Dating App - Email W/ Updates",
               "date": "2026-09-01",
               "sent": 170787,
-              "opens": 26811,
+              "opens": 26812,
               "clicks": 3267,
-              "open_rate": 0.1569850164239667,
+              "open_rate": 0.15699087167056042,
               "click_rate": 0.01912909062165153,
               "unsubs": 1478
             },
@@ -4632,9 +4560,9 @@
               "title": "Reconstellation Invitation",
               "date": "2026-08-29",
               "sent": 105911,
-              "opens": 58346,
+              "opens": 58351,
               "clicks": 6081,
-              "open_rate": 0.5508965074449301,
+              "open_rate": 0.5509437168943736,
               "click_rate": 0.0574161324130638,
               "unsubs": 872
             },
@@ -4672,9 +4600,9 @@
               "title": "What Stands Between You and Reality? (1)",
               "date": "2026-08-27",
               "sent": 291590,
-              "opens": 134813,
+              "opens": 134820,
               "clicks": 4021,
-              "open_rate": 0.4623375287218355,
+              "open_rate": 0.46236153503206556,
               "click_rate": 0.01378991049075757,
               "unsubs": 749
             },
@@ -4692,9 +4620,9 @@
               "title": "One Helpful Idea: What You Notice",
               "date": "2026-08-26",
               "sent": 238794,
-              "opens": 102362,
+              "opens": 102366,
               "clicks": 3640,
-              "open_rate": 0.42866236170088023,
+              "open_rate": 0.4286791125405161,
               "click_rate": 0.015243264068611439,
               "unsubs": 544
             },
@@ -4702,9 +4630,9 @@
               "title": "Productivity Equation Event Invitation",
               "date": "2026-08-22",
               "sent": 89837,
-              "opens": 44961,
+              "opens": 44964,
               "clicks": 7513,
-              "open_rate": 0.5004730790208934,
+              "open_rate": 0.500506472834133,
               "click_rate": 0.08362923962287254,
               "unsubs": 347
             },
@@ -4712,19 +4640,19 @@
               "title": "Psychology Words That Don\u2019t Mean What You Think",
               "date": "2026-08-20",
               "sent": 295860,
-              "opens": 133211,
+              "opens": 133213,
               "clicks": 5435,
-              "open_rate": 0.4502501182991956,
+              "open_rate": 0.45025687825322785,
               "click_rate": 0.018370175082809435,
-              "unsubs": 945
+              "unsubs": 946
             },
             {
               "title": "One Helpful Idea: AI For Social Analysis",
               "date": "2026-08-19",
               "sent": 243647,
-              "opens": 117353,
+              "opens": 117356,
               "clicks": 2994,
-              "open_rate": 0.4816517338608725,
+              "open_rate": 0.48166404675616775,
               "click_rate": 0.012288269504652222,
               "unsubs": 891
             },
@@ -4742,9 +4670,9 @@
               "title": "Launching Demystifying Meditation - ohi-domain",
               "date": "2026-08-13",
               "sent": 176761,
-              "opens": 90827,
+              "opens": 90831,
               "clicks": 3514,
-              "open_rate": 0.513840722783872,
+              "open_rate": 0.5138633522100463,
               "click_rate": 0.019879950894145203,
               "unsubs": 1441
             },
@@ -4762,9 +4690,9 @@
               "title": "One Helpful Idea: Smart Blind Spots",
               "date": "2026-08-11",
               "sent": 463870,
-              "opens": 114464,
+              "opens": 114468,
               "clicks": 3085,
-              "open_rate": 0.2467587901782827,
+              "open_rate": 0.2467674132838942,
               "click_rate": 0.0066505702028585596,
               "unsubs": 1327
             },
@@ -4777,100 +4705,74 @@
               "open_rate": 1.5,
               "click_rate": 5.0246913580246915,
               "unsubs": 0
-            },
-            {
-              "title": "Monthly Debrief - July",
-              "date": "2026-08-08",
-              "sent": 93771,
-              "opens": 70530,
-              "clicks": 4394,
-              "open_rate": 0.7521515180599546,
-              "click_rate": 0.04685883695385567,
-              "unsubs": 174
-            },
-            {
-              "title": "Monthly Debrief - July (1)",
-              "date": "2026-08-08",
-              "sent": 121,
-              "opens": 141,
-              "clicks": 24,
-              "open_rate": 1.165289256198347,
-              "click_rate": 0.19834710743801653,
-              "unsubs": 0
             }
           ],
           "period_used_for_new_subs": "last_4_weeks"
         },
         "bh_daily_rates": [
           {
-            "date": "2026-08-08",
-            "open_rate": 0.7526839347335236,
-            "click_rate": 0.04705406211391812,
-            "unsubscribe_rate": 0.0018531930302901206
-          },
-          {
             "date": "2026-08-11",
-            "open_rate": 0.24719631404730708,
+            "open_rate": 0.24720493414247294,
             "click_rate": 0.008402437762912902,
             "unsubscribe_rate": 0.0028597165712709468
           },
           {
             "date": "2026-08-13",
-            "open_rate": 0.364230641719867,
+            "open_rate": 0.36424197602228325,
             "click_rate": 0.024467925340949985,
             "unsubscribe_rate": 0.005131605418929985
           },
           {
             "date": "2026-08-19",
-            "open_rate": 0.4816517338608725,
+            "open_rate": 0.48166404675616775,
             "click_rate": 0.012288269504652222,
             "unsubscribe_rate": 0.003656929902687084
           },
           {
             "date": "2026-08-20",
-            "open_rate": 0.4502501182991956,
+            "open_rate": 0.45025687825322785,
             "click_rate": 0.018370175082809435,
-            "unsubscribe_rate": 0.003194078280267694
+            "unsubscribe_rate": 0.0031974582572838503
           },
           {
             "date": "2026-08-22",
-            "open_rate": 0.5004730790208934,
+            "open_rate": 0.500506472834133,
             "click_rate": 0.08362923962287254,
             "unsubscribe_rate": 0.0038625510647060787
           },
           {
             "date": "2026-08-26",
-            "open_rate": 0.42866236170088023,
+            "open_rate": 0.4286791125405161,
             "click_rate": 0.015243264068611439,
             "unsubscribe_rate": 0.0022781141904737977
           },
           {
             "date": "2026-08-27",
-            "open_rate": 0.4679507732609304,
+            "open_rate": 0.4679746498666321,
             "click_rate": 0.015113891409197269,
             "unsubscribe_rate": 0.0025616186974288307
           },
           {
             "date": "2026-08-29",
-            "open_rate": 0.5508965074449301,
+            "open_rate": 0.5509437168943736,
             "click_rate": 0.0574161324130638,
             "unsubscribe_rate": 0.008233327982929063
           },
           {
             "date": "2026-09-01",
-            "open_rate": 0.1569850164239667,
+            "open_rate": 0.15699087167056042,
             "click_rate": 0.01912909062165153,
             "unsubscribe_rate": 0.008654054465503814
           },
           {
             "date": "2026-09-02",
-            "open_rate": 0.46950803775700367,
-            "click_rate": 0.00407872607990788,
+            "open_rate": 0.4695383403281769,
+            "click_rate": 0.0040817563370251966,
             "unsubscribe_rate": 0.003815093710701353
           },
           {
             "date": "2026-09-03",
-            "open_rate": 0.41650407931392003,
+            "open_rate": 0.41656039140213785,
             "click_rate": 0.01767868322462892,
             "unsubscribe_rate": 0.0033224132048534395
           },
@@ -4879,15 +4781,17 @@
             "open_rate": 0.9846153846153847,
             "click_rate": 0.15384615384615385,
             "unsubscribe_rate": 0.0
+          },
+          {
+            "date": "2026-09-07",
+            "open_rate": 1.0352112676056338,
+            "click_rate": 0.2535211267605634,
+            "unsubscribe_rate": 0.0
           }
         ],
         "new_subs_daily": {
-          "total": 17734,
+          "total": 16998,
           "daily": [
-            {
-              "date": "2026-08-08",
-              "count": 1656
-            },
             {
               "date": "2026-08-09",
               "count": 2763
@@ -5003,6 +4907,10 @@
             {
               "date": "2026-09-06",
               "count": 468
+            },
+            {
+              "date": "2026-09-07",
+              "count": 920
             }
           ],
           "error": null,
@@ -5012,10 +4920,6 @@
           "total": 14,
           "daily": [
             {
-              "date": "2026-08-08",
-              "count": 0
-            },
-            {
               "date": "2026-08-09",
               "count": 1
             },
@@ -5129,17 +5033,17 @@
             },
             {
               "date": "2026-09-06",
+              "count": 0
+            },
+            {
+              "date": "2026-09-07",
               "count": 0
             }
           ]
         },
         "pdf_sales": {
-          "total": 39,
+          "total": 38,
           "daily": [
-            {
-              "date": "2026-08-08",
-              "count": 1
-            },
             {
               "date": "2026-08-09",
               "count": 1
@@ -5255,22 +5159,19 @@
             {
               "date": "2026-09-06",
               "count": 4
+            },
+            {
+              "date": "2026-09-07",
+              "count": 0
             }
           ]
         },
         "ads": {
-          "spend_usd": 1552.0741600000001,
-          "impressions": 220997,
-          "clicks": 11633,
-          "conversions": 15950.362055000001,
+          "spend_usd": 1524.4093910000001,
+          "impressions": 221149,
+          "clicks": 11569,
+          "conversions": 15995.282680000002,
           "daily": [
-            {
-              "date": "2026-08-08",
-              "spend": 118.552904,
-              "impressions": 1427,
-              "clicks": 206,
-              "conversions": 8.412632
-            },
             {
               "date": "2026-08-09",
               "spend": 53.714518,
@@ -5473,6 +5374,13 @@
               "impressions": 1400,
               "clicks": 146,
               "conversions": 47.151531
+            },
+            {
+              "date": "2026-09-07",
+              "spend": 90.888135,
+              "impressions": 1579,
+              "clicks": 142,
+              "conversions": 53.333257
             }
           ],
           "error": null
@@ -5480,47 +5388,47 @@
         "modules_by_channel": [
           {
             "channel": "Referral",
-            "count": 7093
+            "count": 7055
           },
           {
             "channel": "Direct",
-            "count": 5940
+            "count": 5241
           },
           {
             "channel": "Organic Search",
-            "count": 2496
+            "count": 2352
           },
           {
             "channel": "Cross-network",
-            "count": 1759
+            "count": 1809
           },
           {
             "channel": "Unassigned",
-            "count": 1059
+            "count": 1061
           },
           {
             "channel": "Organic Social",
-            "count": 893
+            "count": 713
           },
           {
             "channel": "Paid Social",
-            "count": 101
+            "count": 150
           },
           {
             "channel": "Organic Video",
-            "count": 95
+            "count": 93
           },
           {
             "channel": "Email",
-            "count": 85
+            "count": 91
           },
           {
             "channel": "AI Assistant",
-            "count": 52
+            "count": 54
           },
           {
             "channel": "Display",
-            "count": 52
+            "count": 43
           },
           {
             "channel": "Paid Search",
@@ -5532,73 +5440,77 @@
           },
           {
             "channel": "Organic Shopping",
-            "count": 2
+            "count": 3
           }
         ],
         "modules_by_campaign": [
           {
             "campaign": "(referral)",
-            "count": 8091
+            "count": 7872
           },
           {
             "campaign": "(direct)",
-            "count": 5940
+            "count": 5241
           },
           {
             "campaign": "(organic)",
-            "count": 2493
+            "count": 2349
           },
           {
             "campaign": "[ACQ] Personality Test - UPT",
-            "count": 1714
+            "count": 1746
           },
           {
             "campaign": "dating-app-email-w-updates",
-            "count": 271
+            "count": 281
           },
           {
             "campaign": "menu_home",
-            "count": 256
+            "count": 242
           },
           {
             "campaign": "(not set)",
-            "count": 225
-          },
-          {
-            "campaign": "my-favorite-tools-to-become-a-better-thinker",
-            "count": 71
+            "count": 238
           },
           {
             "campaign": "unique_traits_meta",
-            "count": 63
+            "count": 93
+          },
+          {
+            "campaign": "my-favorite-tools-to-become-a-better-thinker",
+            "count": 68
           },
           {
             "campaign": "(ai-assistant)",
-            "count": 52
+            "count": 54
+          },
+          {
+            "campaign": "upt_meta_ads",
+            "count": 53
           },
           {
             "campaign": "menu_dashboard",
-            "count": 48
+            "count": 47
+          },
+          {
+            "campaign": "[ACQ] Unique Traits Test - UTT",
+            "count": 37
           },
           {
             "campaign": "thanks-for-your-help",
             "count": 35
           },
           {
-            "campaign": "upt_meta_ads",
-            "count": 34
-          },
-          {
-            "campaign": "website_menu",
+            "campaign": "upt_pmax",
             "count": 28
           },
           {
-            "campaign": "upt_pmax",
-            "count": 27
+            "campaign": "(cross-network)",
+            "count": 26
           },
           {
-            "campaign": "(cross-network)",
-            "count": 25
+            "campaign": "website_menu",
+            "count": 26
           },
           {
             "campaign": "launching-demystifying-meditation-ct-domain",
@@ -5609,16 +5521,8 @@
             "count": 23
           },
           {
-            "campaign": "[ACQ] Unique Traits Test - UTT",
-            "count": 20
-          },
-          {
             "campaign": "coaching_floating_button",
-            "count": 19
-          },
-          {
-            "campaign": "monthly-debrief-july",
-            "count": 15
+            "count": 16
           },
           {
             "campaign": "menu_path",
@@ -5633,15 +5537,19 @@
             "count": 10
           },
           {
-            "campaign": "ct_product_grid_cognitive",
-            "count": 9
-          },
-          {
             "campaign": "ct_product_grid_plus",
             "count": 9
           },
           {
+            "campaign": "monthly-debrief-july",
+            "count": 9
+          },
+          {
             "campaign": "discover-your-unusual-traits-with-our-new-tool",
+            "count": 8
+          },
+          {
+            "campaign": "early-access-discover-who-attracts-you",
             "count": 8
           },
           {
@@ -5661,15 +5569,15 @@
             "count": 6
           },
           {
+            "campaign": "society_explained",
+            "count": 6
+          },
+          {
             "campaign": "one-helpful-idea-ai-for-social-analysis",
             "count": 5
           },
           {
             "campaign": "what-are-the-policies-that-everyone-wants-to-vote-for-regardless-of-their-political-orientation-1-1",
-            "count": 5
-          },
-          {
-            "campaign": "why-scams-succeed-and-cures-fail-understanding-hype-vs-value-1",
             "count": 5
           },
           {
@@ -5689,15 +5597,19 @@
             "count": 4
           },
           {
+            "campaign": "why-scams-succeed-and-cures-fail-understanding-hype-vs-value-1",
+            "count": 4
+          },
+          {
             "campaign": "coaching_cta_unique_traits",
             "count": 3
           },
           {
-            "campaign": "imposter_syndrome_tool_cta",
+            "campaign": "ct_product_grid_cognitive",
             "count": 3
           },
           {
-            "campaign": "new-report-about-your-personality",
+            "campaign": "imposter_syndrome_tool_cta",
             "count": 3
           },
           {
@@ -5715,6 +5627,10 @@
           {
             "campaign": "your-traits-are-not-the-whole-story",
             "count": 3
+          },
+          {
+            "campaign": "cba6aec065-EMAIL_CAMPAIGN_FLOW_STATE_COPY_01",
+            "count": 2
           },
           {
             "campaign": "cognitive_assessment_intro_page",
@@ -5765,10 +5681,6 @@
             "count": 1
           },
           {
-            "campaign": "8869896a49-EMAIL_CAMPAIGN_2025_COMPLIMENT",
-            "count": 1
-          },
-          {
             "campaign": "88d45dd646-EMAIL_CAMPAIGN_2024_07_16_08_54_COPY_01",
             "count": 1
           },
@@ -5789,7 +5701,7 @@
             "count": 1
           },
           {
-            "campaign": "cba6aec065-EMAIL_CAMPAIGN_FLOW_STATE_COPY_01",
+            "campaign": "c6d30a994d-EMAIL_CAMPAIGN_2025_GIANT_IQ",
             "count": 1
           },
           {
@@ -5817,11 +5729,11 @@
             "count": 1
           },
           {
-            "campaign": "monthly-debrief-july-1",
+            "campaign": "new-report-about-your-intelligence",
             "count": 1
           },
           {
-            "campaign": "new-report-about-your-intelligence",
+            "campaign": "new-report-about-your-personality",
             "count": 1
           },
           {
@@ -5834,10 +5746,6 @@
           },
           {
             "campaign": "productivity-workshop-10min-reminder-2",
-            "count": 1
-          },
-          {
-            "campaign": "rationality_max_all_territories",
             "count": 1
           },
           {
@@ -5867,12 +5775,6 @@
         ],
         "kw_pos": {
           "daily": [
-            {
-              "date": "2026-08-08",
-              "position": 7.447457360685373,
-              "clicks": 74,
-              "impressions": 12723
-            },
             {
               "date": "2026-08-09",
               "position": 7.105555127513676,
@@ -6046,26 +5948,28 @@
               "position": 7.752973320475731,
               "clicks": 40,
               "impressions": 6222
+            },
+            {
+              "date": "2026-09-07",
+              "position": 8.733465885307659,
+              "clicks": 50,
+              "impressions": 9556
             }
           ],
-          "avg_position": 7.808622734082663,
-          "clicks": 1349,
-          "impressions": 281674,
+          "avg_position": 7.856854585342559,
+          "clicks": 1325,
+          "impressions": 278507,
           "keyword": "personality test"
         },
         "revenue_cat": {
-          "subscriptions": 4064.5,
-          "pdf": 351.0,
+          "subscriptions": 4224.5,
+          "pdf": 342.0,
           "cognitive": 490.0,
           "other": 5.0
         },
         "new_stripe_subs": {
-          "total": 16,
+          "total": 15,
           "daily": [
-            {
-              "date": "2026-08-08",
-              "count": 2
-            },
             {
               "date": "2026-08-09",
               "count": 1
@@ -6117,6 +6021,10 @@
             {
               "date": "2026-09-06",
               "count": 1
+            },
+            {
+              "date": "2026-09-07",
+              "count": 1
             }
           ],
           "error": null
@@ -6124,28 +6032,20 @@
       }
     },
     "90d": {
-      "start": "2026-07-09",
-      "end": "2026-10-06",
-      "prior_start": "2026-04-10",
-      "prior_end": "2026-07-08",
+      "start": "2026-07-10",
+      "end": "2026-10-07",
+      "prior_start": "2026-04-11",
+      "prior_end": "2026-07-09",
       "days": 90,
       "current": {
         "ga4": {
-          "users": 2064353,
+          "users": 2067213,
           "sessions": 1567346,
-          "pageviews": 6218835,
-          "modules_started": 148600,
-          "modules_finished": 64290
+          "pageviews": 6212314,
+          "modules_started": 148248,
+          "modules_finished": 64174
         },
         "ga4_daily": [
-          {
-            "date": "2026-07-09",
-            "users": 2179,
-            "first_visit": 1895,
-            "modules_started": 638,
-            "accepted_privacy": 454,
-            "modules_finished": 197
-          },
           {
             "date": "2026-07-10",
             "users": 1867,
@@ -6852,24 +6752,20 @@
           },
           {
             "date": "2026-10-06",
-            "users": 24299,
-            "first_visit": 600,
-            "modules_started": 397,
-            "accepted_privacy": 262,
-            "modules_finished": 134
+            "users": 29695,
+            "first_visit": 1015,
+            "modules_started": 683,
+            "accepted_privacy": 425,
+            "modules_finished": 215
           }
         ],
         "stripe_m": {
-          "revenue_usd": 15647.79,
-          "gross_usd": 16532.79,
-          "refunded_usd": 885.0,
-          "subscription_usd": 12903.29,
+          "revenue_usd": 15597.99,
+          "gross_usd": 16447.99,
+          "refunded_usd": 850.0,
+          "subscription_usd": 12853.49,
           "non_subscription_usd": 2744.5,
           "daily": [
-            {
-              "date": "2026-07-09",
-              "revenue": 58.8
-            },
             {
               "date": "2026-07-10",
               "revenue": 109.8
@@ -7225,15 +7121,13 @@
             {
               "date": "2026-10-06",
               "revenue": 38.0
+            },
+            {
+              "date": "2026-10-07",
+              "revenue": 9.0
             }
           ],
           "daily_split": [
-            {
-              "date": "2026-07-09",
-              "subscription": 49.8,
-              "non_subscription": 9.0,
-              "total": 58.8
-            },
             {
               "date": "2026-07-10",
               "subscription": 109.8,
@@ -7767,14 +7661,16 @@
               "subscription": 29.0,
               "non_subscription": 9.0,
               "total": 38.0
+            },
+            {
+              "date": "2026-10-07",
+              "subscription": 0.0,
+              "non_subscription": 9.0,
+              "total": 9.0
             }
           ]
         },
         "mrr_history": [
-          {
-            "date": "2026-07-09",
-            "mrr": 2917.3
-          },
           {
             "date": "2026-07-10",
             "mrr": 3016.3
@@ -8130,32 +8026,36 @@
           {
             "date": "2026-10-06",
             "mrr": 4060.4
+          },
+          {
+            "date": "2026-10-07",
+            "mrr": 4040.5
           }
         ],
         "bh": {
           "error": null,
-          "total_subscribers": 650179,
+          "total_subscribers": 650193,
           "new_subscribers": 0,
-          "campaigns_count": 65,
-          "emails_sent": 8329466,
-          "email_opens": 3378976,
-          "email_clicks": 150149,
-          "open_rate": 0.4056653811901027,
-          "click_rate": 0.018026245620067362,
-          "unsubscribes": 24549,
-          "unsubscribe_rate": 0.002947247758739876,
-          "engaged_readers": 263755,
-          "opens_per_campaign": 51984,
+          "campaigns_count": 63,
+          "emails_sent": 8077686,
+          "email_opens": 3230895,
+          "email_clicks": 132616,
+          "open_rate": 0.3999777906692585,
+          "click_rate": 0.016417573052480625,
+          "unsubscribes": 23938,
+          "unsubscribe_rate": 0.0029634724598108916,
+          "engaged_readers": 260062,
+          "opens_per_campaign": 51284,
           "per_campaign": [
             {
               "title": "One Helpful Idea: Weighty Decision",
               "date": "2026-10-06",
               "sent": 375151,
-              "opens": 98616,
-              "clicks": 3723,
-              "open_rate": 0.2628701509525498,
-              "click_rate": 0.009924003934415742,
-              "unsubs": 773
+              "opens": 100439,
+              "clicks": 3743,
+              "open_rate": 0.2677295275768957,
+              "click_rate": 0.009977315800837529,
+              "unsubs": 787
             },
             {
               "title": "Monthly Debrief - Testing Paywall",
@@ -8191,19 +8091,19 @@
               "title": "Recording + FollowUp - Thinking Clearly About Career Change",
               "date": "2026-10-01",
               "sent": 1483,
-              "opens": 1983,
-              "clicks": 475,
-              "open_rate": 1.337154416722859,
-              "click_rate": 0.3202966958867161,
+              "opens": 1990,
+              "clicks": 476,
+              "open_rate": 1.341874578556979,
+              "click_rate": 0.3209710047201618,
               "unsubs": 3
             },
             {
               "title": "Reminder (6h) - Thinking Clearly About Career Change",
               "date": "2026-09-30",
               "sent": 1424,
-              "opens": 1367,
+              "opens": 1368,
               "clicks": 82,
-              "open_rate": 0.9599719101123596,
+              "open_rate": 0.9606741573033708,
               "click_rate": 0.05758426966292135,
               "unsubs": 0
             },
@@ -8211,9 +8111,9 @@
               "title": "Reminder (10min) - Thinking Clearly About Career Change",
               "date": "2026-09-30",
               "sent": 1424,
-              "opens": 1432,
+              "opens": 1435,
               "clicks": 182,
-              "open_rate": 1.0056179775280898,
+              "open_rate": 1.0077247191011236,
               "click_rate": 0.12780898876404495,
               "unsubs": 3
             },
@@ -8221,29 +8121,29 @@
               "title": "In Defense of Unanswerable Questions (They Are Not Pointless or Unscientific)",
               "date": "2026-09-29",
               "sent": 333177,
-              "opens": 119707,
+              "opens": 119821,
               "clicks": 5740,
-              "open_rate": 0.3592895067786792,
+              "open_rate": 0.3596316672519412,
               "click_rate": 0.017228079969505698,
-              "unsubs": 1011
+              "unsubs": 1014
             },
             {
               "title": "One Helpful Idea: Emotion Questions",
               "date": "2026-09-28",
               "sent": 376180,
-              "opens": 126727,
+              "opens": 126869,
               "clicks": 4511,
-              "open_rate": 0.3368786219363071,
+              "open_rate": 0.33725610080280716,
               "click_rate": 0.011991599766069436,
-              "unsubs": 1132
+              "unsubs": 1133
             },
             {
               "title": "Inviting readers to Overcome event",
               "date": "2026-09-26",
               "sent": 77647,
-              "opens": 48684,
+              "opens": 48741,
               "clicks": 2297,
-              "open_rate": 0.6269913840843819,
+              "open_rate": 0.6277254755496027,
               "click_rate": 0.029582598168634976,
               "unsubs": 258
             },
@@ -8261,49 +8161,49 @@
               "title": "Career Advice from  Conversations With Experts (1)",
               "date": "2026-09-24",
               "sent": 341304,
-              "opens": 134386,
-              "clicks": 4963,
-              "open_rate": 0.3937428216487354,
-              "click_rate": 0.014541288704498043,
-              "unsubs": 1099
+              "opens": 134472,
+              "clicks": 4965,
+              "open_rate": 0.39399479642781804,
+              "click_rate": 0.014547148583081359,
+              "unsubs": 1100
             },
             {
               "title": "One Helpful Idea: The Unsaid Obvious",
               "date": "2026-09-21",
               "sent": 340134,
-              "opens": 120089,
-              "clicks": 3378,
-              "open_rate": 0.35306379250530673,
-              "click_rate": 0.009931379985535112,
+              "opens": 120172,
+              "clicks": 3379,
+              "open_rate": 0.3533078139791964,
+              "click_rate": 0.009934320003292819,
               "unsubs": 1092
             },
             {
               "title": "What our scientific findings can teach you about happiness",
               "date": "2026-09-18",
               "sent": 336296,
-              "opens": 146982,
-              "clicks": 5137,
-              "open_rate": 0.4370613982919809,
-              "click_rate": 0.015275233722672884,
-              "unsubs": 1686
+              "opens": 147050,
+              "clicks": 5138,
+              "open_rate": 0.4372636011133049,
+              "click_rate": 0.015278207293574708,
+              "unsubs": 1687
             },
             {
               "title": "Discover who attracts you - Re-launch",
               "date": "2026-09-14",
               "sent": 232000,
-              "opens": 16936,
-              "clicks": 2875,
-              "open_rate": 0.073,
-              "click_rate": 0.012392241379310345,
-              "unsubs": 107
+              "opens": 16944,
+              "clicks": 2876,
+              "open_rate": 0.07303448275862069,
+              "click_rate": 0.01239655172413793,
+              "unsubs": 108
             },
             {
               "title": "Discover who attracts you - 50 - 100% OR",
               "date": "2026-09-10",
               "sent": 79482,
-              "opens": 38198,
+              "opens": 38208,
               "clicks": 4976,
-              "open_rate": 0.4805867995269369,
+              "open_rate": 0.48071261417679473,
               "click_rate": 0.06260536976925593,
               "unsubs": 104
             },
@@ -8311,9 +8211,9 @@
               "title": "Discover who attracts you - Everyone else",
               "date": "2026-09-10",
               "sent": 199028,
-              "opens": 22070,
+              "opens": 22076,
               "clicks": 2772,
-              "open_rate": 0.11088892015193842,
+              "open_rate": 0.11091906666398697,
               "click_rate": 0.013927688566432863,
               "unsubs": 257
             },
@@ -8321,9 +8221,9 @@
               "title": "One Helpful Idea: Dating App Incentives",
               "date": "2026-09-09",
               "sent": 276605,
-              "opens": 106522,
+              "opens": 106560,
               "clicks": 3187,
-              "open_rate": 0.38510511379042317,
+              "open_rate": 0.385242493808861,
               "click_rate": 0.01152184523056344,
               "unsubs": 803
             },
@@ -8391,9 +8291,9 @@
               "title": "What Capitalists and Marxists Agree and Disagree About (1)",
               "date": "2026-09-03",
               "sent": 301885,
-              "opens": 125734,
+              "opens": 125751,
               "clicks": 5332,
-              "open_rate": 0.4164963479470659,
+              "open_rate": 0.4165526607814234,
               "click_rate": 0.01766235487023204,
               "unsubs": 1003
             },
@@ -8401,19 +8301,19 @@
               "title": "One Helpful Idea: Different Minds",
               "date": "2026-09-02",
               "sent": 330005,
-              "opens": 154940,
-              "clicks": 1346,
-              "open_rate": 0.46950803775700367,
-              "click_rate": 0.00407872607990788,
+              "opens": 154950,
+              "clicks": 1347,
+              "open_rate": 0.4695383403281769,
+              "click_rate": 0.0040817563370251966,
               "unsubs": 1259
             },
             {
               "title": "Dating App - Email W/ Updates",
               "date": "2026-09-01",
               "sent": 170787,
-              "opens": 26811,
+              "opens": 26812,
               "clicks": 3267,
-              "open_rate": 0.1569850164239667,
+              "open_rate": 0.15699087167056042,
               "click_rate": 0.01912909062165153,
               "unsubs": 1478
             },
@@ -8421,9 +8321,9 @@
               "title": "Reconstellation Invitation",
               "date": "2026-08-29",
               "sent": 105911,
-              "opens": 58346,
+              "opens": 58351,
               "clicks": 6081,
-              "open_rate": 0.5508965074449301,
+              "open_rate": 0.5509437168943736,
               "click_rate": 0.0574161324130638,
               "unsubs": 872
             },
@@ -8461,9 +8361,9 @@
               "title": "What Stands Between You and Reality? (1)",
               "date": "2026-08-27",
               "sent": 291590,
-              "opens": 134813,
+              "opens": 134820,
               "clicks": 4021,
-              "open_rate": 0.4623375287218355,
+              "open_rate": 0.46236153503206556,
               "click_rate": 0.01378991049075757,
               "unsubs": 749
             },
@@ -8481,9 +8381,9 @@
               "title": "One Helpful Idea: What You Notice",
               "date": "2026-08-26",
               "sent": 238794,
-              "opens": 102362,
+              "opens": 102366,
               "clicks": 3640,
-              "open_rate": 0.42866236170088023,
+              "open_rate": 0.4286791125405161,
               "click_rate": 0.015243264068611439,
               "unsubs": 544
             },
@@ -8491,9 +8391,9 @@
               "title": "Productivity Equation Event Invitation",
               "date": "2026-08-22",
               "sent": 89837,
-              "opens": 44961,
+              "opens": 44964,
               "clicks": 7513,
-              "open_rate": 0.5004730790208934,
+              "open_rate": 0.500506472834133,
               "click_rate": 0.08362923962287254,
               "unsubs": 347
             },
@@ -8501,19 +8401,19 @@
               "title": "Psychology Words That Don\u2019t Mean What You Think",
               "date": "2026-08-20",
               "sent": 295860,
-              "opens": 133211,
+              "opens": 133213,
               "clicks": 5435,
-              "open_rate": 0.4502501182991956,
+              "open_rate": 0.45025687825322785,
               "click_rate": 0.018370175082809435,
-              "unsubs": 945
+              "unsubs": 946
             },
             {
               "title": "One Helpful Idea: AI For Social Analysis",
               "date": "2026-08-19",
               "sent": 243647,
-              "opens": 117353,
+              "opens": 117356,
               "clicks": 2994,
-              "open_rate": 0.4816517338608725,
+              "open_rate": 0.48166404675616775,
               "click_rate": 0.012288269504652222,
               "unsubs": 891
             },
@@ -8531,9 +8431,9 @@
               "title": "Launching Demystifying Meditation - ohi-domain",
               "date": "2026-08-13",
               "sent": 176761,
-              "opens": 90827,
+              "opens": 90831,
               "clicks": 3514,
-              "open_rate": 0.513840722783872,
+              "open_rate": 0.5138633522100463,
               "click_rate": 0.019879950894145203,
               "unsubs": 1441
             },
@@ -8551,9 +8451,9 @@
               "title": "One Helpful Idea: Smart Blind Spots",
               "date": "2026-08-11",
               "sent": 463870,
-              "opens": 114464,
+              "opens": 114468,
               "clicks": 3085,
-              "open_rate": 0.2467587901782827,
+              "open_rate": 0.2467674132838942,
               "click_rate": 0.0066505702028585596,
               "unsubs": 1327
             },
@@ -8571,9 +8471,9 @@
               "title": "Monthly Debrief - July",
               "date": "2026-08-08",
               "sent": 93771,
-              "opens": 70530,
+              "opens": 70532,
               "clicks": 4394,
-              "open_rate": 0.7521515180599546,
+              "open_rate": 0.7521728466156914,
               "click_rate": 0.04685883695385567,
               "unsubs": 174
             },
@@ -8776,37 +8676,11 @@
               "open_rate": 0.31072677516347064,
               "click_rate": 0.008847675890395881,
               "unsubs": 614
-            },
-            {
-              "title": "Self-Help Pyramid - Test Campaign ",
-              "date": "2026-07-09",
-              "sent": 3,
-              "opens": 3,
-              "clicks": 2,
-              "open_rate": 1.0,
-              "click_rate": 0.6666666666666666,
-              "unsubs": 0
-            },
-            {
-              "title": "Self-Help Pyramid",
-              "date": "2026-07-09",
-              "sent": 251777,
-              "opens": 150586,
-              "clicks": 17558,
-              "open_rate": 0.5980927566854796,
-              "click_rate": 0.06973631427811118,
-              "unsubs": 633
             }
           ],
           "period_used_for_new_subs": "last_3_months"
         },
         "bh_daily_rates": [
-          {
-            "date": "2026-07-09",
-            "open_rate": 0.5980975454762094,
-            "click_rate": 0.06974342680117562,
-            "unsubscribe_rate": 0.002514099610771308
-          },
           {
             "date": "2026-07-15",
             "open_rate": 0.31072677516347064,
@@ -8875,73 +8749,73 @@
           },
           {
             "date": "2026-08-08",
-            "open_rate": 0.7526839347335236,
+            "open_rate": 0.7527052358028373,
             "click_rate": 0.04705406211391812,
             "unsubscribe_rate": 0.0018531930302901206
           },
           {
             "date": "2026-08-11",
-            "open_rate": 0.24719631404730708,
+            "open_rate": 0.24720493414247294,
             "click_rate": 0.008402437762912902,
             "unsubscribe_rate": 0.0028597165712709468
           },
           {
             "date": "2026-08-13",
-            "open_rate": 0.364230641719867,
+            "open_rate": 0.36424197602228325,
             "click_rate": 0.024467925340949985,
             "unsubscribe_rate": 0.005131605418929985
           },
           {
             "date": "2026-08-19",
-            "open_rate": 0.4816517338608725,
+            "open_rate": 0.48166404675616775,
             "click_rate": 0.012288269504652222,
             "unsubscribe_rate": 0.003656929902687084
           },
           {
             "date": "2026-08-20",
-            "open_rate": 0.4502501182991956,
+            "open_rate": 0.45025687825322785,
             "click_rate": 0.018370175082809435,
-            "unsubscribe_rate": 0.003194078280267694
+            "unsubscribe_rate": 0.0031974582572838503
           },
           {
             "date": "2026-08-22",
-            "open_rate": 0.5004730790208934,
+            "open_rate": 0.500506472834133,
             "click_rate": 0.08362923962287254,
             "unsubscribe_rate": 0.0038625510647060787
           },
           {
             "date": "2026-08-26",
-            "open_rate": 0.42866236170088023,
+            "open_rate": 0.4286791125405161,
             "click_rate": 0.015243264068611439,
             "unsubscribe_rate": 0.0022781141904737977
           },
           {
             "date": "2026-08-27",
-            "open_rate": 0.4679507732609304,
+            "open_rate": 0.4679746498666321,
             "click_rate": 0.015113891409197269,
             "unsubscribe_rate": 0.0025616186974288307
           },
           {
             "date": "2026-08-29",
-            "open_rate": 0.5508965074449301,
+            "open_rate": 0.5509437168943736,
             "click_rate": 0.0574161324130638,
             "unsubscribe_rate": 0.008233327982929063
           },
           {
             "date": "2026-09-01",
-            "open_rate": 0.1569850164239667,
+            "open_rate": 0.15699087167056042,
             "click_rate": 0.01912909062165153,
             "unsubscribe_rate": 0.008654054465503814
           },
           {
             "date": "2026-09-02",
-            "open_rate": 0.46950803775700367,
-            "click_rate": 0.00407872607990788,
+            "open_rate": 0.4695383403281769,
+            "click_rate": 0.0040817563370251966,
             "unsubscribe_rate": 0.003815093710701353
           },
           {
             "date": "2026-09-03",
-            "open_rate": 0.41650407931392003,
+            "open_rate": 0.41656039140213785,
             "click_rate": 0.01767868322462892,
             "unsubscribe_rate": 0.0033224132048534395
           },
@@ -8959,68 +8833,68 @@
           },
           {
             "date": "2026-09-09",
-            "open_rate": 0.38510511379042317,
+            "open_rate": 0.385242493808861,
             "click_rate": 0.01152184523056344,
             "unsubscribe_rate": 0.002903056705410242
           },
           {
             "date": "2026-09-10",
-            "open_rate": 0.21639438440271444,
+            "open_rate": 0.21645183296829557,
             "click_rate": 0.027819467882661306,
             "unsubscribe_rate": 0.0012961832609242037
           },
           {
             "date": "2026-09-14",
-            "open_rate": 0.073,
-            "click_rate": 0.012392241379310345,
-            "unsubscribe_rate": 0.0004612068965517241
+            "open_rate": 0.07303448275862069,
+            "click_rate": 0.01239655172413793,
+            "unsubscribe_rate": 0.00046551724137931035
           },
           {
             "date": "2026-09-18",
-            "open_rate": 0.4370613982919809,
-            "click_rate": 0.015275233722672884,
-            "unsubscribe_rate": 0.005013440540476247
+            "open_rate": 0.4372636011133049,
+            "click_rate": 0.015278207293574708,
+            "unsubscribe_rate": 0.005016414111378072
           },
           {
             "date": "2026-09-21",
-            "open_rate": 0.35306379250530673,
-            "click_rate": 0.009931379985535112,
+            "open_rate": 0.3533078139791964,
+            "click_rate": 0.009934320003292819,
             "unsubscribe_rate": 0.003210499391416324
           },
           {
             "date": "2026-09-24",
-            "open_rate": 0.39375285665733006,
-            "click_rate": 0.014544048191076681,
-            "unsubscribe_rate": 0.0032199655443177423
+            "open_rate": 0.394004828483364,
+            "click_rate": 0.014549908000984449,
+            "unsubscribe_rate": 0.0032228954492716255
           },
           {
             "date": "2026-09-26",
-            "open_rate": 0.6269913840843819,
+            "open_rate": 0.6277254755496027,
             "click_rate": 0.029582598168634976,
             "unsubscribe_rate": 0.0033227297899468106
           },
           {
             "date": "2026-09-28",
-            "open_rate": 0.3368786219363071,
+            "open_rate": 0.33725610080280716,
             "click_rate": 0.011991599766069436,
-            "unsubscribe_rate": 0.0030091977244935935
+            "unsubscribe_rate": 0.0030118560263703545
           },
           {
             "date": "2026-09-29",
-            "open_rate": 0.3592895067786792,
+            "open_rate": 0.3596316672519412,
             "click_rate": 0.017228079969505698,
-            "unsubscribe_rate": 0.0030344231444547494
+            "unsubscribe_rate": 0.003043427367435327
           },
           {
             "date": "2026-09-30",
-            "open_rate": 0.9827949438202247,
+            "open_rate": 0.9841994382022472,
             "click_rate": 0.09269662921348315,
             "unsubscribe_rate": 0.001053370786516854
           },
           {
             "date": "2026-10-01",
-            "open_rate": 1.337154416722859,
-            "click_rate": 0.3202966958867161,
+            "open_rate": 1.341874578556979,
+            "click_rate": 0.3209710047201618,
             "unsubscribe_rate": 0.0020229265003371545
           },
           {
@@ -9031,18 +8905,14 @@
           },
           {
             "date": "2026-10-06",
-            "open_rate": 0.2628832041880909,
-            "click_rate": 0.009926457848538886,
-            "unsubscribe_rate": 0.0020604596984212025
+            "open_rate": 0.2677424771896716,
+            "click_rate": 0.009979768578122876,
+            "unsubscribe_rate": 0.0020977772091299958
           }
         ],
         "new_subs_daily": {
-          "total": 68285,
+          "total": 68168,
           "daily": [
-            {
-              "date": "2026-07-09",
-              "count": 166
-            },
             {
               "date": "2026-07-10",
               "count": 161
@@ -9397,19 +9267,19 @@
             },
             {
               "date": "2026-10-06",
-              "count": 372
+              "count": 388
+            },
+            {
+              "date": "2026-10-07",
+              "count": 33
             }
           ],
           "error": null,
           "capped": false
         },
         "cog_sales": {
-          "total": 39,
+          "total": 38,
           "daily": [
-            {
-              "date": "2026-07-09",
-              "count": 1
-            },
             {
               "date": "2026-07-10",
               "count": 2
@@ -9764,6 +9634,10 @@
             },
             {
               "date": "2026-10-06",
+              "count": 0
+            },
+            {
+              "date": "2026-10-07",
               "count": 0
             }
           ]
@@ -9772,10 +9646,6 @@
           "total": 85,
           "daily": [
             {
-              "date": "2026-07-09",
-              "count": 1
-            },
-            {
               "date": "2026-07-10",
               "count": 0
             },
@@ -10130,22 +10000,19 @@
             {
               "date": "2026-10-06",
               "count": 1
+            },
+            {
+              "date": "2026-10-07",
+              "count": 1
             }
           ]
         },
         "ads": {
-          "spend_usd": 5170.355192999998,
-          "impressions": 557567,
-          "clicks": 20478,
-          "conversions": 17512.867752999995,
+          "spend_usd": 5148.1907649999985,
+          "impressions": 556716,
+          "clicks": 20427,
+          "conversions": 17486.310990999995,
           "daily": [
-            {
-              "date": "2026-07-09",
-              "spend": 28.368713,
-              "impressions": 1282,
-              "clicks": 69,
-              "conversions": 34.0
-            },
             {
               "date": "2026-07-10",
               "spend": 35.350716,
@@ -10764,10 +10631,10 @@
             },
             {
               "date": "2026-10-06",
-              "spend": 37.041149,
-              "impressions": 3707,
-              "clicks": 92,
-              "conversions": 3.0
+              "spend": 43.245434,
+              "impressions": 4138,
+              "clicks": 110,
+              "conversions": 10.443238
             }
           ],
           "error": null
@@ -10775,15 +10642,15 @@
         "modules_by_channel": [
           {
             "channel": "Direct",
-            "count": 23105
+            "count": 23114
           },
           {
             "channel": "Referral",
-            "count": 17999
+            "count": 17956
           },
           {
             "channel": "Organic Search",
-            "count": 9404
+            "count": 9367
           },
           {
             "channel": "Unassigned",
@@ -10791,19 +10658,19 @@
           },
           {
             "channel": "Organic Social",
-            "count": 3110
+            "count": 3107
           },
           {
             "channel": "Cross-network",
-            "count": 2960
+            "count": 2946
           },
           {
             "channel": "Paid Social",
-            "count": 1401
+            "count": 1385
           },
           {
             "channel": "Organic Video",
-            "count": 324
+            "count": 319
           },
           {
             "channel": "Email",
@@ -10811,7 +10678,7 @@
           },
           {
             "channel": "Paid Search",
-            "count": 178
+            "count": 171
           },
           {
             "channel": "AI Assistant",
@@ -10833,27 +10700,27 @@
         "modules_by_campaign": [
           {
             "campaign": "(direct)",
-            "count": 23105
+            "count": 23114
           },
           {
             "campaign": "(referral)",
-            "count": 21481
+            "count": 21430
           },
           {
             "campaign": "(organic)",
-            "count": 9388
+            "count": 9351
           },
           {
             "campaign": "[ACQ] Personality Test - UPT",
-            "count": 2328
+            "count": 2305
           },
           {
             "campaign": "discover-who-attracts-you-50-100-or",
-            "count": 1280
+            "count": 1282
           },
           {
             "campaign": "(not set)",
-            "count": 1071
+            "count": 1077
           },
           {
             "campaign": "unique_traits_meta",
@@ -10865,11 +10732,11 @@
           },
           {
             "campaign": "menu_home",
-            "count": 536
+            "count": 535
           },
           {
             "campaign": "[PMAX] Rationality Test",
-            "count": 396
+            "count": 401
           },
           {
             "campaign": "discover-who-attracts-you-re-launch",
@@ -10881,11 +10748,11 @@
           },
           {
             "campaign": "upt_meta_ads",
-            "count": 237
+            "count": 225
           },
           {
             "campaign": "my-favorite-tools-to-become-a-better-thinker",
-            "count": 215
+            "count": 213
           },
           {
             "campaign": "rationality_test_meta",
@@ -10900,20 +10767,20 @@
             "count": 145
           },
           {
-            "campaign": "imposter_syndrome_meta",
-            "count": 136
-          },
-          {
             "campaign": "what-our-scientific-findings-can-teach-you-about-happiness",
             "count": 135
           },
           {
-            "campaign": "menu_dashboard",
-            "count": 117
+            "campaign": "imposter_syndrome_meta",
+            "count": 132
           },
           {
             "campaign": "rationality_max_all_territories",
             "count": 116
+          },
+          {
+            "campaign": "menu_dashboard",
+            "count": 115
           },
           {
             "campaign": "coaching_floating_button",
@@ -10924,12 +10791,8 @@
             "count": 61
           },
           {
-            "campaign": "upt_pmax",
-            "count": 55
-          },
-          {
             "campaign": "(cross-network)",
-            "count": 54
+            "count": 58
           },
           {
             "campaign": "career-advice-from-conversations-with-experts-1",
@@ -10948,6 +10811,10 @@
             "count": 48
           },
           {
+            "campaign": "upt_pmax",
+            "count": 48
+          },
+          {
             "campaign": "menu_path",
             "count": 45
           },
@@ -10956,12 +10823,12 @@
             "count": 36
           },
           {
-            "campaign": "what-you-should-know-about-one-of-the-most-common-and-least-known-mental-health-disorders",
-            "count": 35
-          },
-          {
             "campaign": "what-stands-between-you-and-reality-1",
             "count": 32
+          },
+          {
+            "campaign": "what-you-should-know-about-one-of-the-most-common-and-least-known-mental-health-disorders",
+            "count": 31
           },
           {
             "campaign": "launching-demystifying-meditation-ct-domain",
@@ -11180,6 +11047,10 @@
             "count": 3
           },
           {
+            "campaign": "(not set)",
+            "count": 2
+          },
+          {
             "campaign": "5-things-we-learned-from-writing-the-12-levers",
             "count": 2
           },
@@ -11242,10 +11113,6 @@
           {
             "campaign": "why-you-should-know-how-to-find-academic-papers-and-7-ways-to-do-so",
             "count": 2
-          },
-          {
-            "campaign": "(not set)",
-            "count": 1
           },
           {
             "campaign": "02aabd24b9-New_Subscribers_11_Rationality_Quiz_II",
@@ -11426,12 +11293,6 @@
         ],
         "kw_pos": {
           "daily": [
-            {
-              "date": "2026-07-09",
-              "position": 8.836455059710874,
-              "clicks": 24,
-              "impressions": 7955
-            },
             {
               "date": "2026-07-10",
               "position": 8.887074195053664,
@@ -11947,15 +11808,21 @@
               "position": 9.46703995927717,
               "clicks": 6,
               "impressions": 3929
+            },
+            {
+              "date": "2026-10-04",
+              "position": 8.784941675503712,
+              "clicks": 14,
+              "impressions": 4715
             }
           ],
-          "avg_position": 8.078957591248727,
-          "clicks": 3507,
-          "impressions": 790285,
+          "avg_position": 8.075530624043099,
+          "clicks": 3497,
+          "impressions": 787045,
           "keyword": "personality test"
         },
         "revenue_cat": {
-          "subscriptions": 12125.29,
+          "subscriptions": 12075.49,
           "pdf": 765.0,
           "cognitive": 1242.5,
           "other": 1515.0
@@ -12105,21 +11972,13 @@
       },
       "prior": {
         "ga4": {
-          "users": 513007,
-          "sessions": 229193,
-          "pageviews": 883443,
-          "modules_started": 75803,
-          "modules_finished": 30477
+          "users": 470274,
+          "sessions": 223918,
+          "pageviews": 873204,
+          "modules_started": 74334,
+          "modules_finished": 29956
         },
         "ga4_daily": [
-          {
-            "date": "2026-04-10",
-            "users": 50234,
-            "first_visit": 3848,
-            "modules_started": 2107,
-            "accepted_privacy": 1330,
-            "modules_finished": 718
-          },
           {
             "date": "2026-04-11",
             "users": 16809,
@@ -12831,19 +12690,23 @@
             "modules_started": 697,
             "accepted_privacy": 505,
             "modules_finished": 236
+          },
+          {
+            "date": "2026-07-09",
+            "users": 2179,
+            "first_visit": 1895,
+            "modules_started": 638,
+            "accepted_privacy": 454,
+            "modules_finished": 197
           }
         ],
         "stripe_m": {
-          "revenue_usd": 10259.5,
-          "gross_usd": 10525.4,
-          "refunded_usd": 265.9,
-          "subscription_usd": 8786.9,
+          "revenue_usd": 10269.5,
+          "gross_usd": 10570.4,
+          "refunded_usd": 300.9,
+          "subscription_usd": 8796.9,
           "non_subscription_usd": 1472.6,
           "daily": [
-            {
-              "date": "2026-04-10",
-              "revenue": 48.8
-            },
             {
               "date": "2026-04-11",
               "revenue": 182.9
@@ -13199,15 +13062,13 @@
             {
               "date": "2026-07-08",
               "revenue": 132.9
+            },
+            {
+              "date": "2026-07-09",
+              "revenue": 58.8
             }
           ],
           "daily_split": [
-            {
-              "date": "2026-04-10",
-              "subscription": 39.8,
-              "non_subscription": 9.0,
-              "total": 48.8
-            },
             {
               "date": "2026-04-11",
               "subscription": 147.9,
@@ -13741,14 +13602,16 @@
               "subscription": 67.9,
               "non_subscription": 65.0,
               "total": 132.9
+            },
+            {
+              "date": "2026-07-09",
+              "subscription": 49.8,
+              "non_subscription": 9.0,
+              "total": 58.8
             }
           ]
         },
         "mrr_history": [
-          {
-            "date": "2026-04-10",
-            "mrr": 2564.2
-          },
           {
             "date": "2026-04-11",
             "mrr": 2564.2
@@ -14104,23 +13967,47 @@
           {
             "date": "2026-07-08",
             "mrr": 2917.3
+          },
+          {
+            "date": "2026-07-09",
+            "mrr": 2917.3
           }
         ],
         "bh": {
           "error": null,
-          "total_subscribers": 650179,
+          "total_subscribers": 650193,
           "new_subscribers": 0,
           "campaigns_count": 52,
-          "emails_sent": 8923473,
-          "email_opens": 3622779,
-          "email_clicks": 145920,
-          "open_rate": 0.40598307407889284,
-          "click_rate": 0.0163523776000667,
-          "unsubscribes": 19529,
-          "unsubscribe_rate": 0.002188497684701909,
-          "engaged_readers": 263961,
-          "opens_per_campaign": 69668,
+          "emails_sent": 8728133,
+          "email_opens": 3583332,
+          "email_clicks": 156081,
+          "open_rate": 0.41054965592297915,
+          "click_rate": 0.017882518517992337,
+          "unsubscribes": 18869,
+          "unsubscribe_rate": 0.0021618598158391947,
+          "engaged_readers": 266936,
+          "opens_per_campaign": 68910,
           "per_campaign": [
+            {
+              "title": "Self-Help Pyramid - Test Campaign ",
+              "date": "2026-07-09",
+              "sent": 3,
+              "opens": 3,
+              "clicks": 2,
+              "open_rate": 1.0,
+              "click_rate": 0.6666666666666666,
+              "unsubs": 0
+            },
+            {
+              "title": "Self-Help Pyramid",
+              "date": "2026-07-09",
+              "sent": 251777,
+              "opens": 150586,
+              "clicks": 17558,
+              "open_rate": 0.5980927566854796,
+              "click_rate": 0.06973631427811118,
+              "unsubs": 634
+            },
             {
               "title": "A personal ask before launch day (plus a Q&A for groups)",
               "date": "2026-07-08",
@@ -14620,37 +14507,11 @@
               "open_rate": 1.5731707317073171,
               "click_rate": 0.036585365853658534,
               "unsubs": 0
-            },
-            {
-              "title": "Advice for Living in A World Being Changed by AI",
-              "date": "2026-04-10",
-              "sent": 282628,
-              "opens": 162069,
-              "clicks": 4751,
-              "open_rate": 0.5734357530039487,
-              "click_rate": 0.016810082511286923,
-              "unsubs": 626
-            },
-            {
-              "title": "Advice for Living in A World Being Changed by AI (1)",
-              "date": "2026-04-10",
-              "sent": 164492,
-              "opens": 27967,
-              "clicks": 2648,
-              "open_rate": 0.17002042652530214,
-              "click_rate": 0.016098047321450284,
-              "unsubs": 668
             }
           ],
           "period_used_for_new_subs": "last_3_months"
         },
         "bh_daily_rates": [
-          {
-            "date": "2026-04-10",
-            "open_rate": 0.4250223653605296,
-            "click_rate": 0.016548130255859723,
-            "unsubscribe_rate": 0.0028940776525317588
-          },
           {
             "date": "2026-04-11",
             "open_rate": 1.5731707317073171,
@@ -14890,15 +14751,17 @@
             "open_rate": 0.9644407192229085,
             "click_rate": 0.11238432038946426,
             "unsubscribe_rate": 0.0035708544790685926
+          },
+          {
+            "date": "2026-07-09",
+            "open_rate": 0.5980975454762094,
+            "click_rate": 0.06974342680117562,
+            "unsubscribe_rate": 0.002518071332115339
           }
         ],
         "new_subs_daily": {
-          "total": 23503,
+          "total": 23057,
           "daily": [
-            {
-              "date": "2026-04-10",
-              "count": 612
-            },
             {
               "date": "2026-04-11",
               "count": 407
@@ -15254,18 +15117,18 @@
             {
               "date": "2026-07-08",
               "count": 238
+            },
+            {
+              "date": "2026-07-09",
+              "count": 166
             }
           ],
           "error": null,
           "capped": false
         },
         "cog_sales": {
-          "total": 26,
+          "total": 27,
           "daily": [
-            {
-              "date": "2026-04-10",
-              "count": 0
-            },
             {
               "date": "2026-04-11",
               "count": 1
@@ -15621,16 +15484,16 @@
             {
               "date": "2026-07-08",
               "count": 0
+            },
+            {
+              "date": "2026-07-09",
+              "count": 1
             }
           ]
         },
         "pdf_sales": {
           "total": 94,
           "daily": [
-            {
-              "date": "2026-04-10",
-              "count": 1
-            },
             {
               "date": "2026-04-11",
               "count": 0
@@ -15986,22 +15849,19 @@
             {
               "date": "2026-07-08",
               "count": 3
+            },
+            {
+              "date": "2026-07-09",
+              "count": 1
             }
           ]
         },
         "ads": {
-          "spend_usd": 8504.460980000002,
-          "impressions": 4702922,
-          "clicks": 41910,
-          "conversions": 10156.89060399999,
+          "spend_usd": 8408.260907000002,
+          "impressions": 4469839,
+          "clicks": 39452,
+          "conversions": 9525.392910999988,
           "daily": [
-            {
-              "date": "2026-04-10",
-              "spend": 124.568786,
-              "impressions": 234365,
-              "clicks": 2527,
-              "conversions": 665.497693
-            },
             {
               "date": "2026-04-11",
               "spend": 120.542561,
@@ -16624,6 +16484,13 @@
               "impressions": 1555,
               "clicks": 108,
               "conversions": 45.690888
+            },
+            {
+              "date": "2026-07-09",
+              "spend": 28.368713,
+              "impressions": 1282,
+              "clicks": 69,
+              "conversions": 34.0
             }
           ],
           "error": null
@@ -16631,43 +16498,43 @@
         "modules_by_channel": [
           {
             "channel": "Organic Search",
-            "count": 7708
+            "count": 7659
           },
           {
             "channel": "Referral",
-            "count": 7318
+            "count": 7255
           },
           {
             "channel": "Cross-network",
-            "count": 6117
+            "count": 5769
           },
           {
             "channel": "Direct",
-            "count": 4616
+            "count": 4592
           },
           {
             "channel": "Unassigned",
-            "count": 1828
+            "count": 1814
           },
           {
             "channel": "Paid Search",
-            "count": 1522
+            "count": 1496
           },
           {
             "channel": "Organic Video",
-            "count": 488
+            "count": 492
           },
           {
             "channel": "Paid Social",
-            "count": 322
+            "count": 329
           },
           {
             "channel": "Organic Social",
-            "count": 307
+            "count": 299
           },
           {
             "channel": "Email",
-            "count": 123
+            "count": 122
           },
           {
             "channel": "Paid Other",
@@ -16675,7 +16542,7 @@
           },
           {
             "channel": "AI Assistant",
-            "count": 44
+            "count": 45
           },
           {
             "channel": "Display",
@@ -16689,27 +16556,27 @@
         "modules_by_campaign": [
           {
             "campaign": "(referral)",
-            "count": 8130
+            "count": 8062
           },
           {
             "campaign": "(organic)",
-            "count": 7694
+            "count": 7645
           },
           {
             "campaign": "(direct)",
-            "count": 4616
-          },
-          {
-            "campaign": "[PMAX] Rationality Test",
-            "count": 2928
+            "count": 4592
           },
           {
             "campaign": "[ACQ] Personality Test - UPT",
-            "count": 2713
+            "count": 2736
+          },
+          {
+            "campaign": "[PMAX] Rationality Test",
+            "count": 2561
           },
           {
             "campaign": "[SEARCH] Unique Traits Test",
-            "count": 1420
+            "count": 1388
           },
           {
             "campaign": "(not set)",
@@ -16721,11 +16588,11 @@
           },
           {
             "campaign": "menu_home",
-            "count": 251
+            "count": 243
           },
           {
             "campaign": "what-you-should-know-about-one-of-the-most-common-and-least-known-mental-health-disorders",
-            "count": 229
+            "count": 233
           },
           {
             "campaign": "5-things-we-learned-from-writing-the-12-levers",
@@ -16737,43 +16604,43 @@
           },
           {
             "campaign": "(cross-network)",
-            "count": 137
-          },
-          {
-            "campaign": "imposter_syndrome_meta",
-            "count": 122
-          },
-          {
-            "campaign": "my-favorite-tools-to-become-a-better-thinker",
-            "count": 120
+            "count": 133
           },
           {
             "campaign": "upt_meta_ads",
-            "count": 116
+            "count": 128
+          },
+          {
+            "campaign": "imposter_syndrome_meta",
+            "count": 126
+          },
+          {
+            "campaign": "my-favorite-tools-to-become-a-better-thinker",
+            "count": 119
           },
           {
             "campaign": "discover-your-unusual-traits-with-our-new-tool",
-            "count": 102
+            "count": 98
           },
           {
             "campaign": "menu_dashboard",
-            "count": 86
+            "count": 85
           },
           {
             "campaign": "[ACQ] Imposter Syndrome",
             "count": 81
           },
           {
-            "campaign": "rationality_test",
-            "count": 66
+            "campaign": "upt_pmax",
+            "count": 68
           },
           {
             "campaign": "the-strangest-things-that-correlate-with-iq",
             "count": 66
           },
           {
-            "campaign": "upt_pmax",
-            "count": 61
+            "campaign": "rationality_test",
+            "count": 57
           },
           {
             "campaign": "upt_drip_campaign",
@@ -16781,7 +16648,7 @@
           },
           {
             "campaign": "(ai-assistant)",
-            "count": 44
+            "count": 45
           },
           {
             "campaign": "website_menu",
@@ -16809,7 +16676,7 @@
           },
           {
             "campaign": "unique_traits_search_ads",
-            "count": 19
+            "count": 18
           },
           {
             "campaign": "5-things-we-learned-from-writing-the-12-levers-1",
@@ -16840,10 +16707,6 @@
             "count": 10
           },
           {
-            "campaign": "advice-for-living-in-a-world-being-changed-by-ai",
-            "count": 9
-          },
-          {
             "campaign": "discover-your-unusual-traits-with-our-new-tool-beta-tester-request",
             "count": 9
           },
@@ -16861,6 +16724,10 @@
           },
           {
             "campaign": "ace_experiment_chicken",
+            "count": 7
+          },
+          {
+            "campaign": "advice-for-living-in-a-world-being-changed-by-ai",
             "count": 7
           },
           {
@@ -16949,10 +16816,6 @@
           },
           {
             "campaign": "how-to-network-towards-a-more-fulfilling-career",
-            "count": 3
-          },
-          {
-            "campaign": "lies-damn-lies-and-fabricated-options",
             "count": 3
           },
           {
@@ -17188,6 +17051,10 @@
             "count": 1
           },
           {
+            "campaign": "lies-damn-lies-and-fabricated-options",
+            "count": 1
+          },
+          {
             "campaign": "monthly-debrief-february",
             "count": 1
           },
@@ -17262,12 +17129,6 @@
         ],
         "kw_pos": {
           "daily": [
-            {
-              "date": "2026-04-10",
-              "position": 8.427494615936826,
-              "clicks": 60,
-              "impressions": 11144
-            },
             {
               "date": "2026-04-11",
               "position": 8.126745071495051,
@@ -17801,15 +17662,21 @@
               "position": 9.090623449644452,
               "clicks": 23,
               "impressions": 6047
+            },
+            {
+              "date": "2026-07-09",
+              "position": 8.836455059710874,
+              "clicks": 24,
+              "impressions": 7955
             }
           ],
-          "avg_position": 7.946542616887092,
-          "clicks": 6507,
-          "impressions": 901896,
+          "avg_position": 7.948455948379172,
+          "clicks": 6471,
+          "impressions": 898707,
           "keyword": "personality test"
         },
         "revenue_cat": {
-          "subscriptions": 8530.0,
+          "subscriptions": 8540.0,
           "pdf": 837.0,
           "cognitive": 892.5,
           "other": 0.0
@@ -17925,14 +17792,14 @@
   },
   "daily_window": {
     "start": "2026-01-01",
-    "end": "2026-10-06",
+    "end": "2026-10-07",
     "kpi": {
       "ga4": {
-        "users": 3471134,
+        "users": 3476658,
         "sessions": 2578732,
-        "pageviews": 10986041,
-        "modules_started": 799857,
-        "modules_finished": 140776
+        "pageviews": 10987353,
+        "modules_started": 800143,
+        "modules_finished": 140857
       },
       "ga4_daily": [
         {
@@ -20161,19 +20028,19 @@
         },
         {
           "date": "2026-10-06",
-          "users": 24299,
-          "first_visit": 600,
-          "modules_started": 397,
-          "accepted_privacy": 262,
-          "modules_finished": 134
+          "users": 29695,
+          "first_visit": 1015,
+          "modules_started": 683,
+          "accepted_privacy": 425,
+          "modules_finished": 215
         }
       ],
       "stripe_m": {
-        "revenue_usd": 34408.2,
-        "gross_usd": 36499.69,
+        "revenue_usd": 34417.2,
+        "gross_usd": 36508.69,
         "refunded_usd": 2091.49,
         "subscription_usd": 28404.26,
-        "non_subscription_usd": 6003.94,
+        "non_subscription_usd": 6012.94,
         "daily": [
           {
             "date": "2026-01-01",
@@ -21290,6 +21157,10 @@
           {
             "date": "2026-10-06",
             "revenue": 38.0
+          },
+          {
+            "date": "2026-10-07",
+            "revenue": 9.0
           }
         ],
         "daily_split": [
@@ -22966,6 +22837,12 @@
             "subscription": 29.0,
             "non_subscription": 9.0,
             "total": 38.0
+          },
+          {
+            "date": "2026-10-07",
+            "subscription": 0.0,
+            "non_subscription": 9.0,
+            "total": 9.0
           }
         ]
       },
@@ -24085,32 +23962,36 @@
         {
           "date": "2026-10-06",
           "mrr": 4060.4
+        },
+        {
+          "date": "2026-10-07",
+          "mrr": 4040.5
         }
       ],
       "bh": {
         "error": null,
-        "total_subscribers": 650179,
+        "total_subscribers": 650193,
         "new_subscribers": 0,
         "campaigns_count": 152,
         "emails_sent": 25497487,
-        "email_opens": 11262263,
-        "email_clicks": 389364,
-        "open_rate": 0.441700901739846,
-        "click_rate": 0.015270681381267102,
-        "unsubscribes": 67166,
-        "unsubscribe_rate": 0.0026342203841500144,
-        "engaged_readers": 287184,
-        "opens_per_campaign": 74093,
+        "email_opens": 11264768,
+        "email_clicks": 389390,
+        "open_rate": 0.4417991467159097,
+        "click_rate": 0.015271701089601497,
+        "unsubscribes": 67189,
+        "unsubscribe_rate": 0.00263512243383044,
+        "engaged_readers": 287254,
+        "opens_per_campaign": 74110,
         "per_campaign": [
           {
             "title": "One Helpful Idea: Weighty Decision",
             "date": "2026-10-06",
             "sent": 375151,
-            "opens": 98624,
-            "clicks": 3724,
-            "open_rate": 0.26289147569911847,
-            "click_rate": 0.00992666952773683,
-            "unsubs": 773
+            "opens": 100444,
+            "clicks": 3743,
+            "open_rate": 0.26774285554350113,
+            "click_rate": 0.009977315800837529,
+            "unsubs": 787
           },
           {
             "title": "Monthly Debrief - Testing Paywall",
@@ -24146,19 +24027,19 @@
             "title": "Recording + FollowUp - Thinking Clearly About Career Change",
             "date": "2026-10-01",
             "sent": 1483,
-            "opens": 1983,
-            "clicks": 475,
-            "open_rate": 1.337154416722859,
-            "click_rate": 0.3202966958867161,
+            "opens": 1990,
+            "clicks": 476,
+            "open_rate": 1.341874578556979,
+            "click_rate": 0.3209710047201618,
             "unsubs": 3
           },
           {
             "title": "Reminder (6h) - Thinking Clearly About Career Change",
             "date": "2026-09-30",
             "sent": 1424,
-            "opens": 1367,
+            "opens": 1368,
             "clicks": 82,
-            "open_rate": 0.9599719101123596,
+            "open_rate": 0.9606741573033708,
             "click_rate": 0.05758426966292135,
             "unsubs": 0
           },
@@ -24166,9 +24047,9 @@
             "title": "Reminder (10min) - Thinking Clearly About Career Change",
             "date": "2026-09-30",
             "sent": 1424,
-            "opens": 1432,
+            "opens": 1435,
             "clicks": 182,
-            "open_rate": 1.0056179775280898,
+            "open_rate": 1.0077247191011236,
             "click_rate": 0.12780898876404495,
             "unsubs": 3
           },
@@ -24176,29 +24057,29 @@
             "title": "In Defense of Unanswerable Questions (They Are Not Pointless or Unscientific)",
             "date": "2026-09-29",
             "sent": 333177,
-            "opens": 119707,
+            "opens": 119821,
             "clicks": 5740,
-            "open_rate": 0.3592895067786792,
+            "open_rate": 0.3596316672519412,
             "click_rate": 0.017228079969505698,
-            "unsubs": 1011
+            "unsubs": 1014
           },
           {
             "title": "One Helpful Idea: Emotion Questions",
             "date": "2026-09-28",
             "sent": 376180,
-            "opens": 126727,
+            "opens": 126869,
             "clicks": 4511,
-            "open_rate": 0.3368786219363071,
+            "open_rate": 0.33725610080280716,
             "click_rate": 0.011991599766069436,
-            "unsubs": 1132
+            "unsubs": 1133
           },
           {
             "title": "Inviting readers to Overcome event",
             "date": "2026-09-26",
             "sent": 77647,
-            "opens": 48684,
+            "opens": 48741,
             "clicks": 2297,
-            "open_rate": 0.6269913840843819,
+            "open_rate": 0.6277254755496027,
             "click_rate": 0.029582598168634976,
             "unsubs": 258
           },
@@ -24216,49 +24097,49 @@
             "title": "Career Advice from  Conversations With Experts (1)",
             "date": "2026-09-24",
             "sent": 341304,
-            "opens": 134386,
-            "clicks": 4963,
-            "open_rate": 0.3937428216487354,
-            "click_rate": 0.014541288704498043,
-            "unsubs": 1099
+            "opens": 134473,
+            "clicks": 4965,
+            "open_rate": 0.39399772636710967,
+            "click_rate": 0.014547148583081359,
+            "unsubs": 1100
           },
           {
             "title": "One Helpful Idea: The Unsaid Obvious",
             "date": "2026-09-21",
             "sent": 340134,
-            "opens": 120089,
-            "clicks": 3378,
-            "open_rate": 0.35306379250530673,
-            "click_rate": 0.009931379985535112,
+            "opens": 120172,
+            "clicks": 3379,
+            "open_rate": 0.3533078139791964,
+            "click_rate": 0.009934320003292819,
             "unsubs": 1092
           },
           {
             "title": "What our scientific findings can teach you about happiness",
             "date": "2026-09-18",
             "sent": 336296,
-            "opens": 146983,
-            "clicks": 5137,
-            "open_rate": 0.4370643718628827,
-            "click_rate": 0.015275233722672884,
-            "unsubs": 1686
+            "opens": 147050,
+            "clicks": 5138,
+            "open_rate": 0.4372636011133049,
+            "click_rate": 0.015278207293574708,
+            "unsubs": 1687
           },
           {
             "title": "Discover who attracts you - Re-launch",
             "date": "2026-09-14",
             "sent": 232000,
-            "opens": 16936,
-            "clicks": 2875,
-            "open_rate": 0.073,
-            "click_rate": 0.012392241379310345,
-            "unsubs": 107
+            "opens": 16944,
+            "clicks": 2876,
+            "open_rate": 0.07303448275862069,
+            "click_rate": 0.01239655172413793,
+            "unsubs": 108
           },
           {
             "title": "Discover who attracts you - 50 - 100% OR",
             "date": "2026-09-10",
             "sent": 79482,
-            "opens": 38198,
+            "opens": 38208,
             "clicks": 4976,
-            "open_rate": 0.4805867995269369,
+            "open_rate": 0.48071261417679473,
             "click_rate": 0.06260536976925593,
             "unsubs": 104
           },
@@ -24266,9 +24147,9 @@
             "title": "Discover who attracts you - Everyone else",
             "date": "2026-09-10",
             "sent": 199028,
-            "opens": 22070,
+            "opens": 22076,
             "clicks": 2772,
-            "open_rate": 0.11088892015193842,
+            "open_rate": 0.11091906666398697,
             "click_rate": 0.013927688566432863,
             "unsubs": 257
           },
@@ -24276,9 +24157,9 @@
             "title": "One Helpful Idea: Dating App Incentives",
             "date": "2026-09-09",
             "sent": 276605,
-            "opens": 106522,
+            "opens": 106560,
             "clicks": 3187,
-            "open_rate": 0.38510511379042317,
+            "open_rate": 0.385242493808861,
             "click_rate": 0.01152184523056344,
             "unsubs": 803
           },
@@ -24346,9 +24227,9 @@
             "title": "What Capitalists and Marxists Agree and Disagree About (1)",
             "date": "2026-09-03",
             "sent": 301885,
-            "opens": 125734,
+            "opens": 125751,
             "clicks": 5332,
-            "open_rate": 0.4164963479470659,
+            "open_rate": 0.4165526607814234,
             "click_rate": 0.01766235487023204,
             "unsubs": 1003
           },
@@ -24356,19 +24237,19 @@
             "title": "One Helpful Idea: Different Minds",
             "date": "2026-09-02",
             "sent": 330005,
-            "opens": 154940,
-            "clicks": 1346,
-            "open_rate": 0.46950803775700367,
-            "click_rate": 0.00407872607990788,
+            "opens": 154950,
+            "clicks": 1347,
+            "open_rate": 0.4695383403281769,
+            "click_rate": 0.0040817563370251966,
             "unsubs": 1259
           },
           {
             "title": "Dating App - Email W/ Updates",
             "date": "2026-09-01",
             "sent": 170787,
-            "opens": 26811,
+            "opens": 26812,
             "clicks": 3267,
-            "open_rate": 0.1569850164239667,
+            "open_rate": 0.15699087167056042,
             "click_rate": 0.01912909062165153,
             "unsubs": 1478
           },
@@ -24376,9 +24257,9 @@
             "title": "Reconstellation Invitation",
             "date": "2026-08-29",
             "sent": 105911,
-            "opens": 58346,
+            "opens": 58351,
             "clicks": 6081,
-            "open_rate": 0.5508965074449301,
+            "open_rate": 0.5509437168943736,
             "click_rate": 0.0574161324130638,
             "unsubs": 872
           },
@@ -24416,9 +24297,9 @@
             "title": "What Stands Between You and Reality? (1)",
             "date": "2026-08-27",
             "sent": 291590,
-            "opens": 134813,
+            "opens": 134820,
             "clicks": 4021,
-            "open_rate": 0.4623375287218355,
+            "open_rate": 0.46236153503206556,
             "click_rate": 0.01378991049075757,
             "unsubs": 749
           },
@@ -24436,9 +24317,9 @@
             "title": "One Helpful Idea: What You Notice",
             "date": "2026-08-26",
             "sent": 238794,
-            "opens": 102362,
+            "opens": 102366,
             "clicks": 3640,
-            "open_rate": 0.42866236170088023,
+            "open_rate": 0.4286791125405161,
             "click_rate": 0.015243264068611439,
             "unsubs": 544
           },
@@ -24446,9 +24327,9 @@
             "title": "Productivity Equation Event Invitation",
             "date": "2026-08-22",
             "sent": 89837,
-            "opens": 44961,
+            "opens": 44964,
             "clicks": 7513,
-            "open_rate": 0.5004730790208934,
+            "open_rate": 0.500506472834133,
             "click_rate": 0.08362923962287254,
             "unsubs": 347
           },
@@ -24456,19 +24337,19 @@
             "title": "Psychology Words That Don\u2019t Mean What You Think",
             "date": "2026-08-20",
             "sent": 295860,
-            "opens": 133211,
+            "opens": 133213,
             "clicks": 5435,
-            "open_rate": 0.4502501182991956,
+            "open_rate": 0.45025687825322785,
             "click_rate": 0.018370175082809435,
-            "unsubs": 945
+            "unsubs": 946
           },
           {
             "title": "One Helpful Idea: AI For Social Analysis",
             "date": "2026-08-19",
             "sent": 243647,
-            "opens": 117353,
+            "opens": 117356,
             "clicks": 2994,
-            "open_rate": 0.4816517338608725,
+            "open_rate": 0.48166404675616775,
             "click_rate": 0.012288269504652222,
             "unsubs": 891
           },
@@ -24486,9 +24367,9 @@
             "title": "Launching Demystifying Meditation - ohi-domain",
             "date": "2026-08-13",
             "sent": 176761,
-            "opens": 90827,
+            "opens": 90831,
             "clicks": 3514,
-            "open_rate": 0.513840722783872,
+            "open_rate": 0.5138633522100463,
             "click_rate": 0.019879950894145203,
             "unsubs": 1441
           },
@@ -24506,9 +24387,9 @@
             "title": "One Helpful Idea: Smart Blind Spots",
             "date": "2026-08-11",
             "sent": 463870,
-            "opens": 114464,
+            "opens": 114468,
             "clicks": 3085,
-            "open_rate": 0.2467587901782827,
+            "open_rate": 0.2467674132838942,
             "click_rate": 0.0066505702028585596,
             "unsubs": 1327
           },
@@ -24526,9 +24407,9 @@
             "title": "Monthly Debrief - July",
             "date": "2026-08-08",
             "sent": 93771,
-            "opens": 70530,
+            "opens": 70532,
             "clicks": 4394,
-            "open_rate": 0.7521515180599546,
+            "open_rate": 0.7521728466156914,
             "click_rate": 0.04685883695385567,
             "unsubs": 174
           },
@@ -24750,7 +24631,7 @@
             "clicks": 17558,
             "open_rate": 0.5980927566854796,
             "click_rate": 0.06973631427811118,
-            "unsubs": 633
+            "unsubs": 634
           },
           {
             "title": "A personal ask before launch day (plus a Q&A for groups)",
@@ -26062,7 +25943,7 @@
           "date": "2026-07-09",
           "open_rate": 0.5980975454762094,
           "click_rate": 0.06974342680117562,
-          "unsubscribe_rate": 0.002514099610771308
+          "unsubscribe_rate": 0.002518071332115339
         },
         {
           "date": "2026-07-15",
@@ -26132,73 +26013,73 @@
         },
         {
           "date": "2026-08-08",
-          "open_rate": 0.7526839347335236,
+          "open_rate": 0.7527052358028373,
           "click_rate": 0.04705406211391812,
           "unsubscribe_rate": 0.0018531930302901206
         },
         {
           "date": "2026-08-11",
-          "open_rate": 0.24719631404730708,
+          "open_rate": 0.24720493414247294,
           "click_rate": 0.008402437762912902,
           "unsubscribe_rate": 0.0028597165712709468
         },
         {
           "date": "2026-08-13",
-          "open_rate": 0.364230641719867,
+          "open_rate": 0.36424197602228325,
           "click_rate": 0.024467925340949985,
           "unsubscribe_rate": 0.005131605418929985
         },
         {
           "date": "2026-08-19",
-          "open_rate": 0.4816517338608725,
+          "open_rate": 0.48166404675616775,
           "click_rate": 0.012288269504652222,
           "unsubscribe_rate": 0.003656929902687084
         },
         {
           "date": "2026-08-20",
-          "open_rate": 0.4502501182991956,
+          "open_rate": 0.45025687825322785,
           "click_rate": 0.018370175082809435,
-          "unsubscribe_rate": 0.003194078280267694
+          "unsubscribe_rate": 0.0031974582572838503
         },
         {
           "date": "2026-08-22",
-          "open_rate": 0.5004730790208934,
+          "open_rate": 0.500506472834133,
           "click_rate": 0.08362923962287254,
           "unsubscribe_rate": 0.0038625510647060787
         },
         {
           "date": "2026-08-26",
-          "open_rate": 0.42866236170088023,
+          "open_rate": 0.4286791125405161,
           "click_rate": 0.015243264068611439,
           "unsubscribe_rate": 0.0022781141904737977
         },
         {
           "date": "2026-08-27",
-          "open_rate": 0.4679507732609304,
+          "open_rate": 0.4679746498666321,
           "click_rate": 0.015113891409197269,
           "unsubscribe_rate": 0.0025616186974288307
         },
         {
           "date": "2026-08-29",
-          "open_rate": 0.5508965074449301,
+          "open_rate": 0.5509437168943736,
           "click_rate": 0.0574161324130638,
           "unsubscribe_rate": 0.008233327982929063
         },
         {
           "date": "2026-09-01",
-          "open_rate": 0.1569850164239667,
+          "open_rate": 0.15699087167056042,
           "click_rate": 0.01912909062165153,
           "unsubscribe_rate": 0.008654054465503814
         },
         {
           "date": "2026-09-02",
-          "open_rate": 0.46950803775700367,
-          "click_rate": 0.00407872607990788,
+          "open_rate": 0.4695383403281769,
+          "click_rate": 0.0040817563370251966,
           "unsubscribe_rate": 0.003815093710701353
         },
         {
           "date": "2026-09-03",
-          "open_rate": 0.41650407931392003,
+          "open_rate": 0.41656039140213785,
           "click_rate": 0.01767868322462892,
           "unsubscribe_rate": 0.0033224132048534395
         },
@@ -26216,68 +26097,68 @@
         },
         {
           "date": "2026-09-09",
-          "open_rate": 0.38510511379042317,
+          "open_rate": 0.385242493808861,
           "click_rate": 0.01152184523056344,
           "unsubscribe_rate": 0.002903056705410242
         },
         {
           "date": "2026-09-10",
-          "open_rate": 0.21639438440271444,
+          "open_rate": 0.21645183296829557,
           "click_rate": 0.027819467882661306,
           "unsubscribe_rate": 0.0012961832609242037
         },
         {
           "date": "2026-09-14",
-          "open_rate": 0.073,
-          "click_rate": 0.012392241379310345,
-          "unsubscribe_rate": 0.0004612068965517241
+          "open_rate": 0.07303448275862069,
+          "click_rate": 0.01239655172413793,
+          "unsubscribe_rate": 0.00046551724137931035
         },
         {
           "date": "2026-09-18",
-          "open_rate": 0.4370613982919809,
-          "click_rate": 0.015275233722672884,
-          "unsubscribe_rate": 0.005013440540476247
+          "open_rate": 0.4372636011133049,
+          "click_rate": 0.015278207293574708,
+          "unsubscribe_rate": 0.005016414111378072
         },
         {
           "date": "2026-09-21",
-          "open_rate": 0.35306379250530673,
-          "click_rate": 0.009931379985535112,
+          "open_rate": 0.3533078139791964,
+          "click_rate": 0.009934320003292819,
           "unsubscribe_rate": 0.003210499391416324
         },
         {
           "date": "2026-09-24",
-          "open_rate": 0.39375285665733006,
-          "click_rate": 0.014544048191076681,
-          "unsubscribe_rate": 0.0032199655443177423
+          "open_rate": 0.39400775838831786,
+          "click_rate": 0.014549908000984449,
+          "unsubscribe_rate": 0.0032228954492716255
         },
         {
           "date": "2026-09-26",
-          "open_rate": 0.6269913840843819,
+          "open_rate": 0.6277254755496027,
           "click_rate": 0.029582598168634976,
           "unsubscribe_rate": 0.0033227297899468106
         },
         {
           "date": "2026-09-28",
-          "open_rate": 0.3368786219363071,
+          "open_rate": 0.33725610080280716,
           "click_rate": 0.011991599766069436,
-          "unsubscribe_rate": 0.0030091977244935935
+          "unsubscribe_rate": 0.0030118560263703545
         },
         {
           "date": "2026-09-29",
-          "open_rate": 0.3592895067786792,
+          "open_rate": 0.3596316672519412,
           "click_rate": 0.017228079969505698,
-          "unsubscribe_rate": 0.0030344231444547494
+          "unsubscribe_rate": 0.003043427367435327
         },
         {
           "date": "2026-09-30",
-          "open_rate": 0.9827949438202247,
+          "open_rate": 0.9841994382022472,
           "click_rate": 0.09269662921348315,
           "unsubscribe_rate": 0.001053370786516854
         },
         {
           "date": "2026-10-01",
-          "open_rate": 1.337154416722859,
-          "click_rate": 0.3202966958867161,
+          "open_rate": 1.341874578556979,
+          "click_rate": 0.3209710047201618,
           "unsubscribe_rate": 0.0020229265003371545
         },
         {
@@ -26288,13 +26169,13 @@
         },
         {
           "date": "2026-10-06",
-          "open_rate": 0.2629045284799245,
-          "click_rate": 0.009929123385018085,
-          "unsubscribe_rate": 0.0020604596984212025
+          "open_rate": 0.26775580487206757,
+          "click_rate": 0.009979768578122876,
+          "unsubscribe_rate": 0.0020977772091299958
         }
       ],
       "new_subs_daily": {
-        "total": 109769,
+        "total": 109818,
         "daily": [
           {
             "date": "2026-01-01",
@@ -27410,7 +27291,11 @@
           },
           {
             "date": "2026-10-06",
-            "count": 372
+            "count": 388
+          },
+          {
+            "date": "2026-10-07",
+            "count": 33
           }
         ],
         "error": null,
@@ -28534,11 +28419,15 @@
           {
             "date": "2026-10-06",
             "count": 0
+          },
+          {
+            "date": "2026-10-07",
+            "count": 0
           }
         ]
       },
       "pdf_sales": {
-        "total": 243,
+        "total": 244,
         "daily": [
           {
             "date": "2026-01-01",
@@ -29655,14 +29544,18 @@
           {
             "date": "2026-10-06",
             "count": 1
+          },
+          {
+            "date": "2026-10-07",
+            "count": 1
           }
         ]
       },
       "ads": {
-        "spend_usd": 20941.11051999998,
-        "impressions": 20269555,
-        "clicks": 893564,
-        "conversions": 204932.08156000002,
+        "spend_usd": 20947.31480499998,
+        "impressions": 20269986,
+        "clicks": 893582,
+        "conversions": 204939.52479800003,
         "daily": [
           {
             "date": "2026-01-01",
@@ -31486,10 +31379,10 @@
           },
           {
             "date": "2026-10-06",
-            "spend": 37.041149,
-            "impressions": 3707,
-            "clicks": 92,
-            "conversions": 3.0
+            "spend": 43.245434,
+            "impressions": 4138,
+            "clicks": 110,
+            "conversions": 10.443238
           }
         ],
         "error": null
@@ -31497,23 +31390,23 @@
       "modules_by_channel": [
         {
           "channel": "Referral",
-          "count": 35426
+          "count": 35430
         },
         {
           "channel": "Direct",
-          "count": 34868
+          "count": 34909
         },
         {
           "channel": "Organic Search",
-          "count": 25472
+          "count": 25486
         },
         {
           "channel": "Cross-network",
-          "count": 19889
+          "count": 19899
         },
         {
           "channel": "Unassigned",
-          "count": 10988
+          "count": 10999
         },
         {
           "channel": "Organic Social",
@@ -31537,7 +31430,7 @@
         },
         {
           "channel": "AI Assistant",
-          "count": 203
+          "count": 204
         },
         {
           "channel": "Display",
@@ -31555,19 +31448,19 @@
       "modules_by_campaign": [
         {
           "campaign": "(referral)",
-          "count": 42191
+          "count": 42195
         },
         {
           "campaign": "(direct)",
-          "count": 34869
+          "count": 34910
         },
         {
           "campaign": "(organic)",
-          "count": 25421
+          "count": 25435
         },
         {
           "campaign": "[PMAX] Rationality Test",
-          "count": 8233
+          "count": 8238
         },
         {
           "campaign": "[IGOR] [MAX] BLUEDOT - BIOSAFETY",
@@ -31587,7 +31480,7 @@
         },
         {
           "campaign": "(not set)",
-          "count": 1704
+          "count": 1712
         },
         {
           "campaign": "[SEARCH] Unique Traits Test",
@@ -31595,7 +31488,7 @@
         },
         {
           "campaign": "discover-who-attracts-you-50-100-or",
-          "count": 1280
+          "count": 1282
         },
         {
           "campaign": "menu_home",
@@ -31611,7 +31504,7 @@
         },
         {
           "campaign": "(cross-network)",
-          "count": 372
+          "count": 377
         },
         {
           "campaign": "discover-who-attracts-you-re-launch",
@@ -31655,7 +31548,7 @@
         },
         {
           "campaign": "(ai-assistant)",
-          "count": 203
+          "count": 204
         },
         {
           "campaign": "rationality_max_all_territories",
@@ -32322,6 +32215,10 @@
           "count": 3
         },
         {
+          "campaign": "(not set)",
+          "count": 2
+        },
+        {
           "campaign": "07ce33162a-EMAIL_CAMPAIGN_2025_10_21_12_31",
           "count": 2
         },
@@ -32347,10 +32244,6 @@
         },
         {
           "campaign": "ace_wbp_dynamic",
-          "count": 2
-        },
-        {
-          "campaign": "ads_creative_b",
           "count": 2
         }
       ],
@@ -34011,16 +33904,22 @@
             "position": 9.46703995927717,
             "clicks": 6,
             "impressions": 3929
+          },
+          {
+            "date": "2026-10-04",
+            "position": 8.784941675503712,
+            "clicks": 14,
+            "impressions": 4715
           }
         ],
-        "avg_position": 8.834094999560106,
-        "clicks": 14955,
-        "impressions": 6115102,
+        "avg_position": 8.83405712948606,
+        "clicks": 14969,
+        "impressions": 6119817,
         "keyword": "personality test"
       },
       "revenue_cat": {
         "subscriptions": 26526.77,
-        "pdf": 2151.0,
+        "pdf": 2160.0,
         "cognitive": 3482.5,
         "other": 2247.93
       },
@@ -47224,27 +47123,27 @@
       {
         "date": "2026-10-06",
         "channel": "Direct",
-        "count": 67
+        "count": 108
       },
       {
         "date": "2026-10-06",
         "channel": "Organic Search",
-        "count": 19
+        "count": 33
       },
       {
         "date": "2026-10-06",
         "channel": "Unassigned",
-        "count": 19
+        "count": 30
       },
       {
         "date": "2026-10-06",
         "channel": "Cross-network",
-        "count": 14
+        "count": 24
       },
       {
         "date": "2026-10-06",
         "channel": "Referral",
-        "count": 7
+        "count": 11
       },
       {
         "date": "2026-10-06",
@@ -47254,7 +47153,7 @@
       {
         "date": "2026-10-06",
         "channel": "AI Assistant",
-        "count": 2
+        "count": 3
       },
       {
         "date": "2026-10-06",
@@ -67536,47 +67435,47 @@
       {
         "date": "2026-10-06",
         "campaign": "(direct)",
-        "count": 67
+        "count": 108
       },
       {
         "date": "2026-10-06",
         "campaign": "(organic)",
+        "count": 33
+      },
+      {
+        "date": "2026-10-06",
+        "campaign": "(not set)",
         "count": 19
       },
       {
         "date": "2026-10-06",
         "campaign": "(referral)",
-        "count": 13
-      },
-      {
-        "date": "2026-10-06",
-        "campaign": "(not set)",
-        "count": 11
+        "count": 17
       },
       {
         "date": "2026-10-06",
         "campaign": "[PMAX] Rationality Test",
-        "count": 9
+        "count": 14
       },
       {
         "date": "2026-10-06",
         "campaign": "(cross-network)",
-        "count": 5
+        "count": 10
       },
       {
         "date": "2026-10-06",
         "campaign": "discover-who-attracts-you-50-100-or",
-        "count": 4
+        "count": 6
       },
       {
         "date": "2026-10-06",
         "campaign": "(ai-assistant)",
-        "count": 2
+        "count": 3
       },
       {
         "date": "2026-10-06",
         "campaign": "(not set)",
-        "count": 1
+        "count": 2
       },
       {
         "date": "2026-10-06",
@@ -69544,6 +69443,13 @@
       {
         "date": "2026-10-06",
         "subscriptions": 29.0,
+        "pdf": 9.0,
+        "cognitive": 0.0,
+        "other": 0.0
+      },
+      {
+        "date": "2026-10-07",
+        "subscriptions": 0.0,
         "pdf": 9.0,
         "cognitive": 0.0,
         "other": 0.0
@@ -71861,6 +71767,14 @@
         "viewed_privacy": 214,
         "accepted_privacy": 0,
         "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/who_attracts_you_study.html",
+        "first_visit": 262,
+        "viewed_privacy": 286,
+        "accepted_privacy": 123,
+        "submitted_email": 78
       },
       {
         "date": "2026-04-22",
@@ -74357,14 +74271,6 @@
         "viewed_privacy": 0,
         "accepted_privacy": 160,
         "submitted_email": 96
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/who_attracts_you_study.html",
-        "first_visit": 145,
-        "viewed_privacy": 160,
-        "accepted_privacy": 73,
-        "submitted_email": 44
       },
       {
         "date": "2026-01-06",
@@ -77631,6 +77537,14 @@
         "submitted_email": 91
       },
       {
+        "date": "2026-10-06",
+        "page": "/philosophical_beliefs.html",
+        "first_visit": 5,
+        "viewed_privacy": 112,
+        "accepted_privacy": 56,
+        "submitted_email": 22
+      },
+      {
         "date": "2026-02-04",
         "page": "/philosophical_beliefs.html",
         "first_visit": 26,
@@ -78045,6 +77959,14 @@
         "viewed_privacy": 0,
         "accepted_privacy": 105,
         "submitted_email": 63
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/how_rational_are_you_really_take_the_test.html",
+        "first_visit": 77,
+        "viewed_privacy": 105,
+        "accepted_privacy": 69,
+        "submitted_email": 30
       },
       {
         "date": "2026-01-06",
@@ -79655,6 +79577,14 @@
         "submitted_email": 49
       },
       {
+        "date": "2026-10-06",
+        "page": "/personality-test.html",
+        "first_visit": 53,
+        "viewed_privacy": 0,
+        "accepted_privacy": 77,
+        "submitted_email": 46
+      },
+      {
         "date": "2026-01-23",
         "page": "/what_is_your_time_really_worth_to_you.html",
         "first_visit": 57,
@@ -79701,14 +79631,6 @@
         "viewed_privacy": 76,
         "accepted_privacy": 49,
         "submitted_email": 31
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/philosophical_beliefs.html",
-        "first_visit": 3,
-        "viewed_privacy": 76,
-        "accepted_privacy": 31,
-        "submitted_email": 10
       },
       {
         "date": "2026-02-15",
@@ -80565,14 +80487,6 @@
         "viewed_privacy": 66,
         "accepted_privacy": 31,
         "submitted_email": 9
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/how_rational_are_you_really_take_the_test.html",
-        "first_visit": 44,
-        "viewed_privacy": 66,
-        "accepted_privacy": 44,
-        "submitted_email": 21
       },
       {
         "date": "2026-01-27",
@@ -81445,14 +81359,6 @@
         "viewed_privacy": 56,
         "accepted_privacy": 31,
         "submitted_email": 18
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/personality-test.html",
-        "first_visit": 38,
-        "viewed_privacy": 0,
-        "accepted_privacy": 56,
-        "submitted_email": 34
       },
       {
         "date": "2026-01-14",
@@ -85021,6 +84927,14 @@
         "viewed_privacy": 34,
         "accepted_privacy": 24,
         "submitted_email": 16
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/intrinsic_values_test.html",
+        "first_visit": 11,
+        "viewed_privacy": 34,
+        "accepted_privacy": 15,
+        "submitted_email": 8
       },
       {
         "date": "2026-01-05",
@@ -93927,14 +93841,6 @@
         "submitted_email": 8
       },
       {
-        "date": "2026-10-06",
-        "page": "/intrinsic_values_test.html",
-        "first_visit": 8,
-        "viewed_privacy": 18,
-        "accepted_privacy": 9,
-        "submitted_email": 4
-      },
-      {
         "date": "2026-01-02",
         "page": "/cult_assessment.html",
         "first_visit": 12,
@@ -95981,6 +95887,14 @@
         "viewed_privacy": 16,
         "accepted_privacy": 13,
         "submitted_email": 4
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/cognitive-test-intro.html",
+        "first_visit": 8,
+        "viewed_privacy": 16,
+        "accepted_privacy": 1,
+        "submitted_email": 0
       },
       {
         "date": "2026-01-01",
@@ -98907,6 +98821,14 @@
         "page": "/unanswered-questions-in-psychology/",
         "first_visit": 14,
         "viewed_privacy": 2,
+        "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/personality_report.html",
+        "first_visit": 14,
+        "viewed_privacy": 0,
         "accepted_privacy": 0,
         "submitted_email": 0
       },
@@ -102952,11 +102874,11 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/cognitive-test-intro.html",
-        "first_visit": 6,
+        "page": "/what_is_your_time_really_worth_to_you.html",
+        "first_visit": 8,
         "viewed_privacy": 12,
-        "accepted_privacy": 0,
-        "submitted_email": 0
+        "accepted_privacy": 8,
+        "submitted_email": 5
       },
       {
         "date": "2026-01-06",
@@ -104989,6 +104911,14 @@
         "viewed_privacy": 11,
         "accepted_privacy": 4,
         "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/cult_assessment.html",
+        "first_visit": 9,
+        "viewed_privacy": 11,
+        "accepted_privacy": 7,
+        "submitted_email": 1
       },
       {
         "date": "2026-01-01",
@@ -120544,17 +120474,17 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/cult_assessment.html",
-        "first_visit": 7,
+        "page": "/predict_correlations.html",
+        "first_visit": 1,
         "viewed_privacy": 7,
-        "accepted_privacy": 5,
+        "accepted_privacy": 4,
         "submitted_email": 1
       },
       {
         "date": "2026-10-06",
-        "page": "/what_is_your_time_really_worth_to_you.html",
-        "first_visit": 4,
-        "viewed_privacy": 7,
+        "page": "/unique-traits-test",
+        "first_visit": 7,
+        "viewed_privacy": 5,
         "accepted_privacy": 5,
         "submitted_email": 3
       },
@@ -127152,11 +127082,27 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/personality_report.html",
-        "first_visit": 6,
-        "viewed_privacy": 0,
-        "accepted_privacy": 0,
+        "page": "/lcq.html",
+        "first_visit": 3,
+        "viewed_privacy": 6,
+        "accepted_privacy": 5,
         "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/political_bias_test.html",
+        "first_visit": 5,
+        "viewed_privacy": 6,
+        "accepted_privacy": 3,
+        "submitted_email": 2
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/rhetorical_fallacies.html",
+        "first_visit": 0,
+        "viewed_privacy": 6,
+        "accepted_privacy": 1,
+        "submitted_email": 1
       },
       {
         "date": "2026-01-01",
@@ -135944,11 +135890,43 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/unique-traits-test",
+        "page": "/astrology_challenge.html",
+        "first_visit": 1,
+        "viewed_privacy": 4,
+        "accepted_privacy": 5,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/can_you_guess_which_charities_work.html",
+        "first_visit": 3,
+        "viewed_privacy": 5,
+        "accepted_privacy": 4,
+        "submitted_email": 3
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/create_your_custom_clearer_thinking_plan.html",
+        "first_visit": 0,
+        "viewed_privacy": 5,
+        "accepted_privacy": 2,
+        "submitted_email": 1
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/unanswered-questions-in-psychology/",
         "first_visit": 5,
-        "viewed_privacy": 2,
-        "accepted_privacy": 3,
-        "submitted_email": 2
+        "viewed_privacy": 3,
+        "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/unique-traits-test/",
+        "first_visit": 5,
+        "viewed_privacy": 4,
+        "accepted_privacy": 4,
+        "submitted_email": 0
       },
       {
         "date": "2026-01-01",
@@ -148712,19 +148690,19 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/astrology_challenge.html",
+        "page": "/decisionmaker.html",
         "first_visit": 0,
-        "viewed_privacy": 1,
-        "accepted_privacy": 4,
+        "viewed_privacy": 4,
+        "accepted_privacy": 3,
         "submitted_email": 0
       },
       {
         "date": "2026-10-06",
-        "page": "/political_bias_test.html",
-        "first_visit": 3,
+        "page": "/life_assessment.html",
+        "first_visit": 1,
         "viewed_privacy": 4,
-        "accepted_privacy": 2,
-        "submitted_email": 1
+        "accepted_privacy": 3,
+        "submitted_email": 0
       },
       {
         "date": "2026-01-01",
@@ -167840,11 +167818,27 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/can_you_guess_which_charities_work.html",
-        "first_visit": 2,
+        "page": "/calibrate_your_judgment.html",
+        "first_visit": 3,
+        "viewed_privacy": 0,
+        "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/dashboard.html",
+        "first_visit": 1,
+        "viewed_privacy": 3,
+        "accepted_privacy": 1,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/faulty_reasoning_quiz.html",
+        "first_visit": 0,
         "viewed_privacy": 3,
         "accepted_privacy": 3,
-        "submitted_email": 2
+        "submitted_email": 1
       },
       {
         "date": "2026-10-06",
@@ -167856,19 +167850,11 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/lcq.html",
-        "first_visit": 1,
-        "viewed_privacy": 3,
-        "accepted_privacy": 3,
-        "submitted_email": 0
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/predict_correlations.html",
-        "first_visit": 0,
-        "viewed_privacy": 3,
+        "page": "/is_your_memory_like_a_photograph.html",
+        "first_visit": 2,
+        "viewed_privacy": 2,
         "accepted_privacy": 2,
-        "submitted_email": 1
+        "submitted_email": 3
       },
       {
         "date": "2026-10-06",
@@ -167880,19 +167866,11 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/rhetorical_fallacies.html",
+        "page": "/social_biases.html",
         "first_visit": 0,
         "viewed_privacy": 3,
-        "accepted_privacy": 1,
-        "submitted_email": 1
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/unanswered-questions-in-psychology/",
-        "first_visit": 3,
-        "viewed_privacy": 0,
-        "accepted_privacy": 0,
-        "submitted_email": 0
+        "accepted_privacy": 3,
+        "submitted_email": 2
       },
       {
         "date": "2026-01-01",
@@ -198632,6 +198610,14 @@
       },
       {
         "date": "2026-10-06",
+        "page": "/can_you_detect_weak_arguments.html",
+        "first_visit": 2,
+        "viewed_privacy": 2,
+        "accepted_privacy": 2,
+        "submitted_email": 2
+      },
+      {
+        "date": "2026-10-06",
         "page": "/common_misconceptions.html",
         "first_visit": 1,
         "viewed_privacy": 2,
@@ -198640,35 +198626,27 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/dashboard.html",
-        "first_visit": 0,
+        "page": "/mailing-list/unsubscribe/",
+        "first_visit": 2,
+        "viewed_privacy": 0,
+        "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/moodboosters.html",
+        "first_visit": 2,
         "viewed_privacy": 2,
         "accepted_privacy": 0,
         "submitted_email": 0
       },
       {
         "date": "2026-10-06",
-        "page": "/decisionmaker.html",
-        "first_visit": 0,
-        "viewed_privacy": 2,
-        "accepted_privacy": 2,
-        "submitted_email": 0
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/faulty_reasoning_quiz.html",
-        "first_visit": 0,
-        "viewed_privacy": 2,
-        "accepted_privacy": 2,
+        "page": "/sources_of_pleasure.html",
+        "first_visit": 2,
+        "viewed_privacy": 1,
+        "accepted_privacy": 1,
         "submitted_email": 1
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/social_biases.html",
-        "first_visit": 0,
-        "viewed_privacy": 2,
-        "accepted_privacy": 2,
-        "submitted_email": 2
       },
       {
         "date": "2026-10-06",
@@ -198676,6 +198654,14 @@
         "first_visit": 2,
         "viewed_privacy": 0,
         "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/sunk_costs.html",
+        "first_visit": 0,
+        "viewed_privacy": 2,
+        "accepted_privacy": 1,
         "submitted_email": 0
       },
       {
@@ -250960,6 +250946,14 @@
       },
       {
         "date": "2026-10-06",
+        "page": "/Cognitive_Defusion/",
+        "first_visit": 1,
+        "viewed_privacy": 1,
+        "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
         "page": "/achieve_your_goals.html",
         "first_visit": 1,
         "viewed_privacy": 0,
@@ -250976,27 +250970,19 @@
       },
       {
         "date": "2026-10-06",
+        "page": "/become_a_great_listener.html",
+        "first_visit": 1,
+        "viewed_privacy": 0,
+        "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
         "page": "/building_happiness_habits.html",
         "first_visit": 1,
         "viewed_privacy": 0,
         "accepted_privacy": 0,
         "submitted_email": 0
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/calibrate_your_judgment.html",
-        "first_visit": 1,
-        "viewed_privacy": 0,
-        "accepted_privacy": 0,
-        "submitted_email": 0
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/can_you_detect_weak_arguments.html",
-        "first_visit": 1,
-        "viewed_privacy": 1,
-        "accepted_privacy": 1,
-        "submitted_email": 1
       },
       {
         "date": "2026-10-06",
@@ -251008,17 +250994,25 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/create_your_custom_clearer_thinking_plan.html",
-        "first_visit": 0,
+        "page": "/defining_emotions.html",
+        "first_visit": 1,
         "viewed_privacy": 1,
-        "accepted_privacy": 1,
-        "submitted_email": 1
+        "accepted_privacy": 0,
+        "submitted_email": 0
       },
       {
         "date": "2026-10-06",
         "page": "/explanation_freeze.html",
         "first_visit": 1,
         "viewed_privacy": 0,
+        "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/flexible_thinking.html",
+        "first_visit": 0,
+        "viewed_privacy": 1,
         "accepted_privacy": 0,
         "submitted_email": 0
       },
@@ -251032,23 +251026,15 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/is_your_memory_like_a_photograph.html",
+        "page": "/introduction.html",
         "first_visit": 0,
-        "viewed_privacy": 0,
-        "accepted_privacy": 0,
+        "viewed_privacy": 1,
+        "accepted_privacy": 1,
         "submitted_email": 1
       },
       {
         "date": "2026-10-06",
         "page": "/long-term_future_quiz.html",
-        "first_visit": 1,
-        "viewed_privacy": 0,
-        "accepted_privacy": 0,
-        "submitted_email": 0
-      },
-      {
-        "date": "2026-10-06",
-        "page": "/mailing-list/unsubscribe/",
         "first_visit": 1,
         "viewed_privacy": 0,
         "accepted_privacy": 0,
@@ -251064,19 +251050,35 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/moodboosters.html",
+        "page": "/overcome_procrastination.html",
+        "first_visit": 0,
+        "viewed_privacy": 1,
+        "accepted_privacy": 1,
+        "submitted_email": 1
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/overconfidence_analyzer.html",
         "first_visit": 1,
+        "viewed_privacy": 1,
+        "accepted_privacy": 1,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/planning_fallacy.html",
+        "first_visit": 0,
         "viewed_privacy": 1,
         "accepted_privacy": 0,
         "submitted_email": 0
       },
       {
         "date": "2026-10-06",
-        "page": "/overcome_procrastination.html",
+        "page": "/program_yourself.html",
         "first_visit": 0,
         "viewed_privacy": 1,
         "accepted_privacy": 1,
-        "submitted_email": 1
+        "submitted_email": 0
       },
       {
         "date": "2026-10-06",
@@ -251104,6 +251106,14 @@
       },
       {
         "date": "2026-10-06",
+        "page": "/relationship_review.html",
+        "first_visit": 0,
+        "viewed_privacy": 1,
+        "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
         "page": "/retrocaster.html",
         "first_visit": 1,
         "viewed_privacy": 0,
@@ -251120,7 +251130,7 @@
       },
       {
         "date": "2026-10-06",
-        "page": "/sunk_costs.html",
+        "page": "/uncover_your_guiding_principles.html",
         "first_visit": 0,
         "viewed_privacy": 1,
         "accepted_privacy": 0,
@@ -251144,7 +251154,23 @@
       },
       {
         "date": "2026-10-06",
+        "page": "/understanding_bayes_theorem.html",
+        "first_visit": 0,
+        "viewed_privacy": 1,
+        "accepted_privacy": 1,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
         "page": "/when_to_stop_exploring.html",
+        "first_visit": 1,
+        "viewed_privacy": 0,
+        "accepted_privacy": 0,
+        "submitted_email": 0
+      },
+      {
+        "date": "2026-10-06",
+        "page": "/would_you_make_a_good_tech_startup_founder.html",
         "first_visit": 1,
         "viewed_privacy": 0,
         "accepted_privacy": 0,
