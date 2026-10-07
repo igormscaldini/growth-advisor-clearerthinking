@@ -1,34 +1,41 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Clearer Thinking Plus: The Supplement Paradox</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;700;800&display=swap" rel="stylesheet">
-<!-- Landing page for the Supplement Paradox paywall. Paste the whole file into a Wix "Embed HTML" element (Code mode). Styled after clearerthinking.org/plus. -->
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+<!-- Landing page for the Supplement Paradox paywall. Colours match the newsletter paywall box (cream card, orange button, blue accents). -->
 <style>
-  :root{--blue:#0885F8;--yellow:#FECB02;--text:#303030;--muted:#5b5b5b;--grey:#F5F5F5;}
+  :root{--blue:#0885F8;--orange:#F8911B;--cream:#FFF5E8;--cream-border:#F5D9B8;--text:#2D2D2D;--muted:#555;}
   *{box-sizing:border-box}
   html,body{margin:0;background:#fff;color:var(--text);font-family:"Avenir Next",Avenir,"Nunito Sans",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:760px;margin:0 auto;padding:48px 20px 56px;text-align:center}
-  .logo{width:100%;max-width:380px;height:auto;display:block;margin:0 auto 36px}
-  h1{font-size:clamp(24px,4vw,34px);line-height:1.3;font-weight:700;margin:0 0 18px;letter-spacing:-.2px}
+  .page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 24px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center;max-width:1080px;width:100%}
+  .logo{width:100%;max-width:320px;height:auto;display:block;margin:0 0 28px}
+  .pill{display:inline-block;background:#fff;color:var(--blue);border:1px solid var(--cream-border);font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:999px;margin:0 0 16px}
+  h1{font-size:clamp(26px,3vw,36px);line-height:1.25;font-weight:700;margin:0 0 18px}
   h1 .hl{color:var(--blue)}
-  .lede{font-size:18px;line-height:1.6;font-weight:400;color:#4a4a4a;max-width:600px;margin:0 auto 34px}
-  .lede b{font-weight:700}
-  .card{background:#fff;border-radius:8px;box-shadow:0 2px 14px rgba(0,0,0,.10);padding:34px 40px 36px;text-align:left;max-width:600px;margin:0 auto}
-  .card h2{font-size:20px;font-weight:700;margin:0 0 16px}
-  ul{list-style:none;margin:0 0 26px;padding:0}
-  li{display:flex;gap:14px;align-items:flex-start;font-size:17px;line-height:1.5;padding:10px 14px;border-radius:4px}
-  li:nth-child(odd){background:var(--grey)}
-  .tick{flex:0 0 20px;width:20px;height:20px;margin-top:3px}
-  .price{font-size:clamp(22px,3.4vw,28px);font-weight:700;margin:0 0 20px;text-align:center}
+  .lede{font-size:18px;line-height:1.6;color:var(--muted);margin:0 0 24px}
+  .note{font-size:14px;line-height:1.55;color:#777;margin:0;padding-left:14px;border-left:3px solid var(--blue)}
+  .card{background:var(--cream);border:1px solid var(--cream-border);border-radius:12px;padding:30px 32px 32px}
+  .card h2{font-size:19px;font-weight:700;margin:0 0 12px}
+  ul{list-style:none;margin:0 0 22px;padding:0}
+  li{display:flex;gap:12px;align-items:flex-start;font-size:16px;line-height:1.45;padding:8px 0;border-bottom:1px solid var(--cream-border)}
+  li:last-child{border-bottom:0}
+  .tick{flex:0 0 20px;width:20px;height:20px;margin-top:1px}
+  .price{font-size:22px;font-weight:700;margin:0 0 18px;text-align:center}
   .price .amt{color:var(--blue)}
-  .price .cancel{background:var(--yellow);padding:0 8px;white-space:nowrap}
-  .btn{display:block;width:100%;max-width:320px;margin:0 auto;background:var(--yellow);color:var(--text);text-decoration:none;text-align:center;font-weight:800;font-size:18px;letter-spacing:1.5px;padding:16px 24px;border-radius:5px;transition:filter .15s}
+  .price .cancel{display:block;font-size:15px;font-weight:400;color:var(--muted);margin-top:4px}
+  .btn{display:block;background:var(--orange);color:#fff;text-decoration:none;text-align:center;font-weight:700;font-size:18px;padding:16px 24px;border-radius:8px;transition:filter .15s}
   .btn:hover{filter:brightness(.95)}
-  .note{margin:26px auto 0;max-width:600px;background:var(--grey);border-left:4px solid var(--blue);padding:16px 20px;font-size:15px;line-height:1.55;color:var(--muted);text-align:left}
-  @media (max-width:520px){.wrap{padding:32px 16px 40px} .card{padding:24px 18px 28px} li{font-size:16px;padding:9px 10px} .lede{font-size:16px}}
+  @media (max-width:860px){
+    .page{display:block;padding:28px 16px 40px}
+    .grid{grid-template-columns:1fr;gap:28px}
+    .left{text-align:center} .logo{margin:0 auto 24px;max-width:280px}
+    .note{text-align:left} .lede{font-size:16px} .card{padding:24px 20px 26px}
+  }
 </style></head>
-<body><main class="wrap">
-  <svg class="logo" role="img" aria-label="Clearer Thinking Plus" preserveAspectRatio="xMidYMid meet" viewBox="0 0 870.8 93.59" xmlns="http://www.w3.org/2000/svg">
+<body><main class="page"><div class="grid">
+  <section class="left">
+    <svg class="logo" role="img" aria-label="Clearer Thinking Plus" preserveAspectRatio="xMidYMid meet" viewBox="0 0 870.8 93.59" xmlns="http://www.w3.org/2000/svg">
     <g>
         <path d="M161.71 31.75q-1.8-2.34-4.56-3.6t-5.7-1.26q-3.6 0-6.51 1.35t-4.98 3.69-3.21 5.49-1.14 6.75q0 3.36 1.08 6.36t3.12 5.28 4.98 3.6 6.66 1.32c3.72 0 4.58-.5 6.42-1.5q2.76-1.5 4.68-4.2l4.86 3.66q-.48.66-1.68 1.89t-3.18 2.46-4.77 2.16-6.45.93q-5.04 0-9.09-1.92t-6.9-5.04-4.35-7.05-1.5-7.95q0-4.92 1.62-9.09t4.53-7.2 6.99-4.71 9-1.68q4.2 0 8.25 1.62c4.05 1.62 4.91 2.74 6.63 4.98z" fill="#303030"></path>
         <path d="M174.37 22.57h5.76v37.08h19.5v5.4h-25.26z" fill="#303030"></path>
@@ -58,19 +65,21 @@
         <path fill="none" stroke-linecap="round" stroke-miterlimit="10" stroke-width="7.62" stroke="#fecb02" d="M95.11 53.11V28.63"></path>
     </g>
 </svg>
-  <h1>Join Clearer Thinking Plus to read the full <span class="hl">“The Supplement Paradox”</span>, and unlock more perks</h1>
-  <p class="lede">Members fund our research and keep our tools and articles <b>free for everyone else</b>. Join to read the rest of the article and get everything else that comes with membership.</p>
+    <span class="pill">Members only</span>
+    <h1>Join Clearer Thinking Plus to read the full <span class="hl">“The Supplement Paradox”</span>, and unlock more perks</h1>
+    <p class="lede">Members fund our research and tools, and keep them free for everyone. Join to read the rest of the article and get everything else that comes with membership.</p>
+    <p class="note">After checkout, we’ll take you straight to the full version of “The Supplement Paradox” and send you a welcome email explaining how to access your other perks.</p>
+  </section>
   <section class="card">
     <h2>What you get</h2>
     <ul>
-      <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#FECB02" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>The full <b>“The Supplement Paradox”</b> article, plus all future members-only content</span></li>
-      <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#FECB02" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Ad-Free Podcasts</span></li>
-      <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#FECB02" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Over 10 Hours of Bonus Content</span></li>
-      <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#FECB02" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Monthly Email Wrap-Up</span></li>
-      <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#FECB02" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Early Access to Future Tools</span></li>
+        <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#F8911B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>The full <b>“The Supplement Paradox”</b> article, plus all future members-only content</span></li>
+        <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#F8911B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Ad-Free Podcasts</span></li>
+        <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#F8911B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Over 10 Hours of Bonus Content</span></li>
+        <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#F8911B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Monthly Email Wrap-Up</span></li>
+        <li><svg class="tick" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="#F8911B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Early Access to Future Tools</span></li>
     </ul>
-    <p class="price">All for only <span class="amt">$9/month</span>. <span class="cancel">Cancel anytime.</span></p>
-    <a class="btn" href="https://www.guidedtrack.com/programs/1pvomgo/run?p=supporter&amp;src=supplement-paradox-lp" target="_top">Sign Up</a>
+    <p class="price">All for only <span class="amt">$9/month</span><span class="cancel">Cancel anytime.</span></p>
+    <a class="btn" href="https://www.guidedtrack.com/programs/1pvomgo/run?p=supporter&amp;src=supplement-paradox-lp" target="_top">Sign up to read the full version</a>
   </section>
-  <p class="note">After checkout, we’ll take you straight to the full version of “The Supplement Paradox” and send you a welcome email explaining how to access your other perks.</p>
-</main></body></html>
+</div></main></body></html>
