@@ -1,10 +1,10 @@
 <!doctype html>
 <!-- Clearer Thinking Plus paywall box for the WEB version of a paywalled article (Wix blog "Embed HTML"
      element, which renders it in an iframe). Same look as the beehiiv snippet ct_plus_paywall_A_card_cream.html;
-     the differences: no beehiiv merge tag (the web has no reader identity, so BOTH links open the sign-up
-     program in its default state: the pitch page whose Sign Up button is the Stripe payment link),
-     src=supplement-paradox-web, and a body reset so the iframe shows no margin.
-     In Wix set the element height to about 360px on desktop and 480px on mobile (the box grows as text wraps). -->
+     the differences: no beehiiv merge tag (the web has no reader identity, so the button opens the sign-up
+     program in its default state and members are told to use their newsletter link instead of a dead-end
+     "Click here"), src=supplement-paradox-web, and a body reset so the iframe shows no margin.
+     Wix sizes the embed to its content (checked 2026-10-12: 347px desktop, 486px phone), so no height to set. -->
 <html>
 <head>
 <meta charset="utf-8">
@@ -24,7 +24,7 @@
           <td style="background-color:#F8911B; border-radius:8px;">
             <a href="https://programs.clearerthinking.org/members-only-content/?newsletter=The%20Supplement%20Paradox&amp;src=supplement-paradox-web" target="_blank" rel="noopener" style="display:inline-block; padding:14px 30px; font-family:Arial, Helvetica, sans-serif; font-size:16px; font-weight:bold; line-height:1; color:#FFFFFF; text-decoration:none; border-radius:8px;">Become a member to read the rest</a>
           </td></tr></table>
-      <div style="font-size:13px; line-height:1.5; color:#777777; margin:22px 0 0 0;">Already a paid subscriber? <a href="https://programs.clearerthinking.org/members-only-content/?newsletter=The%20Supplement%20Paradox&amp;src=supplement-paradox-web" target="_blank" rel="noopener" style="color:#0885F8; font-weight:bold; text-decoration:underline;">Click here</a> to read the full version.</div>
+      <div style="font-size:13px; line-height:1.5; color:#777777; margin:22px 0 0 0;">Already a paid subscriber? Open the article from the link in your newsletter email.</div>
     </td>
   </tr>
 </table>
