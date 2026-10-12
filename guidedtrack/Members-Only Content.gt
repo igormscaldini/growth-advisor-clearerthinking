@@ -7,7 +7,13 @@
 -- URL PARAMETERS
 --   ?newsletter=The%20Supplement%20Paradox   article name shown on the page (required in practice)
 --   &src=supplement-paradox                  optional tracking tag, passed on to the sign-up link
+--   &h={{subscriber_email_hash}}             beehiiv merge tag, MD5 of the reader's email. When it
+--                                            matches the member list the reader skips this page and
+--                                            opens the full version directly.
 -- Without ?newsletter= the page falls back to generic "the article" wording.
+--
+-- THIS FILE IS A TEMPLATE. The repo is public, so the access key and the member list are filled
+-- in by members_only_programs.py, which writes the push-ready copy to ~/guidedtrack/. Push THAT.
 --
 -- GOTCHAS: <img> is stripped from *html, so the CT+ logo is a CSS background image (inline SVG
 -- data URI); {variable} is not interpolated inside <style>.
@@ -16,10 +22,17 @@
 -- SETTINGS (edit these) ---------------------------------------------------------
 >> signupBaseUrl = "https://www.guidedtrack.com/programs/1pvomgo/run?p=supporter"
 >> priceText = "$9/month"
+>> fullVersionBaseUrl = "https://programs.clearerthinking.org/members-only-content-supplement-paradox/"
+-- The full-version program opens only with this key (same value in both programs).
+>> accessKey = "__MEMBERS_ONLY_KEY__"
+-- MEMBER LIST: MD5 of each active Clearer Thinking Plus subscriber's email, lowercased.
+-- Regenerate with members_only_programs.py whenever members join or leave.
+-- BEGIN MEMBER HASHES
+>> memberHashes = []
+-- END MEMBER HASHES
 -- TEST MODE: while testMode = 1 the Sign Up button skips checkout and opens the full-version
--- page below, so the whole reader journey can be tried. Set testMode = 0 before going live.
->> testMode = 1
->> fullVersionUrl = "https://programs.clearerthinking.org/members-only-content-supplement-paradox/"
+-- page directly. Keep it 0 in production.
+>> testMode = 0
 ---------------------------------------------------------------------------------
 
 -- URL parameters. An empty string is TRUTHY in GuidedTrack, so test both cases.
@@ -29,6 +42,11 @@
 	>> src = ""
 *if: src = ""
 	>> src = "newsletter-paywall"
+*if: not h
+	>> h = ""
+>> h = h.lowercase
+
+>> fullVersionUrl = "{fullVersionBaseUrl}?k={accessKey}&src={src}"
 
 -- Wording with and without an article name
 >> headlineName = "article"
@@ -46,6 +64,13 @@
 *settings
 	*menu: no
 	*back: no
+
+-- Members (their hash is in the list) skip the pitch and open the article directly.
+>> isMember = 0
+*if: h in memberHashes
+	>> isMember = 1
+*if: isMember = 1
+	*goto: {fullVersionUrl}
 
 *html
 	<style>

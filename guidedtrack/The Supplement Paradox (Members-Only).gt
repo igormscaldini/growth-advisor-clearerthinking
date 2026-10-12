@@ -1,9 +1,11 @@
 --------------------------------------------------------------------------------
 -- NAME: The Supplement Paradox (Members-Only)
--- TEST page: members-only full version of the newsletter article "The Supplement Paradox"
--- (Spencer Greenberg and Travis M.). Reached from the "Members-Only Content" program (38912)'s
--- Sign Up button while that program is in test mode. Generated 2026-10-07 from the beehiiv
--- draft body by a script; edit the text here directly for small fixes.
+-- Members-only full version of the newsletter article "The Supplement Paradox"
+-- (Spencer Greenberg and Travis M.). Opens only with ?k=<access key>, which the "Members-Only
+-- Content" program (38912) appends after verifying the reader; anyone else sees a short notice.
+-- Generated 2026-10-07 from the beehiiv draft body by a script; edit the text here for small fixes.
+-- TEMPLATE: the key is filled in by members_only_programs.py (the repo is public). Push the
+-- copy it writes to ~/guidedtrack/, not this file.
 -- The 2010-vs-2024 infographic is omitted: it was never hosted anywhere public.
 --------------------------------------------------------------------------------
 
@@ -41,6 +43,15 @@
 		.program_container .ct-coach a.ct-coach-btn { display: inline-block; background: #F8911B; color: #ffffff !important; text-decoration: none !important; font-weight: 700; font-size: 17px; padding: 14px 28px; border-radius: 8px; }
 	</style>
 
+-- ACCESS GATE: same key as accessKey in program 38912. Empty and wrong values both stop here.
+>> accessKey = "__MEMBERS_ONLY_KEY__"
+*if: not k
+	>> k = ""
+*if: not (k = accessKey)
+	*html
+		<div class="ct-thanks"><p class="ct-thanks-head">This article is for Clearer Thinking Plus members</p><p>Please open it from the link in your newsletter. Not a member yet? <a href="https://programs.clearerthinking.org/members-only-content/?newsletter=The%20Supplement%20Paradox&src=direct">Join Clearer Thinking Plus</a> to read the full version.</p></div>
+	*quit
+
 *html
 	<div class="ct-thanks"><p class="ct-thanks-head">Exclusive content for Clearer Thinking Plus members</p><p>You’re reading the full version of this article. Thank you for being a member: your support funds our research and keeps our tools and articles free for everyone.</p></div>
 	<h1 class="ct-title">The Supplement Paradox: Why are so many claims about supplements B.S.?</h1>
@@ -66,7 +77,7 @@
 	<h2>What we’re <em>not </em>saying</h2>
 	<p>Before we dive into critiquing the common arguments, it’s important to point out that we are not saying supplements are useless to all people in all places at all times. We’re specifically looking at non-pregnant adults, and two other important kinds of exceptions should be noted:</p>
 	<ol><li>For many nutritional deficiencies, supplements genuinely are incredibly helpful. If you go a long enough time without vitamin C, <a target="_blank" rel="noopener" href="https://ods.od.nih.gov/factsheets/VitaminC-HealthProfessional/">you will likely get scurvy</a>; a lack of vitamin A <a target="_blank" rel="noopener" href="https://ods.od.nih.gov/factsheets/VitaminA-HealthProfessional/">can lead to Night Blindness</a>, and a severe deficiency of Vitamin D can <a target="_blank" rel="noopener" href="https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/">cause serious bone issues</a>. It's absolutely critical that you get enough of each of the essential vitamins and minerals. Importantly, though, this is a different question than whether most people in the US will benefit from untargeted supplementation.</li><li>There is robust evidence in favor of some supplements having positive effects for specific medical conditions or in some contexts. We discuss this more below, but for example, <a target="_blank" rel="noopener" href="https://doi.org/10.1001/jama.2023.12876">folic acid supplementation can benefit</a> people who are pregnant or planning to become pregnant in the next month or so, and creatine (when paired with resistance training) is <a target="_blank" rel="noopener" href="https://doi.org/10.1519/JSC.0000000000004862">genuinely useful</a> if you're trying to improve muscle strength.</li></ol>
-	<p>Our focus is the claim that most people should be on supplements because they produce positive effects in average adultpeople without deficiencies and who lack specific medical conditions that can be treated by those supplements. In other words, <strong>we’re criticizing the view that the general adult population should all be taking untargeted supplements to improve or maintain their health.</strong></p>
+	<p>Our focus is the claim that most people should be on supplements because they produce positive effects in average adult people without deficiencies and who lack specific medical conditions that can be treated by those supplements. In other words, <strong>we’re criticizing the view that the general adult population should all be taking untargeted supplements to improve or maintain their health.</strong></p>
 	<p>It’s important that we’re clear about this: if you're taking supplements and finding benefits, or your doctor has recommended you take them, we are not suggesting you should stop taking them.</p>
 	<h2>The evidence of large trials</h2>
 	<p>If you look at studies on supplements, you'll find that earlier trials tend to show a wide variety of different benefits of many supplements. But a common pattern of events goes like this: those early and promising-seeming studies (which may be smaller, target more specific demographics, or have otherwise-biased samples) motivate larger, more rigorous studies in the general population, but the larger trials don’t find the same results in healthy adults.</p>
