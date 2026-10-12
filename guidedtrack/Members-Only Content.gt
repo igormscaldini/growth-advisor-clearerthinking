@@ -20,7 +20,10 @@
 --------------------------------------------------------------------------------
 
 -- SETTINGS (edit these) ---------------------------------------------------------
->> signupBaseUrl = "https://www.guidedtrack.com/programs/1pvomgo/run?p=supporter"
+-- Stripe Payment Link on the team's Supporter price (lookup key "supporter"); after payment it
+-- redirects to the full version with the access key. The GT checkout (1pvomgo?p=supporter) is
+-- the alternative, but its Stripe success URL is the ambassador thank-you page.
+>> signupBaseUrl = "https://buy.stripe.com/aFa7sK0w357taUt4afak00y"
 >> priceText = "$9/month"
 >> fullVersionBaseUrl = "https://programs.clearerthinking.org/members-only-content-supplement-paradox/"
 -- The full-version program opens only with this key (same value in both programs).
@@ -57,7 +60,8 @@
 	>> perkName = "<b>“{newsletter}”</b> article"
 	>> noteName = "“{newsletter}”"
 
->> signupUrl = "{signupBaseUrl}&src={src}"
+-- client_reference_id lands on the Stripe checkout session, so sign-ups stay attributable to the source.
+>> signupUrl = "{signupBaseUrl}?client_reference_id={src}"
 *if: testMode = 1
 	>> signupUrl = fullVersionUrl
 
