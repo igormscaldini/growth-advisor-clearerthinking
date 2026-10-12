@@ -75,11 +75,6 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   something changed, and emails Igor either way; it PATCHes richContent/excerpt only, so the
   backdate, byline and slug survive. `reports/seo_hub_titles_cache.json` is COMMITTED (not
   ignored) so CI starts warm; the workflow commits it back.
-- `wix_newsletter_draft.py` (+ `wix_ricos.py`, a local HTML -> Ricos converter: the Blog-only API key gets 403 from
-  Wix's own converter): saves a newsletter article's FREE version as a Wix blog DRAFT from the members-only GT
-  program's `*html` blocks, cut at the paywall, then the CTA and footnotes. Images must be in Wix media first
-  (the Wix MCP `UploadImageToWixSite` with public URLs works; Ricos IMAGE nodes do not render external URLs).
-  Byline = `WIX_BLOG_MEMBER_ID` (Igor's by default); set the real author in the editor before publishing.
 - `tools_redirect_map.py` + `tools_redirects.py`: the Wix "Tools" CMS collection (internal id
   `Courses`) auto-creates a /tools/<slug> dynamic page per tool that duplicates the real
   programs.* tool. 85 of them were 301'd to the official pages on 2026-09-30 (ids in
@@ -253,17 +248,6 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `src/data/programs/`, Vercel deploys `main`; work on `purpose/YYYY-MM-DD/desc` branches and never
   push `main` from an agent). GT embed "allowed pages" API: `GET/POST /programs/{id}/pages`.
 
-- Members-only newsletter flow (live 2026-10-12): paywall links carry `?newsletter=<title>&src=<tag>&h={{subscriber_email_hash}}`
-  to GT 38912 "Members-Only Content" (programs.clearerthinking.org/members-only-content/). It compares `h` (beehiiv's MD5
-  of the reader email) with the active Stripe customers' hashes and sends members to GT 38913 "The Supplement Paradox
-  (Members-Only)" with `?k=<MEMBERS_ONLY_KEY>`; everyone else sees the pitch whose Sign Up opens the Supporter checkout
-  (GT 1pvomgo). 38913 shows a notice without the key. `guidedtrack/*.gt` are TEMPLATES (public repo): run
-  `members_only_programs.py --csv <Stripe subscriptions export>` (or `--stripe`) to write the push-ready copies to
-  `~/guidedtrack/`, then `gt push -o` each; the list goes stale, so re-run before each members-only send. Key lives in
-  `.env` (`MEMBERS_ONLY_KEY`). Limits found: Igor's GT account has no `Firebase`/`readEmail` custom service (no live
-  Stripe check from GT); the Supporter checkout's Stripe `success_url` is fixed to clearerthinking.org/typ-ct-ambassador by
-  the team's Firebase function, so "redirect to the article after checkout" needs Belen to add a success URL parameter.
-  `*goto: {url}` works before any page is shown (verified in headless Chrome).
 ## Working conventions
 - Igor's rules: no em dashes anywhere in prose; always ground audience claims in the survey and
   buyer data (see the knowledge base); keep CT+ / paid framing aligned with the mission.
