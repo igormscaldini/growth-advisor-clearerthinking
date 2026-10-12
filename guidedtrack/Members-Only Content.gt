@@ -28,8 +28,8 @@
 >> fullVersionBaseUrl = "https://programs.clearerthinking.org/members-only-content-supplement-paradox/"
 -- The full-version program opens only with this key (same value in both programs).
 >> accessKey = "__MEMBERS_ONLY_KEY__"
--- MEMBER LIST: MD5 of each active Clearer Thinking Plus subscriber's email, lowercased.
--- Regenerate with members_only_programs.py whenever members join or leave.
+-- MEMBER LIST (fallback only, used when the live check below fails): MD5 of each active
+-- Clearer Thinking Plus subscriber's email, lowercased. Regenerate with members_only_programs.py.
 -- BEGIN MEMBER HASHES
 >> memberHashes = []
 -- END MEMBER HASHES
@@ -69,10 +69,24 @@
 	*menu: no
 	*back: no
 
--- Members (their hash is in the list) skip the pitch and open the article directly.
+-- Members skip the pitch and open the article directly. The live check asks the growth dashboard
+-- (external service "memberCheck": GET /api/member-check?h=<hash> with basic auth, see
+-- frontend/app/api/member-check/route.ts) whether the hash belongs to a current Stripe subscriber.
+-- The static list above is only the fallback when that call fails, because it goes stale.
 >> isMember = 0
-*if: h in memberHashes
-	>> isMember = 1
+>> memberCheckError = ""
+*if: not (h = "")
+	*service: memberCheck
+		*path: /api/member-check?h={h}
+		*method: GET
+		*success
+			*if: it["member"] = 1
+				>> isMember = 1
+		*error
+			>> memberCheckError = it
+*if: isMember = 0 and not (memberCheckError = "")
+	*if: h in memberHashes
+		>> isMember = 1
 *if: isMember = 1
 	*goto: {fullVersionUrl}
 
