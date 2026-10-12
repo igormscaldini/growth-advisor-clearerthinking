@@ -41,6 +41,9 @@
 		.program_container .ct-coach p { font-family: inherit; font-size: 17px !important; line-height: 1.55 !important; margin: 0 0 18px 0 !important; }
 		.program_container .ct-coach p.ct-coach-head { font-size: 22px !important; font-weight: 700 !important; margin: 0 0 10px 0 !important; }
 		.program_container .ct-coach a.ct-coach-btn { display: inline-block; background: #F8911B; color: #ffffff !important; text-decoration: none !important; font-weight: 700; font-size: 17px; padding: 14px 28px; border-radius: 8px; }
+		.program_container .ct-thanks p + p, .program_container .ct-thanks ul + p { margin-top: 10px !important; }
+		.program_container .ct-thanks ul { margin: 8px 0 0 0; padding-left: 22px; }
+		.program_container .ct-thanks li { font-family: inherit; font-size: 16px !important; line-height: 1.5 !important; margin: 0 0 4px 0 !important; }
 	</style>
 
 -- ACCESS GATE: same key as accessKey in program 38912. Empty and wrong values both stop here.
@@ -52,8 +55,17 @@
 		<div class="ct-thanks"><p class="ct-thanks-head">This article is for Clearer Thinking Plus members</p><p>Please open it from the link in your newsletter. Not a member yet? <a href="https://programs.clearerthinking.org/members-only-content/?newsletter=The%20Supplement%20Paradox&src=direct">Join Clearer Thinking Plus</a> to read the full version.</p></div>
 	*quit
 
+-- WELCOME BOX: the Stripe payment link redirects here with ?session=<checkout session id>, so a
+-- reader arriving with it has just joined. Show the welcome instead of the regular members banner.
+*if: not session
+	>> session = ""
+*if: not (session = "")
+	*html
+		<div class="ct-thanks"><p class="ct-thanks-eyebrow">Welcome to Clearer Thinking Plus</p><p class="ct-thanks-head">Your membership is active. Thank you for supporting our work.</p><p>Memberships like yours pay for our research, our free tools and the articles we send every week. The full article is below. As a Supporter you also get:</p><ul><li>Ad-free versions of our podcasts</li><li>Over 10 hours of bonus content</li><li>A monthly email wrap-up of everything we published</li><li>Early access to our future tools</li><li>The full version of every members-only article from now on</li></ul><p>Want more? <b>Explorer</b> ($29/month) adds our Advanced Cognitive Assessment, a professional PDF report on your personality test results and the Life-Changing Questions deck. <b>Navigator</b> ($99/month) adds two coaching sessions every month on top of that. Compare and upgrade at <a href="https://www.clearerthinking.org/plus" target="_blank">clearerthinking.org/plus</a>.</p><p>Your other perks are in the <a href="https://programs.clearerthinking.org/dashboard.html#Perks" target="_blank">members dashboard</a>. To cancel at any time, email <a href="mailto:info@clearerthinking.org">info@clearerthinking.org</a>. No hard feelings.</p></div>
+*if: session = ""
+	*html
+		<div class="ct-thanks"><p class="ct-thanks-head">Exclusive content for Clearer Thinking Plus members</p><p>You’re reading the full version of this article. Thank you for being a member: your support funds our research and keeps our tools and articles free for everyone.</p></div>
 *html
-	<div class="ct-thanks"><p class="ct-thanks-head">Exclusive content for Clearer Thinking Plus members</p><p>You’re reading the full version of this article. Thank you for being a member: your support funds our research and keeps our tools and articles free for everyone.</p></div>
 	<h1 class="ct-title">The Supplement Paradox: Why are so many claims about supplements B.S.?</h1>
 	<p class="ct-byline">By Spencer Greenberg and Travis M.</p>
 
