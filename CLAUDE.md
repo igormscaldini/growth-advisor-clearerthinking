@@ -125,6 +125,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Images: `save_image` wants a public URL; relaying bytes as base64 through the model corrupts anything above ~15 KB
   (verify by downloading + PIL decode) and public hosting via GitHub is blocked by the permission classifier, so reuse
   wixstatic/beehiiv URLs or leave a placeholder box. Doc export: `curl .../export?format=html` (link-shared, no auth).
+- `tools_mock_data/mock_gt_export.py`: turns a real GuidedTrack CSV export (scratchpad only, never committed) into a
+  mock file with the same columns and no real person's data; made 2026-10-14 for the AI Advisor volunteer. Delivered
+  files: Drive folder "Data for AI Advisor - files" (id 160asOFgJnE5KENpkyXJbyRF1g54empem). The Drive connector can
+  only receive content as model-typed text (Doc conversion dies above ~21 KB; .txt/.csv fine to 132 KB, verify by md5).
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
