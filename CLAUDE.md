@@ -135,6 +135,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   mock file with the same columns and no real person's data; made 2026-10-14 for the AI Advisor volunteer. Delivered
   files: Drive folder "Data for AI Advisor - files" (id 160asOFgJnE5KENpkyXJbyRF1g54empem). The Drive connector can
   only receive content as model-typed text (Doc conversion dies above ~21 KB; .txt/.csv fine to 132 KB, verify by md5).
+- Unanswered Questions in Psychology Prize (Clearer Research, $400 per winning question, voted by academic
+  psychologists; cancelled if <40 submissions from unaffiliated academics): GT program 37281 (`adcd55g`) embedded at
+  programs.clearerthinking.org/unanswered-questions-in-psychology/. Outreach email (spencer@clearerresearch.org,
+  2026-09-28) says deadline Nov 10, 2026; the form still said Oct 10 on 2026-10-15: keep them in sync. Daily runs:
+  `reports/uqp_daily_runs_src/build.py`. Reddit rules/sizes verified 2026-10-15 via a Redlib mirror (reddit.com
+  blocks fetches); ranked list and bans are in the memory note `project_unanswered_questions_psychology_prize`.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
