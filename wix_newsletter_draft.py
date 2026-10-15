@@ -49,9 +49,9 @@ ARTICLE = {
     # Same wording as the paywall snippet in the beehiiv draft.
     "paywall": {
         "heading": "You’ve reached the members-only part of this article",
-        "body": ("Most of what we write stays free for everyone. Some articles have an extra section for paid "
-                 "members, whose support makes our work possible. Members also get ad-free podcasts, early "
-                 "access to new tools, and more."),
+        "body": ("Almost everything we write is still completely free for everyone, but some articles (no more "
+                 "than 1 per month) may have an extra section for paid members, whose support makes our work "
+                 "possible. Members also get ad-free podcasts, early access to new tools, and more."),
         "button": "Become a member to read the rest",
         "url": MEMBERS_URL,
     },
