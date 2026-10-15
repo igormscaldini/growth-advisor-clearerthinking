@@ -42,7 +42,8 @@ ARTICLE = {
     # beehiiv image URL (as in the GT source) -> Wix media id + pixel size (UploadImageToWixSite, 2026-10-12)
     "images": {
         "180b9ee7-cf9b-4be1-a5e9-3f36ec6f4555/image4.png": ("3c0c4c_9056ab2004bc4ae6a18bd0382971c9aa~mv2.png", 1875, 839, "A capsule on a velvet table"),
-        "ae51ee61-3759-440c-8a37-9568f597daf4/upload_ec04e78b1ff07d29.png": ("3c0c4c_6a17cfc63f074f019e0d565732028075~mv2.png", 680, 308, "Reasons people give for taking supplements, by age group"),
+        # high-res replacement of the reasons-by-age chart (2026-10-15); the old 680x308 copy was 3c0c4c_6a17cfc63f074f019e0d565732028075~mv2.png
+        "d72d50e0-9382-42b5-8513-0dd9bf4ee166/supplement_use_reasons_by_age.png": ("3c0c4c_bc45dc77fc3e4b41b72d35d62475716f~mv2.png", 2511, 1632, "Reasons people give for taking supplements, by age group"),
     },
     "cover": "3c0c4c_9056ab2004bc4ae6a18bd0382971c9aa~mv2.png",  # the hero image, shown once as the cover
     "fade": ("3c0c4c_9ba7338a4390404eb2bdf9929c051645~mv2.png", 513, 99, "The rest of the article is for members"),
