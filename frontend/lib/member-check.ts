@@ -55,3 +55,36 @@ export function makeCache<T>(ttlMs: number) {
     },
   };
 }
+
+// Loose shape check: enough to reject empty input and junk, not a full RFC validation.
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * An email typed by a reader, normalised for hashing, or null when it is not an address.
+ * Trims and lowercases (emailHash does too, so the hash matches Stripe's). A space inside the
+ * local part is put back as "+": "a+b@x.com" arrives as "a b@x.com" when a caller passes it
+ * through a query string without encoding the plus, and no real address contains a space.
+ */
+export function normalizeEmail(input: string | null | undefined): string | null {
+  const v = (input ?? "").trim().toLowerCase().replace(/ /g, "+");
+  return EMAIL_RE.test(v) ? v : null;
+}
+
+/**
+ * The "e" field of a request body, whatever the client sent: a JSON object ({"e": "..."}) or a
+ * form-encoded string (e=...). GuidedTrack's *send posts an association; the exact content type
+ * is not documented, so both are accepted. Returns null when there is no usable field.
+ */
+export function emailFromBodyText(text: string): string | null {
+  const t = (text ?? "").trim();
+  if (!t) return null;
+  if (t.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(t) as { e?: unknown };
+      return typeof parsed?.e === "string" ? parsed.e : null;
+    } catch {
+      return null;
+    }
+  }
+  return new URLSearchParams(t).get("e");
+}

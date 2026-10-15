@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { emailHash, hashesFromSubscriptions, makeCache, normalizeHash } from "./member-check.ts";
+import { emailFromBodyText, emailHash, hashesFromSubscriptions, makeCache, normalizeEmail, normalizeHash } from "./member-check.ts";
 
 test("emailHash is MD5 of the trimmed, lowercased address", () => {
   // md5("hello") is the textbook value; the function must trim and lowercase before hashing.
@@ -51,4 +51,30 @@ test("makeCache keeps the old value when a reload fails, and clear() forces a re
   assert.equal(await cache.get(async () => "second", 60), "second");
   cache.clear();
   assert.equal(await cache.get(async () => "third", 61), "third");
+});
+
+test("normalizeEmail trims, lowercases, restores a plus lost to query-string decoding, and rejects junk", () => {
+  assert.equal(normalizeEmail("  Igor@Example.com "), "igor@example.com");
+  assert.equal(normalizeEmail("igor+hc@gmail.com"), "igor+hc@gmail.com");
+  assert.equal(normalizeEmail("igor hc@gmail.com"), "igor+hc@gmail.com"); // "+" decoded to a space upstream
+  assert.equal(normalizeEmail("not-an-email"), null);
+  assert.equal(normalizeEmail("a@b"), null);
+  assert.equal(normalizeEmail(""), null);
+  assert.equal(normalizeEmail("   "), null);
+  assert.equal(normalizeEmail(null), null);
+  assert.equal(normalizeEmail(undefined), null);
+  // the hash of a normalised address equals the hash beehiiv/Stripe-side code produces
+  assert.equal(emailHash(normalizeEmail(" A+B@X.com ")!), emailHash("a+b@x.com"));
+});
+
+test("emailFromBodyText reads the e field from a JSON or form body and ignores everything else", () => {
+  assert.equal(emailFromBodyText('{"e": "a@x.com"}'), "a@x.com");
+  assert.equal(emailFromBodyText('{"e": "a+b@x.com", "other": 1}'), "a+b@x.com");
+  assert.equal(emailFromBodyText("e=a%2Bb%40x.com"), "a+b@x.com"); // form-encoded keeps the plus
+  assert.equal(emailFromBodyText("e=a+b@x.com"), "a b@x.com"); // unencoded plus becomes a space; normalizeEmail repairs it
+  assert.equal(normalizeEmail(emailFromBodyText("e=a+b@x.com")), "a+b@x.com");
+  assert.equal(emailFromBodyText('{"e": 5}'), null);
+  assert.equal(emailFromBodyText("{not json"), null);
+  assert.equal(emailFromBodyText("x=1"), null);
+  assert.equal(emailFromBodyText(""), null);
 });

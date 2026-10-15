@@ -63,3 +63,12 @@ def test_real_templates_have_the_placeholders():
         text = (mop.TEMPLATES / f"{name}.gt").read_text()
         assert mop.KEY_PLACEHOLDER in text, name
     assert mop.HASH_BLOCK.search((mop.TEMPLATES / "Members-Only Content.gt").read_text())
+
+
+def test_members_only_content_template_has_the_typed_email_fallback():
+    text = (mop.TEMPLATES / "Members-Only Content.gt").read_text()
+    for marker in ("*label: pitch", "*label: memberForm", "*label: checkEmail", "*goto: memberForm", "*goto: pitch"):
+        assert marker in text, marker
+    assert '*send: {"e" -> memberEmail}' in text  # the typed address is POSTed, never put in the path
+    assert text.count("\t*save: memberEmail") == 2 and text.count("\t*throwaway") == 2  # PII stays out of the export
+    assert "*if: ask = 1\n\t*goto: memberForm" in text

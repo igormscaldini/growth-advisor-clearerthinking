@@ -17,8 +17,10 @@ Then push both (gt pulls nothing, so re-run this after every template edit):
 How the member check works: the newsletter's paywall links carry `&h={{subscriber_email_hash}}`,
 beehiiv's MD5 of the subscriber's email. Program 38912 compares it with the hashes of the active
 Stripe customers' emails (lowercased) and sends matches straight to the article. A member whose
-Stripe email differs from their beehiiv email is not matched and lands on the sign-up page; the
-checkout program then tells them they already subscribe.
+Stripe email differs from their beehiiv email is not matched and lands on the sign-up page, which
+since 2026-10-15 carries an "Already a member? Enter your email" form: the typed address goes to
+the same route (POST /api/member-check) and a match opens the article. The web version's paywall
+box links to that form directly with &ask=1.
 
 The key: MEMBERS_ONLY_KEY in .env (16 hex chars). Both programs get the same value, so a run
 of this script keeps them in sync. Without it in .env a new one is generated and appended.

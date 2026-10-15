@@ -10,7 +10,12 @@
 --   &h={{subscriber_email_hash}}             beehiiv merge tag, MD5 of the reader's email. When it
 --                                            matches the member list the reader skips this page and
 --                                            opens the full version directly.
+--   &ask=1                                   start on the "Already a member?" email form (the link
+--                                            under the web version's paywall box, which has no hash).
 -- Without ?newsletter= the page falls back to generic "the article" wording.
+-- Readers without a matching hash can type the email they subscribed with; the pitch page
+-- carries that form at the bottom. The address is checked by the same route (POST) and kept
+-- out of the run data (*throwaway). Anyone who knows a member's email gets in: accepted.
 --
 -- THIS FILE IS A TEMPLATE. The repo is public, so the access key and the member list are filled
 -- in by members_only_programs.py, which writes the push-ready copy to ~/guidedtrack/. Push THAT.
@@ -48,6 +53,8 @@
 *if: not h
 	>> h = ""
 >> h = h.lowercase
+*if: not ask
+	>> ask = 0
 
 >> fullVersionUrl = "{fullVersionBaseUrl}?k={accessKey}&src={src}"
 
@@ -89,7 +96,10 @@
 		>> isMember = 1
 *if: isMember = 1
 	*goto: {fullVersionUrl}
+*if: ask = 1
+	*goto: memberForm
 
+*label: pitch
 *html
 	<style>
 		.program_container { max-width: 1120px !important; }
@@ -141,5 +151,66 @@
 			<p class="ct-price">All for only <span class="ct-amt">{priceText}</span><span class="ct-cancel">Cancel anytime.</span></p>
 			<a class="ct-cta" href="{signupUrl}" target="_top">Sign Up</a>
 		</div>
-		<p class="ct-help">Already a member but can’t access this content? Email us at <a href="mailto:info@clearerthinking.org">info@clearerthinking.org</a> and we’ll sort it out.</p>
+		<p class="ct-help">Already a member? Enter the email you subscribed with below and we’ll open the article. Still stuck? Email us at <a href="mailto:info@clearerthinking.org">info@clearerthinking.org</a>.</p>
 	</div>
+
+-- Members whose beehiiv address differs from their Stripe one, and readers of the web version
+-- (no hash at all), can type the email they subscribed with. Optional: an empty answer just
+-- shows the pitch again.
+*question: Already a member? Enter the email you subscribed with and we’ll open the article.
+	*type: text
+	*placeholder: you@example.com
+	*save: memberEmail
+	*blank
+	*throwaway
+*goto: checkEmail
+
+-- Reached directly with &ask=1 (the "Already a paid subscriber?" link under the web paywall box).
+*label: memberForm
+*header: Already a Clearer Thinking Plus member?
+Enter the email you used when you subscribed and we’ll open the full article.
+
+*question: Your email
+	*type: text
+	*placeholder: you@example.com
+	*save: memberEmail
+	*throwaway
+
+-- The route hashes the address itself (POST, so nothing needs URL-encoding) and answers
+-- {"member": 0|1}; there is no static fallback for typed addresses.
+*label: checkEmail
+*if: not memberEmail
+	>> memberEmail = ""
+*if: memberEmail = ""
+	*goto: pitch
+>> emailMember = 0
+>> emailCheckError = ""
+*service: memberCheck
+	*path: /api/member-check
+	*method: POST
+	*send: {"e" -> memberEmail}
+	*success
+		*if: it["member"] = 1
+			>> emailMember = 1
+	*error
+		>> emailCheckError = it
+*if: emailMember = 1
+	*goto: {fullVersionUrl}
+*if: not (emailCheckError = "")
+	*header: We couldn’t check your membership right now
+	Please try again in a minute, or email us at info@clearerthinking.org and we’ll open the article for you.
+
+	*question: What would you like to do?
+		Try again
+			*goto: memberForm
+		See membership options
+			*goto: pitch
+*if: emailMember = 0 and emailCheckError = ""
+	*header: We couldn’t find an active membership for {memberEmail}
+	Check the spelling, or try the email you used at checkout. If you believe this is a mistake, email us at info@clearerthinking.org.
+
+	*question: What would you like to do?
+		Try another email
+			*goto: memberForm
+		See membership options
+			*goto: pitch
