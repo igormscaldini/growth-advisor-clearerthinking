@@ -52,6 +52,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `.env.local`). It pulls GT program 38551's CSV export + beehiiv; its README has the counting rules. Email link
   scanners click all 5 rating links right after each send; Igor chose (2026-09-29) to count every run anyway, no filter. Also sends Igor a
   Monday 12:00 (São Paulo) email via Vercel cron + Gmail API (its README has the details).
+- Members-only newsletter gate: `guidedtrack/Members-Only Content.gt` (GT 38912, embedded at
+  programs.clearerthinking.org/members-only-content/) + `frontend/app/api/member-check/route.ts`. A reader
+  is let into the full version (GT 38913, keyed) when beehiiv's `h={{subscriber_email_hash}}` link param OR an
+  email typed on the pitch page (`&ask=1` opens that form first; used by the web paywall box) matches an active
+  or past_due Stripe subscription. Templates are filled and pushed with `members_only_programs.py`
+  (docstring has the push commands); `gt pull` + diff first. Snippets in `newsletter_snippets/`.
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
   schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
 - `site_health_check.py` (`site-health-check.yml`, daily): sends Igor ONE "Website Checks - <date>" email
