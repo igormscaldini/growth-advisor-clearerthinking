@@ -61,15 +61,17 @@ def hashes_from_csv(path: Path) -> list[str]:
 
 
 def hashes_from_stripe() -> list[str]:
-    """Every active subscription's customer email, straight from Stripe."""
+    """Every active or past_due subscription's customer email, straight from Stripe."""
     import stripe
 
     stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
     emails = set()
-    for sub in stripe.Subscription.list(status="active", limit=100, expand=["data.customer"]).auto_paging_iter():
-        email = (sub.customer.email or "") if hasattr(sub.customer, "email") else ""
-        if email:
-            emails.add(email)
+    # Same statuses as the live route (frontend/lib/member-check.ts MEMBER_STATUSES).
+    for status in ("active", "past_due"):
+        for sub in stripe.Subscription.list(status=status, limit=100, expand=["data.customer"]).auto_paging_iter():
+            email = (sub.customer.email or "") if hasattr(sub.customer, "email") else ""
+            if email:
+                emails.add(email)
     return sorted({email_hash(e) for e in emails})
 
 
