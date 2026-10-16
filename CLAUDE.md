@@ -30,6 +30,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `fetch_snapshot.py` is the single source (`dashboard.py` and `weekly_advisor.py` import it). The
   goals table's "Total revenue" = Stripe gross + these lines. To publish an edit without waiting
   for the throttled cron, rewrite `snapshot.json`'s `manual_revenue` with `manual_revenue_block()`.
+  A sponsor paying through Stripe must also go in `data_layer.SPONSORSHIP_CHARGE_IDS` (charge id), which
+  every Stripe revenue metric skips, or the money is counted twice (manual line + Stripe "Other"/gross).
 - `weekly_advisor.py`: Friday 11:00 UTC letter (results, the week's work, next week's
   priorities), filed in the inbox as unread. With no letter (Claude call failed) the email is
   "NO LETTER, numbers only" (reason + fix on top, raw numbers below) and the run exits 1; a

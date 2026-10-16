@@ -198,7 +198,7 @@ export function OverviewTab({ snapshot, period }: Props) {
       <KpiCard
         label="Total Revenue (Gross)"
         value={fmtMoney(grossRev)}
-        helpText="Stripe • gross volume = sum of all successful charge amounts (pre-refund) in window."
+        helpText="Stripe • gross volume = sum of all successful charge amounts (pre-refund) in window, excluding sponsorship payments made through Stripe (those are counted in the manual Newsletter Sponsorships line)."
         data={revDaily}
         color="#16A34A"
         yLabel="Revenue ($)"

@@ -29,7 +29,8 @@ export function MonetizationTab({ snapshot, period }: Props) {
     },
     {
       source: "Other",
-      detail: "Stripe — all other successful charges (excl. subscriptions, $9 PDF, $35/$17.50 cognitive), net of refunds",
+      detail:
+        "Stripe — all other successful charges (excl. subscriptions, $9 PDF, $35/$17.50 cognitive, and sponsorship payments, which are counted under Newsletter Sponsorships), net of refunds",
       revenue: cat.other,
     },
   ];

@@ -74,13 +74,23 @@ PERSONALITY_AMOUNTS = (900,)
 # weekly_advisor.py import these. After editing, the snapshot cron picks the change up on its
 # next run; to publish immediately, rewrite the manual_revenue block in snapshot.json via
 # manual_revenue_block() and push.
-MANUAL_REVENUE_LAST_UPDATED = "2026-09-28"
+# A sponsor that pays through Stripe must also be listed in data_layer.SPONSORSHIP_CHARGE_IDS,
+# or the payment is counted twice (here and in the Stripe "Other" bucket / gross revenue).
+# Beehiiv Ad Network = 2026 year to date from beehiiv's Monetize > Ad Network earnings:
+# the paid-out total plus placements that ran but are still awaiting payout.
+MANUAL_REVENUE_LAST_UPDATED = "2026-10-16"
 MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
     "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00), ("Hive", 2_500.00)],
     "Affiliates": [("Kitted Decks", 350.00)],
     "Podcast sponsorships": [("ACE", 800.00)],
-    "Newsletter Sponsorships": [("80,000 Hours", 4_200.00), ("Game Over (Jesse)", 3_000.00)],
-    "Beehiiv Ad Network": [("Beehiiv", 1_102.91)],
+    "Newsletter Sponsorships": [
+        ("80,000 Hours", 4_200.00),
+        ("Game Over (Jesse)", 3_000.00),
+        ("Non-Trivial", 1_500.00),
+        ("Settled", 1_500.00),
+        ("80,000 Hours (Oct 2026)", 5_000.00),
+    ],
+    "Beehiiv Ad Network": [("Beehiiv, paid out", 1_102.91), ("Beehiiv, pending payout", 438.00)],
 }
 
 

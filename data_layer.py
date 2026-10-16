@@ -15,6 +15,43 @@ load_dotenv()
 
 CACHE_TTL = 600  # 10 minutes
 
+# One-off Stripe charges that are sponsorship payments. The same money is already booked in
+# fetch_snapshot.MANUAL_REVENUE ("Newsletter Sponsorships"), so every Stripe revenue metric
+# skips these charges to avoid counting it twice. Add the charge id (Stripe dashboard >
+# Payments) whenever a sponsor pays through Stripe.
+SPONSORSHIP_CHARGE_IDS: dict[str, str] = {
+    "ch_3UDUoQAoBs2tgN9p0mf60Ez6": "Game Over (Jesse), $1,500 on 2026-09-08",
+}
+
+REVENUE_CATEGORIES = ("subscriptions", "pdf", "cognitive", "other")
+
+
+def _charge_bucket(ch) -> Optional[tuple[str, int]]:
+    """(revenue category, net cents) for one Stripe charge, or None when it must not count.
+
+    Skipped: charges that did not succeed, fully refunded ones, and sponsorship payments
+    (SPONSORSHIP_CHARGE_IDS). Categories:
+    - subscriptions: the charge came from an invoice OR its description starts with "Subscription"
+    - pdf: $9.00 charges (Personality Test PDF)
+    - cognitive: $35.00 or $17.50 charges (Cognitive Assessment)
+    - other: everything else
+    Net of refunds (amount - amount_refunded).
+    """
+    if getattr(ch, "status", None) != "succeeded" or getattr(ch, "id", None) in SPONSORSHIP_CHARGE_IDS:
+        return None
+    amount = ch.amount or 0
+    net = amount - (getattr(ch, "amount_refunded", 0) or 0)
+    if net <= 0:
+        return None
+    desc = (getattr(ch, "description", "") or "").lower().strip()
+    if getattr(ch, "invoice", None) or desc.startswith("subscription"):
+        return "subscriptions", net
+    if amount == 900:
+        return "pdf", net
+    if amount in (3500, 1750):
+        return "cognitive", net
+    return "other", net
+
 
 # =============================================================================
 # GA4
@@ -273,12 +310,13 @@ def stripe_metrics(start: date, end: date) -> dict:
     start_ts = _date_to_ts(start)
     end_ts = _date_to_ts(end) + 86400
 
-    # Total revenue from all successful charges (both subscription + one-time)
+    # Total revenue from all successful charges (both subscription + one-time), minus
+    # sponsorship payments, which the manual revenue lines already count.
     gross = 0
     refunded = 0
     daily_total: dict[str, int] = defaultdict(int)
     for ch in s.Charge.list(created={"gte": start_ts, "lt": end_ts}, limit=100).auto_paging_iter():
-        if ch.status != "succeeded":
+        if ch.status != "succeeded" or ch.id in SPONSORSHIP_CHARGE_IDS:
             continue
         amt = ch.amount or 0
         refund = getattr(ch, "amount_refunded", 0) or 0
@@ -685,9 +723,9 @@ def ga4_modules_finished_by_campaign_daily(start: date, end: date) -> list[dict]
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def stripe_revenue_by_category_daily(start: date, end: date) -> list[dict]:
-    """Daily revenue (USD) bucketed by category (subscriptions / pdf / cognitive / other), net of refunds.
+    """Daily revenue (USD) per category (see _charge_bucket), net of refunds.
 
-    Same logic as stripe_revenue_by_category but with a per-day breakdown. One pass through charges.
+    Same bucketing as stripe_revenue_by_category but with a per-day breakdown. One pass through charges.
     """
     from stripe_client import get_client
 
@@ -695,34 +733,23 @@ def stripe_revenue_by_category_daily(start: date, end: date) -> list[dict]:
     start_ts = _date_to_ts(start)
     end_ts = _date_to_ts(end) + 86400
 
-    daily: dict[str, dict[str, float]] = defaultdict(lambda: {"subscriptions": 0.0, "pdf": 0.0, "cognitive": 0.0, "other": 0.0})
+    daily: dict[str, dict[str, float]] = defaultdict(lambda: dict.fromkeys(REVENUE_CATEGORIES, 0.0))
     for ch in s.Charge.list(
         created={"gte": start_ts, "lt": end_ts}, limit=100, expand=["data.invoice"]
     ).auto_paging_iter():
-        if ch.status != "succeeded":
+        hit = _charge_bucket(ch)
+        if hit is None:
             continue
-        net = (ch.amount or 0) - (getattr(ch, "amount_refunded", 0) or 0)
-        if net <= 0:
-            continue
-        desc = (getattr(ch, "description", "") or "").lower().strip()
-        is_sub = bool(getattr(ch, "invoice", None)) or desc.startswith("subscription")
+        category, net = hit
         d_iso = datetime.fromtimestamp(ch.created, tz=timezone.utc).date().isoformat()
-        bucket = daily[d_iso]
-        if is_sub:
-            bucket["subscriptions"] += net / 100
-        elif (ch.amount or 0) == 900:
-            bucket["pdf"] += net / 100
-        elif (ch.amount or 0) in (3500, 1750):
-            bucket["cognitive"] += net / 100
-        else:
-            bucket["other"] += net / 100
+        daily[d_iso][category] += net / 100
 
     # Zero-fill the range so the client gets a complete daily series
     out = []
     cur = start
     while cur <= end:
         di = cur.isoformat()
-        b = daily.get(di, {"subscriptions": 0.0, "pdf": 0.0, "cognitive": 0.0, "other": 0.0})
+        b = daily.get(di, dict.fromkeys(REVENUE_CATEGORIES, 0.0))
         out.append({"date": di, **b})
         cur += timedelta(days=1)
     return out
@@ -782,47 +809,25 @@ def stripe_charges_daily_by_amounts(
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def stripe_revenue_by_category(start: date, end: date) -> dict:
-    """Single-pass bucketing of successful charge revenue (USD) in [start, end] into:
-
-    - subscriptions: charges originated from a subscription invoice
-      (detected by `invoice` set OR description starting with "Subscription")
-    - pdf: $9.00 charges that are NOT subscriptions (Personality Test PDF)
-    - cognitive: $35.00 or $17.50 charges that are NOT subscriptions (Cognitive Assessment)
-    - other: everything else successful and non-subscription
-
-    Net of refunds (uses amount - amount_refunded).
-    """
+    """Single-pass bucketing of successful charge revenue (USD) in [start, end] into
+    subscriptions / pdf / cognitive / other (rules in _charge_bucket), net of refunds and
+    without sponsorship payments (SPONSORSHIP_CHARGE_IDS)."""
     from stripe_client import get_client
 
     s = get_client()
     start_ts = _date_to_ts(start)
     end_ts = _date_to_ts(end) + 86400
 
-    subs_c = pdf_c = cog_c = other_c = 0
+    cents = dict.fromkeys(REVENUE_CATEGORIES, 0)
     for ch in s.Charge.list(
         created={"gte": start_ts, "lt": end_ts}, limit=100, expand=["data.invoice"]
     ).auto_paging_iter():
-        if ch.status != "succeeded":
+        hit = _charge_bucket(ch)
+        if hit is None:
             continue
-        net = (ch.amount or 0) - (getattr(ch, "amount_refunded", 0) or 0)
-        if net <= 0:
-            continue
-        desc = (getattr(ch, "description", "") or "").lower().strip()
-        is_sub = bool(getattr(ch, "invoice", None)) or desc.startswith("subscription")
-        if is_sub:
-            subs_c += net
-        elif (ch.amount or 0) == 900:
-            pdf_c += net
-        elif (ch.amount or 0) in (3500, 1750):
-            cog_c += net
-        else:
-            other_c += net
-    return {
-        "subscriptions": subs_c / 100,
-        "pdf": pdf_c / 100,
-        "cognitive": cog_c / 100,
-        "other": other_c / 100,
-    }
+        category, net = hit
+        cents[category] += net
+    return {category: c / 100 for category, c in cents.items()}
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
