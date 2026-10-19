@@ -150,6 +150,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   projects (free AI advisor, critical-thinking games) for the year-end donation email; `theories_of_change.md` is the
   source, `render.py` builds the HTML and copies the Markdown to `~/Downloads`. Donations are NOT tax-deductible
   (not a 501(c)(3), per the support page): say so in any appeal or arrange a fiscal sponsor first.
+- `gtm/`: sources of the GTM-WGXZSLV Custom HTML tags (blog audio tracking; `coaching_fab_tools.html` = the
+  "Get Coaching" floating button for programs.* pages, trigger scoped by Page Hostname, assessment in
+  `reports/coaching_fab_tools_assessment_2026-10-19.html`). The container is SHARED by www (Wix) and programs.*.
+  `gtm.js` fetched with curl is not what browsers get (it lacked tags GA4 proves are firing): judge the container
+  from a live page or GA4, never from that file. programs.* pages render GuidedTrack inline (no iframe) and load
+  GTM from `google_analytics_guidedtrack_trigger.js` at the end of body; `personality-test.html` loads it only after
+  the CTA. The container's Just Links trigger still has Wait for Tags on (2 s) on both hosts (checked 2026-10-19).
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
