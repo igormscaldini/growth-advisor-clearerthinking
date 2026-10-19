@@ -146,6 +146,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   2026-09-28) says deadline Nov 10, 2026; the form still said Oct 10 on 2026-10-15: keep them in sync. Daily runs:
   `reports/uqp_daily_runs_src/build.py`. Reddit rules/sizes verified 2026-10-15 via a Redlib mirror (reddit.com
   blocks fetches); ranked list and bans are in the memory note `project_unanswered_questions_psychology_prize`.
+- `reports/year_end_appeal_theories_of_change_2026-10-19_src/`: donor-facing theories of change for the two 2027
+  projects (free AI advisor, critical-thinking games) for the year-end donation email; `theories_of_change.md` is the
+  source, `render.py` builds the HTML and copies the Markdown to `~/Downloads`. Donations are NOT tax-deductible
+  (not a 501(c)(3), per the support page): say so in any appeal or arrange a fiscal sponsor first.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)

@@ -1,0 +1,190 @@
+# Two projects for 2027: what we want to build and why we think it will work
+
+Draft for Clearer Thinking's year-end appeal. 2026-10-19 02:23pm. Square brackets mark the numbers and names still to be filled in.
+
+## How to read this
+
+Each project is laid out the same way: the problem, what we will build, why we expect it to work (with the evidence we are relying on), what we already have, what could go wrong, what your donation buys, and how we will know whether it worked. Sources are numbered and listed at the end.
+
+## Project 1: A free, evidence-based AI advisor for people who cannot get good advice
+
+### The problem
+
+Good advice is one of the most unequally distributed goods in the world.
+
+- More than 1 billion people live with a mental health disorder. In low-income countries fewer than 10% of them receive any care, against more than 50% in higher-income countries. Governments in low-income countries spend as little as US$0.04 per person per year on mental health; high-income countries spend up to US$65. [1]
+- The global median is 13 mental health workers per 100,000 people. Low-income countries have little more than 1 per 100,000; high-income countries have more than 60. [1][2]
+- The WHO's own household surveys found that 76% to 85% of people with a severe mental disorder in low- and middle-income countries had received no treatment in the previous year. [3]
+
+Those figures only count diagnosable conditions. The far larger group is people with ordinary hard problems: a career decision, a habit they cannot break, a conflict at home, a plan they keep not starting. When we survey our own readers, the problems they name most are procrastination (52%), career uncertainty (41%), poor focus (40%), lack of motivation (39%), and anxiety or stress (37%). [4] In rich countries, a coach or therapist for those problems costs tens to hundreds of dollars an hour. For most of the world's population, that option does not exist at any price.
+
+Meanwhile, people are already asking machines. By July 2025, ChatGPT alone had 700 million weekly users, about 10% of the world's adults, with the fastest growth in lower-income countries. Roughly 29% of all messages are "practical guidance" (how-to advice, tutoring, coaching-style questions), and more than 70% of use is now personal rather than work-related. [5] So the question is no longer whether people in poor countries will get advice from an AI. They already do. The question is whether that advice is any good, and whether it is safe. Today's general-purpose chatbots were not built for this: in a Stanford evaluation against clinical guidelines, leading models responded inappropriately to crisis cues more than 20% of the time, in one case listing tall bridges to a user who had just said they lost their job. [6]
+
+### What we will build
+
+A free advisor, usable in any phone browser, that gives careful, research-grounded advice on the problems people actually bring: decisions, goals, habits, mood, relationships, and how to think more clearly about them. It is built on three things no generic chatbot has:
+
+- **Thirteen years of applied psychology.** Since 2013 we have built more than 80 free interactive tools and run more than 50 independent studies on what helps people decide, plan, and feel better. [7] That material, the techniques, the evidence behind them, and the pitfalls we found along the way, becomes the advisor's knowledge base.
+- **What our tools know about you, if you choose to share it.** Someone who has taken our personality test, values test, or rationality test can let the advisor use that profile, so the advice fits them rather than an average person. [8]
+- **Design rules we have already tested.** Our 2025 prototype taught us what makes AI advice useful rather than generic: ask one or two clarifying questions before advising, offer two or three options rather than one, use open reflection questions rather than yes/no checks, hedge honestly, and never dress up a guess as a diagnosis. [8]
+
+What it is not: it is not therapy, it does not diagnose, and it hands anyone in crisis to a human line in their country. Those limits are the same ones our human coaching program uses. [8]
+
+### Why we expect it to work
+
+The causal chain is simple. People who have no access to advice get a free, always-available advisor. The advisor is good enough to help with everyday problems. They make better decisions and feel better. And the marginal cost per person is close to zero. Each link has evidence behind it.
+
+1. **Self-guided digital help works, including in low- and middle-income countries.** Three meta-analyses of randomized trials in low- and middle-income countries find moderate to large effects of digital psychological interventions: Hedges' g = 0.60 across 22 trials [9]; g = 0.61 for depression and 0.73 for anxiety across 80 trials with 12,070 participants [10]; and g = 0.89 across 21 trials, with no significant difference between programs that included a human guide and those that did not [11]. Fully self-guided internet CBT, the closest existing thing to an unassisted advisor, is effective on its own (g = 0.27, number needed to treat 8) and works about as well as guided programs for people with mild symptoms. [12][13]
+2. **Conversational AI specifically produces measurable benefits.** A meta-analysis of 15 randomized trials of AI conversational agents found reductions in depression (g = 0.64) and distress (g = 0.70), with larger effects for generative-AI systems than for scripted ones. [14] In the first randomized trial of a generative-AI therapy chatbot (210 adults, NEJM AI, 2025), participants with depression saw a 51% average symptom reduction over 8 weeks, those with anxiety 31%, and those at risk of eating disorders 19%, relative to a waitlist. They used it for about six hours, often in the middle of the night, and three-quarters were not in any other treatment. [15]
+3. **The advice itself is already competitive with human advice in blind ratings.** When blinded clinicians compared doctors' and a chatbot's answers to the same 195 patient questions, they preferred the chatbot's answer 78.6% of the time and rated it empathetic 45% of the time, against 4.6% for the doctors. [16] In a 2025 study, 830 people read responses to couples-therapy scenarios written either by therapists or by ChatGPT; they could rarely tell which was which, and rated the AI responses higher on core therapy principles. [17] Ratings are not outcomes, but they show the raw material is there.
+4. **Advice on everyday goals works when humans give it.** Meta-analyses of coaching find effects from g = 0.43 (coping) to 0.74 (goal-directed self-regulation) [18], and g = 1.29 on goal attainment for psychologically informed coaching [19]. Our bet is that a well-designed advisor can deliver a meaningful share of that benefit at no cost to the user. That is the untested link, and it is the one we will measure.
+5. **We already reach the people this is for.** In the past 12 months our tools were completed about 240,000 times, and 42% of those completions came from low- and middle-income countries. India alone was 17%, the Philippines 7%, Indonesia 5%, and Pakistan and Bangladesh were both in the top ten. [20] Mobile internet now reaches 4.7 billion people, and almost 90% of its growth in 2024 came from low- and middle-income countries. [21] The advisor will sit at the end of every tool, so distribution is already solved.
+
+### What we already have
+
+- A working prototype, built in 2025 at the end of our personality test, and a product brief that settles scope, safety limits, and the design rules above. Engineering has started. [8]
+- Demand data from 15,737 tool users surveyed in October 2025: 26% want a text conversation with an AI about their results, 16% want AI-guided exercises, 47% are not interested, and 11% are opposed. [22] Two lessons: the advisor is always opt-in, and our current audience (mostly in rich countries) is not the group with the most to gain.
+
+### What could go wrong, and what we will do about it
+
+- **Safety.** We will test the advisor against the published crisis scenarios that current models fail [6], route any crisis signal to local helplines, keep humans reviewing flagged conversations, and keep the scope narrow. Illinois and Nevada now bar AI from delivering therapy without a clinician [23]; our advisor is built to stay on the self-help side of that line.
+- **Quality outside English.** We launch in English, which covers India, the Philippines, Nigeria, and much of our current reach in lower-income countries, and add languages only after per-language evaluation.
+- **Uptake.** Nearly half of our tool users say they are not interested. We will treat the opt-in rate as a primary metric and improve or stop based on it.
+- **Fading effects.** One meta-analysis of chatbot trials found benefits at 8 weeks but none at 3 months. [24] We will build in check-ins and measure at 3 months, not just at the end of the program.
+- **Running costs.** Every conversation costs money in model fees. Your donation covers a fixed number of free conversations; we will cap use per person and seek provider credits.
+- **Privacy.** Personal profiles stay separate from the shared knowledge base, nothing is used to train models, and users can delete everything.
+
+### What your donation funds
+
+[Fill in: total budget, split across engineering, content and prompt development with our psychologists, safety evaluation, model fees for N free conversations, the outcome study, and translation.] For scale: [$X] funds roughly [N] advisor conversations for people who would otherwise have no one to ask.
+
+### How we will know it worked
+
+- **Month 3:** in a blind comparison, raters prefer our advisor's answers to a generic chatbot's at least [60]% of the time. If it cannot beat a generic model, we stop and say so.
+- **Month 6:** public launch; [N] people helped, with the share from low- and middle-income countries reported; safety audit published.
+- **Month 12:** a pre-registered outcome study (randomized if we can, pre/post with 3-month follow-up at minimum) on validated measures of mood, decision confidence, and goal progress. We publish the results whatever they show.
+
+## Project 2: Games that teach critical thinking to people who will never read a newsletter
+
+### The problem
+
+Thinking skills matter, they can be taught, and we are teaching them in a format most people will not consume.
+
+- **They matter.** Adults who score higher on a validated measure of decision-making competence report fewer negative life events linked to poor decisions, even after controlling for intelligence and background. [25]
+- **They can be taught.** A review of 341 effect sizes found that instruction improves critical thinking (g = 0.30), and that what works best is dialogue, authentic problems, and mentoring, not lectures. [26]
+- **Reading reaches fewer people every year.** Only 48.5% of U.S. adults read a book for pleasure in 2022, down from 52.7% in 2017; the share reading fiction was the lowest since the survey began in 1992. [27] Our newsletter, podcast, and 2,000-word articles can only reach people who read or listen for fun.
+- **Games reach almost everyone else.** About 205 million Americans, nearly two-thirds of people aged 5 to 90, play video games regularly, and the average player is 36. [28] Worldwide there are about 3.6 billion players, 3 billion of them on phones. [29]
+- **Our readers already tell us why they do not share our work:** "friends don't like having their irrationalities pointed out." [4] A game changes the social contract. Nobody is correcting you; you are playing, and you can send it to a friend as a challenge rather than a lecture.
+- **Classrooms want this.** Nearly half (48%) of U.S. K-12 teachers used game-based learning in 2015, double the 2010 share [30], and Kahoot! reported that half of U.S. K-12 students used it monthly [31]. Students are already 19% of our audience. [4]
+
+### What we will build
+
+[Three to five] short, free, browser-based games, playable on a phone in 10 to 15 minutes with no account, each training one transferable skill, each with a classroom version. Candidate skills, chosen from what our readers asked for most [4]:
+
+- **Spot the manipulation:** recognize the rhetorical and statistical tricks in headlines, ads, and arguments (readers' top request, at 52%, was "how to actually change people's minds"; they also asked for primary-source literacy and news evaluation).
+- **Calibration:** learn how confident to be, with instant scoring (forecasting skills, 34%).
+- **Base rates and risk:** make quick judgments under uncertainty and see where intuition fails (rationally assessing risks, 36%).
+- **Scout mindset:** practice updating on evidence rather than defending a side (47%).
+
+Each game follows the design principles with the strongest evidence: practice with immediate, personalized feedback (the reason games beat videos in the research below), realistic rather than abstract problems, social or collaborative play, and short "booster" rounds spaced over the following weeks to counter forgetting. The classroom version adds a teacher guide, a 15-minute play session, discussion prompts, and a class leaderboard.
+
+### Why we expect it to work
+
+The causal chain: people who would never read about reasoning play a short game. The game trains a specific skill with feedback. The skill measurably improves and persists. The game spreads socially and through classrooms. The evidence for each link:
+
+1. **Games teach.** Across 57 controlled comparisons, digital games outperformed non-game instruction on learning outcomes (g = 0.33). [32] For critical thinking specifically, a meta-analysis of 20 studies found a large overall effect of game-based learning (g = 0.86 overall; g = 0.66 on measured skills). [33] Collaborative problem solving, which games can build in, improves critical thinking with an effect size of 0.82 across 36 studies. [34]
+2. **One game session can reduce real cognitive biases, and the effect lasts.** In two randomized experiments, a single play of a debiasing game developed for intelligence analysts cut confirmation bias, anchoring, the fundamental attribution error, and other biases by at least 32% immediately and by at least 24% when people were retested two or more months later. The game beat an instructional video covering the same material (19% at follow-up), because it added practice with feedback, and the gains transferred to problems in formats and contexts the game never covered. [35]
+3. **Games can build resistance to misinformation, with caveats we design around.** A re-analysis of 33 inoculation experiments (37,025 participants) found that both game and video "prebunking" improved people's ability to tell reliable from unreliable news without making them blanket skeptics. [36] Not everyone agrees: independent replications of the best-known game, Bad News, found that in some samples it lowered belief in true and false headlines alike, which is a shift in caution, not discernment. [37] A 2025 study of 11,759 people found that game-based inoculation fades faster than text or video unless followed by a memory "booster". [38] An earlier set of experiments found the Bad News effect held for three months when players were retested regularly, but decayed within two months when they were not. [39] We therefore measure discrimination (true versus false), not just skepticism, and build boosters into every game.
+4. **We have the distribution.** Interactive tools are already how most people find us (about 240,000 completions in the past 12 months [20]) and the format our readers value most, tied for first ahead of the newsletter [4]; 68% of them want more "thinking-skill developers". [4] Games extend that engine to people who do not read, and to teachers.
+
+### What we already have
+
+- Thirteen years and more than 80 interactive tools, several of which are already close to games: "Can You Detect Weak Arguments?", "Rhetorical Fallacies", the calibration trainer we built with Open Philanthropy, "How Rational Are You, Really?", and the Political Bias Test. [7]
+- The audience research above, which tells us which skills to build first and why people hesitate to share. [4]
+- A reading of the game-design research that says where the gains come from (practice, feedback, authentic problems, boosters) and where the risks are (decay, blanket skepticism). [35][36][38]
+
+### What could go wrong, and what we will do about it
+
+- **Effects fade.** Game-based gains decay faster than other formats. [38] Every game ships with spaced booster rounds, and we measure at two months, not just immediately.
+- **Fun and rigor pull against each other.** We playtest with people outside our audience before launch and cut anything that is accurate but boring, or fun but teaches the wrong lesson.
+- **Teaching cynicism instead of discernment.** We score players on telling good from bad, not on rejecting everything, and we report both. [36][37]
+- **Transfer to real life is hard to prove.** We use validated outside measures (decision-making competence subscales, calibration scores, headline-discernment tasks), not in-game points, as the outcome.
+- **Classroom adoption depends on teachers.** Free, no accounts, no student data, a one-page guide, and a pilot with [N] teachers before we scale.
+
+### What your donation funds
+
+[Fill in: total budget across game design and development for N games, playtesting, the classroom pilot, a pre-registered evaluation with two-month follow-up, and translation.] For scale: [$X] builds and tests one game end to end.
+
+### How we will know it worked
+
+- **Reach:** plays, unique players, share of players under 25, and share coming through classrooms, reported quarterly.
+- **Learning:** each game is tested in a pre-registered randomized comparison against a control, with immediate and two-month measures on validated instruments. Target: a persistent effect of at least [g = 0.3] at two months.
+- **Spread:** share rate per player and the number of teachers using the classroom version.
+- **Transparency:** we publish every result, including null ones, as we do with Transparent Replications.
+
+## Short versions for the email
+
+**Project 1 (about 170 words)**
+
+More than a billion people live with a mental health disorder, and in low-income countries fewer than one in ten get any care; governments there spend about four cents per person per year on it. Billions more face ordinary hard problems, a decision, a habit, a conflict, with nobody qualified to ask. They are already asking chatbots: ChatGPT has 700 million weekly users, growing fastest in poorer countries, and almost a third of what people ask for is practical guidance. But generic chatbots respond badly to crisis cues more than a fifth of the time.
+
+We want to build a free advisor that gives careful, evidence-based advice, drawing on the 13 years and 80+ tools we have built, the techniques that randomized trials show work in low-income settings, and, if the user chooses, what our tools already know about them. Forty-two percent of the 240,000 people who completed our tools last year live in low- and middle-income countries. They are the first people this is for.
+
+**Project 2 (about 150 words)**
+
+Better thinking can be taught. The strongest evidence says what works is practice with feedback on real problems, and that a single session of a well-designed game can cut measured cognitive biases by about a quarter two months later. But we deliver our teaching as newsletters and podcasts, and fewer than half of American adults read even one book a year. Two-thirds play games.
+
+We want to build a set of short, free, phone-first games that each train one skill: spotting manipulation, calibrating confidence, judging risk, updating on evidence. Each comes with a classroom version, because games travel through schools in a way articles never will, and because a game is something you send a friend as a challenge, not a correction. We will test every game in a pre-registered trial with a two-month follow-up and publish whatever we find.
+
+## Sources
+
+1. World Health Organization, press release, 2 September 2025, "Over a billion people living with mental health conditions; services require urgent scale-up" (Mental Health Atlas 2024). https://www.who.int/news/item/02-09-2025-over-a-billion-people-living-with-mental-health-conditions-services-require-urgent-scale-up
+2. World Health Organization, "World mental health today: latest data" (2025). https://iris.who.int/server/api/core/bitstreams/31714489-1345-4439-8b37-6cbdc52e15ca/content
+3. WHO Executive Board document EB130/9 (2011), reporting the WHO World Mental Health Surveys (Demyttenaere et al., JAMA, 2004). https://apps.who.int/gb/ebwha/pdf_files/EB130/B130_9-en.pdf
+4. Clearer Thinking audience survey, March 2026 (about 540 respondents; 130 to 190 answers per question), and the 2024 coaching-interest survey. Internal.
+5. Chatterji, A. et al., "How People Use ChatGPT," NBER Working Paper 34255, September 2025. https://www.nber.org/papers/w34255
+6. Moore, J. et al., "Expressing stigma and inappropriate responses prevents LLMs from safely replacing mental health providers," ACM FAccT 2025 (arXiv:2504.18412). Summary: https://hai.stanford.edu/news/exploring-the-dangers-of-ai-in-mental-health-care
+7. ClearerThinking.org support page (founded 2013; 85+ interactive tools; 50+ independent studies). https://www.clearerthinking.org/support-clearer-thinking
+8. Clearer Thinking AI advisor product brief (October 2026) and learnings from the 2025 prototype. Internal.
+9. Fu, Z.-F. et al., "Effectiveness of digital psychological interventions for mental health problems in low-income and middle-income countries: a systematic review and meta-analysis," The Lancet Psychiatry, 2020. https://consensus.app/papers/details/a72a809d292d54d0b6f3a2af7689a726/
+10. Kim, J. et al., "Effectiveness of Digital Mental Health Tools to Reduce Depressive and Anxiety Symptoms in Low- and Middle-Income Countries: Systematic Review and Meta-analysis," JMIR Mental Health, 2023. https://consensus.app/papers/details/0bc1a1bea8fa5d998812896d1834de7c/
+11. Karyotaki, E. et al., "Digital interventions for common mental disorders in low- and middle-income countries: A systematic review and meta-analysis," Cambridge Prisms: Global Mental Health, 2023. https://consensus.app/papers/details/a6f1b0af045958ff849cf9fd37ad4d93/
+12. Karyotaki, E. et al., "Efficacy of Self-guided Internet-Based Cognitive Behavioral Therapy in the Treatment of Depressive Symptoms: A Meta-analysis of Individual Participant Data," JAMA Psychiatry, 2017. https://consensus.app/papers/details/2df688c507ee5737b6023ad5d457b809/
+13. Karyotaki, E. et al., "Internet-Based Cognitive Behavioral Therapy for Depression: A Systematic Review and Individual Patient Data Network Meta-analysis," JAMA Psychiatry, 2021. https://consensus.app/papers/details/ce147a80992f5bdca3239573ea0e4a7c/
+14. Li, H. et al., "Systematic review and meta-analysis of AI-based conversational agents for promoting mental health and well-being," npj Digital Medicine, 2023. https://consensus.app/papers/details/89d794f015135dfcad47e74237b1cd1f/
+15. Heinz, M. V. et al., "Randomized Trial of a Generative AI Chatbot for Mental Health Treatment," NEJM AI, 2025. Dartmouth summary: https://home.dartmouth.edu/news/2025/03/first-therapy-chatbot-trial-yields-mental-health-benefits
+16. Ayers, J. W. et al., "Comparing Physician and Artificial Intelligence Chatbot Responses to Patient Questions Posted to a Public Social Media Forum," JAMA Internal Medicine, 2023. Summary: https://hub.jhu.edu/2023/04/28/study-chatgpt-outperforms-human-physicians
+17. Hatch, S. G. et al., "When ELIZA meets therapists: A Turing test for the heart and mind," PLOS Mental Health, 2025. Summary: https://e3.eurekalert.org/news-releases/1073138
+18. Theeboom, T., Beersma, B. and van Vianen, A., "Does coaching work? A meta-analysis on the effects of coaching on individual level outcomes in an organizational context," The Journal of Positive Psychology, 2014. https://consensus.app/papers/details/efe5a8c0276454718e6445e648a6bbc2/
+19. Wang, Q. et al., "The effectiveness of workplace coaching: a meta-analysis of contemporary psychologically informed coaching approaches," Journal of Work-Applied Management, 2021. https://consensus.app/papers/details/037f42c983715bc59702eb0bd063cc69/
+20. Clearer Thinking Google Analytics: "Submitted Email" events (tool completions) by country, 19 October 2025 to 18 October 2026, bucketed by the World Bank's income classification. Internal. Completions count events, not unique people; the share is 44% when the August 2026 viral traffic wave is excluded.
+21. GSMA, "The State of Mobile Internet Connectivity 2025." https://www.gsma.com/somic/wp-content/uploads/2025/09/The-State-of-Mobile-Internet-Connectivity-2025-Trends-in-Mobile-Internet-Connectivity.pdf
+22. Clearer Thinking survey of tool users, 9 to 20 October 2025, n = 15,737 across six tools. Internal.
+23. Illinois Wellness and Oversight for Psychological Resources Act (HB 1806), signed August 2025; Nevada passed a related law in June 2025. https://www.beckershospitalreview.com/?p=303810
+24. Zhong, W. et al., "The therapeutic effectiveness of artificial intelligence-based chatbots in alleviation of depressive and anxiety symptoms in short-course treatments: A systematic review and meta-analysis," Journal of Affective Disorders, 2024. https://consensus.app/papers/details/0b075ad9b11b59a4a66174439189d2fc/
+25. Bruine de Bruin, W., Parker, A. M. and Fischhoff, B., "Individual differences in adult decision-making competence," Journal of Personality and Social Psychology, 2007. https://consensus.app/papers/details/a19588d663f15c419b2a47482f43c80c/
+26. Abrami, P. C. et al., "Strategies for Teaching Students to Think Critically: A Meta-Analysis," Review of Educational Research, 2015. https://consensus.app/papers/details/984c7f56bdef550d8cdd56fa714ffef2/
+27. National Endowment for the Arts, "Arts Participation Patterns in 2022: Highlights from the Survey of Public Participation in the Arts." https://www.arts.gov/impact/research/publications/arts-participation-patterns-2022-highlights-survey-public-participation-arts
+28. Entertainment Software Association, "2025 Essential Facts About the U.S. Video Game Industry," press release, 3 June 2025. https://www.theesa.com/annual-esa-study-reveals-video-games-universal-appeal-across-generations/
+29. Newzoo, "Global Games Market Report 2025" (3.58 billion players forecast). https://gamedevreports.substack.com/p/newzoo-the-games-market-in-2025
+30. Project Tomorrow, Speak Up 2015 survey, reported in Education Week, May 2016. https://www.edweek.org/technology/digital-learning-games-breaking-into-k-12-mainstream/2016/05
+31. Kahoot! press kit, May 2020 (50% of U.S. K-12 students use Kahoot! monthly). https://kahoot.com/files/2020/05/KahootPressKit_2020-05.pdf
+32. Clark, D. B., Tanner-Smith, E. E. and Killingsworth, S. S., "Digital Games, Design, and Learning: A Systematic Review and Meta-Analysis," Review of Educational Research, 2016. https://www.sri.com/publication/education-learning-pubs/digital-learning-pubs/digital-games-design-and-learning-a-systematic-review-and-meta-analysis-brief/
+33. Mao, W. et al., "Effects of Game-Based Learning on Students' Critical Thinking: A Meta-Analysis," Journal of Educational Computing Research, 2021. https://consensus.app/papers/details/0cf1a487e0d55e8f8bf370977a139c30/
+34. Xu, E.-W. et al., "The effectiveness of collaborative problem solving in promoting students' critical thinking: A meta-analysis based on empirical literature," Humanities and Social Sciences Communications, 2023. https://consensus.app/papers/details/5e3a0e597ea855a89be1d6c76a8eb884/
+35. Morewedge, C. K. et al., "Debiasing Decisions: Improved Decision Making With a Single Training Intervention," Policy Insights from the Behavioral and Brain Sciences, 2015. https://openaccess.city.ac.uk/id/eprint/12324/1/Debiasing_Decisions_PIBBS.pdf
+36. Simchon, A. et al., "A signal detection theory meta-analysis of psychological inoculation against misinformation," Current Opinion in Psychology, 2025. https://consensus.app/papers/details/da8a2079ad8c5ca7bb7ff33347d624f4/
+37. "Mixed News about the Bad News Game," Journal of Cognition (https://journalofcognition.org/articles/324), and Seabrooke, T., Modirrousta-Galian, A. and Higham, P. A., Psychonomic Bulletin & Review, 2026 (https://discovery.ucl.ac.uk/id/eprint/10211973/7/Modirrousta-Galian_s13423-025-02827-x.pdf).
+38. Maertens, R. et al., "Psychological booster shots targeting memory increase long-term resistance against misinformation," Nature Communications, 2025. https://consensus.app/papers/details/26ad97e09c10559a907aacefe57afa5c/
+39. Maertens, R. et al., "Long-term effectiveness of inoculation against misinformation: Three longitudinal experiments," Journal of Experimental Psychology: Applied, 2021. https://consensus.app/papers/details/ca54a7d8cdc35328ac18c6997fa1c034/
+
+## Notes for Igor (delete before sending)
+
+- **Framing changes I made on purpose.** "Poor people" became "people in low- and middle-income countries" and "people who cannot get good advice"; donors in this audience will read "poor people" as condescending. "The past 10 years" became 13 years, because the support page says Clearer Thinking was founded in 2013. "Therapy or coaching" became "advice": the advisor must not be positioned as therapy. The Stanford safety results, the Illinois and Nevada laws, and the coaching program's own exclusions all point the same way, and the self-help carve-out in the Illinois law is the line to stay behind.
+- **The biggest weakness in the original Idea 1** was that it asserted demand. The strongest fix is the ChatGPT usage paper (fastest adoption in lower-income countries, 29% practical guidance) plus our own GA4 data (42% of completions from LMICs). Both are now in the text.
+- **The biggest weakness in the original Idea 2** was "some people aren't into reading" without numbers. It now has the NEA reading data, the ESA and Newzoo player counts, the classroom adoption figures, and the "friends don't like having their irrationalities pointed out" quote, which turns the sharing problem into the argument for games.
+- **Honesty points a skeptical donor will test.** Chatbot effects fade by 3 months in one meta-analysis; game-based inoculation decays faster than video; the Bad News replications are mixed; 47% of our own tool users are not interested in an AI conversation. All four are stated in the text with the mitigation, which is a stronger position than leaving them for a donor to find.
+- **Tax status.** The support page says contributions are not tax-deductible because Clearer Thinking is not a 501(c)(3). For a wealthy audience at year-end this will come up. Either state it plainly in the email or arrange a fiscal sponsor or donor-advised-fund path before sending.
+- **Numbers to fill in before sending:** budgets, what each dollar amount buys, the number of games, team names, the pilot size, and the milestone targets in square brackets. I did not invent any of these.
+- **Numbers to double-check:** the homepage says "over 400,000 subscribers" while average unique opens run at about 86,000 per send; I avoided the subscriber count entirely. The "about 240,000 completions" figure counts Submitted Email events, not unique people, and includes the 3 daily health-check runs (negligible).
+- **Possible additions:** one real example conversation from the 2025 prototype for Project 1, and one 60-second playable mock-up for Project 2. Donors give to things they can see.
