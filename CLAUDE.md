@@ -26,6 +26,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   25-minute budget) -> Vercel dashboard at https://growth-advisor-clearerthinking.vercel.app/.
   `frontend/public/beehiiv_new_subs_cache.json` is an incremental cache committed with the
   snapshot; delete it to force a full re-walk (takes ~25 min).
+- MLA = MailList Accelerator: CT brands a copy of a tool for a partner org (e.g. `/p/hive/worlds-biggest-problems-quiz`,
+  the main quiz program 20481 fed a `brand_data` variable), runs ads under the partner's name and sells the subscribers at a
+  $3-15 CPA; opt-ins are stamped in beehiiv's `MLA Tags` custom field. The Hive pilot (2026) is dissected in the memory note
+  `project_hive_mla_pilot`: most delivered subscribers were existing CT readers, so never quote it as paid acquisition.
 - Manual (non-Stripe) revenue lines (sponsorships, MLA, affiliates): `MANUAL_REVENUE` in
   `fetch_snapshot.py` is the single source (`dashboard.py` and `weekly_advisor.py` import it). The
   goals table's "Total revenue" = Stripe gross + these lines. To publish an edit without waiting
