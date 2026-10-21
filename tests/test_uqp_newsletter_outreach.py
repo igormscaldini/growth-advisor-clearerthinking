@@ -36,6 +36,7 @@ def test_editor_draft_is_personal_and_complete():
     assert subject == "A call for submissions for Psychology News"
     assert body.startswith("Hi Jane,")
     assert "Your Announcements section looks like the right spot. Would you be willing" in body
+    assert "forward it to the department's faculty and graduate student lists" in body
     assert "Department of Psychology at University of Michigan" in body
     assert "$400" in body and "November 10, 2026" in body
     assert "?src=nl_university_of_michigan" in body
@@ -47,6 +48,23 @@ def test_department_office_draft_uses_generic_greeting_and_forwarding_ask():
                                      contact_email="psych@umich.edu"))
     assert body.startswith("Hello,")
     assert "pass this along to whoever puts together Psychology News" in body
+
+
+def test_named_office_contact_is_greeted_by_first_name():
+    _, body = draft_email(base(contact_name="Krista Lester", contact_type="department office"))
+    assert body.startswith("Hi Krista,")
+
+
+def test_no_newsletter_row_gets_forwarding_ask_and_university_subject():
+    subject, body = draft_email(base(newsletter_name="", contact_type="department office"))
+    assert subject == "A call for submissions for psychology faculty and graduate students at University of Michigan"
+    assert "forward the short item below to the department's faculty and graduate students" in body
+
+
+def test_ask_sentence_override_replaces_default_ask():
+    _, body = draft_email(base(ask_sentence="Could you drop it in Psych Weekly?", hook_sentence="Hook."))
+    assert "Hook. Could you drop it in Psych Weekly?\n\nThank you" in body
+    assert "Would you be willing" not in body
 
 
 def test_chair_draft_changes_subject_and_ask():
@@ -75,8 +93,22 @@ def test_load_contacts_merges_dedupes_applies_overrides_and_drops_unusable(tmp_p
     out = load_contacts([a, b], overrides)
     slugs = [c["slug"] for c in out]
     assert slugs == ["yale_university", "duke_university"]   # Brown dropped (no route), Rice skipped, Yale deduped
+    assert all(c["tier"] == 3 for c in out)
     assert out[0]["contact_email"] == "x@yale.edu"            # first occurrence wins
     assert out[0]["hook_sentence"] == "Hook."
+
+
+def test_second_newsletter_of_same_university_gets_suffixed_slug_and_sorting_by_tier(tmp_path):
+    a = tmp_path / "a.json"
+    a.write_text(json.dumps([
+        {"university": "University of Minnesota (extra)", "newsletter_name": "Brain Wave", "contact_email": "a@umn.edu",
+         "contact_type": "department office", "confidence": "medium"},
+        {"university": "University of Minnesota", "newsletter_name": "Psych Scoop", "contact_email": "b@umn.edu",
+         "contact_type": "editor/comms", "confidence": "medium"},
+    ]))
+    out = load_contacts([a], {"university_of_minnesota": {"tier": 2}, "university_of_minnesota_2": {"tier": 1}})
+    assert [c["slug"] for c in out] == ["university_of_minnesota_2", "university_of_minnesota"]
+    assert out[1]["university"] == "University of Minnesota"  # "(extra)" stripped
 
 
 def test_build_rows_has_every_column_and_numbering():

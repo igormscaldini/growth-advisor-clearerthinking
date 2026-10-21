@@ -27,7 +27,7 @@ DEADLINE = "November 10, 2026"
 SIGNATURE = "Igor Scaldini\nClearer Research and Clearer Thinking\nclearerthinking.org"
 
 COLUMNS = [
-    "#", "University", "Department", "Newsletter", "Newsletter URL",
+    "#", "Tier", "University", "Department", "Newsletter", "Newsletter URL",
     "Audience, frequency, how to submit", "Contact name", "Role", "Email",
     "Where the email was found", "Contact type", "Confidence", "Tracking link",
     "Subject", "Email draft", "Status", "Sent on", "Notes",
@@ -85,38 +85,58 @@ def first_name(contact_name: str) -> str:
     return first
 
 
+NON_PERSON = ("office", "department", "reception", "psychology", "general", "committee", "team")
+
+
+def is_person(contact_name: str) -> bool:
+    n = (contact_name or "").lower()
+    return bool(n) and not any(w in n for w in NON_PERSON)
+
+
 def draft_email(row: dict) -> tuple[str, str]:
-    """Return (subject, body) for one contact. Pure function, tested."""
-    newsletter = row.get("newsletter_name") or "your department newsletter"
+    """Return (subject, body) for one contact. Pure function, tested.
+
+    `hook_sentence` (hand-written per row) opens the request paragraph; `ask_sentence`
+    replaces the default ask for rows that need a specific one (weekly bulletins, annual
+    newsletters that will not run before the deadline, student associations, etc.).
+    """
+    newsletter = (row.get("newsletter_name") or "").strip()
     department = row.get("department") or "the psychology department"
     university = row["university"]
     ctype = row.get("contact_type", "")
     link = tracking_link(row["slug"])
     hook = (row.get("hook_sentence") or "").strip()
+    tail = "It is ready to paste, and I'm happy to trim it or adjust it to your format."
 
-    name = first_name(row.get("contact_name", "")) if ctype == "editor/comms" or ctype == "chair/DGS" else ""
+    name = first_name(row.get("contact_name", "")) if is_person(row.get("contact_name", "")) else ""
     greeting = f"Hi {name}," if name else "Hello,"
 
-    if ctype == "department office":
-        ask = (f"Could you pass this along to whoever puts together {newsletter}, or to the "
-               f"person who handles announcements for the department? The short item below is "
-               f"ready to paste, and I'm happy to trim it or adjust it to your format.")
+    if row.get("ask_sentence"):
+        ask = row["ask_sentence"].strip()
+    elif not newsletter:
+        ask = (f"Could you forward the short item below to the department's faculty and graduate "
+               f"students, or pass it to whoever sends department announcements? {tail}")
+    elif ctype == "department office":
+        ask = (f"Could you pass this along to whoever puts together {newsletter}, or to the person "
+               f"who handles announcements for the department? If the next issue comes after the "
+               f"deadline, a forward to the faculty and graduate student lists would help just as much. {tail}")
     elif ctype == "chair/DGS":
         ask = (f"I know this is not a typical request. Could you forward the short item below to "
-               f"your faculty and graduate students, or pass it to whoever manages {newsletter}? "
-               f"I'm happy to trim it or adjust it to your format.")
+               f"your faculty and graduate students, or pass it to whoever manages {newsletter}? {tail}")
     elif ctype == "form only":
         ask = (f"I'm submitting the short item below through your announcements form, and I "
-               f"wanted to send it to you directly as well in case that is easier. I'm happy to "
-               f"trim it or adjust it to your format.")
+               f"wanted to send it to you directly as well in case that is easier. {tail}")
     else:
-        ask = (f"Would you be willing to include the short item below in {newsletter}? It is "
-               f"ready to paste, and I'm happy to trim it or adjust it to your format.")
+        ask = (f"Would you be willing to include the short item below in {newsletter}, or, if the "
+               f"next issue comes after the deadline, forward it to the department's faculty and "
+               f"graduate student lists? {tail}")
+
+    if newsletter:
+        subject = f"A call for submissions for {newsletter}"
+    else:
+        subject = f"A call for submissions for psychology faculty and graduate students at {university}"
 
     intro_hook = (hook + " ") if hook else ""
-    subject = f"A call for submissions for {newsletter}" if ctype != "chair/DGS" else \
-        f"A $400 prize for unanswered questions in psychology, for {department}"
-
     body = (
         f"{greeting}\n\n"
         f"I'm Igor Scaldini, and I work with Spencer Greenberg's team at Clearer Research, the "
@@ -148,20 +168,24 @@ def load_contacts(paths: list[Path], overrides: dict | None = None) -> list[dict
     for p in paths:
         for item in json.loads(Path(p).read_text()):
             item = dict(item)
+            item["university"] = re.sub(r"\s*\(extra\)\s*", "", item["university"]).strip()
             key = slugify(item["university"] + " " + (item.get("newsletter_name") or ""))
             if key in seen_keys:
                 continue
             seen_keys.add(key)
             slug = slugify(item["university"])
             if any(o["slug"] == slug for o in out):
-                slug = key
+                slug = slug + "_2"
             item["slug"] = slug
             item.update(overrides.get(slug, {}))
             if item.get("skip"):
                 continue
             if not (item.get("contact_email") or item.get("contact_type") == "form only"):
                 continue
+            item.setdefault("tier", 3)
             out.append(item)
+    order = {"high": 0, "medium": 1, "low": 2}
+    out.sort(key=lambda r: (int(r["tier"]), order.get(r.get("confidence", "low"), 2)))
     return out
 
 
@@ -171,6 +195,7 @@ def build_rows(contacts: list[dict]) -> list[dict]:
         subject, body = draft_email(c)
         rows.append({
             "#": i,
+            "Tier": c.get("tier", 3),
             "University": c["university"],
             "Department": c.get("department", ""),
             "Newsletter": c.get("newsletter_name", ""),
@@ -201,6 +226,10 @@ def method_rows(stamp: str, n: int) -> list[list[str]]:
                           "No address was guessed from a name pattern. 'form only' rows have a submission form instead of an email."],
         ["Contact priority", "1. Newsletter editor or department communications coordinator. 2. Department office email. "
                              "3. Chair or director of graduate studies. The 'Contact type' column says which one each row is."],
+        ["Tier", "1 = live department newsletter that reaches faculty and graduate students, with a named editor, communications "
+                 "contact or submission route. 2 = a live newsletter, but alumni- or undergraduate-facing, college- or institute-level, "
+                 "annual (next issue after the deadline), or reachable only through a general inbox. 3 = no current newsletter found; "
+                 "an office or communications contact who can forward the item to faculty and graduate students."],
         ["Confidence", "high = email on a .edu page and the newsletter clearly exists; medium = one of the two is weaker; low = both are weak. "
                        "Re-check low rows before sending."],
         ["Tracking link", "Each row's link carries ?src=nl_<university>. GA4 records the full page URL, so visits per newsletter can be counted "
@@ -245,7 +274,7 @@ def create_sheet(rows: list[dict], title: str, stamp: str) -> str:
     }).execute()
 
     g0 = gids[tabs[0]]
-    widths = {"#": 40, "University": 200, "Department": 200, "Newsletter": 200, "Newsletter URL": 220,
+    widths = {"#": 40, "Tier": 50, "University": 200, "Department": 200, "Newsletter": 200, "Newsletter URL": 220,
               "Audience, frequency, how to submit": 320, "Contact name": 160, "Role": 200, "Email": 230,
               "Where the email was found": 220, "Contact type": 130, "Confidence": 90, "Tracking link": 220,
               "Subject": 260, "Email draft": 520, "Status": 110, "Sent on": 100, "Notes": 260}
