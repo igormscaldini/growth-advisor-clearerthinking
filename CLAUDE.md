@@ -89,7 +89,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   ignored) so CI starts warm; the workflow commits it back.
   Any live blog post can be edited the same way: `GET /posts/slugs/<slug>` to find it (`draft-posts/query`
   cannot filter on slug), PATCH `richContent` on `/draft-posts/<id>`, then publish (done 2026-10-15 for
-  /post/guest-posting; Ricos node JSON is in that post's API response).
+  /post/guest-posting; Ricos node JSON is in that post's API response). Draft posts carry `hasUnpublishedChanges`:
+  check it before publishing or you push a teammate's pending edits. After a publish the plain post URL keeps serving
+  the cached old HTML for a while; verify with a `?cb=<random>` query. 2026-10-21: personality.html -> personality-test.html
+  in 15 posts (22 links).
 - `tools_redirect_map.py` + `tools_redirects.py`: the Wix "Tools" CMS collection (internal id
   `Courses`) auto-creates a /tools/<slug> dynamic page per tool that duplicates the real
   programs.* tool. 85 of them were 301'd to the official pages on 2026-09-30 (ids in
