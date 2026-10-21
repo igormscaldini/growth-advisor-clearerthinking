@@ -162,6 +162,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   from a live page or GA4, never from that file. programs.* pages render GuidedTrack inline (no iframe) and load
   GTM from `google_analytics_guidedtrack_trigger.js` at the end of body; `personality-test.html` loads it only after
   the CTA. The container's Just Links trigger still has Wait for Tags on (2 s) on both hosts (checked 2026-10-19).
+  GTM's Custom HTML compiler is ES5-only: no let/const, arrows or template literals, and no `function`
+  declaration inside a block (if/try/loop), which fails publish validation; write `var f = function () {}`.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
