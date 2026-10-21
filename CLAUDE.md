@@ -172,8 +172,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - `reports/upt_ranking_plan_2026-10-21_src/`: UPT "personality test" ranking diagnosis + plan (memory note
   `project_upt_personality_test_ranking_2026_10`). The 2026-07-21 intro-page launch hard-coded the title "Ultimate
   Personality Test | ClearerThinking.org" in the team repo's `template.liquid` (program.yml still holds the old "Free
-  Scientific Personality Test..." title); Igor's fix branch `bugfix/2026-09-23/upt-seo-title-description` was never
-  merged, and that title change did NOT cut CTR. Read mobile and desktop GSC separately for this query (mobile fell
+  Scientific Personality Test..." title); Igor's fix branch `bugfix/2026-09-23/upt-seo-title-description` is PR #9 (opened
+  2026-10-21, reviewer Josh); that title change did NOT cut CTR. Read mobile and desktop GSC separately for this query (mobile fell
   ~65% in the week of 2026-09-28, desktop flat). The Jun 2026 "TG @SEO_LINKK_ORDER" referring domains are link-dump
   spam, not CT's: no disavow. All other tool pages share `src/templates/program.liquid` (one footer link = ~150 internal
   links). PageSpeed Insights API quota is exhausted on the shared project: run `npx -y lighthouse@12` locally.
