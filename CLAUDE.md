@@ -151,6 +151,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `reports/uqp_daily_runs_src/build.py`; submissions-over-time chart (daily + cumulative vs the 40 target):
   `submissions_timeline.py` beside it. Reddit rules/sizes verified 2026-10-15 via a Redlib mirror (reddit.com
   blocks fetches); ranked list and bans are in the memory note `project_unanswered_questions_psychology_prize`.
+  Form deadline fixed to Nov 10 on 2026-10-21 (source copy in `guidedtrack/`). University newsletter outreach sheet
+  (52 verified contacts, tiered, one draft each): `reports/uqp_newsletter_outreach_src/build_sheet.py` builds it from the
+  research agents' JSON + an overrides file (both scratchpad-only, they hold named people's emails); sheet id in the memory note.
 - `reports/year_end_appeal_theories_of_change_2026-10-19_src/`: donor-facing theories of change for the two 2027
   projects (free AI advisor, critical-thinking games) for the year-end donation email; `theories_of_change.md` is the
   source, `render.py` builds the HTML and copies the Markdown to `~/Downloads`. Donations are NOT tax-deductible
