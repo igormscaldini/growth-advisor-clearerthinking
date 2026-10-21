@@ -93,6 +93,21 @@ def is_person(contact_name: str) -> bool:
     return bool(n) and not any(w in n for w in NON_PERSON)
 
 
+def prose_department(department: str) -> str:
+    """'Department of Psychology (Faculty of Arts and Sciences) - note' -> 'the Department of Psychology'."""
+    d = re.sub(r"\s*\([^)]*\)", "", department or "").split(";")[0].split(" - ")[0].strip().rstrip(",")
+    if not d:
+        return "the psychology department"
+    if re.match(r"^(Department|College|Graduate Association|Duke Institute|Psychology Undergraduate)", d):
+        d = "the " + d
+    return d
+
+
+def prose_university(university: str) -> str:
+    u = (university or "").strip()
+    return ("the " + u) if re.match(r"^(University|College) ", u) else u
+
+
 def draft_email(row: dict) -> tuple[str, str]:
     """Return (subject, body) for one contact. Pure function, tested.
 
@@ -101,7 +116,7 @@ def draft_email(row: dict) -> tuple[str, str]:
     newsletters that will not run before the deadline, student associations, etc.).
     """
     newsletter = (row.get("newsletter_name") or "").strip()
-    department = row.get("department") or "the psychology department"
+    department = prose_department(row.get("department", ""))
     university = row["university"]
     ctype = row.get("contact_type", "")
     link = tracking_link(row["slug"])
@@ -142,7 +157,7 @@ def draft_email(row: dict) -> tuple[str, str]:
         f"I'm Igor Scaldini, and I work with Spencer Greenberg's team at Clearer Research, the "
         f"research arm of ClearerThinking.org. We're running the Unanswered Questions in "
         f"Psychology Prize, and I'd love to reach the faculty, postdocs and graduate students "
-        f"of {department} at {university}.\n\n"
+        f"of {department} at {prose_university(university)}.\n\n"
         f"The idea is simple: submit the question in psychology you think most needs an answer. "
         f"Each winning question earns $400, and the winners are chosen by a vote of current and "
         f"former academic psychologists. Submitting takes about ten minutes, and the deadline is "

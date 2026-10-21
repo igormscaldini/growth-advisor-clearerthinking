@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "reports" / "uqp_newsletter_outreach_src"))
 
 from build_sheet import (COLUMNS, build_rows, draft_email, first_name, load_contacts,  # noqa: E402
-                         slugify, tracking_link)
+                         prose_department, prose_university, slugify, tracking_link)
 
 
 def base(**kw):
@@ -25,6 +25,18 @@ def test_first_name_strips_honorifics_and_handles_empty():
     assert first_name("Psychology Department") == "Psychology"  # caller decides by contact_type
 
 
+def test_prose_department_and_university():
+    assert prose_department("Department of Psychology (Faculty of Arts and Sciences)") == "the Department of Psychology"
+    assert prose_department("Department of Psychology (USC Dornsife) - college-level newsletter") == "the Department of Psychology"
+    assert prose_department("Department of Psychological and Brain Sciences (CLAS); newsletter is college-level") == \
+        "the Department of Psychological and Brain Sciences"
+    assert prose_department("Duke Institute for Brain Sciences") == "the Duke Institute for Brain Sciences"
+    assert prose_department("") == "the psychology department"
+    assert prose_university("University of Michigan") == "the University of Michigan"
+    assert prose_university("UCLA") == "UCLA"
+    assert prose_university("Harvard University") == "Harvard University"
+
+
 def test_slug_and_tracking_link():
     assert slugify("University of Michigan") == "university_of_michigan"
     assert tracking_link("ucla") == \
@@ -37,7 +49,7 @@ def test_editor_draft_is_personal_and_complete():
     assert body.startswith("Hi Jane,")
     assert "Your Announcements section looks like the right spot. Would you be willing" in body
     assert "forward it to the department's faculty and graduate student lists" in body
-    assert "Department of Psychology at University of Michigan" in body
+    assert "of the Department of Psychology at the University of Michigan." in body
     assert "$400" in body and "November 10, 2026" in body
     assert "?src=nl_university_of_michigan" in body
     assert "—" not in body and "—" not in subject  # no em dashes, Igor's rule
@@ -69,7 +81,7 @@ def test_ask_sentence_override_replaces_default_ask():
 
 def test_chair_draft_changes_subject_and_ask():
     subject, body = draft_email(base(contact_type="chair/DGS", contact_name="Prof. Ann Lee"))
-    assert subject.startswith("A $400 prize for unanswered questions in psychology")
+    assert subject == "A call for submissions for Psychology News"
     assert body.startswith("Hi Ann,")
     assert "forward the short item below to your faculty and graduate students" in body
 
