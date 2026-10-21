@@ -91,10 +91,11 @@
 
     var fab = document.createElement('a');
     fab.className = 'ct-coaching-fab';
-    // No utm parameters on purpose: the tools report clicks through the data layer
-    // (see the cta_click comment in google_analytics_guidedtrack_trigger.js). "src" is
-    // visible in GA4 as part of the landing page_location and is read by nothing else.
-    fab.href = 'https://www.clearerthinking.org/coaching?src=tools_fab';
+    // utm parameters (Igor's choice, 2026-10-21), matching the Wix "Get Coaching Button":
+    // the /coaching visit is then attributed in GA4 to tools / banner, which starts a new
+    // session and replaces the visitor's original source for that visit.
+    fab.href = 'https://www.clearerthinking.org/coaching'
+      + '?utm_source=tools&utm_medium=banner&utm_campaign=tools_floating_button';
     fab.setAttribute('aria-label', 'Get Coaching');
     fab.innerHTML =
       '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
