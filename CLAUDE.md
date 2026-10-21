@@ -158,7 +158,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   projects (free AI advisor, critical-thinking games) for the year-end donation email; `theories_of_change.md` is the
   source, `render.py` builds the HTML and copies the Markdown to `~/Downloads`. Donations are NOT tax-deductible
   (not a 501(c)(3), per the support page): say so in any appeal or arrange a fiscal sponsor first.
-- `wix/coaching_fab_www.html`: source of the Wix custom-code embed "Get Coaching Button" (www only).
+- `wix/`: sources of the Wix custom-code embeds: `coaching_fab_www.html` ("Get Coaching Button", site-wide, hides on
+  /coaching) and `contact_fab_coaching.html` ("Questions? Get in touch", /coaching only). Both open in a new tab.
 - `gtm/`: sources of the GTM-WGXZSLV Custom HTML tags (blog audio tracking; `coaching_fab_tools.html` = the
   "Get Coaching" floating button for programs.* pages, trigger scoped by Page Hostname, assessment in
   `reports/coaching_fab_tools_assessment_2026-10-19.html`). The container is SHARED by www (Wix) and programs.*.
