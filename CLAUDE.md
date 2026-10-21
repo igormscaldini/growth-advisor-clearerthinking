@@ -148,7 +148,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   psychologists; cancelled if <40 submissions from unaffiliated academics): GT program 37281 (`adcd55g`) embedded at
   programs.clearerthinking.org/unanswered-questions-in-psychology/. Outreach email (spencer@clearerresearch.org,
   2026-09-28) says deadline Nov 10, 2026; the form still said Oct 10 on 2026-10-15: keep them in sync. Daily runs:
-  `reports/uqp_daily_runs_src/build.py`. Reddit rules/sizes verified 2026-10-15 via a Redlib mirror (reddit.com
+  `reports/uqp_daily_runs_src/build.py`; submissions-over-time chart (daily + cumulative vs the 40 target):
+  `submissions_timeline.py` beside it. Reddit rules/sizes verified 2026-10-15 via a Redlib mirror (reddit.com
   blocks fetches); ranked list and bans are in the memory note `project_unanswered_questions_psychology_prize`.
 - `reports/year_end_appeal_theories_of_change_2026-10-19_src/`: donor-facing theories of change for the two 2027
   projects (free AI advisor, critical-thinking games) for the year-end donation email; `theories_of_change.md` is the

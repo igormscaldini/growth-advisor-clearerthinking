@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UQP submissions over time</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-1: #fcfcfb; --surface-2: #ffffff; --line: #e4e3df; --line-strong: #b9b8b2;
+    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #7b7a75;
+    --series-1: #2a78d6; --series-2: #eb6834; --shadow: 0 4px 16px rgba(0,0,0,.10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --surface-1: #1a1a19; --surface-2: #232322; --line: #34342f; --line-strong: #5a5952;
+      --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+      --series-1: #3987e5; --series-2: #d95926; --shadow: 0 4px 16px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --surface-2: #232322; --line: #34342f; --line-strong: #5a5952;
+    --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+    --series-1: #3987e5; --series-2: #d95926; --shadow: 0 4px 16px rgba(0,0,0,.5);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--surface-1); color: var(--text-primary);
+         font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 40px 16px 56px; }
+  h1 { font-size: 22px; font-weight: 650; margin: 0 0 6px; letter-spacing: -.01em; }
+  .sub { color: var(--text-secondary); margin: 0 0 28px; font-size: 14px; }
+  .sub .stamp { color: var(--text-muted); }
+  .kpis { display: flex; gap: 32px; flex-wrap: wrap; margin: 0 0 32px; }
+  .kpi .v { font-size: 34px; font-weight: 600; line-height: 1.1; }
+  .kpi .l { color: var(--text-secondary); font-size: 13px; margin-top: 2px; }
+  .panel { margin: 0 0 28px; }
+  .panel h2 { font-size: 14px; font-weight: 600; margin: 0 0 4px; color: var(--text-primary); }
+  .panel .note { font-size: 12.5px; color: var(--text-muted); margin: 0 0 8px; }
+  .legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--text-secondary); margin: 0 0 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { display: inline-block; width: 16px; height: 2px; border-radius: 1px; }
+  svg { width: 100%; height: auto; display: block; overflow: visible; }
+  svg text { font-family: inherit; }
+  .tick { fill: var(--text-muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .lbl { fill: var(--text-secondary); font-size: 12px; }
+  .lbl.strong { fill: var(--text-primary); font-weight: 600; }
+  .hair { stroke: var(--line); stroke-width: 1; }
+  .hair.strong { stroke: var(--line-strong); }
+  .bar { fill: var(--series-1); transition: opacity .12s; }
+  .bar.dim { opacity: .55; }
+  .hit { fill: transparent; cursor: default; }
+  .cross { stroke: var(--line-strong); stroke-width: 1; pointer-events: none; }
+  .tip { position: fixed; z-index: 5; pointer-events: none; background: var(--surface-2); color: var(--text-primary);
+         border-radius: 8px; box-shadow: var(--shadow); padding: 8px 11px; font-size: 12.5px; line-height: 1.4;
+         display: none; min-width: 150px; }
+  .tip .d { color: var(--text-muted); margin-bottom: 3px; }
+  .tip .r { display: flex; align-items: center; gap: 7px; }
+  .tip .r b { font-variant-numeric: tabular-nums; min-width: 2ch; text-align: right; }
+  .tip .r i { display: inline-block; width: 12px; height: 2px; border-radius: 1px; }
+  .tip .r span { color: var(--text-secondary); }
+  details { margin-top: 8px; font-size: 13px; }
+  summary { cursor: pointer; color: var(--text-secondary); }
+  table { border-collapse: collapse; margin-top: 10px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: right; padding: 5px 12px 5px 0; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; }
+  th { color: var(--text-muted); font-weight: 500; font-size: 12px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Unanswered Questions in Psychology: submissions over time</h1>
+  <p class="sub">GuidedTrack program 37281, real question submissions by day the form was opened (UTC); the three
+    April test entries are excluded. First submission __FIRST__, latest __LAST__.<br>
+    <span class="stamp">Generated __STAMP__</span></p>
+
+  <div class="kpis">
+    <div class="kpi"><div class="v">__SUBS__</div><div class="l">questions submitted</div></div>
+    <div class="kpi"><div class="v">__RESP__</div><div class="l">unique responders</div></div>
+    <div class="kpi"><div class="v">__TARGET__</div><div class="l">submissions needed for the prize to run</div></div>
+  </div>
+
+  <section class="panel">
+    <h2>Submissions per day</h2>
+    <p class="note">Hover a day for its count. One person may submit several questions.</p>
+    <svg id="daily" role="img" aria-label="Daily submissions"></svg>
+  </section>
+
+  <section class="panel">
+    <h2>Cumulative total</h2>
+    <div class="legend">
+      <span><i style="background:var(--series-1)"></i>Questions submitted</span>
+      <span><i style="background:var(--series-2)"></i>Unique responders</span>
+    </div>
+    <svg id="cum" role="img" aria-label="Cumulative submissions and unique responders"></svg>
+  </section>
+
+  <details>
+    <summary>Table of days with submissions</summary>
+    <table id="tbl"><thead><tr>
+      <th>Date</th><th>Submissions</th><th>New responders</th><th>Cumulative submissions</th><th>Cumulative responders</th>
+    </tr></thead><tbody></tbody></table>
+  </details>
+</main>
+<div class="tip" id="tip"></div>
+
+<script>
+(function () {
+  const DATA = __DATA__;
+  const OUTREACH = "__OUTREACH__";
+  const TARGET = __TARGET__;
+  const n = DATA.length;
+  const W = 860, ML = 40, MR = 150, MT = 30, MB = 28;
+  const innerW = W - ML - MR, band = innerW / n;
+  const xs = i => ML + i * band, xc = i => ML + (i + .5) * band, xe = i => ML + (i + 1) * band;
+  const svgNS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs, parent, text) => {
+    const e = document.createElementNS(svgNS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    if (text !== undefined) e.textContent = text;
+    parent.appendChild(e); return e;
+  };
+  const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const DOW = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const parse = s => new Date(s + "T00:00:00Z");
+  const short = s => { const d = parse(s); return MON[d.getUTCMonth()] + " " + d.getUTCDate(); };
+  const long = s => { const d = parse(s); return DOW[d.getUTCDay()] + ", " + short(s) + " " + d.getUTCFullYear(); };
+  const tip = document.getElementById("tip");
+  const showTip = (ev, rows, dateStr) => {
+    tip.replaceChildren();
+    const d = document.createElement("div"); d.className = "d"; d.textContent = dateStr; tip.appendChild(d);
+    for (const r of rows) {
+      const row = document.createElement("div"); row.className = "r";
+      const key = document.createElement("i"); key.style.background = r.color;
+      const b = document.createElement("b"); b.textContent = r.value;
+      const s = document.createElement("span"); s.textContent = r.label;
+      row.append(key, b, s); tip.appendChild(row);
+    }
+    tip.style.display = "block";
+    const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+    let x = ev.clientX + pad, y = ev.clientY + pad;
+    if (x + w > window.innerWidth - 8) x = ev.clientX - w - pad;
+    if (y + h > window.innerHeight - 8) y = ev.clientY - h - pad;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  const hideTip = () => { tip.style.display = "none"; };
+
+  function xAxis(svg, baseY) {
+    el("line", {x1: ML, x2: ML + innerW, y1: baseY, y2: baseY, class: "hair strong"}, svg);
+    for (let i = 0; i < n; i += 7)
+      el("text", {x: xc(i), y: baseY + 17, "text-anchor": "middle", class: "tick"}, svg, short(DATA[i].date));
+  }
+
+  // Panel 1: daily columns
+  (function () {
+    const H = 190, innerH = H - MT - MB, baseY = MT + innerH;
+    const svg = document.getElementById("daily");
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    const maxV = Math.max(1, ...DATA.map(d => d.submissions));
+    const y = v => baseY - v / maxV * innerH;
+    for (let v = 0; v <= maxV; v++)
+      el("text", {x: ML - 10, y: y(v) + 4, "text-anchor": "end", class: "tick"}, svg, v);
+    // outreach marker
+    const oi = DATA.findIndex(d => d.date === OUTREACH);
+    if (oi >= 0) {
+      el("line", {x1: xc(oi), x2: xc(oi), y1: MT - 4, y2: baseY, class: "hair strong"}, svg);
+      el("text", {x: xc(oi) + 6, y: MT + 2, class: "lbl"}, svg, "Outreach email to academics");
+    }
+    xAxis(svg, baseY);
+    const bw = Math.min(24, band - 2), r = 4;
+    const bars = [];
+    DATA.forEach((d, i) => {
+      if (d.submissions > 0) {
+        const x0 = xc(i) - bw / 2, top = y(d.submissions), h = baseY - top, rr = Math.min(r, h);
+        const p = `M${x0},${baseY} V${top + rr} Q${x0},${top} ${x0 + rr},${top} H${x0 + bw - rr} Q${x0 + bw},${top} ${x0 + bw},${top + rr} V${baseY} Z`;
+        bars[i] = el("path", {d: p, class: "bar"}, svg);
+        if (d.submissions === maxV)
+          el("text", {x: xc(i), y: top - 6, "text-anchor": "middle", class: "lbl strong"}, svg, d.submissions);
+      }
+    });
+    DATA.forEach((d, i) => {
+      const hit = el("rect", {x: xs(i), y: MT - 4, width: band, height: innerH + 4, class: "hit"}, svg);
+      const on = ev => {
+        bars.forEach((b, j) => b && b.classList.toggle("dim", j !== i));
+        showTip(ev, [{color: "var(--series-1)", value: d.submissions,
+                      label: d.submissions === 1 ? "submission" : "submissions"}], long(d.date));
+      };
+      hit.addEventListener("pointermove", on);
+      hit.addEventListener("pointerleave", () => { bars.forEach(b => b && b.classList.remove("dim")); hideTip(); });
+    });
+  })();
+
+  // Panel 2: cumulative step lines
+  (function () {
+    const H = 250, innerH = H - MT - MB, baseY = MT + innerH;
+    const svg = document.getElementById("cum");
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    const last = DATA[n - 1];
+    const top = Math.max(TARGET, last.cum_submissions);
+    const step = top <= 50 ? 10 : 20, maxV = Math.ceil(top / step) * step;
+    const y = v => baseY - v / maxV * innerH;
+    for (let v = 0; v <= maxV; v += step)
+      el("text", {x: ML - 10, y: y(v) + 4, "text-anchor": "end", class: "tick"}, svg, v);
+    // target
+    el("line", {x1: ML, x2: ML + innerW, y1: y(TARGET), y2: y(TARGET), class: "hair strong"}, svg);
+    el("text", {x: ML + innerW + 10, y: y(TARGET) + 4, class: "lbl"}, svg, `Target: ${TARGET}`);
+    xAxis(svg, baseY);
+    const series = [
+      {key: "cum_submissions", color: "var(--series-1)", label: "questions submitted"},
+      {key: "cum_responders", color: "var(--series-2)", label: "unique responders"},
+    ];
+    for (const s of series) {
+      let p = `M${xs(0)},${y(DATA[0][s.key])}`;
+      DATA.forEach((d, i) => { p += ` H${xe(i)}`; if (i < n - 1) p += ` V${y(DATA[i + 1][s.key])}`; });
+      el("path", {d: p, fill: "none", stroke: s.color, "stroke-width": 2, "stroke-linejoin": "round",
+                  "stroke-linecap": "round"}, svg);
+      const ex = xe(n - 1), ey = y(last[s.key]);
+      el("circle", {cx: ex, cy: ey, r: 6, fill: "var(--surface-1)"}, svg);
+      el("circle", {cx: ex, cy: ey, r: 4, fill: s.color}, svg);
+      el("text", {x: ex + 10, y: ey + 4, class: "lbl strong"}, svg, `${last[s.key]} ${s.label}`);
+    }
+    const cross = el("line", {x1: 0, x2: 0, y1: MT - 4, y2: baseY, class: "cross", visibility: "hidden"}, svg);
+    const hit = el("rect", {x: ML, y: MT - 4, width: innerW, height: innerH + 4, class: "hit"}, svg);
+    hit.addEventListener("pointermove", ev => {
+      const pt = svg.createSVGPoint(); pt.x = ev.clientX; pt.y = ev.clientY;
+      const loc = pt.matrixTransform(svg.getScreenCTM().inverse());
+      const i = Math.max(0, Math.min(n - 1, Math.floor((loc.x - ML) / band)));
+      const d = DATA[i];
+      cross.setAttribute("x1", xc(i)); cross.setAttribute("x2", xc(i)); cross.setAttribute("visibility", "visible");
+      showTip(ev, [
+        {color: "var(--series-1)", value: d.cum_submissions, label: "questions so far"},
+        {color: "var(--series-2)", value: d.cum_responders, label: "responders so far"},
+        {color: "transparent", value: d.submissions, label: d.submissions === 1 ? "submission that day" : "submissions that day"},
+      ], long(d.date));
+    });
+    hit.addEventListener("pointerleave", () => { cross.setAttribute("visibility", "hidden"); hideTip(); });
+  })();
+
+  // Table view
+  const tb = document.querySelector("#tbl tbody");
+  for (const d of DATA) {
+    if (!d.submissions) continue;
+    const tr = document.createElement("tr");
+    for (const v of [long(d.date), d.submissions, d.new_responders, d.cum_submissions, d.cum_responders]) {
+      const td = document.createElement("td"); td.textContent = v; tr.appendChild(td);
+    }
+    tb.appendChild(tr);
+  }
+})();
+</script>
+</body>
+</html>
