@@ -111,7 +111,9 @@
       });
     });
 
-    function update() {
+    // Function expressions, not declarations: GTM's Custom HTML compiler is ES5-only and
+    // rejects a function declaration inside a block (here, the try block).
+    var update = function () {
       if (!document.body) return;
       // GuidedTrack re-renders only its .main div, but some landing pages rebuild <body>
       // when the program starts (personality-test.html does): put the button back if so.
@@ -123,14 +125,14 @@
       document.documentElement.classList.toggle('ct-coaching-fab-lift', lift);
       // GuidedTrack's native payment panel is also fixed to the bottom; hide while it is open.
       fab.style.display = document.getElementById('payment-ui-container') ? 'none' : '';
-    }
+    };
 
     var pending = false;
-    function schedule() {
+    var schedule = function () {
       if (pending) return;
       pending = true;
       requestAnimationFrame(function () { pending = false; update(); });
-    }
+    };
     update();
     new MutationObserver(schedule).observe(document.documentElement, { childList: true, subtree: true });
     window.addEventListener('resize', schedule);
