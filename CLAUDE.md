@@ -278,6 +278,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   over two waves genuinely produced clicks (+0.82 GSC clicks per run) but moved ranking zero at every lag,
   and at 0.055% of impressions it never could. Its value is the 2,948 cold first impressions (58% positive,
   18% "like every other personality test"). `seo_experiment_analysis.py` + report in `reports/`.
+- Igor's GT account lists 241 programs (`GET /programs.json?page=N`, 50 per page) but only 42 of the 135
+  program keys embedded on live programs.* pages (the `id` of the `.guidedtrack` div); the rest belong to other
+  authors. `GET /programs/{key}/embed` (no auth) CREATES a real unfinished run and returns run_id + access_key;
+  `/runs/{id}/contents` then returns the compiled program. Audit of links to personality.html (2026-10-21):
+  `~/Downloads/ct_links_to_personality_html_2026-10-21.csv`, 18 web pages, none on programs.* static HTML.
 - Run data: `GET /programs/{id}/exports?export_format=csv` returns all non-test runs incl.
   unfinished ones; `GET /programs/{id}/runs.json?page=N` is 25 per page (`per_page`/`limit` are
   ignored, iterate until empty) and includes test runs.
