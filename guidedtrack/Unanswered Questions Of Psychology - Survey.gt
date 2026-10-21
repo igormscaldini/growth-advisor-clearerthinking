@@ -1,0 +1,1394 @@
+
+
+-- Deadline discussion:
+-- Start sending out mid May / second half of May.
+-- Send out over a process of two weeks.
+-- Give people two weeks to submit ideas.
+-- So, mid June 14th/16th.
+
+-- Updated deadline discussion(07-16-26):
+-- Deadline to be October 10th
+
+-- Updated deadline (10-21-26): November 10th, 2026, matching the Sep 28 outreach email
+
+
+*settings
+	*back: yes
+
+>> email = ""
+>> name = ""
+>> anonymity_choice = ""
+>> permission_use_example = ""
+>> permission_list_winner = ""
+
+-- From Spencer's spreadsheet: https://docs.google.com/spreadsheets/d/1cIreVxInZh9a6rWq2Qc-HRzp5UE1oL1ZUiQVD1ZsUec/edit?gid=0#gid=0
+>> example_question1 = "Is mental health best modeled by categories or factors, and what is the right set of categories or factors to carve the reality of mental health differences at the joints?"
+>> example_question2 = "What are the deep, underlying, modifiable psychological causes of why some people have higher long-term subjective well-being than others?"
+>> example_question3 = "What scalable psychological interventions can reduce polarization and between-group animosity without suppressing legitimate disagreement?"
+
+-- From here: https://doi.org/10.1007/s11427-025-3024-y (p.20)
+>> example_question4 = "What (if any) neuroimaging biomarkers can be validated to accurately guide individualized treatment selection for depression?"
+
+>> example_question5 = "What is the right model for how human beliefs change in the face of evidence (including deviations from Bayesian rationality)?"
+
+>> example_question6 = "What is the right model for how interoceptive signals are integrated with exteroception (externally detected signals) to determine emotion?"
+
+-- From here: https://journals.sagepub.com/doi/pdf/10.1177/1088868318811759 (p.354-5)
+>> example_question7 = "How do members of a group come to share the same moral values?"
+
+
+-- Added during round of edits with Spencer and Igor, on 07-16-26. To be placed third in the list of examples.
+>> example_question8 = "What are the true psychological impacts of social media, and how do these differ by demographic group and by social media app type?"
+
+
+----------------------------------
+-- Header banner
+----------------------------------
+
+*program: Unanswered Questions in Psychology - Submission Style Sheet 2
+ 
+*html
+	<div class="unanswered-fullbleed unanswered-hero-band">
+		<div class="unanswered-wrap">
+			<div class="unanswered-title">The Unanswered Questions in Psychology Prize</div>
+			<div class="unanswered-subtitle">Awarded By <i>Clearer Research</i></div>
+		
+			<div class="unanswered-desc"><i>Submission form (apply by November 10, 2026)</i></div>
+		</div>
+	</div>
+
+----------------------------------
+-- First Page: Prize Introduction
+----------------------------------
+
+*html
+	<style>
+		.uqip-logo-wrap {
+			text-align: center !important;
+			margin: 0 auto 24px auto !important;
+		}
+
+		.uqip-logo-wrap img {
+			width: 180px !important;
+			max-width: 70% !important;
+			height: auto !important;
+			display: inline-block !important;
+		}
+	
+		.uqip-wrap {
+			max-width: 900px !important;
+			margin: 0 auto !important;
+			padding: 44px 14px 26px 14px !important;
+			color: #505050 !important;
+			text-align: center !important;
+		}
+
+		.uqip-title {
+			margin: 0 auto 18px auto !important;
+			max-width: 760px !important;
+			color: #042F54 !important;
+			font-family: Georgia, "Times New Roman", serif !important;
+			font-size: 44px !important;
+			line-height: 1.18 !important;
+			font-weight: 700 !important;
+		}
+
+		.uqip-accent {
+			width: 84px !important;
+			height: 3px !important;
+			background: #A65C20 !important;
+			border-radius: 999px !important;
+			margin: 0 auto 26px auto !important;
+		}
+
+		.uqip-subtitle {
+			max-width: 690px !important;
+			margin: 0 auto 20px auto !important;
+			color: #505050 !important;
+			font-size: 20px !important;
+			line-height: 1.55 !important;
+		}
+
+		.uqip-invitation {
+			max-width: 600px !important;
+			margin: 0 auto 42px auto !important;
+			color: #042F54 !important;
+			font-family: Georgia, "Times New Roman", serif !important;
+			font-size: 22px !important;
+			line-height: 1.35 !important;
+			font-weight: 700 !important;
+		}
+
+		.uqip-facts {
+			display: grid !important;
+			grid-template-columns: 1fr 1px 1fr !important;
+			align-items: center !important;
+			gap: 34px !important;
+			max-width: 720px !important;
+			margin: 0 auto 42px auto !important;
+		}
+
+		.uqip-divider-vertical {
+			width: 1px !important;
+			height: 92px !important;
+			background: #D8DEE5 !important;
+		}
+
+		.uqip-fact-icon {
+			width: 86px !important;
+			height: 86px !important;
+			margin: 0 auto 16px auto !important;
+			border-radius: 50% !important;
+			background: #EFF2F5 !important;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			font-size: 34px !important;
+			color: #042F54 !important;
+		}
+
+		.uqip-fact-icon.uqip-prize {
+			color: #A65C20 !important;
+		}
+
+		.uqip-fact-text {
+			margin: 0 !important;
+			color: #042F54 !important;
+			font-size: 20px !important;
+			line-height: 1.35 !important;
+			font-weight: 700 !important;
+		}
+
+		.uqip-emphasis {
+			color: #A65C20 !important;
+		}
+
+		.uqip-divider {
+			display: grid !important;
+			grid-template-columns: 1fr 70px 1fr !important;
+			align-items: center !important;
+			gap: 0 !important;
+			max-width: 780px !important;
+			margin: 0 auto 24px auto !important;
+		}
+
+		.uqip-divider-line {
+			height: 1px !important;
+			background: #D8DEE5 !important;
+		}
+
+		.uqip-divider-mark {
+			height: 3px !important;
+			background: #A65C20 !important;
+			border-radius: 999px !important;
+		}
+
+		.uqip-section-title {
+			margin: 0 0 28px 0 !important;
+			color: #042F54 !important;
+			font-family: Georgia, "Times New Roman", serif !important;
+			font-size: 28px !important;
+			line-height: 1.25 !important;
+			font-weight: 700 !important;
+		}
+
+		.uqip-mission-grid {
+			display: grid !important;
+			grid-template-columns: 1fr 1px 1fr 1px 1fr !important;
+			align-items: start !important;
+			gap: 24px !important;
+			margin: 0 auto 34px auto !important;
+			max-width: 840px !important;
+		}
+
+		.uqip-mission-divider {
+			width: 1px !important;
+			height: 150px !important;
+			background: #D8DEE5 !important;
+			margin: 8px auto 0 auto !important;
+		}
+
+		.uqip-mission-icon {
+			width: 72px !important;
+			height: 72px !important;
+			margin: 0 auto 16px auto !important;
+			border-radius: 50% !important;
+			background: #EFF2F5 !important;
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			font-size: 30px !important;
+			color: #042F54 !important;
+		}
+
+		.uqip-mission-icon.uqip-bronze {
+			color: #A65C20 !important;
+		}
+
+		.uqip-number-row {
+			display: flex !important;
+			align-items: center !important;
+			justify-content: center !important;
+			gap: 10px !important;
+			margin: 0 0 10px 0 !important;
+		}
+
+		.uqip-number-line {
+			width: 34px !important;
+			height: 1px !important;
+			background: #D8DEE5 !important;
+		}
+
+		.uqip-number {
+			color: #A65C20 !important;
+			font-weight: 700 !important;
+			font-size: 16px !important;
+		}
+
+		.uqip-card-title {
+			margin: 0 !important;
+			color: #042F54 !important;
+			font-size: 18px !important;
+			line-height: 1.35 !important;
+			font-weight: 700 !important;
+		}
+
+		.uqip-cta {
+			max-width: 740px !important;
+			margin: 0 auto 24px auto !important;
+			padding: 18px 22px !important;
+			background: #042F54 !important;
+			border-radius: 8px !important;
+			box-shadow: 0 7px 18px rgba(4, 47, 84, 0.18) !important;
+			color: #FFFFFF !important;
+			font-size: 20px !important;
+			line-height: 1.35 !important;
+			font-weight: 700 !important;
+		}
+
+		.uqip-cta-arrow {
+			margin-left: 18px !important;
+			font-size: 24px !important;
+			font-weight: 400 !important;
+		}
+
+		.uqip-footer-note {
+			margin: 0 auto !important;
+			max-width: 640px !important;
+			color: #505050 !important;
+			font-size: 17px !important;
+			line-height: 1.45 !important;
+			font-style: italic !important;
+		}
+
+		@media (max-width: 760px) {
+			.uqip-wrap {
+				padding-top: 30px !important;
+			}
+
+			.uqip-title {
+				font-size: 32px !important;
+			}
+
+			.uqip-subtitle {
+				font-size: 17px !important;
+			}
+
+			.uqip-invitation {
+				font-size: 19px !important;
+				margin-bottom: 30px !important;
+			}
+
+			.uqip-facts {
+				grid-template-columns: 1fr !important;
+				gap: 24px !important;
+			}
+
+			.uqip-divider-vertical {
+				width: 72px !important;
+				height: 1px !important;
+				margin: 0 auto !important;
+			}
+
+			.uqip-mission-grid {
+				grid-template-columns: 1fr !important;
+				gap: 24px !important;
+			}
+
+			.uqip-mission-divider {
+				width: 72px !important;
+				height: 1px !important;
+				margin: 0 auto !important;
+			}
+
+			.uqip-cta {
+				font-size: 17px !important;
+			}
+		}
+	</style>
+
+*html
+	
+
+	<div class="uqip-wrap">
+		<div class="uqip-logo-wrap">
+			<img src="http://media.clearerthinking.org/images/Unanswered_Questions_in_Psychology/uqip2.png">
+		</div>
+		<h1 class="uqip-title">Can you help to identify psychology's most important unanswered questions?</h1>
+		<div class="uqip-accent"></div>
+
+		<p class="uqip-subtitle">The future and societal impact of psychology research depends on which questions receive attention, so we're rewarding people who help identify the most important ones.</p>
+
+		<div class="uqip-facts">
+			<div>
+				<div class="uqip-fact-icon"><i class="fas fa-stopwatch"></i></div>
+				<p class="uqip-fact-text">Most submissions take<br>just <span class="uqip-emphasis">2–5 minutes</span> to write</p>
+			</div>
+
+			<div class="uqip-divider-vertical"></div>
+
+			<div>
+				<div class="uqip-fact-icon uqip-prize"><i class="fas fa-trophy"></i></div>
+				<p class="uqip-fact-text">Winning submissions<br>are <span class="uqip-emphasis">publicized</span> and<br>receive a <span class="uqip-emphasis">$400 USD</span> prize</p>
+			</div>
+		</div>
+
+		<div class="uqip-divider">
+			<div class="uqip-divider-line"></div>
+			<div class="uqip-divider-mark"></div>
+			<div class="uqip-divider-line"></div>
+		</div>
+
+		<h2 class="uqip-section-title">Your contribution helps:</h2>
+
+		<div class="uqip-mission-grid">
+			<div>
+				<div class="uqip-mission-icon"><i class="fas fa-search"></i></div>
+				<div class="uqip-number-row">
+					<div class="uqip-number-line"></div>
+					<div class="uqip-number">01</div>
+					<div class="uqip-number-line"></div>
+				</div>
+				<p class="uqip-card-title">Highlight high-impact research directions</p>
+			</div>
+
+			<div class="uqip-mission-divider"></div>
+
+			<div>
+				<div class="uqip-mission-icon"><i class="fas fa-bullhorn"></i></div>
+				<div class="uqip-number-row">
+					<div class="uqip-number-line"></div>
+					<div class="uqip-number">02</div>
+					<div class="uqip-number-line"></div>
+				</div>
+				<p class="uqip-card-title">Draw public attention to important areas of research</p>
+			</div>
+
+			<div class="uqip-mission-divider"></div>
+
+			<div>
+				<div class="uqip-mission-icon uqip-bronze"><i class="fas fa-lightbulb"></i></div>
+				<div class="uqip-number-row">
+					<div class="uqip-number-line"></div>
+					<div class="uqip-number">03</div>
+					<div class="uqip-number-line"></div>
+				</div>
+				<p class="uqip-card-title">Reward intellectual insight</p>
+			</div>
+		</div>
+	</div>
+
+*component
+	*classes: unanswered-question-buttons
+	Click here to submit an Unanswered Question for consideration →
+	*click
+		*goto: Page_GetStarted
+
+*html
+	<style>
+		.full-rules-box h1 {
+			font-family: Georgia, "Times New Roman", serif !important;
+			color: #0F171F !important;
+			font-size: 16px !important;
+			line-height: 30px !important;
+			font-weight: 700 !important;
+			margin: 16px 0 0px 0 !important;
+			padding-top: 4px !important;
+			margin-top: 0 !important;
+			text-align: center !important;
+		}
+		
+		.full-rules-box h2 {
+			font-family: Georgia, "Times New Roman", serif !important;
+			color: #0F171F !important;
+			font-size: 16px !important;
+			line-height: 30px !important;
+			font-weight: 700 !important;
+			margin: 16px 0 0px 0 !important;
+			padding-top: 4px !important;
+		}
+		
+		.full-rules-box h3 {
+			font-family: Georgia, "Times New Roman", serif !important;
+			color: #A65C20 !important;
+			font-size: 14px !important;
+			margin: 0 0 20px 0 !important;
+			text-align: center !important;
+		}
+		
+		.full-rules-box p {
+			color: #505050 !important;
+			font-size: 14px !important;
+			line-height: 25px !important;
+			margin: 0 0 12px 0 !important;
+		}
+	</style>
+
+*list: expandable
+	*classes: FAQ-box
+	See example submissions (click to expand)
+		_*Examples*_
+		*list
+			{example_question1}
+			{example_question2}
+			{example_question8}
+			{example_question3}
+			{example_question4}
+			{example_question5}
+			{example_question6}
+			{example_question7}
+	
+	More about us (click to expand)
+		*html
+			<div class="full-rules-box">
+			<p><a href="http://clearerresearch.org/">Clearer Research</a> is a meta-science project aimed at supporting and improving psychological science. Our work spans several areas, including:</p>
+			<p>● Combatting the replication crisis and exploring where there is opportunity for improvement in current research practices, by running rapid replications and conducting careful analyses of recently published psychological studies (<a href="https://replications.clearerthinking.org/">Transparent Replications</a>)</p>
+			<p>● Developing easy-to-use, browser-based tools for conducting social science research, such as:<br>
+			&nbsp; ○ <a href="https://www.positly.com/">Positly.com</a>: A platform for recruiting study participants<br>
+			&nbsp; ○ <a href="https://www.guidedtrack.com/">GuidedTrack</a>: A platform for building studies, surveys, educational modules, apps, tools, and prototypes without hiring a programmer<br>
+			&nbsp; ○ <a href="https://www.hypothesize.io/">Hypothesize.io</a>: A platform for analyzing and visualizing data, with support for more than 100 statistical methods and built-in explanations<br>
+			&nbsp; ○ <a href="https://personalitymap.io/">PersonalityMap.io</a>: A platform that lets you search and explore over 1 million empirical correlations between human traits</p>
+			<p>● Initiatives designed to identify and promote high-impact research directions, including the Unanswered Questions in Psychology Prize.</p>
+			
+			<p>Clearer Research grew out of a sister project, <a href="https://www.clearerthinking.org/">Clearer Thinking</a> (established in 2013 and since then featured in different media outlets such as Scientific American, Vox, WSJ, the New York Times, and others), which develops resources (educational tools, articles, and a podcast) about psychology and critical thinking for a general audience. In contrast, Clearer Research is focused on offering value to the academic community.</p>
+			
+			<p>Clearer Research is funded by grants, donations, self-funding, and Clearer Thinking subscriptions.</p>
+			</div>
+
+
+*html
+	<div class="thanks"><i>We're excited to see the questions you think matter most!</i></div>
+
+*wait
+
+*label: Page_GetStarted
+
+
+----------------------------------
+-- Header banner
+----------------------------------
+
+*program: Unanswered Questions in Psychology - Submission Style Sheet 2
+
+*html
+	<div class="unanswered-fullbleed unanswered-hero-band">
+		<div class="unanswered-wrap">
+			<div class="unanswered-title">The Unanswered Questions in Psychology Prize</div>
+			<div class="unanswered-subtitle">Awarded By <i>Clearer Research</i></div>
+		
+			<div class="unanswered-desc">Submission form</div>
+		</div>
+	</div>
+
+----------------------------------
+-- How it works
+----------------------------------
+
+*html
+	<div style="height: 40px !important;"></div>
+	<h2>How it works</h2>
+	
+/*Submission:*/ You submit what you see as being an important, unanswered question pertaining to the subject matter of psychology. You have the option to include a brief explanation of why the question is important, if you like. Anyone can submit, though we expect the substantial majority of submissions to come from academic psychologists.
+
+/*Judging:*/ After the submission deadline (November 10th, 2026), eligible submitted questions will be deduplicated and reduced to a manageable longlist by the Clearer Research team. The resulting set of questions will then be voted on by academic psychologists only (all current and former academic psychologists will be eligible to vote) to determine the winners.
+
+/*Awards:*/ Each participant who submitted a question that's judged to be among the "most important" based on the votes of academic psychologists will be awarded the Unanswered Questions in Psychology Prize and $400 USD.
+
+/*Publication:*/ We will publish the final list of winning questions, along with the names of those who submitted them (except for those who opted to remain anonymous), on the [Clearer Research|https://v0-university-website-redesign-ruddy.vercel.app/#resources] and [Clearer Thinking|https://www.clearerthinking.org] websites and newsletter (our typical reach is 250,000 people) and pursue press attention. We are also interested in collaborating with any winners on an article for academic publication about the project and results, with details to be discussed.
+
+*html
+	<br>
+
+----------------------------------
+-- Expandables with extra details
+----------------------------------
+
+*html
+	<style>
+		.full-rules-box h1 {
+			font-family: Georgia, "Times New Roman", serif !important;
+			color: #0F171F !important;
+			font-size: 16px !important;
+			line-height: 30px !important;
+			font-weight: 700 !important;
+			margin: 16px 0 0px 0 !important;
+			padding-top: 4px !important;
+			margin-top: 0 !important;
+			text-align: center !important;
+		}
+		
+		.full-rules-box h2 {
+			font-family: Georgia, "Times New Roman", serif !important;
+			color: #0F171F !important;
+			font-size: 16px !important;
+			line-height: 30px !important;
+			font-weight: 700 !important;
+			margin: 16px 0 0px 0 !important;
+			padding-top: 4px !important;
+		}
+		
+		.full-rules-box h3 {
+			font-family: Georgia, "Times New Roman", serif !important;
+			color: #A65C20 !important;
+			font-size: 14px !important;
+			margin: 0 0 20px 0 !important;
+			text-align: center !important;
+		}
+		
+		.full-rules-box p {
+			color: #505050 !important;
+			font-size: 14px !important;
+			line-height: 25px !important;
+			margin: 0 0 12px 0 !important;
+		}
+	</style>
+
+*list: expandable
+	*classes: FAQ-box
+	See full rules text (click to expand)
+		*html
+			<div class="full-rules-box">
+			<h1>Unanswered Questions in Psychology Prize</h1>
+			<h3>Full Rules and Guidelines</h3>
+			
+			<p>Inspired by the Millennium Problems in mathematics, the Unanswered Questions in Psychology Prize aims to identify the most important open questions in psychology.</p>
+		
+			<p>We are seeking submissions of questions that, in the view of academic psychologists, represent especially important unresolved issues in the field of psychology.</p>
+		
+			<p>Winning submissions will be selected based on their perceived importance, as judged by academic psychologists through a voting process. The Clearer Research team will be responsible for de-duplicating similar entries, and reducing the set of submissions to a manageable number for voting.</p>
+		
+			<h2>1. Eligibility</h2>
+		
+			<p>Anyone may submit any number of questions. We anticipate most questions will be submitted by academic psychologists, but that is not a requirement for entry.</p>
+			
+			<p>Submissions may be made by anyone whatsoever, without limitation. However, voting on the winners will be limited only to academic psychologists (current or former). The exact definition of an academic psychologist used for the purposes of this prize will be determined by the Clearer Research team.</p>
+			
+			<p>There are no geographic restrictions on participation.</p>
+			
+			<p>To be eligible for the prize (including monetary award), submitters must provide their full name and a valid email address. Prizes will be paid via PayPal (or, when that is not possible, via wire transfer).</p>
+			
+			<p>Members of the Clearer Research team may submit questions but will not be eligible to vote on winning submissions (only current and former academic psychologists with no affiliation to Clearer Research will be permitted to vote). Submissions from the Clearer Research team are also not eligible for prize money.</p>
+			
+			<h2>2. What to Submit</h2>
+			<p>Submissions must include:<br>
+			● One "Unanswered Questions in Psychology" question per submission (multiple submissions per person are allowed, but they must be submitted one at a time).<br>
+			● Answers to two demographic questions: one about the submitter's relevant fields of expertise, the other about the submitter's level of education. These questions are included for research purposes only and answers given to these questions will not be used (in any way) in the process of selecting winners.</p>
+			
+			<p>Required for prize eligibility:<br>
+			● The name of the submitter<br>
+			● A valid, working email address at which to contact the submitter<br>
+			Submissions without a name or email address are permitted but authors of such submissions will not be eligible to receive the prize and monetary award (even if their question is selected as a winner).</p>
+			
+			<p>Submissions may include (at the submitters discretion):<br>
+			● An explanation of the question's importance. This may be especially useful for questions the importance of which is not immediately obvious, such as those that are particularly technically specialized.</p>
+			
+			<p>Any submitter choosing to give their name will be asked whether they are willing to grant permissions for the Clearer Research team to (a) publish the submitter's question, explanation, and name in the event that their question is selected as a winner, and to (b) use the submitter's question, explanation, and name in communication about and promotion of the prize, prior to the selection of winners.</p>
+			
+			<h2>3. Multiple Submissions</h2>
+			<p>There is no limit on:<br>
+			● the number of submissions any individual is permitted to submit<br>
+			● the number of submissions submitted by any individual that may be selected for the voting stage</p>
+			
+			<p>Any individual seeking to submit multiple questions must submit each one separately.</p>
+			
+			<p>In the event that multiple questions submitted by the same individual are selected as winners of the prize, that individual will receive a number of prizes and associated monetary awards equal to the number of winning questions that individual submitted.</p>
+			
+			<h2>4. Scope of Acceptable Questions</h2>
+		
+			<p>Questions should pertain to the subject matter of psychology, broadly construed.</p>
+			
+			<p>Questions should not pertain to meta-level questions about psychology as a discipline. For example, questions such as "Should we get rid of p-values?", or "How do we increase interdisciplinary collaboration?" are beyond the scope of this prize because they are meta-level questions about the field rather than questions about psychology itself. This exclusion does not reflect a judgment about their importance.</p>
+			
+			<p>Questions may draw on or intersect with adjacent fields such as neuroscience, philosophy, economics, or public policy. However, submissions must remain substantively about psychological phenomena.</p>
+		
+			<p>Questions may be very broad (e.g., "What determines long-term subjective well-being?"), very narrow, or anywhere between.</p>
+		
+			<p>Questions may be empirical, theoretical, or conceptual.</p>
+		
+			<p>Questions are not required to be currently answerable, or even answerable in principle.</p>
+			
+			<p>The Clearer Research team may reword submissions for clarity and to make formatting/structure uniform across entries.</p>
+
+		
+			<h2>5. Evaluation Criteria</h2>
+		
+			<p>The Clearer Research team will determine which questions to "longlist" for voting. Those longlisted will then be voted on by academic psychologists, and it is this vote that will determine the final winners. While the Clearer Research team will decide on the longlist, and the longlist must be at least twice as many submissions as the total number of prizes planned. Members of the Clearer Research team are not permitted to vote on the winning submissions.</p>
+		
+			<p>Submissions will be evaluated first and foremost on importance. Ultimately, it is up to voters to decide what 'important' means to them, though we do intend to give suggestions, which may include factors like:<br>
+			● the potential of the question to significantly advance understanding<br>
+			● its relevance to real-world outcomes or to alleviating societal challenges<br>
+			● its capacity to shape future research directions<br>
+			● its foundational or unifying role within psychology</p>
+		
+			<p>Final judgments are left to the discretion of voters and the Clearer Research team.</p>
+		
+			<h2>6. Number of Winners and Prizes</h2>
+			
+			<p>There is no fixed number of winners. The exact number of winning entries will be determined by the Clearer Research team, and will be at minimum 8 (as long as at least 40 submissions are received from academic psychologists not affiliated with Clearer Research - if fewer than 40 submissions are received from academic psychologists not affiliated with Clearer Research, the prize may be canceled, with no prizes paid out).</p>
+			
+			<p>Each eligible winning submission will receive a prize of $400 USD.</p>
+			
+			<p>Both winning and non-winning submissions may be listed on our website (e.g., as "top mentions", "runners up", etc., or simply being listed as a full set of submissions). By making a submission you grant us permission to use that submission for any purpose whatsoever, including listing it on our website and newsletter.</p>
+			
+			<p>Members of the Clearer Research team may make submissions but cannot be awarded prize money if such a submission were to be selected by voters as a top submission (i.e., the money would be awarded to the next highest rated submission from a non-team member, so that such submissions cannot impact the prize money awarded to external submitters).</p>
+		
+			<h2>7. Judging Process</h2>
+		
+			<p>Winners will be determined through a voting process by academic psychologists. Since there is no fixed number of winners, the Clearer Research team will determine the cut-off and number of winners after voting has concluded.</p>
+		
+			<p>The Clearer Research team will administer and oversee the process.</p>
+			
+			<h2>8. Duplicate and Similar Submissions</h2>
+		
+			<p>We expect that multiple participants will submit similar or identical questions.</p>
+		
+			<p>In such cases:<br>
+			● A maximum of one version of the question will be voted upon<br>
+			● This will typically be the earliest submitted version that is phrased with adequate clarity (only the first to submit the idea with adequate clarity will be eligible for the prize), but may involve merging two or more submissions in cases where questions are not merely duplicates but are on the same topic and additive to each other.<br>
+			● When explanation text is required to convey the importance of the question, the quality of explanation text will be considered as a factor in which submission is selected to be voted upon</p>
+		
+			<p>Other similar submissions will not be considered separately.</p>
+		
+			<h2>9. Submission Editing and Resubmission</h2>
+		
+			<p>Submissions cannot be edited by submitters after they are submitted. However, participants may submit the same underlying idea again as a new submission, for example:<br>
+			● to improve wording<br>
+			● to clarify the question<br>
+			● to provide a better explanation</p>
+
+			<p>Each submission will be treated independently.</p>
+		
+			<h2>10. Use of Submissions and Privacy</h2>
+			
+			<p>As part of the submission process, submitters may choose whether to provide their full name, title, and email address, or to remain anonymous.</p>
+			
+			<p>By submitting to the prize, submitters grant the Clearer Research team permission to publish and share the question and explanation text associated with their submission. Once winners have been selected, the Clearer Research team may publish or share the question, explanation text, and (where provided) the name and title provided in any and all submissions.</p>
+			
+			<p>Submitters who choose to provide their name will be asked whether they grant permission for their name (and title, when given) to be published or shared alongside their question and explanation text in promotional material for the prize, prior to winners being selected. The Clearer Research team may publish or share such information in accordance with the permissions given by the submitter. Submitters who do not choose to submit their name will not be asked the additional permission question and the Clearer Research team reserves the right to publish the question and explanation given in any such submission without attribution. A name and email must be submitted in order for a submission to be eligible to receive prize money.</p>
+			
+			<p>Any data provided that is not a submitter's question, explanation, or name will never be published or shared externally except:<br>
+			1. in aggregated and anonymized form as part of data analyses or reporting about the prize (for example, "X number of people with Y specialization submitted questions").<br>
+			2. some third-party service providers (such as Google Analytics) may process or temporarily store data as part of providing services to us. They do not have permission to use or disclose this data for any purpose other than to render their services to us.</p>
+		
+			<p>E.U. Citizens: Please note that your data will be stored outside of the European Union, including potentially in the U.S. and in other countries where we may have servers or databases.</p>
+		
+		
+			<h2>11. AI-Generated Submissions</h2>
+		
+			<p>AI assistance is permitted, but submissions should primarily reflect the submitter's own thinking.</p>
+			
+			<p>We strongly discourage the use of AI-generated submission and explanation text. If AI is used in the process, we recommend rewording submission to be in your own words.</p>
+			
+			<p>Submissions may be rejected at the discretion of the Clearer Research team (e.g., if they appear to be low quality, or plagiarized).</p>
+			
+			<h2>12. Timeline</h2>
+		
+			<p>Submission deadline: November 10th, 2026</p>
+			<p>Voting and winner announcement timelines will be communicated to participants after submissions close.</p>
+			
+			<h2>13. Final Authority</h2>
+		
+			<p>All decisions regarding:<br>
+			● eligibility<br>
+			● interpretation of rules<br>
+			● duplicate submissions<br>
+			● AI-related concerns<br>
+			● and prize awards<br>
+			are made at the discretion of the Clearer Research team, whose decisions are final.</p>
+			</div>
+
+
+*program: Unanswered Questions in Psychology Privacy Policy
+
+----------------------------------
+-- Page endmatter
+----------------------------------
+
+*component
+	*classes: unanswered-question-buttons
+	Go to the submission page →
+	*click
+		*goto: Page2_Submissions
+
+*html
+	<div class="thanks"><i>Thank you for your interest in participating!</i></div>
+
+*wait
+
+*label: Page2_Submissions
+
+*progress: 20%
+
+*settings
+	*back: yes
+
+*page
+	*html
+		<style>
+			.unanswered-wrap {
+				max-width: 980px !important;
+				margin: 0 auto !important;
+				padding: 0 14px !important;
+			}
+			
+			.unanswered-fullbleed {
+				width: 100vw !important;
+				margin-left: calc(50% - 50vw) !important;
+				margin-right: calc(50% - 50vw) !important;
+				border: 0 !important;
+			}
+			
+			.unanswered-hero-band {
+				padding: 26px 18px 18px 18px !important;
+				background: #EEF0F3 !important;
+				border-radius: 0 !important;
+			}
+			
+			.unanswered-title {
+				margin: 0 !important;
+				color: #042F54 !important;
+				font-family: Georgia, "Times New Roman", serif !important;
+				font-size: 26px !important;
+				line-height: 1.2 !important;
+				font-weight: 700 !important;
+				letter-spacing: 0.2px !important;
+				text-align: center !important;
+			}
+			
+			.unanswered-subtitle {
+				text-align: center !important;
+				font-size: 20px !important;
+				color: #A65C20 !important;
+			}
+			
+			.unanswered-desc {
+				margin: 0 auto 10px auto !important;
+				max-width: 780px !important;
+				text-align: center !important;
+				color: #505050 !important;
+				line-height: 1.55 !important;
+			}
+			
+			.FAQ-box * {
+				background-color: #EFF2F5 !important;
+				color: #0F171F !important;
+			}		
+			
+			.FAQ-box .panel {
+				border: 0px solid #dddddd !important;
+				border-radius: 8 !important;
+			}
+			
+			.FAQ-box .panel-heading {
+				border: 0px solid #ffffff !important;
+			}
+			
+			.FAQ-box .panel-collapse {
+				border: 0px solid #ffffff !important;
+			}
+
+		</style>
+	
+	----------------------------------
+	-- Header banner
+	----------------------------------
+	
+	*html
+		<div class="unanswered-fullbleed unanswered-hero-band">
+			<div class="unanswered-wrap">
+				<div class="unanswered-title">The Unanswered Questions in Psychology Prize</div>
+				<div class="unanswered-subtitle">Awarded By <i>Clearer Research</i></div>
+			
+				<div class="unanswered-desc">Submission form</div>
+			</div>
+		</div>
+	
+	----------------------------------
+	-- Expandables with details
+	----------------------------------
+	*html
+		<br>
+	
+	*html
+		<style>
+			.specification-note {
+				background: #EFF2F5 !important;
+				border: 1px solid #042F54 !important;
+				border-left: 5px solid #042F54 !important;
+				border-radius: 10px !important;
+				padding: 15px 17px !important;
+				margin: 0 0 18px 0 !important;
+			}
+			.specification-note p {
+				margin: 0 !important;
+				color: #042F54 !important;
+			}
+		</style>
+	
+	*html
+		<div class="specification-note">
+			<p><b>Questions must...</b></p>
+			<ul>
+			<li>pertain to the subject matter of psychology, broadly construed.</li>
+			<li><b>not</b> pertain to meta-level questions about psychology as a discipline (e.g., "How do we improve replicability?", "Should we get rid of p-values?", or "How do we increase interdisciplinary collaboration?" are beyond the scope of this prize. This exclusion does not reflect a judgment about their importance).</li>
+			</ul>
+		
+			<p><b>Questions may...</b></p>
+			<ul>
+			<li>draw on or intersect with adjacent fields such as neuroscience, philosophy, economics, or public policy. As long as they remain substantively about psychological phenomena.</li>
+			<li>be very broad, very narrow, or anywhere in between.</li>
+			<li>be empirical, theoretical, or conceptual. They are not required to be currently answerable, or even answerable in principle.</li>
+			</ul>
+		</div>
+
+	*list: expandable
+		*classes: FAQ-box
+		See example submissions (click to expand)
+			_*Examples*_
+			*list
+				{example_question1}
+				{example_question2}
+				{example_question8}
+				{example_question3}
+				{example_question4}
+				{example_question5}
+				{example_question6}
+				{example_question7}
+				
+			*html
+				<br>
+			Note: You may wish to think about phrasing your question in a way that is understandable by your colleagues with differing specializations, who will be voting on the final candidates.
+	
+	----------------------------------
+	-- Main page content
+	----------------------------------
+	
+	*question: Please submit your *Unanswered Questions In Psychology* question here
+		*tip: By submitting, you are agreeing to the rules of this prize
+		*type: paragraph
+		*save: submitted_question
+	
+	*question: *Optional:* If you believe explanation is needed to understand the importance of your submitted question, you may submit explanation text here
+		*tip: No character limit, but please try to avoid very long explanations
+		*type: paragraph
+		*blank
+		*save: importance_explanation
+
+*progress: 45%
+
+
+
+*progress: 70%
+
+----------------------------------
+-- Header banner
+----------------------------------
+
+*program: Unanswered Questions in Psychology - Submission Style Sheet 2
+
+*html
+	<div class="unanswered-fullbleed unanswered-hero-band">
+		<div class="unanswered-wrap">
+			<div class="unanswered-title">The Unanswered Questions in Psychology Prize</div>
+			<div class="unanswered-subtitle">Awarded By <i>Clearer Research</i></div>
+		
+			<div class="unanswered-desc">Submission form</div>
+		</div>
+	</div>
+	<br>
+----------------------------------
+-- Question
+----------------------------------
+
+*html
+	<style>
+		.eligibility-note {
+			background: #fffaf0 !important;
+			border: 1px solid #fde68a !important;
+			border-left: 5px solid #FECB02 !important;
+			border-radius: 10px !important;
+			padding: 15px 17px !important;
+			margin: 0 0 18px 0 !important;
+		}
+		.eligibility-note p {
+			margin: 0 !important;
+			color: #505050 !important;
+		}
+	</style>
+
+*html
+	<div class="eligibility-note">
+		<p>To be eligible for the prize (and associated $400 USD award), you will need to provide your name and email address. You are also welcome to remain anonymous, but winning submissions submitted anonymously will not be eligible for the prize.</p>
+	</div>
+
+*question: Would you like to provide your name and email address (making you eligible for the prize)?
+	Provide my name and email, to be eligible for the prize
+	Remain anonymous
+		*goto: remaining anonymous
+	*save: anonymity_choice
+
+
+----------------------------------
+-- Style sheet for *page
+----------------------------------
+*label: askEmail
+
+*page
+	*html
+		<style>
+			.unanswered-wrap {
+				max-width: 980px !important;
+				margin: 0 auto !important;
+				padding: 0 14px !important;
+			}
+			
+			.unanswered-fullbleed {
+				width: 100vw !important;
+				margin-left: calc(50% - 50vw) !important;
+				margin-right: calc(50% - 50vw) !important;		
+				border: 0 !important;
+			}
+			
+			.unanswered-hero-band {
+				padding: 26px 18px 18px 18px !important;
+				background: #EEF0F3 !important;
+				border-radius: 0 !important;
+			}
+			
+			.unanswered-title {
+				margin: 0 !important;
+				color: #042F54 !important;
+				font-family: Georgia, "Times New Roman", serif !important;
+				font-size: 26px !important;
+				line-height: 1.2 !important;
+				font-weight: 700 !important;
+				letter-spacing: 0.2px !important;
+				text-align: center !important;
+			}
+			
+			.unanswered-subtitle {
+				text-align: center !important;
+				font-size: 20px !important;
+				color: #A65C20 !important;
+			}
+			
+			.unanswered-desc {
+				margin: 0 auto 10px auto !important;
+				max-width: 780px !important;
+				text-align: center !important;
+				color: #505050 !important;
+				line-height: 1.55 !important;
+			}
+			
+			.FAQ-box * {
+				background-color: #EFF2F5 !important;
+				color: #0F171F !important;
+			}		
+			
+			.FAQ-box .panel {
+				border: 0px solid #dddddd !important;
+				border-radius: 8 !important;
+			}
+			
+			.FAQ-box .panel-heading {
+				border: 0px solid #ffffff !important;
+			}
+			
+			.FAQ-box .panel-collapse {
+				border: 0px solid #ffffff !important;
+			}
+
+		</style>
+	
+	----------------------------------
+	-- Header banner
+	----------------------------------
+	
+	*html
+		<div class="unanswered-fullbleed unanswered-hero-band">
+			<div class="unanswered-wrap">
+				<div class="unanswered-title">The Unanswered Questions in Psychology Prize</div>
+				<div class="unanswered-subtitle">Awarded By <i>Clearer Research</i></div>
+			
+				<div class="unanswered-desc">Submission form</div>
+			</div>
+		</div>
+		<br>
+	----------------------------------
+	-- Question
+	----------------------------------
+
+	*question: What is your full name and title?
+		*save: name
+	
+	*question: What is your email address?
+		*tip: We will use this to tell you whether you have won a prize and to communicate with you about this project. We will not share it with any third parties.
+		*placeholder: name@example.com
+		*save: email
+	
+	
+	*html
+		<br><br>
+		<div class="unanswered-desc">
+		<h2>Promotional Permission</h2>
+		</div>
+
+	*question: May we use elements of your submission (name, question, and explanation) as an example on our website or when communicating with others about this project?
+		Yes
+		No
+		*save: permission_use_example
+	
+
+
+>> in_emailToCheck = email
+*program: email format validation - public
+
+*if: out_invalidEmail = 1
+	That email address does not appear to be valid. Please try again.
+	*goto: askEmail
+
+*label: remaining anonymous
+	
+-- *if: anonymity_choice = "Remain anonymous"
+
+-- 	----------------------------------
+-- 	-- Header banner
+-- 	----------------------------------
+	
+-- 	*program: Unanswered Questions in Psychology - Submission Style Sheet 2
+	
+-- 	*html
+-- 		<div class="unanswered-fullbleed unanswered-hero-band">
+-- 			<div class="unanswered-wrap">
+-- 				<div class="unanswered-title">The Unanswered Questions in Psychology Prize</div>
+-- 				<div class="unanswered-subtitle">Awarded By <i>Clearer Research</i></div>
+			
+-- 				<div class="unanswered-desc">Submission form</div>
+-- 			</div>
+-- 		</div>
+		
+-- 	----------------------------------
+-- 	-- Question
+-- 	----------------------------------
+
+-- 	*question: Optional: Please provide your email address if you would like to receive occasional updates about this project
+-- 		*placeholder: name@example.com
+-- 		*blank
+-- 		*save: email
+	
+
+
+----------------------------------
+-- Header banner
+----------------------------------
+
+*program: Unanswered Questions in Psychology - Submission Style Sheet 2
+
+*html
+	<div class="unanswered-fullbleed unanswered-hero-band">
+		<div class="unanswered-wrap">
+			<div class="unanswered-title">The Unanswered Questions in Psychology Prize</div>
+			<div class="unanswered-subtitle">Awarded By <i>Clearer Research</i></div>
+		
+			<div class="unanswered-desc">Submission form</div>
+		</div>
+	</div>
+	
+----------------------------------
+-- Question
+----------------------------------
+
+-- Decisions about the top two answers informed by: https://doi.org/10.64628/AB.up6e3ycjh
+
+*question: What is the highest position or degree you've obtained in psychology, behavioral science or other related fields, if any?
+	*tip: We expect most submissions will be from academic psychologists, but everyone is welcome to submit regardless of background. Once submissions are collected, only current and former academic psychologists will be eligible to vote to determine the winners.
+	Tenured professor, permanent faculty, or equivalent
+		>> highestPositionInPsychology = 8
+	Professor but not tenured, temporary faculty, or equivalent
+		>> highestPositionInPsychology = 7
+	Completed PhD
+		>> highestPositionInPsychology = 6
+	Started or have a PhD in progress but haven't finished it
+		>> highestPositionInPsychology = 5
+	Completed a Masters degree but have not started a PhD
+		>> highestPositionInPsychology = 4
+	Started a Masters degree but haven't finished it
+		>> highestPositionInPsychology = 3
+	Completed an undergraduate degree but have not started a higher degree
+		>> highestPositionInPsychology = 2
+	Started an undergraduate degree but have not finished it
+		>> highestPositionInPsychology = 1
+	None of the above
+		>> highestPositionInPsychology = 0
+	*save: education
+
+
+-- ====[ Old version ]====
+
+-- *question: 2. What is the highest position or degree you've obtained in psychology, behavioral science or other related fields?
+-- 	Tenured professor
+-- 		>> highestPositionInPsychology = 8
+-- 	Professor but not tenured
+-- 		>> highestPositionInPsychology = 7
+-- 	Completed PhD but have never been a professor
+-- 		>> highestPositionInPsychology = 6
+-- 	Started or have a PhD in progress but haven't finished it
+-- 		>> highestPositionInPsychology = 5
+-- 	Completed a Masters degree but have not started a PhD
+-- 		>> highestPositionInPsychology = 4
+-- 	Started a Masters degree but haven't finished it
+-- 		>> highestPositionInPsychology = 3
+-- 	Completed an undergraduate degree but have not started a higher degree
+-- 		>> highestPositionInPsychology = 2
+-- 	Started an undergraduate degree but have not finished it
+-- 		>> highestPositionInPsychology = 1
+-- 	None of the above
+-- 		>> highestPositionInPsychology = 0
+-- 	*save: education
+
+
+
+*if: highestPositionInPsychology > 3
+	
+	----------------------------------
+	-- Header banner
+	----------------------------------
+	
+	*program: Unanswered Questions in Psychology - Submission Style Sheet 2
+	
+	*html
+		<div class="unanswered-fullbleed unanswered-hero-band">
+			<div class="unanswered-wrap">
+				<div class="unanswered-title">The Unanswered Questions in Psychology Prize</div>
+				<div class="unanswered-subtitle">Awarded By <i>Clearer Research</i></div>
+			
+				<div class="unanswered-desc">Submission form</div>
+			</div>
+		</div>
+	
+	----------------------------------
+	-- Question
+	----------------------------------
+	
+	-- List taken from https://doi.org/10.1371/journal.pone.0296421
+	-- Their list is adapted from the Web of Science classification "because it is often used in bibliometric research"
+	-- I kept the couple that they added in (personality psychology, cognitive neuroscience)
+	-- I added the couple that they cut from the Web of Science classification (applied psychology, multidisciplinary psychology) because their reasons for doing so don't provide strong motivation in this context
+	
+	*html
+		<div style="height: 40px !important;"></div>
+	
+	-- *header: Finally, we have two questions about your background.
+	
+	*question: Which fields best describe your area(s) of expertise?
+		*tip: Please select all that apply
+		*type: checkbox
+		*shuffle
+		Psychoanalysis
+		Clinical psychology
+		Cognitive neuroscience
+		Developmental psychology
+		Educational psychology
+		Experimental psychology
+		Biological psychology
+		Mathematical psychology
+		Social psychology
+		Personality psychology
+		Applied psychology
+		Multidisciplinary psychology
+		*other
+		*save: expertise_fields
+	
+	
+	-- ==== [ Here's the list from Igor's version: ]====
+		
+	-- *question: What field best describes your expertise?
+	-- 	*shuffle
+	-- 	Developmental and Educational Psychology
+	-- 	Social and Personality Psychology
+	-- 	Industrial-Organizational Psychology / Management
+	-- 	Clinical, Health, and Forensic Psychology
+	-- 	Cognitive Psychology / Neuropsychology / Neuroscience
+	-- 	Behavioral Economics
+	-- 	Judgment and Decision-Making
+	-- 	Quantitative Psychology / Methods
+	-- 	*other
+	-- 	*save: expertise_field
+	
+
+
+
+
+
+
+
+
+
+
+*progress: 100%
+
+----------------------------------
+-- Header banner
+----------------------------------
+
+*program: Unanswered Questions in Psychology - Submission Style Sheet 2
+
+*html
+	<div class="unanswered-fullbleed unanswered-hero-band">
+		<div class="unanswered-wrap">
+			<div class="unanswered-title">The Unanswered Questions in Psychology Prize</div>
+			<div class="unanswered-subtitle">Awarded By <i>Clearer Research</i></div>
+		
+			<div class="unanswered-desc">Submission form</div>
+		</div>
+	</div>
+	
+----------------------------------
+-- Question
+----------------------------------
+
+*html
+	<style>
+		.headers {font-size: 20pt; font-weight: bold; color: #000000; margin-top: 50px; margin-bottom: 10px; text-align: center; }
+		.subheaders { color: #000000; text-align: center; margin-bottom: 50px;}
+	</style>
+
+*html
+	<div class="headers">Thank you very much for your submission!</div>
+	<div class="subheaders">We really appreciate your contribution to this project.</div>
+
+If you know anyone else who might be interested in submitting a question, we would be grateful if you would share this with them.
+
+*if: email.size > 0
+	We will send you an email when we have more information about the project. Meanwhile, if you have any questions, feel free to reach out to us at contact@clearerresearch.org
+
+*if: email.size = 0
+	To sign up for email updates about this project as it unfolds, go to [http://clearerresearch.org/|http://clearerresearch.org].
+	
+	Meanwhile, if you have any questions, feel free to reach out to us at contact@clearerresearch.org
+	
+You may now close this window or tab.
+
+
+
+-- =======================
+-- ====[ OLD VERSION ]====
+-- =======================
+
+
+
+-- *image: https://images.guidedtrack.com/untitled_presentation_rbq06cq.png
+
+-- *header: Call For Submissions: Unanswered Questions In Psychology Prize
+
+-- Thank you for your interest in participating. The goal of this project is to identify the most important unanswered scientific questions in psychology, as judged by the academic psychology community. We will award $400 to the submission(s) selected as the most important by that community.
+
+-- For inspiration and to give you a sense of the sort of ideas being submitted, here are some examples: 
+
+-- *list
+-- 	[idea submitted by an academic with their name if they give permission]
+-- 	[idea submitted by an academic with their name if they give permission]
+-- 	[idea submitted by an academic with their name if they give permission]
+
+-- If the idea you submit is selected as one of the winning submissions (as voted on the academic community) you'll receive a Unanswered Questions In Psychology Prize.
+
+-- If you’d rather remain anonymous, you’re welcome to do so, but anonymous submissions will not be eligible for the prize.
+
+-- *button: Let's get started
+
+-- *question: What do see as one of the biggest open or unanswered research questions related to psychology or human nature? Please be specific but keep your submission to less than 100 words.
+-- 	*type: paragraph
+
+-- *question: What field best describes your expertise?
+-- 	*shuffle
+-- 	Developmental and Educational Psychology
+-- 	Social and Personality Psychology
+-- 	Industrial-Organizational Psychology / Management
+-- 	Clinical, Health, and Forensic Psychology
+-- 	Cognitive and Neuropsychology / Neuroscience
+-- 	Behavioral Economics
+-- 	Judgment
+-- 	*other
+
+-- >> position_answers = ["Tenured professor", "Professor but not tenured", "Completed PhD but have never been a professor", "Started or have a PhD in progress but haven't finished it", "Completed a Masters degree but have not started a PhD", "Started a Masters degree but haven't finished it", "Completed an undergraduate degree but have not started a higher degree", "Started an undergradudate degree but have not finished it"]
+-- >> position_answers.shuffle
+
+-- >> position_answers.add("None of the above")
+
+-- *question: What is your current position related to academic?
+-- 	*answers: position_answers
+-- 	*other
+-- 	*save: position
+
+-- 	-- Tenured professor
+-- 	-- Professor but not tenured
+-- 	-- Completed PhD but have never been a professor
+-- 	-- Started or have a PhD in progress but haven't finished it
+-- 	-- Completed a Masters degree but have not started a PhD
+-- 	-- Started a Masters degree but haven't finished it
+-- 	-- Completed an undergraduate degree but have not started a higher degree
+-- 	-- Started an undergradudate degree but have not finished it
+-- 	-- None of the above
+
+
+-- Thank you! To be eligible for the Unanswered Questions in Psychology Award prize of $400, awarded to the winning submission(s) as voted on by the academic community, you’ll need to provide your name.
+
+-- If you’d rather remain anonymous, you’re welcome to do so, but anonymous submissions will not be eligible for the prize.
+
+-- >> email = ""
+
+-- *question:Would you like to give your name (and be eligable for the prize) or remain anonymous?
+-- 	Provide my name
+-- 	Remain anonymous
+-- 		No problem.
+
+-- 		*question: Please provide your email address so we can communicate with you about this project (or leave it blank and hit submit to continue(
+-- 			*blank
+-- 		*goto: end
+
+-- *question: What is your full name?
+-- 	*save: name
+
+-- *question: What is your email address? We'll use this to tell you whether you've won a prize and communicate with you about this project.
+-- 	*save: email
+
+-- *question: Are you okay with using your submission and name as an example when on our website and when we communicate with others about the project?
+-- 	Yes
+-- 	No
+
+-- *question: If you win a prize, are you okay with your name bieng listed on our website as a prize winner?
+-- 	Yes
+-- 	No
+	
+-- *label: end
+
+-- *header: Thank you so much for your submission.
+
+-- We really appreciate it! If you know any one else who you think might be interested in submitting, we'd be happy to have you share this survey with others.
+
+-- *if: email.size > 0
+-- 	We'll send you an email when we have more information about the project.
+
+
+
+
