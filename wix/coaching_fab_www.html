@@ -1,0 +1,94 @@
+<!--
+  "Get Coaching" floating button on the Wix site (www.clearerthinking.org).
+
+  Where it lives: Wix dashboard > Settings > Custom Code, embed "Get Coaching Button"
+  (all pages). It hides itself on any /coaching path. The tool pages on
+  programs.clearerthinking.org get the same button through GTM (gtm/coaching_fab_tools.html).
+
+  Source of truth for the embed: this file. Paste everything below this comment into Wix.
+  2026-10-21: link opens in a new tab (target=_blank, rel=noopener).
+-->
+<style>
+  .ct-coaching-fab {
+    position: fixed;
+    bottom: 24px; /* standard FAB position, matches right offset */
+    right: 24px;
+    z-index: 2147483000; /* sit above Wix UI */
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 22px;
+    background-color: #0885F8;
+    color: #ffffff !important;
+    font-family: "Avenir Next", "Avenir", "Nunito Sans", "Segoe UI",
+                 Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none !important;
+    border-radius: 999px; /* fully rounded pill */
+    box-shadow: 0 6px 18px rgba(8, 133, 248, 0.35);
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease,
+                background-color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .ct-coaching-fab:hover {
+    background-color: #0a76d8;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(8, 133, 248, 0.45);
+  }
+  .ct-coaching-fab:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(8, 133, 248, 0.35);
+  }
+  .ct-coaching-fab svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+  /* Slightly tighter on small screens */
+  @media (max-width: 480px) {
+    .ct-coaching-fab {
+      bottom: 16px;
+      right: 16px;
+      padding: 12px 18px;
+      font-size: 15px;
+    }
+  }
+</style>
+
+<a class="ct-coaching-fab"
+   href="https://www.clearerthinking.org/coaching?utm_source=website&utm_medium=banner&utm_campaign=coaching_floating_button"
+   target="_blank"
+   rel="noopener"
+   aria-label="Get Coaching">
+  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"
+          stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  Get Coaching
+</a>
+
+<script>
+  (function () {
+    // Hide the button on any /coaching page (e.g. /coaching, /coaching/plans).
+    function applyVisibility() {
+      var btn = document.querySelector(".ct-coaching-fab");
+      if (!btn) return;
+      var onCoaching = window.location.pathname.toLowerCase().indexOf("/coaching") === 0;
+      btn.style.display = onCoaching ? "none" : "inline-flex";
+    }
+
+    applyVisibility();
+
+    // Wix is a single-page app: re-check when the route changes without a reload.
+    var lastPath = window.location.pathname;
+    setInterval(function () {
+      if (window.location.pathname !== lastPath) {
+        lastPath = window.location.pathname;
+        applyVisibility();
+      }
+    }, 400);
+  })();
+</script>
