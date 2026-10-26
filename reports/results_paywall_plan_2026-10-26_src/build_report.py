@@ -22,9 +22,13 @@ def derive(d):
     utt_months = [x for x in m["UTT"][2:9]]                        # Mar to Sep 2026 (live since March)
     utt_median = sorted(utt_months)[len(utt_months) // 2]
     rat_month = round(sum(m["RAT"][:9]) / 9)
-    p1_share = u["page1"] / u["finished_questions"]
-    depth = d["upt_report_export"]["depth_pct_of_page1"]       # 2026 curve (report revisits), page 8 included
-    upt_viewers = round(upt_month * p1_share)
+    e = d["upt_export_2026"]; depth = e["depth_pct_of_page1"]   # 2026 first-time readers, page 8 included
+    def median(xs):
+        xs = sorted(xs); n = len(xs)
+        return round((xs[n // 2 - 1] + xs[n // 2]) / 2) if n % 2 == 0 else xs[n // 2]
+    upt_viewers = median(v["p1"] for v in e["monthly"].values())          # typical 2026 month, first-time report viewers
+    upt_viewers_aug = max(v["p1"] for v in e["monthly"].values())
+    upt_month = median(v["finished_q"] for v in e["monthly"].values())    # typical 2026 month, finishers (GuidedTrack runs)
     hits = {
         "A (after page 1)": upt_viewers,
         "B (after page 2)": round(upt_viewers * depth["p2"] / 100),
@@ -37,9 +41,12 @@ def derive(d):
         "upt_finish_rate": pct(g["UPT"]["submits"], g["UPT"]["starts"]),
         "utt_finish_rate": pct(g["UTT"]["submits"], g["UTT"]["starts"]),
         "rat_finish_rate": pct(g["RAT"]["submits"], g["RAT"]["starts"]),
-        "upt_email_of_finished": pct(u["gave_email"], u["finished_questions"]),
-        "upt_p1_of_finished": pct(u["page1"], u["finished_questions"]),
-        "upt_finished_of_runs": pct(u["finished_questions"], u["runs"]),
+        "upt_email_of_finished": e["email_of_finished"],
+        "upt_p1_of_finished": e["p1_of_finished"],
+        "upt_finished_of_runs": e["finished_of_runs"],
+        "upt_viewers_aug": upt_viewers_aug,
+        "ga4_share_of_export": pct(sum(m["UPT"]), e["finished_questions"]),
+        "annual_low": round(hits["C (after page 5)"] * 0.03 * 9 * 12), "annual_high": round(hits["C (after page 5)"] * 0.12 * 14 * 12),
         "utt_finished_of_runs": pct(t["finished"], t["runs"]),
         "utt_email_of_finished": pct(t["gave_email"], t["finished"]),
         "utt_all86_of_runs": pct(t["selected_all_86_traits"], t["runs"]),
@@ -96,7 +103,7 @@ def columns(labels, values, width=640, h=170, label_every=1):
 
 # ----------------------------------------------------------------------------- content
 g = D["ga4_90d"]; u = D["upt_export"]; t = D["utt_export"]; s = D["stripe"]; a = D["audience"]; m = D["ga4_monthly_submits_2026"]
-rr = D["upt_report_export"]; depth = rr["depth_pct_of_page1"]; depth24 = u["depth_pct_of_page1"]; names = u["page_names"]
+E = D["upt_export_2026"]; rr = D["upt_report_export"]; depth = E["depth_pct_of_page1"]; depth_rev = rr["depth_pct_of_page1"]; depth24 = u["depth_pct_of_page1"]; names = u["page_names"]
 names["p8"] = "AI insights"
 pt = rr["pdf_price_test_2025_plus"]
 
@@ -224,32 +231,32 @@ H.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta na
 <h1>Where to put a results paywall: UPT, Unique Traits Test, Rationality Test</h1>
 <p class="sub">Plan for Igor's approval, nothing has been changed on any tool. {STAMP}</p>
 
-<div class="card"><p class="lead"><b>Short answer.</b> Gate the Ultimate Personality Test between report page 5 and page 6: everything the page promises (snapshot, cluster, Big Five, Enneagram, Jungian type) stays free, and the paid part is what only CT has (Distinctive Traits, Predictions, the AI action plan) plus the existing $9 PDF folded in, free for CT+ members. For the Unique Traits Test, measure first (make the AI profile an on-demand button for four weeks), then gate the AI synthesis, not the trait results. Do not paywall the Rationality Test: it is the partner front door and its report is too thin to carry a price. On 2026 traffic the whole programme is worth roughly $5k to $20k a year, so treat it as a lever that pays off when paid traffic scales, not as the path to the $120k goal.</p>
+<div class="card"><p class="lead"><b>Short answer.</b> Gate the Ultimate Personality Test between report page 5 and page 6: everything the page promises (snapshot, cluster, Big Five, Enneagram, Jungian type) stays free, and the paid part is what only CT has (Distinctive Traits, Predictions, the AI action plan) plus the existing $9 PDF folded in, free for CT+ members. For the Unique Traits Test, measure first (make the AI profile an on-demand button for four weeks), then gate the AI synthesis, not the trait results. Do not paywall the Rationality Test: it is the partner front door and its report is too thin to carry a price. On 2026 traffic the whole programme is worth roughly $5k to $20k a year, so treat it as a lever that pays off when paid traffic scales, not as the path to the $120k goal.</p>""".replace("roughly $5k to $20k a year", f"roughly ${X['annual_low'] / 1000:.0f}k to ${X['annual_high'] / 1000:.0f}k a year") + f"""
 <p><b>Why the gate sits after the email ask in every tool:</b> the report already comes after the email step, so goal #4 (opens per campaign) and the MailList Accelerator deals (paid per subscriber) are untouched. Nothing in this plan moves the paywall ahead of the email.</p></div>
 
 <h2>1. What the three tools look like today</h2>
 <p class="cap">GA4, {g['window']}. Starts = Accepted Privacy Policy, submitted = Submitted Email (the functional "finished" event).</p>
 {funnel_chart}
 <div class="kpis">
-{kpi(f"{X['upt_month']:,}", "UPT finishers a month, Jan to Sep 2026 average (28k to 49k a month in Oct to Dec 2025 on paid traffic)")}
+{kpi(f"{X['upt_month']:,}", f"UPT finishers in a typical 2026 month (GuidedTrack runs, median of Jan to Oct; GA4 counts only {X['ga4_share_of_export']}% of these; 28k to 49k a month in Oct to Dec 2025 on paid traffic)")}
 {kpi(f"{X['utt_median']:,}", "Unique Traits finishers in a typical 2026 month (11,511 in the August viral wave)")}
 {kpi(f"{X['rat_month']:,}", "Rationality Test finishers a month, 2026 average (partner pages drive the spikes)")}
 {kpi(f"{X['upt_finish_rate']}% / {X['utt_finish_rate']}% / {X['rat_finish_rate']}%", "start to email-submit rate: UPT / Unique Traits / Rationality (90 days)")}
 </div>
 
 <h3>Ultimate Personality Test: an eight-page report that loses four in ten readers on page 1</h3>
-<p class="cap">GuidedTrack export of the report program (22897), {rr['window']}, {rr['runs_2026']:,} runs: readers opening their report again from the emailed or copied link. Share of page-1 viewers who opened each page. The 2024 in-run curve for first-time readers (May to Aug 2024, {u['page1']:,} readers) is almost identical: pages 2 to 7 at {depth24['p2']}, {depth24['p3']}, {depth24['p4']}, {depth24['p5']}, {depth24['p6']} and {depth24['p7']}%.</p>
+<p class="cap">GuidedTrack export of the main program (22660), {E['window']}: {E['page1']:,} first-time report viewers. Share who opened each page. Two independent checks give the same shape: readers reopening their report in 2026 (report program 22897, {rr['runs_2026']:,} runs) reach pages 2 to 8 at {depth_rev['p2']}, {depth_rev['p3']}, {depth_rev['p4']}, {depth_rev['p5']}, {depth_rev['p6']}, {depth_rev['p7']} and {depth_rev['p8']}%, and first-time readers in May to Aug 2024 reached pages 2 to 7 at {depth24['p2']}, {depth24['p3']}, {depth24['p4']}, {depth24['p5']}, {depth24['p6']} and {depth24['p7']}%.</p>
 {depth_chart}
 <div class="kpis">
 {kpi(f"{X['upt_finished_of_runs']}%", "of runs answer every question")}
 {kpi(f"{X['upt_email_of_finished']}%", "of finishers give an email")}
 {kpi(f"{X['upt_p1_of_finished']}%", "of finishers open report page 1")}
-{kpi(f"{u['median_minutes_by_deepest_page']['1']} to {u['median_minutes_by_deepest_page']['7']} min", "median time spent, readers who stop at page 1 vs. reach page 7")}
+{kpi(f"{E['median_minutes_by_deepest_page']['1']} to {E['median_minutes_by_deepest_page']['8']} min", "median time spent, readers who stop at page 1 vs. reach page 8")}
 </div>
 <ul>
 <li>The curve has one cliff and then a slope: {100 - depth['p2']:.0f}% leave after the snapshot page, and from page 2 on each page keeps roughly 90% of the previous one, down to {depth['p8']}% on the AI page. Readers who get past the snapshot tend to read on; the gate position decides how many of them see a price, not whether the report "works".</li>
-<li>Paid-ads visitors go shallower (2024 in-run data): {u['organic_vs_cpc']['cpc_p5_of_p1']}% of them reach page 5 against {u['organic_vs_cpc']['organic_p5_of_p1']}% of organic visitors. A gate after page 5 is therefore mostly seen by organic readers, the ones who also become the engaged subscribers (UPT subscribers open at {a['upt_subscriber_open_rate']}).</li>
-<li>The PDF card on page 1 is clicked by {rr['pdf_click_pct_of_page1_2026']}% of 2026 report viewers and the Cognitive Assessment card by {rr['iq_click_pct_of_page1_2026']}%: soft, one-line offers already draw a few percent at the top of the report.</li>
+<li>Paid-ads visitors go shallower: {E['organic_vs_cpc']['cpc']['p5_of_p1']}% of them reach page 5 against {E['organic_vs_cpc']['organic+other']['p5_of_p1']}% of organic visitors (2026). A gate after page 5 is therefore mostly seen by organic readers, the ones who also become the engaged subscribers (UPT subscribers open at {a['upt_subscriber_open_rate']}). Ads readers do click the PDF card more often ({E['organic_vs_cpc']['cpc']['pdf_click_pct_of_p1']}% against {E['organic_vs_cpc']['organic+other']['pdf_click_pct_of_p1']}%).</li>
+<li>The $9 PDF card on page 1 is clicked by {E['pdf_price_test_2026']['9']['click_pct']}% of 2026 first-time report viewers ({E['pdf_price_test_2026']['9']['clicked']:,} of {E['pdf_price_test_2026']['9']['shown']:,}) and the Cognitive Assessment card by {E['iq_click_pct_of_page1']}%: soft, one-line offers already draw a couple of percent at the top of the report.</li>
 <li>Report revisits are large: /personality_report.html had {g['report_pages']['personality_report.html']['views']:,} views from {g['report_pages']['personality_report.html']['users']:,} users in 90 days, mostly from the emailed link. The unlock must travel with the link, or buyers will hit the wall again.</li>
 </ul>
 
@@ -293,10 +300,10 @@ H.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta na
 {options_table(rat_options)}
 
 <h2>4. What it is worth on today's traffic</h2>
-<p class="cap">UPT, monthly. {X['upt_month']:,} finishers x {X['upt_p1_of_finished']}% who open the report = about {X['upt_viewers']:,} report viewers a month; hits = viewers who reach the gate under the 2026 depth curve (page 8 gate: readers who finish page 7). Gross, before Stripe fees and refunds, before any cannibalisation of today's {X['pdf_2026_avg']} PDF sales a month (about ${X['pdf_2026_avg'] * 9:,}).</p>
+<p class="cap">UPT, monthly. About {X['upt_viewers']:,} first-time report viewers in a typical 2026 month (median of the ten months; the August wave had {X['upt_viewers_aug']:,}); hits = viewers who reach the gate under the 2026 depth curve (page 8 gate: readers who finish page 7). Gross, before Stripe fees and refunds, before any cannibalisation of today's {X['pdf_2026_avg']} PDF sales a month (about ${X['pdf_2026_avg'] * 9:,}).</p>
 {scenario_table(X['hits'])}
 <ul>
-<li>Option C at $9 and a 6% conversion is about ${round(X['hits']['C (after page 5)'] * 0.06 * 9):,} a month, roughly what the PDF makes today; the bundle replaces it rather than adding to it unless conversion or price is higher. The honest framing: on 2026 organic traffic this is a $5k to $20k a year lever. In Oct to Dec 2025 the UPT ran at 8 to 14 times today's volume on paid traffic; a gate that converts even 3% at $9 then adds about $2.5 to $4 per 100 finishers, which partly funds the ads.</li>
+<li>Option C at $9 and a 6% conversion is about ${round(X['hits']['C (after page 5)'] * 0.06 * 9):,} a month, about twice what the PDF makes today; since the bundle replaces the PDF, the net gain is the difference. The honest framing: on 2026 organic traffic this is a ${X['annual_low'] / 1000:.0f}k to ${X['annual_high'] / 1000:.0f}k a year lever. In Oct to Dec 2025 the UPT ran at 6 to 10 times today's volume on paid traffic; a gate that converts even 3% at $9 then adds about $4 per 100 finishers, which partly funds the ads.</li>
 <li>Unique Traits: {X['utt_median']:,} finishers in a typical month, all of whom see the report; if half reach the AI section, about {round(X['utt_median'] * 0.5):,} hits, so ${round(X['utt_median'] * 0.5 * 0.03 * 9):,} to ${round(X['utt_median'] * 0.5 * 0.12 * 9):,} a month at $9. The August wave would have multiplied that by eight for one month.</li>
 <li>Rationality: not modelled, no gate recommended.</li>
 </ul>
@@ -308,7 +315,7 @@ H.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta na
 <li>UPT: add a PDF card with a preview image at the foot of page 5 and page 8 (option F) and record the click in the run data; today the card only shows on page 1.</li>
 <li>Unique Traits: turn the AI profile into a free "Generate my AI profile" button and record clicks (option U4). This is the hit-rate measurement for a later gate.</li>
 <li>Both: add <code>paywall_seen</code>, <code>checkout_clicked</code> and <code>unlocked</code> variables now so the baseline exists before anything is charged.</li>
-<li>Confirm the 2026 first-time-reader depth curve from the refreshed main export (streaming as this is written; the revisit curve above and the 2024 in-run curve already agree).</li>
+<li>Re-run the depth numbers the week before launch (refresh the slim export, rerun the builder) so the gate position is set on current readers.</li>
 </ol>
 <h3>Phase 1 (weeks 2 to 3): build the gate behind a flag</h3>
 <ol>
@@ -353,7 +360,8 @@ H.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta na
 <h2>Appendix: data notes</h2>
 <ul>
 <li>{D['generated_note']}</li>
-<li>UPT depth: the chart uses the report program's own 2026 export (report revisits, {rr['runs_2026']:,} runs, complete). The main test's export (about 3.4 GB, 5,199 columns) stalled server-side after 188k rows (August 2024) on the first pass, so first-time-reader depth is from May to August 2024; a second pass with a longer timeout is running. {rr['note']}</li>
+<li>UPT depth: the chart uses the main program's complete 2026 export (744,297 runs since 2023; the first pass stalled server-side after 188k rows and a second pass with an hour-long read timeout took 55 minutes). The report program's own 2026 export (revisits, {rr['runs_2026']:,} runs) and the May to August 2024 in-run window are the two cross-checks quoted in the caption. {rr['note']}</li>
+<li>GA4 undercounts UPT finishers: in Jan to Oct 2026 it recorded {X['ga4_share_of_export']}% of the finishers in the run export (ad blockers, consent, and the window of Jul 22 to Aug 10 when GA4 recorded nothing on the UPT pages). Sizing in sections 1 and 4 therefore uses the run export; the 90-day GA4 funnel is kept for the cross-tool comparison.</li>
 <li>Rationality: {R['note']} The first two passes stopped in June 2015 on that NUL byte (a parser bug on my side).</li>
 <li>Unique Traits numbers are complete ({t['since_launch']['runs']:,} live runs since launch). The export does not record device.</li>
 <li>GA4 <code>cta_click</code> counts use the standard <code>linkUrl</code> dimension; the tag's <code>link_url</code> parameter is not registered as a custom dimension.</li>
