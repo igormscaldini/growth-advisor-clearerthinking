@@ -64,8 +64,9 @@ def hbars(rows, width=640, bar_h=22, gap=10, label_w=190, gate_after=None, gate_
     for i, (label, v) in enumerate(rows):
         y = 4 + i * (bar_h + gap); w = max(2, plot_w * v / vmax)
         out.append(f'<text x="{label_w - 10}" y="{y + bar_h * 0.7:.0f}" text-anchor="end" class="lbl">{html.escape(label)}</text>')
-        out.append(f'<rect x="{label_w}" y="{y}" width="{w:.1f}" height="{bar_h}" rx="4" class="bar"><title>{html.escape(label)}: {v}{unit}</title></rect>')
-        out.append(f'<text x="{label_w + w + 8:.1f}" y="{y + bar_h * 0.7:.0f}" class="val">{v}{unit}</text>')
+        vs = f"{v:,}" if isinstance(v, int) else f"{v}"
+        out.append(f'<rect x="{label_w}" y="{y}" width="{w:.1f}" height="{bar_h}" rx="4" class="bar"><title>{html.escape(label)}: {vs}{unit}</title></rect>')
+        out.append(f'<text x="{label_w + w + 8:.1f}" y="{y + bar_h * 0.7:.0f}" class="val">{vs}{unit}</text>')
         if gate_after is not None and i == gate_after:
             gy = y + bar_h + gap / 2
             out.append(f'<line x1="{label_w}" x2="{label_w + plot_w}" y1="{gy:.1f}" y2="{gy:.1f}" class="gate"/>')
