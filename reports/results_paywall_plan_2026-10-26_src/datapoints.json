@@ -192,7 +192,59 @@
     "note": "The report is a single page (hero counts, strongest traits, moderate traits, AI profile, absent traits, retake and share), so there is no page-depth signal; the invite-a-friend click variable is never set (dead)."
   },
   "rat_export": {
-    "note": "Run export streamed to 2015 only on the first two attempts (a NUL byte broke the parser); the fixed stream is running. Report depth for this tool is therefore not in this version. The report has 4 pages: type, 4 skill percentiles, 12 skills with tips and links to free CT tools, share; plus the product grid between pages 1 and 2."
+    "window": "live runs started 2026-01-01 to 2026-10-26 (report-page flags exist since July 2025)",
+    "runs": 83092,
+    "report_p1": 21703,
+    "depth_pct_of_page1": {
+      "p1": 100.0,
+      "p2": 82.1,
+      "p3": 75.8,
+      "p4": 66.0
+    },
+    "product_grid_pct_of_page1_since_jul_2026": 85.4,
+    "credits_pct_of_page1": 12.1,
+    "iq_click_pct_of_page1": 1.91,
+    "by_source": {
+      "organic+other": {
+        "runs": 37781,
+        "p1_of_runs": 39.9,
+        "p4_of_p1": 67.1
+      },
+      "cpc": {
+        "runs": 45311,
+        "p1_of_runs": 14.6,
+        "p4_of_p1": 63.4
+      },
+      "partner": {
+        "runs": 0,
+        "p1_of_runs": null,
+        "p4_of_p1": null
+      }
+    },
+    "iq_price_test": {
+      "35": {
+        "shown": 19342,
+        "clicked": 415,
+        "click_pct": 2.15
+      },
+      "?": {
+        "shown": 2361,
+        "clicked": 0,
+        "click_pct": 0.0
+      }
+    },
+    "minutes_median_report_viewers": 18.8,
+    "reasoning_types_share": {
+      "Skeptic": 29.1,
+      "Free Spirit": 22.8,
+      "Journalist": 19.6,
+      "Meditator": 12.8,
+      "Executive": 5.5,
+      "Detective": 4.8
+    },
+    "partner_brands": {},
+    "note": "Export complete (2,028,255 runs since 2014, streamed in 20 minutes after stripping NUL bytes). Emails exceed report viewers because partner-branded and ad flows collect the email before the quiz.",
+    "p2_pct_of_page1_since_jul_2026": 83.3
   },
   "stripe": {
     "pdf_price_usd": 9,

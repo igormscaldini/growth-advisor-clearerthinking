@@ -110,6 +110,9 @@ funnel_chart = hbars([
 ], unit="", label_w=230)
 
 pdf_chart = columns(s["pdf_monthly"]["months"], s["pdf_monthly"]["count"], label_every=2)
+R = D["rat_export"]
+rat_chart = hbars([("1. Reasoning type", R["depth_pct_of_page1"]["p1"]), ("2. Skill percentiles", R["depth_pct_of_page1"]["p2"]),
+                   ("3. Twelve skills + tips", R["depth_pct_of_page1"]["p3"]), ("4. Share", R["depth_pct_of_page1"]["p4"])])
 
 
 def scenario_table(hits, prices=(9, 14), rates=(0.03, 0.06, 0.12)):
@@ -191,7 +194,7 @@ rat_options = [
     dict(score=3, name="R2. Gate page 3 (12-skill breakdown and tips) only",
          what="Type and the four skill percentiles stay free; the skill-by-skill page becomes paid.",
          **{"for": "Page 3 is the most actionable page.",
-            "against": "The tips are links to free CT tools, so you would be charging for a table of contents; report depth for this tool is still unmeasured (export being re-fetched)."}),
+            "against": "The tips are links to free CT tools, so you would be charging for a table of contents, and the partner-branded runs would need an exemption."}),
     dict(score=2, name="R1. Gate pages 2 to 4",
          what="Type free, everything else paid.",
          **{"for": "Simple.", "against": "A thin, ten-year-old report cannot carry a price, and the partner pages would need an exemption."}),
@@ -260,7 +263,15 @@ H.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta na
 <p>{t['note']} {X['utt_all86_of_runs']}% of runs answer all 86 traits. The report shows the counts, the strongest traits, the moderate ones, an AI-written five-part profile (a Gemini call per view), the absent traits, and a retake offer. There is no way to know today how many readers scroll to the AI section, which is why the plan measures before it charges.</p>
 
 <h3>Rationality Test: short quiz, four-page report, the partner front door</h3>
-<p>{D['rat_export']['note']} The tool is embedded for partners (80,000 Hours and Asimov Press welcome flows, the MailList Accelerator pilot), and the page already carries the Cognitive Assessment card with a randomised price and the CT+ product grid. {g['RAT']['landings']:,} landings became {g['RAT']['submits']:,} finishers in 90 days.</p>
+<p class="cap">GuidedTrack run export, {R['window']}, {R['runs']:,} runs, {R['report_p1']:,} report viewers.</p>
+{rat_chart}
+<div class="kpis">
+{kpi(f"{R['depth_pct_of_page1']['p4']}%", "of report viewers reach page 4 (the flattest curve of the three tools)")}
+{kpi(f"{R['minutes_median_report_viewers']} min", "median time to the report")}
+{kpi(f"{R['iq_click_pct_of_page1']}%", "of report viewers click the Cognitive Assessment card")}
+{kpi(f"{R['by_source']['partner']['runs']:,}", "partner-branded runs in 2026 (Asimov Press, 80,000 Hours)")}
+</div>
+<p>Four short pages (type, four skill percentiles, twelve skills with tips linking to free CT tools, share) keep {R['depth_pct_of_page1']['p3']}% of readers to page 3 and {R['depth_pct_of_page1']['p4']}% to page 4, so a gate here would be seen by most finishers; the question is what it would sell. The page already carries the Cognitive Assessment card with a randomised price: the $35 card is clicked by {R['iq_price_test'].get('35', {}).get('click_pct', '?')}% of readers and the $17.50 card by {R['iq_price_test'].get('17.50', {}).get('click_pct', '?')}%, the same lesson as the PDF test (a lower price buys no extra clicks). The product grid between pages 1 and 2 is seen by {R['product_grid_pct_of_page1_since_jul_2026']}% of readers since July 2026. {g['RAT']['landings']:,} landings became {g['RAT']['submits']:,} finishers in 90 days; paid and partner traffic come in bursts (26,544 runs in April 2026, 23,406 of them from ads).</p>
 
 <h2>2. What readers already pay for, and what they said about paywalls</h2>
 <p class="cap">Stripe, one-off $9 Personality PDF purchases by month ({s['pdf_sales_since_2025_01']} since January 2025, ${s['pdf_net_usd_since_2025_01']:,} net). October 2026 runs to the 26th.</p>
@@ -297,7 +308,7 @@ H.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta na
 <li>UPT: add a PDF card with a preview image at the foot of page 5 and page 8 (option F) and record the click in the run data; today the card only shows on page 1.</li>
 <li>Unique Traits: turn the AI profile into a free "Generate my AI profile" button and record clicks (option U4). This is the hit-rate measurement for a later gate.</li>
 <li>Both: add <code>paywall_seen</code>, <code>checkout_clicked</code> and <code>unlocked</code> variables now so the baseline exists before anything is charged.</li>
-<li>Confirm the 2026 first-time-reader depth curve from the refreshed main export (streaming as this is written; the revisit curve above and the 2024 in-run curve already agree) and get the Rationality depth from its re-fetched export.</li>
+<li>Confirm the 2026 first-time-reader depth curve from the refreshed main export (streaming as this is written; the revisit curve above and the 2024 in-run curve already agree).</li>
 </ol>
 <h3>Phase 1 (weeks 2 to 3): build the gate behind a flag</h3>
 <ol>
@@ -343,7 +354,7 @@ H.append(f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta na
 <ul>
 <li>{D['generated_note']}</li>
 <li>UPT depth: the chart uses the report program's own 2026 export (report revisits, {rr['runs_2026']:,} runs, complete). The main test's export (about 3.4 GB, 5,199 columns) stalled server-side after 188k rows (August 2024) on the first pass, so first-time-reader depth is from May to August 2024; a second pass with a longer timeout is running. {rr['note']}</li>
-<li>Rationality depth: the first two export passes stopped in June 2015 on a NUL byte in a row (a parser bug on my side, now fixed); the re-fetch is running.</li>
+<li>Rationality: {R['note']} The first two passes stopped in June 2015 on that NUL byte (a parser bug on my side).</li>
 <li>Unique Traits numbers are complete ({t['since_launch']['runs']:,} live runs since launch). The export does not record device.</li>
 <li>GA4 <code>cta_click</code> counts use the standard <code>linkUrl</code> dimension; the tag's <code>link_url</code> parameter is not registered as a custom dimension.</li>
 <li>Monthly GA4 submits by tool are in the datapoints file; October 2026 is partial.</li>
