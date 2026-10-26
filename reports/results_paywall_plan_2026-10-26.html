@@ -1,0 +1,264 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Results paywall plan</title><style>
+:root{--bg:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#8a897f;--line:#e6e5e0;--card:#ffffff;--accent:#2a78d6;--accent2:#eb6834;--accent-soft:#eaf2fd;--ok:#0ca30c;--warn:#d03b3b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8d8c84;--line:#33332f;--card:#222221;--accent:#3987e5;--accent2:#d95926;--accent-soft:#1f2d3f}}
+:root[data-theme="dark"]{--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8d8c84;--line:#33332f;--card:#222221;--accent:#3987e5;--accent2:#d95926;--accent-soft:#1f2d3f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:920px;margin:0 auto;padding:40px 16px 80px}h1{font-size:30px;line-height:1.2;margin:0 0 6px}h2{font-size:22px;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--line)}h3{font-size:18px;margin:28px 0 8px}h4{margin:0;font-size:16px}
+.sub{color:var(--ink2);margin:0 0 24px}.lead{font-size:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.kpi .v{font-size:26px;font-weight:600;line-height:1.1}.kpi .l{color:var(--ink2);font-size:13px;margin-top:4px}
+.chart{width:100%;height:auto;display:block;margin:10px 0 4px}.bar{fill:var(--accent)}.lbl{fill:var(--ink2);font-size:13px}.lbl.small{font-size:11px}.val{fill:var(--ink);font-size:13px}.axis{stroke:var(--line);stroke-width:1}.gate{stroke:var(--accent2);stroke-width:2;stroke-dasharray:6 5}.gate-lbl{fill:var(--accent2);font-size:12px;font-weight:600}
+.cap{color:var(--muted);font-size:13px;margin:0 0 6px}table{border-collapse:collapse;width:100%;margin:10px 0;font-size:14px}th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--ink2);font-weight:600}table.num td:not(:first-child),table.num th:not(:first-child){text-align:right}
+.options{display:grid;gap:12px}.opt{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 18px}.opt p{margin:6px 0;font-size:15px}.opt-head{display:flex;align-items:center;gap:12px}.score{background:var(--accent-soft);color:var(--accent);font-weight:700;border-radius:999px;padding:2px 10px;font-size:14px;white-space:nowrap}
+ul,ol{padding-left:22px}li{margin:4px 0}.warn{border-left:4px solid var(--accent2);padding-left:14px}.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media (max-width:700px){.two{grid-template-columns:1fr}}
+code{font-size:13px;background:var(--accent-soft);padding:1px 5px;border-radius:4px}
+</style></head><body><main>
+<h1>Where to put a results paywall: UPT, Unique Traits Test, Rationality Test</h1>
+<p class="sub">Plan for Igor's approval, nothing has been changed on any tool. 2026-10-26 02:12pm</p>
+
+<div class="card"><p class="lead"><b>Short answer.</b> Gate the Ultimate Personality Test between report page 5 and page 6: everything the page promises (snapshot, cluster, Big Five, Enneagram, Jungian type) stays free, and the paid part is what only CT has (Distinctive Traits, Predictions, the AI action plan) plus the existing $9 PDF folded in, free for CT+ members. For the Unique Traits Test, measure first (make the AI profile an on-demand button for four weeks), then gate the AI synthesis, not the trait results. Do not paywall the Rationality Test: it is the partner front door and its report is too thin to carry a price. On 2026 traffic the whole programme is worth roughly $5k to $20k a year, so treat it as a lever that pays off when paid traffic scales, not as the path to the $120k goal.</p>
+<p><b>Why the gate sits after the email ask in every tool:</b> the report already comes after the email step, so goal #4 (opens per campaign) and the MailList Accelerator deals (paid per subscriber) are untouched. Nothing in this plan moves the paywall ahead of the email.</p></div>
+
+<h2>1. What the three tools look like today</h2>
+<p class="cap">GA4, 2026-07-28 to 2026-10-25. Starts = Accepted Privacy Policy, submitted = Submitted Email (the functional "finished" event).</p>
+<svg class="chart" viewBox="0 0 640 200" role="img" aria-label="bar chart">
+<text x="220" y="19" text-anchor="end" class="lbl">UPT: started</text>
+<rect x="230" y="4" width="308.2" height="22" rx="4" class="bar"><title>UPT: started: 20672</title></rect>
+<text x="546.2" y="19" class="val">20672</text>
+<text x="220" y="51" text-anchor="end" class="lbl">UPT: submitted email</text>
+<rect x="230" y="36" width="164.0" height="22" rx="4" class="bar"><title>UPT: submitted email: 11000</title></rect>
+<text x="402.0" y="51" class="val">11000</text>
+<text x="220" y="83" text-anchor="end" class="lbl">Unique Traits: started</text>
+<rect x="230" y="68" width="340.0" height="22" rx="4" class="bar"><title>Unique Traits: started: 22807</title></rect>
+<text x="578.0" y="83" class="val">22807</text>
+<text x="220" y="115" text-anchor="end" class="lbl">Unique Traits: submitted</text>
+<rect x="230" y="100" width="231.0" height="22" rx="4" class="bar"><title>Unique Traits: submitted: 15493</title></rect>
+<text x="469.0" y="115" class="val">15493</text>
+<text x="220" y="147" text-anchor="end" class="lbl">Rationality: started</text>
+<rect x="230" y="132" width="169.7" height="22" rx="4" class="bar"><title>Rationality: started: 11381</title></rect>
+<text x="407.7" y="147" class="val">11381</text>
+<text x="220" y="179" text-anchor="end" class="lbl">Rationality: submitted</text>
+<rect x="230" y="164" width="90.5" height="22" rx="4" class="bar"><title>Rationality: submitted: 6069</title></rect>
+<text x="328.5" y="179" class="val">6069</text>
+</svg>
+<div class="kpis">
+<div class="kpi"><div class="v">3,436</div><div class="l">UPT finishers a month, Jan to Sep 2026 average (28k to 49k a month in Oct to Dec 2025 on paid traffic)</div></div>
+<div class="kpi"><div class="v">1,378</div><div class="l">Unique Traits finishers in a typical 2026 month (11,511 in the August viral wave)</div></div>
+<div class="kpi"><div class="v">2,502</div><div class="l">Rationality Test finishers a month, 2026 average (partner pages drive the spikes)</div></div>
+<div class="kpi"><div class="v">53.2% / 67.9% / 53.3%</div><div class="l">start to email-submit rate: UPT / Unique Traits / Rationality (90 days)</div></div>
+</div>
+
+<h3>Ultimate Personality Test: an eight-page report that loses four in ten readers on page 1</h3>
+<p class="cap">GuidedTrack export of the report program (22897), live runs started 2026-01-01 to 2026-10-26, 20,374 runs: readers opening their report again from the emailed or copied link. Share of page-1 viewers who opened each page. The 2024 in-run curve for first-time readers (May to Aug 2024, 16,867 readers) is almost identical: pages 2 to 7 at 63.4, 45.3, 42.0, 38.7, 35.7 and 33.8%.</p>
+<svg class="chart" viewBox="0 0 640 264" role="img" aria-label="bar chart">
+<text x="180" y="19" text-anchor="end" class="lbl">1. Snapshot + contents</text>
+<rect x="190" y="4" width="380.0" height="22" rx="4" class="bar"><title>1. Snapshot + contents: 100.0%</title></rect>
+<text x="578.0" y="19" class="val">100.0%</text>
+<text x="180" y="51" text-anchor="end" class="lbl">2. Cluster (16 types)</text>
+<rect x="190" y="36" width="221.9" height="22" rx="4" class="bar"><title>2. Cluster (16 types): 58.4%</title></rect>
+<text x="419.9" y="51" class="val">58.4%</text>
+<text x="180" y="83" text-anchor="end" class="lbl">3. Big Five</text>
+<rect x="190" y="68" width="195.3" height="22" rx="4" class="bar"><title>3. Big Five: 51.4%</title></rect>
+<text x="393.3" y="83" class="val">51.4%</text>
+<text x="180" y="115" text-anchor="end" class="lbl">4. Enneagram</text>
+<rect x="190" y="100" width="179.0" height="22" rx="4" class="bar"><title>4. Enneagram: 47.1%</title></rect>
+<text x="377.0" y="115" class="val">47.1%</text>
+<text x="180" y="147" text-anchor="end" class="lbl">5. Jungian type</text>
+<rect x="190" y="132" width="156.6" height="22" rx="4" class="bar"><title>5. Jungian type: 41.2%</title></rect>
+<text x="354.6" y="147" class="val">41.2%</text>
+<line x1="190" x2="570" y1="159.0" y2="159.0" class="gate"/>
+<text x="570" y="155.0" text-anchor="end" class="gate-lbl">proposed gate: before page 6</text>
+<text x="180" y="179" text-anchor="end" class="lbl">6. Distinctive traits</text>
+<rect x="190" y="164" width="142.1" height="22" rx="4" class="bar"><title>6. Distinctive traits: 37.4%</title></rect>
+<text x="340.1" y="179" class="val">37.4%</text>
+<text x="180" y="211" text-anchor="end" class="lbl">7. Predictions</text>
+<rect x="190" y="196" width="124.3" height="22" rx="4" class="bar"><title>7. Predictions: 32.7%</title></rect>
+<text x="322.3" y="211" class="val">32.7%</text>
+<text x="180" y="243" text-anchor="end" class="lbl">8. AI insights</text>
+<rect x="190" y="228" width="108.7" height="22" rx="4" class="bar"><title>8. AI insights: 28.6%</title></rect>
+<text x="306.7" y="243" class="val">28.6%</text>
+</svg>
+<div class="kpis">
+<div class="kpi"><div class="v">51.2%</div><div class="l">of runs answer every question</div></div>
+<div class="kpi"><div class="v">72.0%</div><div class="l">of finishers give an email</div></div>
+<div class="kpi"><div class="v">72.7%</div><div class="l">of finishers open report page 1</div></div>
+<div class="kpi"><div class="v">18.2 to 30.3 min</div><div class="l">median time spent, readers who stop at page 1 vs. reach page 7</div></div>
+</div>
+<ul>
+<li>The curve has one cliff and then a slope: 42% leave after the snapshot page, and from page 2 on each page keeps roughly 90% of the previous one, down to 28.6% on the AI page. Readers who get past the snapshot tend to read on; the gate position decides how many of them see a price, not whether the report "works".</li>
+<li>Paid-ads visitors go shallower (2024 in-run data): 25.6% of them reach page 5 against 40.0% of organic visitors. A gate after page 5 is therefore mostly seen by organic readers, the ones who also become the engaged subscribers (UPT subscribers open at 31% (second most engaged acquisition tool)).</li>
+<li>The PDF card on page 1 is clicked by 2.13% of 2026 report viewers and the Cognitive Assessment card by 0.82%: soft, one-line offers already draw a few percent at the top of the report.</li>
+<li>Report revisits are large: /personality_report.html had 36,153 views from 6,674 users in 90 days, mostly from the emailed link. The unlock must travel with the link, or buyers will hit the wall again.</li>
+</ul>
+
+<h3>Unique Traits Test: one long page, 26 minutes of effort, no depth signal</h3>
+<div class="kpis">
+<div class="kpi"><div class="v">43.7%</div><div class="l">of runs finish (longest test on the site)</div></div>
+<div class="kpi"><div class="v">26.0 min</div><div class="l">median time to the report (p25 19.6, p75 39.1)</div></div>
+<div class="kpi"><div class="v">61.2%</div><div class="l">of finishers give an email (90 days; 73% since launch)</div></div>
+<div class="kpi"><div class="v">5 / 10</div><div class="l">median strong / moderate trait alignments per report</div></div>
+</div>
+<p>The report is a single page (hero counts, strongest traits, moderate traits, AI profile, absent traits, retake and share), so there is no page-depth signal; the invite-a-friend click variable is never set (dead). 63.0% of runs answer all 86 traits. The report shows the counts, the strongest traits, the moderate ones, an AI-written five-part profile (a Gemini call per view), the absent traits, and a retake offer. There is no way to know today how many readers scroll to the AI section, which is why the plan measures before it charges.</p>
+
+<h3>Rationality Test: short quiz, four-page report, the partner front door</h3>
+<p>Run export streamed to 2015 only on the first two attempts (a NUL byte broke the parser); the fixed stream is running. Report depth for this tool is therefore not in this version. The report has 4 pages: type, 4 skill percentiles, 12 skills with tips and links to free CT tools, share; plus the product grid between pages 1 and 2. The tool is embedded for partners (80,000 Hours and Asimov Press welcome flows, the MailList Accelerator pilot), and the page already carries the Cognitive Assessment card with a randomised price and the CT+ product grid. 16,572 landings became 6,069 finishers in 90 days.</p>
+
+<h2>2. What readers already pay for, and what they said about paywalls</h2>
+<p class="cap">Stripe, one-off $9 Personality PDF purchases by month (686 since January 2025, $5,868 net). October 2026 runs to the 26th.</p>
+<svg class="chart" viewBox="0 0 640 170" role="img" aria-label="column chart">
+<rect x="15.9" y="120.0" width="19.2" height="16.0" rx="3" class="bar"><title>2025-03: 8</title></rect>
+<text x="25.5" y="115.0" text-anchor="middle" class="val">8</text>
+<text x="25.5" y="158" text-anchor="middle" class="lbl small">25-03</text>
+<rect x="46.9" y="64.0" width="19.2" height="72.0" rx="3" class="bar"><title>2025-04: 36</title></rect>
+<rect x="77.9" y="110.0" width="19.2" height="26.0" rx="3" class="bar"><title>2025-05: 13</title></rect>
+<text x="87.5" y="158" text-anchor="middle" class="lbl small">25-05</text>
+<rect x="108.9" y="112.0" width="19.2" height="24.0" rx="3" class="bar"><title>2025-06: 12</title></rect>
+<rect x="139.9" y="20.0" width="19.2" height="116.0" rx="3" class="bar"><title>2025-07: 58</title></rect>
+<text x="149.5" y="158" text-anchor="middle" class="lbl small">25-07</text>
+<rect x="170.9" y="76.0" width="19.2" height="60.0" rx="3" class="bar"><title>2025-08: 30</title></rect>
+<rect x="201.9" y="72.0" width="19.2" height="64.0" rx="3" class="bar"><title>2025-09: 32</title></rect>
+<text x="211.5" y="158" text-anchor="middle" class="lbl small">25-09</text>
+<rect x="232.9" y="28.0" width="19.2" height="108.0" rx="3" class="bar"><title>2025-10: 54</title></rect>
+<rect x="263.9" y="30.0" width="19.2" height="106.0" rx="3" class="bar"><title>2025-11: 53</title></rect>
+<text x="273.5" y="158" text-anchor="middle" class="lbl small">25-11</text>
+<rect x="294.9" y="92.0" width="19.2" height="44.0" rx="3" class="bar"><title>2025-12: 22</title></rect>
+<rect x="325.9" y="106.0" width="19.2" height="30.0" rx="3" class="bar"><title>2026-01: 15</title></rect>
+<text x="335.5" y="158" text-anchor="middle" class="lbl small">26-01</text>
+<rect x="356.9" y="94.0" width="19.2" height="42.0" rx="3" class="bar"><title>2026-02: 21</title></rect>
+<rect x="387.9" y="60.0" width="19.2" height="76.0" rx="3" class="bar"><title>2026-03: 38</title></rect>
+<text x="397.5" y="158" text-anchor="middle" class="lbl small">26-03</text>
+<rect x="418.9" y="72.0" width="19.2" height="64.0" rx="3" class="bar"><title>2026-04: 32</title></rect>
+<rect x="449.9" y="60.0" width="19.2" height="76.0" rx="3" class="bar"><title>2026-05: 38</title></rect>
+<text x="459.5" y="158" text-anchor="middle" class="lbl small">26-05</text>
+<rect x="480.9" y="58.0" width="19.2" height="78.0" rx="3" class="bar"><title>2026-06: 39</title></rect>
+<rect x="511.9" y="54.0" width="19.2" height="82.0" rx="3" class="bar"><title>2026-07: 41</title></rect>
+<text x="521.5" y="158" text-anchor="middle" class="lbl small">26-07</text>
+<rect x="542.9" y="42.0" width="19.2" height="94.0" rx="3" class="bar"><title>2026-08: 47</title></rect>
+<rect x="573.9" y="60.0" width="19.2" height="76.0" rx="3" class="bar"><title>2026-09: 38</title></rect>
+<text x="583.5" y="158" text-anchor="middle" class="lbl small">26-09</text>
+<rect x="604.9" y="18.0" width="19.2" height="118.0" rx="3" class="bar"><title>2026-10*: 59</title></rect>
+<text x="614.5" y="13.0" text-anchor="middle" class="val">59</text>
+<line x1="10" x2="630" y1="136.5" y2="136.5" class="axis"/>
+</svg>
+<ul>
+<li><b>The PDF converts when seen.</b> About 333 people a month reach the PDF page and 37 buy, roughly one in seven. But only 43 clicks in 90 days came from the report pages themselves (0.39% of finishers); 850 of 1,494 PDF-page sessions were direct, i.e. the follow-up email. Demand exists; exposure inside the report does not.</li>
+<li><b>The price test already ran, and it says $9 is not too high.</b> The UPT randomises the PDF price shown on the report. Since 2025, the $9 card was clicked by 3.38% of readers who saw it (1,647 of 48,799), the $4.50 card by 2.9% (213 of 7,346) and the $19 card by 0.86% (19 of 2,211). Halving the price bought no extra clicks; doubling it cut clicks four-fold. Revenue per view is therefore highest at $9 of the points tested, and the untested band between $9 and $19 is where a gate price test should sit (the plan proposes $9 against $14). The same GuidedTrack <code>*experiment</code> machinery runs the gate test.</li>
+<li><b>Competitors charge far more for less.</b> Truity's full report is $19 to $29, 16Personalities' suites about $29 to EUR 99, the official MBTI $59.95 (third-party 2026 figures, unverified on the vendors' sites). CT's $9 anchor is low, and most of these sites gate the detail, not the type.</li>
+<li><b>The audience warned us.</b> In the March 2026 survey (n=539) paywalls were named as off-mission, NPS is -5, and only 31% knew CT+ existed. Buyers are 45%+ US; India is about 25% of sign-ups, about 0% of revenue. A gate that keeps the promised results free and makes CT+ worth more is defensible to this audience; a wall in front of the type is not.</li>
+<li><b>Benchmarks.</b> News paywalls convert 0.2% to 0.5% (anonymous visitors) of paywall hits a month for anonymous visitors and about 9.9% for known users (see the September benchmark report). Every reader who hits a CT gate is a known user: we have their email and 20 minutes of their attention. The scenarios below assume 3% to 12% of gate hits buy; the PDF page's one-in-seven is the optimistic bound for a pre-qualified audience.</li>
+</ul>
+
+<h2>3. Placement options, scored</h2>
+<h3>Ultimate Personality Test</h3>
+<div class='options'>
+<div class="opt"><div class="opt-head"><span class="score">8/10</span><h4>C. Free pages 1 to 5, paid pages 6 to 8 plus the PDF</h4></div>
+<p>Everything the page title promises stays free: snapshot, the 16-cluster analysis, Big Five, Enneagram, Jungian type. The paid part is what only Clearer Thinking has: Distinctive Traits, Predictions about your life (from CT's own outcome data), the AI action plan, and the $9 PDF folded in. Locked items show as teasers in the page-1 contents list and as one line at the foot of pages 2 to 5.</p><p><b>For:</b> It never contradicts the free promise that ranks the page (goal #3), it sits after the email ask (goal #4 untouched), and it hits the 41.2% most engaged readers, who have already spent about 24 minutes. CT+ members get it free, which gives the membership a tangible perk.</p><p><b>Against:</b> Smallest paying audience of the hard gates (about 1,030 hits a month on 2026 traffic). Pages 6 to 8 must feel premium to justify money; the predictions page is currently flagged as not crystal-ball accurate in its own copy.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">8/10</span><h4>F. First make the existing $9 PDF visible in the flow (no gate)</h4></div>
+<p>Only 43 clicks reached the PDF page from the report pages in 90 days (0.39% of finishers); nearly all PDF buyers arrive from the follow-up email. Put the PDF card at the end of page 5 and page 8 with a preview image, and measure clicks before building anything.</p><p><b>For:</b> About 333 people a month reach the PDF page and 37 buy (roughly one in seven), so the offer converts once seen; the problem is exposure. One afternoon of GuidedTrack edits, no payments code, no risk to the free experience.</p><p><b>Against:</b> It is an upsell, not a paywall, so the ceiling is lower; it only tells you how the PDF sells, not how a locked report would.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">7/10</span><h4>E. No gate: sell an expanded &#x27;Full Report&#x27; at the end of pages 5 and 8</h4></div>
+<p>Keep every current page free and sell more: a longer AI action plan, the PDF, a printable traits map, and the right to re-run and compare later. Same checkout mechanics as C, no content taken away.</p><p><b>For:</b> Zero loss of free value, fully consistent with the mission and the survey; tests willingness to pay with no backlash risk.</p><p><b>Against:</b> Upsells convert below gates, and it needs new content before it can be sold.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">6/10</span><h4>D. Gate only page 8 (AI insights) plus the PDF</h4></div>
+<p>The AI page is the one with a real marginal cost (a Gemini call per view) and the one that reads as premium. Lock it, bundle the PDF, leave pages 1 to 7 free.</p><p><b>For:</b> Smallest footprint and a clean story (we charge for the part that costs us money).</p><p><b>Against:</b> About 817 hits a month and you are taking away something readers have had free since the page launched; lowest revenue of the gates.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">5/10</span><h4>B. Free pages 1 to 2, paid pages 3 to 8</h4></div>
+<p>Snapshot plus the cluster deep-dive stay free; the Big Five, Enneagram and Jungian detail pages, traits, predictions and AI become paid.</p><p><b>For:</b> Hits 58.4% of report viewers (about 1,459 a month), so roughly 1.6x the revenue of C at the same conversion.</p><p><b>Against:</b> The title sells 'Myers-Briggs style, Big 5 and Enneagram'; charging for their detail pages reads as bait and switch, invites refunds and bad reviews, and risks the ranking and the email engine.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">3/10</span><h4>A. Free page 1 only (snapshot), everything else paid</h4></div>
+<p>The classic hard paywall: you get your four type names in one image, pay for the rest.</p><p><b>For:</b> Every report viewer sees the price, so the highest theoretical revenue.</p><p><b>Against:</b> Breaks the 'free personality test, instant results' promise that ranks #7 for 'personality test', kills the compare-with-a-friend and team flows, and lands squarely on the survey finding that paywalls feel off-mission (NPS already minus 5).</p></div>
+</div>
+<h3>Unique Traits Test</h3>
+<div class='options'>
+<div class="opt"><div class="opt-head"><span class="score">8/10</span><h4>U4. Measure first: turn the AI profile into a &#x27;Generate my AI profile&#x27; button</h4></div>
+<p>The report is one long page, so we have no idea how many readers reach the AI section. Make it on demand (a click, still free) and record the click. Four weeks of data tell you the hit rate a gate would get.</p><p><b>For:</b> Zero risk, trivial GuidedTrack change, and it also cuts Gemini calls for readers who never scroll that far.</p><p><b>Against:</b> Delays revenue by a month.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">7/10</span><h4>U3. Gate the AI profile, distribution plots and a PDF, after the trait lists</h4></div>
+<p>All trait alignments (strong, moderate, absent) stay free. The paid 'Deep Dive' is the AI 'Understanding Your Unique Profile' section (five parts), the per-trait score distributions, and a downloadable PDF.</p><p><b>For:</b> Readers have invested a median 26.0 minutes and 61.2% gave an email; the trait results they came for are not withheld, only the synthesis is. The AI section has a real per-view cost.</p><p><b>Against:</b> Hit rate unknown until U4 runs; the single-page report needs a page break and a locked-state card, which is more GuidedTrack surgery than the UPT.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">5/10</span><h4>U2. Free strong traits, paid moderate and absent traits plus AI</h4></div>
+<p>Show the median 5 strong alignments, lock the median 10 moderate ones, the absent list and the AI profile.</p><p><b>For:</b> Everyone who finishes sees the gate, and moderate traits are where the surprises are.</p><p><b>Against:</b> After a 26-minute test, hiding half of the results is the scenario most likely to produce angry feedback; it also hides the content that makes people share.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">5/10</span><h4>U5. Upsell instead: paid &#x27;assess someone else&#x27; or compare-with-a-partner report</h4></div>
+<p>63.0% of runs already answer all 86 traits; sell a second run for a partner or friend with a side-by-side comparison.</p><p><b>For:</b> New value rather than a wall; a natural gift or couples product.</p><p><b>Against:</b> Speculative demand and new content to build; the current for-someone-else mode is used by under 1% of runs.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">3/10</span><h4>U1. Hero counts plus top 3 strong traits free, everything else paid</h4></div>
+<p>The hard version.</p><p><b>For:</b> Maximum hits.</p><p><b>Against:</b> Longest test on the site, lowest trust tolerance; the backlash risk outweighs the revenue.</p></div>
+</div>
+<h3>Rationality Test</h3>
+<div class='options'>
+<div class="opt"><div class="opt-head"><span class="score">8/10</span><h4>R3. No paywall; keep it as the free front door and sharpen the cross-sells</h4></div>
+<p>The report is four short pages whose tips link to free CT mini-tools; it is the tool partners (80,000 Hours, Asimov Press, MailList Accelerator deals) embed under their own brand, and the Cognitive Assessment card already sits on page 1 and 2. Keep it free, tighten the Cognitive Assessment and CT+ cards, and revisit once the UPT gate has numbers.</p><p><b>For:</b> About 2,502 submits a month come through partner and paid pages whose value to CT is the subscriber, not the report. A wall here hurts the deals that pay per subscriber.</p><p><b>Against:</b> Leaves money on the table if the UPT gate converts well.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">5/10</span><h4>R4. Later: sell a &#x27;rationality skills training plan&#x27; card on page 3</h4></div>
+<p>New content: a personalised 4-week plan built from the 12 skill scores, delivered as a PDF or email course.</p><p><b>For:</b> Page 3 is where readers see their weak skills and want a fix; it adds value instead of removing it.</p><p><b>Against:</b> Content does not exist yet; demand unproven.</p></div>
+<div class="opt"><div class="opt-head"><span class="score">3/10</span><h4>R2. Gate page 3 (12-skill breakdown and tips) only</h4></div>
+<p>Type and the four skill percentiles stay free; the skill-by-skill page becomes paid.</p><p><b>For:</b> Page 3 is the most actionable page.</p><p><b>Against:</b> The tips are links to free CT tools, so you would be charging for a table of contents; report depth for this tool is still unmeasured (export being re-fetched).</p></div>
+<div class="opt"><div class="opt-head"><span class="score">2/10</span><h4>R1. Gate pages 2 to 4</h4></div>
+<p>Type free, everything else paid.</p><p><b>For:</b> Simple.</p><p><b>Against:</b> A thin, ten-year-old report cannot carry a price, and the partner pages would need an exemption.</p></div>
+</div>
+
+<h2>4. What it is worth on today's traffic</h2>
+<p class="cap">UPT, monthly. 3,436 finishers x 72.7% who open the report = about 2,499 report viewers a month; hits = viewers who reach the gate under the 2026 depth curve (page 8 gate: readers who finish page 7). Gross, before Stripe fees and refunds, before any cannibalisation of today's 37 PDF sales a month (about $333).</p>
+<table class='num'><thead><tr><th>Placement (hits a month)</th><th>3% buy, $9</th><th>6% buy, $9</th><th>12% buy, $9</th><th>3% buy, $14</th><th>6% buy, $14</th><th>12% buy, $14</th></tr></thead><tbody>
+<tr><td>A (after page 1) (2,499)</td><td>$675</td><td>$1,349</td><td>$2,699</td><td>$1,050</td><td>$2,099</td><td>$4,198</td></tr>
+<tr><td>B (after page 2) (1,459)</td><td>$394</td><td>$788</td><td>$1,576</td><td>$613</td><td>$1,226</td><td>$2,451</td></tr>
+<tr><td>C (after page 5) (1,030)</td><td>$278</td><td>$556</td><td>$1,112</td><td>$433</td><td>$865</td><td>$1,730</td></tr>
+<tr><td>D (page 8 only) (817)</td><td>$221</td><td>$441</td><td>$882</td><td>$343</td><td>$686</td><td>$1,373</td></tr>
+</tbody></table>
+<ul>
+<li>Option C at $9 and a 6% conversion is about $556 a month, roughly what the PDF makes today; the bundle replaces it rather than adding to it unless conversion or price is higher. The honest framing: on 2026 organic traffic this is a $5k to $20k a year lever. In Oct to Dec 2025 the UPT ran at 8 to 14 times today's volume on paid traffic; a gate that converts even 3% at $9 then adds about $2.5 to $4 per 100 finishers, which partly funds the ads.</li>
+<li>Unique Traits: 1,378 finishers in a typical month, all of whom see the report; if half reach the AI section, about 689 hits, so $186 to $744 a month at $9. The August wave would have multiplied that by eight for one month.</li>
+<li>Rationality: not modelled, no gate recommended.</li>
+</ul>
+
+<h2>5. Recommended plan</h2>
+<div class="card">
+<h3 style="margin-top:0">Phase 0 (week 1): measure and expose, no payments code</h3>
+<ol>
+<li>UPT: add a PDF card with a preview image at the foot of page 5 and page 8 (option F) and record the click in the run data; today the card only shows on page 1.</li>
+<li>Unique Traits: turn the AI profile into a free "Generate my AI profile" button and record clicks (option U4). This is the hit-rate measurement for a later gate.</li>
+<li>Both: add <code>paywall_seen</code>, <code>checkout_clicked</code> and <code>unlocked</code> variables now so the baseline exists before anything is charged.</li>
+<li>Confirm the 2026 first-time-reader depth curve from the refreshed main export (streaming as this is written; the revisit curve above and the 2024 in-run curve already agree) and get the Rationality depth from its re-fetched export.</li>
+</ol>
+<h3>Phase 1 (weeks 2 to 3): build the gate behind a flag</h3>
+<ol>
+<li><b>Stripe:</b> one product "Ultimate Personality Test: Full Report" with a $9 price and a $14 test price; metadata <code>tool=upt</code>. Tell <code>data_layer._charge_bucket</code> apart from the PDF by metadata, or the dashboard will file these as PDF sales.</li>
+<li><b>Two Vercel routes in this repo</b> (same pattern and basic auth as the members-only check): <code>POST /api/report-checkout</code> creates a Checkout Session whose success URL is the reader's own report link plus <code>&amp;unlock={CHECKOUT_SESSION_ID}</code>, with the email pre-filled; <code>GET /api/report-unlock</code> answers 1 for a paid session id, for an email with a prior purchase, or for an active CT+ member (reusing the member-check lookup). The GuidedTrack checkout program the team runs on Firebase is the alternative; it needs Belen or Josh and cannot carry a per-reader success URL today.</li>
+<li><b>GuidedTrack</b> (report program 22897, in Igor's account): at the start of page 6, if not unlocked, show the gate card (what is inside, price, CT+ members free, "Already bought it? Enter your email"), call the checkout service, and return. On report start, verify an <code>unlock</code> parameter through the service and append it to the emailed and copied report links so revisits stay open. Send a receipt email with the unlocked link.</li>
+<li><b>Teasers:</b> lock icons on items 6 to 8 of the page-1 contents list and a one-line note at the foot of pages 2 to 5, so nobody discovers the wall by surprise.</li>
+<li>Test end to end with <code>?paywall=1</code> only (Igor and the team), including a real $9 purchase and refund, a CT+ member, and a revisit from the emailed link.</li>
+</ol>
+<h3>Phase 2 (weeks 4 to 8): launch at 50%, read weekly</h3>
+<ol>
+<li>GuidedTrack <code>*experiment</code> with three arms: control (no gate), gate at $9, gate at $14. Four weeks or 1,500 gate hits per arm, whichever comes first.</li>
+<li>Primary metrics: gate hits, checkout clicks, paid, revenue per report viewer. Guardrails that pause the test if they move more than 10% against control: email-submit rate, page 1 to page 2 continuation, the end-of-tool feedback rating, and the GSC click-through rate for "personality test" (weekly, mobile and desktop separately, as in the ranking plan).</li>
+<li>Decide: keep the winning arm at 100%, add the PDF email campaign's link to the unlocked report, and retire the standalone PDF card if the bundle outsells it.</li>
+</ol>
+<h3>Phase 3: Unique Traits, only with the Phase 0 numbers</h3>
+<p>If at least 40% of finishers click "Generate my AI profile", gate it (option U3) with the same routes, a page break before the AI section, and the trait lists untouched. Below that, keep it free and sell the PDF instead.</p>
+<h3>Rationality Test</h3>
+<p>No gate. Tighten the Cognitive Assessment card copy on pages 1 and 2 and keep the product grid. Revisit after the UPT numbers exist. Note that the in-run report program (id 2263) is not in Igor's GuidedTrack account, so any change there needs its owner.</p>
+</div>
+
+<h2>6. Risks and how the plan handles them</h2>
+<table><thead><tr><th>Risk</th><th>Why it matters here</th><th>Mitigation in the plan</th></tr></thead><tbody>
+<tr><td>Ranking for "personality test" (goal #3)</td><td>The title promises a free test with instant results; a wall in front of the type would invite pogo-sticking and bad reviews.</td><td>Gate only after every promised framework; GSC CTR is a pause guardrail; teasers make the paid part explicit.</td></tr>
+<tr><td>Audience trust (paywalls "off-mission", NPS minus 5)</td><td>The Rigorous Rationalist persona is the loudest critic and the CT+ prospect.</td><td>CT+ members free (the gate becomes a membership perk); the free part is larger than any competitor's; copy says where the money goes.</td></tr>
+<tr><td>Email engine and MLA deals (goal #4)</td><td>Partners pay per subscriber; the newsletter's best cohort comes from the UPT.</td><td>The gate sits after the email step everywhere; partner pages can be exempted by the <code>brand_data</code> variable if ever needed.</td></tr>
+<tr><td>Support load: lost links, "I already paid"</td><td>Report revisits are 36k views a quarter.</td><td>Unlock travels in the link and in a receipt email; email lookup recognises prior buyers.</td></tr>
+<tr><td>Revenue mis-filed in the dashboard</td><td>$9 charges are classified as PDF sales by amount.</td><td>Classify by Stripe metadata before launch.</td></tr>
+<tr><td>Team conventions (Firebase payments)</td><td>CT's other paid flows create sessions via Firebase.</td><td>Either path works; the Vercel path is proposed because it carries the per-reader success URL and is under Igor's control. Flag to Spencer before build.</td></tr>
+<tr><td>Cannibalising the PDF</td><td>The PDF is the entry product (50% of buyers).</td><td>Bundle it; measure bundle sales against the PDF baseline of about 37 a month.</td></tr>
+</tbody></table>
+
+<h2>7. What I need from you to start</h2>
+<ol>
+<li>Scope: UPT first (option C), Unique Traits measured then gated (U4 then U3), Rationality untouched. Yes or changes.</li>
+<li>Price arms: $9 and $14, PDF included in both. Or your own numbers.</li>
+<li>CT+ members get the full report free. Yes or no.</li>
+<li>Payments path: new Vercel routes in this repo (my proposal) or the team's Firebase checkout (needs Belen or Josh).</li>
+<li>Permission to edit the two UPT report programs and the Unique Traits programs in your GuidedTrack account, behind a flag, after the usual pull-and-diff.</li>
+</ol>
+
+<h2>Appendix: data notes</h2>
+<ul>
+<li>Numbers gathered 2026-10-26. Sources: GA4 (property via ga4_client.py), GuidedTrack run exports streamed from /programs/{id}/exports (emails reduced to presence flags, never stored), Stripe charges, program sources pulled from GuidedTrack.</li>
+<li>UPT depth: the chart uses the report program's own 2026 export (report revisits, 20,374 runs, complete). The main test's export (about 3.4 GB, 5,199 columns) stalled server-side after 188k rows (August 2024) on the first pass, so first-time-reader depth is from May to August 2024; a second pass with a longer timeout is running. Revisiting readers are a more engaged population than first-time readers, yet their 2026 depth curve matches the 2024 in-run curve within a few points, so the shape is stable. Page 8 (AI insights) exists in this window. Credits are not a depth signal here (the standalone report ends without one).</li>
+<li>Rationality depth: the first two export passes stopped in June 2015 on a NUL byte in a row (a parser bug on my side, now fixed); the re-fetch is running.</li>
+<li>Unique Traits numbers are complete (65,035 live runs since launch). The export does not record device.</li>
+<li>GA4 <code>cta_click</code> counts use the standard <code>linkUrl</code> dimension; the tag's <code>link_url</code> parameter is not registered as a custom dimension.</li>
+<li>Monthly GA4 submits by tool are in the datapoints file; October 2026 is partial.</li>
+</ul>
+</main></body></html>

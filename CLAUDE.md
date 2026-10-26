@@ -181,6 +181,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   ~65% in the week of 2026-09-28, desktop flat). The Jun 2026 "TG @SEO_LINKK_ORDER" referring domains are link-dump
   spam, not CT's: no disavow. All other tool pages share `src/templates/program.liquid` (one footer link = ~150 internal
   links). PageSpeed Insights API quota is exhausted on the shared project: run `npx -y lighthouse@12` locally.
+- `reports/results_paywall_plan_2026-10-26_src/`: results-paywall plan for the UPT, Unique Traits and Rationality tests
+  (memory note `project_results_paywall_plan_2026_10`): `datapoints.json` holds every number, `build_report.py` renders
+  the HTML. Awaiting Igor's approval; nothing on the tools was changed.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
@@ -289,6 +292,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - Run data: `GET /programs/{id}/exports?export_format=csv` returns all non-test runs incl.
   unfinished ones; `GET /programs/{id}/runs.json?page=N` is 25 per page (`per_page`/`limit` are
   ignored, iterate until empty) and includes test runs.
+- Big exports STREAM oldest-first with no paging or date filter (the UPT main export is 5,199 columns at ~18 KB a row,
+  ~3.4 GB): keep only the wanted columns while streaming, strip NUL bytes from each line before `csv.reader` (a 2015
+  Rationality row has one), and use an hour-long read timeout (the server stalled mid-stream for 15+ minutes). Subprogram
+  variables (e.g. `seenReportPage1..8`) land in the parent program's export. A program you do not own can still be read:
+  `GET /programs/{key}/embed` (creates a real unfinished run) then `GET /runs/{id}/contents` with
+  `X-GuidedTrack-Access-Key` returns the compiled run with every subprogram (memory note
+  `reference_guidedtrack_exports_and_compiled_runs` has the program ids of the UPT, Unique Traits and Rationality families).
 - GT runtime facts verified 2026-09-14 (the skill guide gets some wrong): `0` and `""` are TRUTHY,
   only undefined is falsy, so test flags with `*if: flag = 1` (the Career Navigation Survey's
   `*if: changingCareer` gate never worked for this reason). `text.find` returns the 1-based position

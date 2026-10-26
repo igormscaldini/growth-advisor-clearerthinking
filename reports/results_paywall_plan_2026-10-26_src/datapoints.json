@@ -1,0 +1,334 @@
+{
+  "generated_note": "Numbers gathered 2026-10-26. Sources: GA4 (property via ga4_client.py), GuidedTrack run exports streamed from /programs/{id}/exports (emails reduced to presence flags, never stored), Stripe charges, program sources pulled from GuidedTrack.",
+  "ga4_90d": {
+    "window": "2026-07-28 to 2026-10-25",
+    "UPT": {
+      "page": "/personality-test.html",
+      "landings": null,
+      "starts": 20672,
+      "submits": 11000,
+      "note": "The UPT fires no Viewed Privacy Policy event since Sep 2025, so landings are not measured."
+    },
+    "UTT": {
+      "page": "/unique-traits-test (+ trailing-slash variant)",
+      "landings": 22679,
+      "starts": 22807,
+      "submits": 15493
+    },
+    "RAT": {
+      "page": "/how_rational_are_you_really_take_the_test.html",
+      "landings": 16572,
+      "starts": 11381,
+      "submits": 6069
+    },
+    "report_pages": {
+      "personality_report.html": {
+        "views": 36153,
+        "sessions": 9777,
+        "users": 6674
+      },
+      "personality-test-pdf-generator": {
+        "views": 4066,
+        "sessions": 1096,
+        "users": 999
+      },
+      "getmyreport.html": {
+        "views": 5146,
+        "sessions": 1304,
+        "users": 1191
+      },
+      "rationality-report/*": {
+        "views": 6084,
+        "sessions": 1699,
+        "users": 1309
+      }
+    },
+    "pdf_page_sessions_by_source": {
+      "(direct) / (none)": 850,
+      "guidedtrack.com / referral": 335,
+      "google / organic": 143,
+      "google / cpc": 141,
+      "programs / banner": 25
+    },
+    "cta_click_to_pdf_page_from_report_pages": 43,
+    "cta_click_to_plus_from_tool_pages": 31
+  },
+  "ga4_monthly_submits_2026": {
+    "months": [
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08",
+      "2026-09",
+      "2026-10*"
+    ],
+    "UPT": [
+      4186,
+      2769,
+      3668,
+      4024,
+      4535,
+      2486,
+      1089,
+      4278,
+      3889,
+      2834
+    ],
+    "UTT": [
+      0,
+      294,
+      4675,
+      1378,
+      1231,
+      322,
+      567,
+      11511,
+      2669,
+      1195
+    ],
+    "RAT": [
+      2186,
+      2132,
+      4214,
+      6637,
+      1136,
+      1442,
+      948,
+      2257,
+      1565,
+      2135
+    ],
+    "UPT_starts": [
+      5888,
+      4029,
+      4984,
+      6143,
+      7402,
+      3814,
+      1579,
+      9082,
+      6879,
+      4712
+    ],
+    "note": "October is 1 to 25 only. Oct to Dec 2025 the UPT ran at 28k to 49k submits a month on paid traffic (95,761 starts in Oct 2025); the 2026 figures are the organic baseline."
+  },
+  "upt_export": {
+    "window": "live runs started 2024-05-01 to 2024-08-16 (the only window with report-page flags in the part of the export that streamed before the server stalled)",
+    "runs": 45303,
+    "finished_questions": 23189,
+    "gave_email": 16689,
+    "page1": 16867,
+    "depth_pct_of_page1": {
+      "p1": 100.0,
+      "p2": 63.4,
+      "p3": 45.3,
+      "p4": 42.0,
+      "p5": 38.7,
+      "p6": 35.7,
+      "p7": 33.8,
+      "credits": 10.7
+    },
+    "organic_vs_cpc": {
+      "organic_p5_of_p1": 40.0,
+      "cpc_p5_of_p1": 25.6,
+      "organic_p7_of_p1": 34.9,
+      "cpc_p7_of_p1": 22.1
+    },
+    "median_minutes_by_deepest_page": {
+      "1": 18.2,
+      "2": 20.8,
+      "3": 22.5,
+      "4": 21.9,
+      "5": 24.4,
+      "6": 26.3,
+      "7": 30.3
+    },
+    "page_names": {
+      "p1": "Snapshot + contents",
+      "p2": "Cluster (16 types)",
+      "p3": "Big Five",
+      "p4": "Enneagram",
+      "p5": "Jungian type",
+      "p6": "Distinctive traits",
+      "p7": "Predictions",
+      "p8": "AI insights (added later)"
+    },
+    "note": "Page 8 (AI insights), the always-on PDF card and the PDF price experiment did not exist in this window; a 2026 refresh of this curve is streaming and will be checked before implementation."
+  },
+  "utt_export": {
+    "window": "live runs started 2026-07-28 to 2026-10-25",
+    "runs": 43492,
+    "finished": 19008,
+    "gave_email": 11631,
+    "report_seen": 19009,
+    "selected_all_86_traits": 27389,
+    "since_launch": {
+      "window": "2026-02 to 2026-10-26",
+      "runs": 65035,
+      "finished": 27045,
+      "gave_email": 19772
+    },
+    "strong_traits": {
+      "median": 5,
+      "p25": 3,
+      "p75": 8,
+      "share_zero": 2.5
+    },
+    "moderate_traits": {
+      "median": 10,
+      "p25": 8,
+      "p75": 13
+    },
+    "absent_traits_median": 73,
+    "minutes": {
+      "median": 26.0,
+      "p25": 19.6,
+      "p75": 39.1
+    },
+    "note": "The report is a single page (hero counts, strongest traits, moderate traits, AI profile, absent traits, retake and share), so there is no page-depth signal; the invite-a-friend click variable is never set (dead)."
+  },
+  "rat_export": {
+    "note": "Run export streamed to 2015 only on the first two attempts (a NUL byte broke the parser); the fixed stream is running. Report depth for this tool is therefore not in this version. The report has 4 pages: type, 4 skill percentiles, 12 skills with tips and links to free CT tools, share; plus the product grid between pages 1 and 2."
+  },
+  "stripe": {
+    "pdf_price_usd": 9,
+    "pdf_sales_since_2025_01": 686,
+    "pdf_net_usd_since_2025_01": 5868,
+    "pdf_monthly": {
+      "months": [
+        "2025-03",
+        "2025-04",
+        "2025-05",
+        "2025-06",
+        "2025-07",
+        "2025-08",
+        "2025-09",
+        "2025-10",
+        "2025-11",
+        "2025-12",
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08",
+        "2026-09",
+        "2026-10*"
+      ],
+      "count": [
+        8,
+        36,
+        13,
+        12,
+        58,
+        30,
+        32,
+        54,
+        53,
+        22,
+        15,
+        21,
+        38,
+        32,
+        38,
+        39,
+        41,
+        47,
+        38,
+        59
+      ]
+    },
+    "price_variant_4_50_sales": 44,
+    "price_variant_5_sales": 10,
+    "cognitive_2026_monthly_range": "6 to 17",
+    "note": "October 2026 is to the 26th. The $4.50 charges are the PDF price experiment variant (Experiment (random pdf price) in the UPT run data)."
+  },
+  "competitors": {
+    "note": "Third-party 2026 guide (themoneybees.co), not verified on the vendors' sites",
+    "Truity full report": "$19 to $29",
+    "16Personalities premium suites": "about $29 to EUR 99",
+    "Official MBTI (mbtionline)": "$59.95",
+    "Enneagram detailed reports": "$10 to $60"
+  },
+  "benchmarks": {
+    "news_paywall_stop_conversion_monthly_median": "0.2% to 0.5% (anonymous visitors)",
+    "known_user_conversion_piano": "9.9%",
+    "source": "reports/paywall_conversion_benchmark_2026-09-23.html"
+  },
+  "audience": {
+    "survey_n": 539,
+    "nps": -5,
+    "paywalls": "flagged as off-mission by respondents",
+    "ct_plus_awareness": "31%",
+    "buyers_us_share": "45%+",
+    "india_signups": "about 25% of sign-ups, about 0% of revenue",
+    "upt_subscriber_open_rate": "31% (second most engaged acquisition tool)"
+  },
+  "upt_report_export": {
+    "program": "Ultimate Personality Test - Report (GuidedTrack 22897), the program that renders the report; its own runs are report revisits via the emailed or copied link (personality_report.html)",
+    "window": "live runs started 2026-01-01 to 2026-10-26",
+    "runs_2026": 20374,
+    "depth_pct_of_page1": {
+      "p1": 100.0,
+      "p2": 58.4,
+      "p3": 51.4,
+      "p4": 47.1,
+      "p5": 41.2,
+      "p6": 37.4,
+      "p7": 32.7,
+      "p8": 28.6
+    },
+    "monthly_runs_2026": {
+      "months": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08",
+        "2026-09",
+        "2026-10*"
+      ],
+      "runs": [
+        2153,
+        1683,
+        2276,
+        1996,
+        1961,
+        1803,
+        1607,
+        3189,
+        2051,
+        1655
+      ]
+    },
+    "pdf_click_pct_of_page1_2026": 2.13,
+    "iq_click_pct_of_page1_2026": 0.82,
+    "pdf_price_test_2025_plus": {
+      "$9": {
+        "shown": 48799,
+        "clicked": 1647,
+        "click_pct": 3.38
+      },
+      "$4.50": {
+        "shown": 7346,
+        "clicked": 213,
+        "click_pct": 2.9
+      },
+      "$19": {
+        "shown": 2211,
+        "clicked": 19,
+        "click_pct": 0.86
+      }
+    },
+    "note": "Revisiting readers are a more engaged population than first-time readers, yet their 2026 depth curve matches the 2024 in-run curve within a few points, so the shape is stable. Page 8 (AI insights) exists in this window. Credits are not a depth signal here (the standalone report ends without one)."
+  }
+}
