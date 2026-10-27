@@ -13,7 +13,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).parent))
-from build import ROOT, fetch_runs  # noqa: E402
+from build import ROOT, fetch_runs, is_test_question  # noqa: E402
 
 QUESTION_COLS = ("(ozwgip)", "(h808ylh)")            # question field, old and new program versions
 EMAIL_COLS = ("(itxzlya)", "email", "(1i0bb4v)", "(z7p2re0)")  # email field, newest first
@@ -37,7 +37,7 @@ def _first_filled(runs: pd.DataFrame, suffixes) -> pd.Series:
 def submissions(runs: pd.DataFrame) -> pd.DataFrame:
     """Real submissions: columns `day` (date) and `responder` (lower-cased email, may be NA)."""
     q = _first_filled(runs, QUESTION_COLS)
-    keep = q.notna() & q.ne("") & q.str.lower().ne("test")
+    keep = q.notna() & q.ne("") & ~is_test_question(q)
     sub = runs.loc[keep]
     return pd.DataFrame({
         "day": pd.to_datetime(sub["Time Started (UTC)"]).dt.date.values,

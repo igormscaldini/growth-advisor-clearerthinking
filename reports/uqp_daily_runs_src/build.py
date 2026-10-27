@@ -7,6 +7,7 @@ Run: .venv/bin/python reports/uqp_daily_runs_src/build.py
 import io
 import json
 import os
+import re
 from datetime import date, datetime, timedelta
 from pathlib import Path
 
@@ -18,6 +19,14 @@ ROOT = Path(__file__).resolve().parents[2]
 PROGRAM_ID = 37281
 DAYS = 14
 QUESTION_COLS = ("(ozwgip)", "(h808ylh)")  # the question field in the old and new program versions
+# Test entries typed into the question field by the team: "test", "testing", "Igor testing", "test 2"...
+# (a real question is a sentence, so this never matches one that merely contains the word "test").
+TEST_QUESTION_RE = re.compile(r"^(?:\w+\s+)?test(?:ing)?(?:\s*\d+)?$", re.I)
+
+
+def is_test_question(q: pd.Series) -> pd.Series:
+    """True where the question text is a team test entry rather than a submission."""
+    return q.astype("string").str.strip().str.match(TEST_QUESTION_RE).fillna(False).astype(bool)
 
 
 def fetch_runs() -> pd.DataFrame:
@@ -32,7 +41,7 @@ def fetch_runs() -> pd.DataFrame:
 def daily_counts(runs: pd.DataFrame, end: date, days: int = DAYS) -> list:
     qcols = [c for c in runs.columns if c.endswith(QUESTION_COLS)]
     answered = runs[qcols].apply(lambda col: col.astype(str).str.strip().ne("") & col.notna()).any(axis=1)
-    test = runs[qcols].apply(lambda col: col.astype(str).str.strip().str.lower().eq("test")).any(axis=1)
+    test = runs[qcols].apply(is_test_question).any(axis=1)
     runs = runs[~test]
     day = pd.to_datetime(runs["Time Started (UTC)"]).dt.date
     out = []

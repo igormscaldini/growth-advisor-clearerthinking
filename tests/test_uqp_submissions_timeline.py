@@ -6,6 +6,7 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "reports" / "uqp_daily_runs_src"))
+from build import is_test_question  # noqa: E402
 from submissions_timeline import submissions, timeline  # noqa: E402
 
 Q_NEW = "Please submit your question here (h808ylh)"
@@ -50,3 +51,18 @@ def test_timeline_counts_each_anonymous_submission_as_its_own_responder():
     sub = pd.DataFrame({"day": [date(2026, 10, 1)] * 2, "responder": [pd.NA, pd.NA]})
     out = timeline(sub, start=date(2026, 10, 1), end=date(2026, 10, 1))
     assert out[0]["submissions"] == 2 and out[0]["cum_responders"] == 2
+
+
+def test_is_test_question_matches_team_entries_only():
+    q = pd.Series(["test", "Testing", "Igor testing", "test 2", " TEST ",
+                   "Why do personality tests predict so little?", "Is testing a skill?", None, ""])
+    assert list(is_test_question(q)) == [True, True, True, True, True, False, False, False, False]
+
+
+def test_submissions_drops_igor_testing_entry():
+    runs = _runs([
+        ("2026-10-21 10:00:00", "Igor testing", None, "igor@x.org", None),
+        ("2026-10-21 11:00:00", "What is attention?", None, "d@x.org", None),
+    ])
+    sub = submissions(runs)
+    assert len(sub) == 1 and list(sub["responder"]) == ["d@x.org"]
