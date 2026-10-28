@@ -190,6 +190,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - `reports/results_paywall_plan_2026-10-26_src/`: results-paywall plan for the UPT, Unique Traits and Rationality tests
   (memory note `project_results_paywall_plan_2026_10`): `datapoints.json` holds every number, `build_report.py` renders
   the HTML. Awaiting Igor's approval; nothing on the tools was changed.
+- `reports/welcome_drip_copy_2026-10-28_src/`: personalized copy for the beehiiv "[Drip Campaign] New Subscribers" automation
+  (`drip_copy.md` is the source; `build_doc_html.py --split` renders the three Google Docs, Drive folder
+  "New Subscribers drip copy (2026-10-28)"). Branch on the custom field `last_tool_tried` (display names, 98% filled);
+  `first_tool_tried` is never populated. The live "Big news" coaching email has a mangled final link and is sent by BOTH
+  that automation and "[Drip Campaign] Tried Attraction Study"; it unsubscribes 1.3% of recipients per send.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)

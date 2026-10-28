@@ -53,8 +53,14 @@ def render(md: str) -> str:
 if __name__ == "__main__":
     md = SRC.read_text()
     if "--split" in sys.argv:
-        head, rest = md.split("\n---\n\n## Email 2", 1)
-        parts = {"drip_copy_part1.html": head, "drip_copy_part2.html": "# New Subscribers drip: personalized copy (part 2)\n\n## Email 2" + rest}
+        a, rest = md.split("### 1E.", 1)
+        b_, c = rest.split("\n---\n\n## Email 2", 1)
+        title = "# New Subscribers drip: personalized copy"
+        parts = {
+            "drip_copy_part1.html": a.replace(title, title + " (1 of 3: how to use it, Email 1 paths A to D)"),
+            "drip_copy_part2.html": title + " (2 of 3: Email 1 paths E to H)\n\n### 1E." + b_,
+            "drip_copy_part3.html": title + " (3 of 3: Emails 2 to 4, review notes)\n\n## Email 2" + c,
+        }
     else:
         parts = {"drip_copy.html": md}
     for name, text in parts.items():
