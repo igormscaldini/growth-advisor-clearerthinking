@@ -1,0 +1,202 @@
+<html><body><h1>New Subscribers drip: personalized copy</h1>
+<p>Draft for review. Source: <code>reports/welcome_drip_copy_2026-10-28_src/drip_copy.md</code> in the Growth Advisor repo.</p>
+<h2>How to use this document</h2>
+<p><b>Which field to personalize on.</b> Use the custom field <b>Last Tool Tried</b> (<code>last_tool_tried</code>). It is filled for 98% of new sign-ups with the tool's display name. "First Tool Tried" is empty on every sign-up since it was created, so do not use it.</p>
+<p><b>Exact values seen on the last 30,000 sign-ups</b> (share of Oct 24 to 28, after the viral spike): Who Attracts You (45 to 70%), The Ultimate Personality Test (about 80 a day), How Rational Are You, Really? (about 50), Philosophical Beliefs (about 35), Intrinsic Values Test (about 30), Unique Traits Test (about 12), The Value Of Your Time Calculator (about 3), blank (about 3%), everything else (about 5%).</p>
+<p><b>Email 1 is branched; Emails 2 to 4 are single emails with a merge tag.</b> A beehiiv multi-split branch takes up to 5 paths plus "All others", so Email 1 needs two nested splits on Last Tool Tried:</p>
+<p>1. Split A (equals): Who Attracts You / The Ultimate Personality Test / How Rational Are You, Really? / Philosophical Beliefs / Intrinsic Values Test / All others</p>
+<p>2. Split B inside "All others" (equals): Unique Traits Test / The Value Of Your Time Calculator / All others (the generic version, which also covers blanks)</p>
+<p><b>Merge tag.</b> Emails 2 to 4 refer to the tool with the Last Tool Tried merge tag inside quotation marks, so every tool name reads naturally ("Who Attracts You", "How Rational Are You, Really?"). The exact tag is <code>{{last_tool_tried | one of our tools}}</code>: the text after the bar is the fallback for the 3% of blanks (field names are case-sensitive; merge tags also work in subject lines).</p>
+<p><b>Links.</b> Every coaching link carries <code>utm_source=beehiiv&amp;utm_medium=email&amp;utm_campaign=welcome_coaching&amp;utm_content=&lt;path&gt;</code> so GA4 shows which variant sends people to /coaching. The session clip is https://youtu.be/oqyw8872x0E.</p>
+<p><b>Two things to fix in the live automation regardless of this copy.</b></p>
+<ul>
+<li>The last link of the live "Big news" email ("give it a try") is a mangled URL that starts with <code>https://www.clearerthinahttps://...</code> and lands on a dead page. 140 people have clicked it so far.</li>
+<li>"Big news" is also step 2 of the live "[Drip Campaign] Tried Attraction Study" automation, and every Who Attracts You sign-up matches that segment and the New Subscribers trigger. Both automations sent about 30,000 copies in the last 7 days. Keep it in one place only.</li>
+</ul>
+<p><b>Why the rewrite.</b> "Big news" loses 1.34% of recipients to unsubscribes (versus 0.21 to 0.26% for the other two drip emails) and sends 0.2% to /coaching. The new subject lines promise a continuation of what the reader did yesterday, the opening names a problem the tool just surfaced, the price is framed as under $50 a session (the band 72% of readers said they would pay in the 2024 coaching survey), and the "trained psychology graduates" line pre-empts the "life coach selling obvious tips" image that came up in the same survey.</p>
+<hr>
+<h2>Email 1 (24 hours after sign-up): coaching, one version per tool</h2>
+<p>Shared frame: Spencer, first person. Only the subject, preview text, opening and bullet list change between paths. Button text is the same everywhere: <b>See how coaching works</b>.</p>
+<h3>1A. Path: Last Tool Tried equals "Who Attracts You"</h3>
+<p><b>Subject:</b> Knowing your type is the easy part</p>
+<p><b>Preview text:</b> The part of dating that a report can't do for you.</p>
+<p><b>Coaching link:</b> https://www.clearerthinking.org/coaching?utm_source=beehiiv&amp;utm_medium=email&amp;utm_campaign=welcome_coaching&amp;utm_content=who_attracts_you</p>
+<p>Hi there,</p>
+<p>Spencer here again, from ClearerThinking.org. Thanks for taking <a href="https://programs.clearerthinking.org/who_attracts_you_study.html">Who Attracts You</a> yesterday.</p>
+<p>Your report shows which aspects of physical appearance predict who you find attractive. That is a genuinely new thing to know about yourself. But I want to be honest about what it can't do. It can't help with the part of dating and relationships that actually decides how things go: starting a conversation with someone you like, handling a "no" without taking it personally, the nerves before a first date, or noticing why your relationships keep following the same pattern. Those are skills, and they are much easier to build with someone in your corner.</p>
+<p>That gap, between knowing something about yourself and living differently because of it, is the reason we started offering one-on-one coaching. I tried the coaching myself before we partnered with Overcome, the organization that provides the coaches. They are trained psychology graduates who use methods drawn from cognitive behavioral therapy, acceptance and commitment therapy, and motivational interviewing. Sessions are practical: you leave each one with something specific to try before the next.</p>
+<p>Whether you are dating right now or in a relationship, a coach can help you:</p>
+<ul>
+<li>feel less anxious meeting new people, online or in person</li>
+<li>stop avoiding the situations that could actually lead somewhere, like asking someone out or going to the event you keep skipping</li>
+<li>notice the pattern that keeps repeating in your relationships, and change your part in it</li>
+<li>build routines around sleep, work, and stress that leave you with energy for the rest of your life</li>
+</ul>
+<p>It costs $99 a month for up to two 45-minute video sessions, which works out to under $50 a session. Your first session is usually within a week of signing up. You can cancel anytime and switch coaches anytime. And if after your first session it turns out that what you need is therapy rather than coaching, we will refund you.</p>
+<p>If you want to see what a session is actually like before deciding, <a href="https://youtu.be/oqyw8872x0E">here is a 15-minute clip from a real one</a>.</p>
+<p><b>[Button] See how coaching works</b></p>
+<p>Coaching is not therapy, and it is not meant for crises or specialist mental health treatment. But if you want practical help turning what you learned into something you actually do differently, I hope you will take a look.</p>
+<p>Warmly,</p>
+<p>Spencer Greenberg</p>
+<p>Founder, ClearerThinking.org</p>
+<h3>1B. Path: Last Tool Tried equals "The Ultimate Personality Test"</h3>
+<p><b>Subject:</b> Your traits are not the whole story</p>
+<p><b>Preview text:</b> What a personality report can't do for you.</p>
+<p><b>Coaching link:</b> https://www.clearerthinking.org/coaching?utm_source=beehiiv&amp;utm_medium=email&amp;utm_campaign=welcome_coaching&amp;utm_content=personality_test</p>
+<p>Hi there,</p>
+<p>This is Spencer Greenberg, founder of ClearerThinking.org. Thanks for taking the <a href="https://programs.clearerthinking.org/personality-test.html">Ultimate Personality Test</a> yesterday.</p>
+<p>Your report describes your tendencies: how much you worry, how you handle deadlines, how much structure you want, how you recharge. What it can't do is decide what you do with them. Two people with the same scores can live very different lives, depending on whether they have learned to work with their patterns or are quietly run by them. In my experience the difference is rarely more self-knowledge. It is practice, and a second person to practice with.</p>
+<p>That gap, between knowing something about yourself and living differently because of it, is the reason we started offering one-on-one coaching. I tried the coaching myself before we partnered with Overcome, the organization that provides the coaches. They are trained psychology graduates who use methods drawn from cognitive behavioral therapy, acceptance and commitment therapy, and motivational interviewing. Sessions are practical: you leave each one with something specific to try before the next.</p>
+<p>A coach can help you:</p>
+<ul>
+<li>manage worry and stress instead of being managed by them</li>
+<li>set standards you can actually meet, if perfectionism turns small tasks into ordeals</li>
+<li>say no and hold a boundary without a week of guilt afterward</li>
+<li>reduce the avoidance, overthinking, or procrastination your report may have put a name to</li>
+<li>build habits and routines that fit your personality instead of fighting it</li>
+</ul>
+<p>It costs $99 a month for up to two 45-minute video sessions, which works out to under $50 a session. Your first session is usually within a week of signing up. You can cancel anytime and switch coaches anytime. And if after your first session it turns out that what you need is therapy rather than coaching, we will refund you.</p>
+<p>If you want to see what a session is actually like before deciding, <a href="https://youtu.be/oqyw8872x0E">here is a 15-minute clip from a real one</a>.</p>
+<p><b>[Button] See how coaching works</b></p>
+<p>Coaching is not therapy, and it is not meant for crises or specialist mental health treatment. But if one of your traits is getting in the way of your work, your goals, your relationships, or your peace of mind, I hope you will take a look.</p>
+<p>Warmly,</p>
+<p>Spencer Greenberg</p>
+<p>Founder, ClearerThinking.org</p>
+<h3>1C. Path: Last Tool Tried equals "How Rational Are You, Really?"</h3>
+<p><b>Subject:</b> The problems a rationality test can't solve</p>
+<p><b>Preview text:</b> Most of them are follow-through problems.</p>
+<p><b>Coaching link:</b> https://www.clearerthinking.org/coaching?utm_source=beehiiv&amp;utm_medium=email&amp;utm_campaign=welcome_coaching&amp;utm_content=rationality_test</p>
+<p>Hi there,</p>
+<p>This is Spencer Greenberg, founder of ClearerThinking.org. Thanks for taking <a href="https://programs.clearerthinking.org/how_rational_are_you_really_take_the_test.html">How Rational Are You, Really?</a> yesterday.</p>
+<p>Here is something I have learned from working with thousands of people who care about thinking well: some problems don't yield to clear thinking alone. You can understand procrastination perfectly and still procrastinate. You can know exactly which habit is holding you back and still not change it. Stress, low motivation, routines that collapse after two weeks: these usually aren't reasoning problems. They are follow-through problems, and a better argument won't solve them.</p>
+<p>That gap, between knowing what to do and doing it, is the reason we started offering one-on-one coaching. I tried the coaching myself before we partnered with Overcome, the organization that provides the coaches. They are trained psychology graduates who use methods drawn from cognitive behavioral therapy, acceptance and commitment therapy, and motivational interviewing. Sessions are practical: you leave each one with something specific to try before the next.</p>
+<p>A coach can help you:</p>
+<ul>
+<li>reduce procrastination and avoidance</li>
+<li>build habits and routines that survive past week two</li>
+<li>manage stress before it builds up</li>
+<li>turn a goal you keep circling into concrete weekly actions</li>
+<li>close the gap between what you know you should do and what you actually do</li>
+</ul>
+<p>It costs $99 a month for up to two 45-minute video sessions, which works out to under $50 a session. Your first session is usually within a week of signing up. You can cancel anytime and switch coaches anytime. And if after your first session it turns out that what you need is therapy rather than coaching, we will refund you.</p>
+<p>If you want to see what a session is actually like before deciding, <a href="https://youtu.be/oqyw8872x0E">here is a 15-minute clip from a real one</a>.</p>
+<p><b>[Button] See how coaching works</b></p>
+<p>Coaching is not therapy, and it is not meant for crises or specialist mental health treatment. But if a stubborn pattern is getting in the way of your work, your goals, your relationships, or your peace of mind, I hope you will take a look.</p>
+<p>Warmly,</p>
+<p>Spencer Greenberg</p>
+<p>Founder, ClearerThinking.org</p>
+<h3>1D. Path: Last Tool Tried equals "Philosophical Beliefs"</h3>
+<p><b>Subject:</b> The gap between what you believe and how you live</p>
+<p><b>Preview text:</b> Examining your life is not the same as changing it.</p>
+<p><b>Coaching link:</b> https://www.clearerthinking.org/coaching?utm_source=beehiiv&amp;utm_medium=email&amp;utm_campaign=welcome_coaching&amp;utm_content=philosophical_beliefs</p>
+<p>Hi there,</p>
+<p>This is Spencer Greenberg, founder of ClearerThinking.org. Thanks for taking the <a href="https://programs.clearerthinking.org/philosophical_beliefs.html">Philosophical Beliefs quiz</a> yesterday, and for thinking carefully about questions most people never examine directly, from free will to what makes an action right.</p>
+<p>Here is something curious about the examined life: examining it is not the same as changing it. You can hold a considered view about what matters, how you ought to treat people, or what a good life looks like, and still find your actual days shaped by something else entirely: the urgent over the important, habits you never chose, evenings that disappear without a trace. The gap between your beliefs about how to live and how you actually live doesn't close through more reflection alone.</p>
+<p>That gap is the reason we started offering one-on-one coaching. I tried the coaching myself before we partnered with Overcome, the organization that provides the coaches. They are trained psychology graduates who use methods drawn from cognitive behavioral therapy, acceptance and commitment therapy, and motivational interviewing. Sessions are practical: you leave each one with something specific to try before the next.</p>
+<p>A coach can help you:</p>
+<ul>
+<li>get clear on what you value most, and turn it into concrete weekly actions</li>
+<li>reduce procrastination and avoidance on the things that actually matter to you</li>
+<li>build habits and routines you would endorse on reflection</li>
+<li>manage stress and overthinking</li>
+<li>close the gap between the life you would argue for and the life you are living</li>
+</ul>
+<p>It costs $99 a month for up to two 45-minute video sessions, which works out to under $50 a session. Your first session is usually within a week of signing up. You can cancel anytime and switch coaches anytime. And if after your first session it turns out that what you need is therapy rather than coaching, we will refund you.</p>
+<p>If you want to see what a session is actually like before deciding, <a href="https://youtu.be/oqyw8872x0E">here is a 15-minute clip from a real one</a>.</p>
+<p><b>[Button] See how coaching works</b></p>
+<p>Coaching is not therapy, and it is not meant for crises or specialist mental health treatment. But if that gap is getting in the way of your work, your goals, your relationships, or your peace of mind, I hope you will take a look.</p>
+<p>Warmly,</p>
+<p>Spencer Greenberg</p>
+<p>Founder, ClearerThinking.org</p>
+<h3>1E. Path: Last Tool Tried equals "Intrinsic Values Test"</h3>
+<p><b>Subject:</b> Knowing your values is the easy part</p>
+<p><b>Preview text:</b> A value trap is easier to spot than to climb out of.</p>
+<p><b>Coaching link:</b> https://www.clearerthinking.org/coaching?utm_source=beehiiv&amp;utm_medium=email&amp;utm_campaign=welcome_coaching&amp;utm_content=intrinsic_values</p>
+<p>Hi there,</p>
+<p>This is Spencer Greenberg, founder of ClearerThinking.org. Thanks for taking the <a href="https://programs.clearerthinking.org/intrinsic_values_test.html">Intrinsic Values Test</a> yesterday, and for stopping to work out what you care about for its own sake, which most people never do.</p>
+<p>Here is what we have noticed, though: a value trap is much easier to spot than to climb out of. You can know perfectly well that you are pursuing something because other people call it valuable rather than because you do, and still keep pursuing it. You can see clearly that your weeks are filled with things that don't serve what you truly care about, and still watch next week fill up the same way. Rearranging your life around your real values is a different challenge from identifying them.</p>
+<p>That gap, between knowing what you value and living by it, is the reason we started offering one-on-one coaching. I tried the coaching myself before we partnered with Overcome, the organization that provides the coaches. They are trained psychology graduates who use methods drawn from cognitive behavioral therapy, acceptance and commitment therapy, and motivational interviewing. Sessions are practical: you leave each one with something specific to try before the next.</p>
+<p>A coach can help you:</p>
+<ul>
+<li>turn your top values into concrete goals and weekly actions</li>
+<li>step back from pursuits that look valuable but aren't actually yours</li>
+<li>let go of guilt about not wanting what others expect you to want</li>
+<li>reduce procrastination and avoidance on the things you care about most</li>
+<li>build habits and routines that create more of what you value</li>
+</ul>
+<p>It costs $99 a month for up to two 45-minute video sessions, which works out to under $50 a session. Your first session is usually within a week of signing up. You can cancel anytime and switch coaches anytime. And if after your first session it turns out that what you need is therapy rather than coaching, we will refund you.</p>
+<p>If you want to see what a session is actually like before deciding, <a href="https://youtu.be/oqyw8872x0E">here is a 15-minute clip from a real one</a>.</p>
+<p><b>[Button] See how coaching works</b></p>
+<p>Coaching is not therapy, and it is not meant for crises or specialist mental health treatment. But if the gap between your values and your day-to-day life is getting in the way of your work, your goals, your relationships, or your peace of mind, I hope you will take a look.</p>
+<p>Warmly,</p>
+<p>Spencer Greenberg</p>
+<p>Founder, ClearerThinking.org</p>
+<h3>1F. Path: Last Tool Tried equals "Unique Traits Test"</h3>
+<p><b>Subject:</b> What to do with what you learned about yourself</p>
+<p><b>Preview text:</b> A name for a trait is a relief. It is not a change.</p>
+<p><b>Coaching link:</b> https://www.clearerthinking.org/coaching?utm_source=beehiiv&amp;utm_medium=email&amp;utm_campaign=welcome_coaching&amp;utm_content=unique_traits</p>
+<p>Hi there,</p>
+<p>This is Spencer Greenberg, founder of ClearerThinking.org. Thanks for taking the <a href="https://programs.clearerthinking.org/unique-traits-test/">Unique Traits Test</a> yesterday, and for exploring parts of your inner experience that most people never stop to examine.</p>
+<p>Discovering a trait can be a relief, because it finally gives a name to something you may have assumed was just you. But a name, on its own, doesn't change much. You can know exactly what to call the worry that eats your evenings, the sounds that set you off, or the tendency to avoid things that matter to you, and still find yourself living with it the same way you did before.</p>
+<p>That gap, between understanding a trait and living well with it, is the reason we started offering one-on-one coaching. I tried the coaching myself before we partnered with Overcome, the organization that provides the coaches. They are trained psychology graduates who use methods drawn from cognitive behavioral therapy, acceptance and commitment therapy, and motivational interviewing. Sessions are practical: you leave each one with something specific to try before the next.</p>
+<p>A coach can help you:</p>
+<ul>
+<li>reduce worry, overthinking, or avoidance</li>
+<li>build habits and routines that work with your mind instead of against it</li>
+<li>manage stress before it builds up</li>
+<li>explain your differences to the people around you, at home or at work</li>
+<li>make progress on a goal that a stubborn pattern has been getting in the way of</li>
+</ul>
+<p>It costs $99 a month for up to two 45-minute video sessions, which works out to under $50 a session. Your first session is usually within a week of signing up. You can cancel anytime and switch coaches anytime. And if after your first session it turns out that what you need is therapy rather than coaching, we will refund you.</p>
+<p>If you want to see what a session is actually like before deciding, <a href="https://youtu.be/oqyw8872x0E">here is a 15-minute clip from a real one</a>.</p>
+<p><b>[Button] See how coaching works</b></p>
+<p>Coaching is not therapy, and it is not meant for crises or specialist mental health treatment. But if something you saw in your report is getting in the way of your work, your goals, your relationships, or your peace of mind, I hope you will take a look.</p>
+<p>Warmly,</p>
+<p>Spencer Greenberg</p>
+<p>Founder, ClearerThinking.org</p>
+<h3>1G. Path: Last Tool Tried equals "The Value Of Your Time Calculator"</h3>
+<p><b>Subject:</b> The hours no calculator can get back</p>
+<p><b>Preview text:</b> Knowing what your hour is worth doesn't change what happens to your hours.</p>
+<p><b>Coaching link:</b> https://www.clearerthinking.org/coaching?utm_source=beehiiv&amp;utm_medium=email&amp;utm_campaign=welcome_coaching&amp;utm_content=value_of_time</p>
+<p>Hi there,</p>
+<p>This is Spencer Greenberg, founder of ClearerThinking.org. Thanks for using the <a href="https://programs.clearerthinking.org/what_is_your_time_really_worth_to_you.html">Value of Your Time calculator</a> yesterday, and for putting a real number on something most people only ever guess at.</p>
+<p>Here is the catch with that number: knowing what your hour is worth doesn't change what happens to your hours. The biggest time losses usually aren't pricing mistakes, like waiting in the wrong line or skipping a worthwhile cab. They are patterns: the evenings that vanish into things you don't actually value, the commitments you couldn't say no to, the tasks you know you should hand off but keep doing yourself. A calculator can price those hours. It can't get them back.</p>
+<p>That gap, between knowing what your time is worth and spending it that way, is the reason we started offering one-on-one coaching. I tried the coaching myself before we partnered with Overcome, the organization that provides the coaches. They are trained psychology graduates who use methods drawn from cognitive behavioral therapy, acceptance and commitment therapy, and motivational interviewing. Sessions are practical: you leave each one with something specific to try before the next.</p>
+<p>A coach can help you:</p>
+<ul>
+<li>reduce procrastination and the time lost to avoidance</li>
+<li>get better at saying no to commitments that aren't worth your hours</li>
+<li>actually follow through on delegating, not just know you should</li>
+<li>build routines that protect your highest-value time</li>
+<li>spend less time overthinking decisions you could make quickly</li>
+</ul>
+<p>It costs $99 a month for up to two 45-minute video sessions, which works out to under $50 a session. Your first session is usually within a week of signing up. You can cancel anytime and switch coaches anytime. And if after your first session it turns out that what you need is therapy rather than coaching, we will refund you.</p>
+<p>If you want to see what a session is actually like before deciding, <a href="https://youtu.be/oqyw8872x0E">here is a 15-minute clip from a real one</a>.</p>
+<p><b>[Button] See how coaching works</b></p>
+<p>Coaching is not therapy, and it is not meant for crises or specialist mental health treatment. But if the way your hours actually get spent is getting in the way of your work, your goals, your relationships, or your peace of mind, I hope you will take a look.</p>
+<p>Warmly,</p>
+<p>Spencer Greenberg</p>
+<p>Founder, ClearerThinking.org</p>
+<h3>1H. Path: All others (every other tool, and blank)</h3>
+<p><b>Subject:</b> The part our tools can't do for you</p>
+<p><b>Preview text:</b> Knowing is the easy part.</p>
+<p><b>Coaching link:</b> https://www.clearerthinking.org/coaching?utm_source=beehiiv&amp;utm_medium=email&amp;utm_campaign=welcome_coaching&amp;utm_content=other_tools</p>
+<p><b>Merge tag:</b> uses Last Tool Tried with the fallback <code>one of our tools</code>.</p>
+<p>Hi there,</p>
+<p>This is Spencer Greenberg, founder of ClearerThinking.org. Thanks for trying "{{last_tool_tried | one of our tools}}" yesterday.</p>
+<p>Our tools are good at one thing: showing you something true about yourself or about the way you think. They are much worse at the next step, which is changing what you actually do on a Tuesday afternoon. In my experience, most people don't need more information for that. They need a plan that fits their life, someone to be accountable to, and a second person to think it through with when they get stuck.</p>
+<p>That gap, between knowing something and living differently because of it, is the reason we started offering one-on-one coaching. I tried the coaching myself before we partnered with Overcome, the organization that provides the coaches. They are trained psychology graduates who use methods drawn from cognitive behavioral therapy, acceptance and commitment therapy, and motivational interviewing. Sessions are practical: you leave each one with something specific to try before the next.</p>
+<p>A coach can help you:</p>
+<ul>
+<li>reduce procrastination and avoidance on the things that matter to you</li>
+<li>build habits and routines that last</li>
+<li>manage stress before it builds up</li>
+<li>make progress on a goal that has been stuck for a while</li>
+</ul>
+<p>It costs $99 a month for up to two 45-minute video sessions, which works out to under $50 a session. Your first session is usually within a week of signing up. You can cancel anytime and switch coaches anytime. And if after your first session it turns out that what you need is therapy rather than coaching, we will refund you.</p>
+<p>If you want to see what a session is actually like before deciding, <a href="https://youtu.be/oqyw8872x0E">here is a 15-minute clip from a real one</a>.</p>
+<p><b>[Button] See how coaching works</b></p>
+<p>Coaching is not therapy, and it is not meant for crises or specialist mental health treatment. But if you want practical help turning what you learned into something you actually do differently, I hope you will take a look.</p>
+<p>Warmly,</p>
+<p>Spencer Greenberg</p>
+<p>Founder, ClearerThinking.org</p></body></html>
