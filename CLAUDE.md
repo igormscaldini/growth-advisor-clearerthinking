@@ -64,6 +64,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   email typed on the pitch page (`&ask=1` opens that form first; used by the web paywall box) matches an active
   or past_due Stripe subscription. Templates are filled and pushed with `members_only_programs.py`
   (docstring has the push commands); `gt pull` + diff first. Snippets in `newsletter_snippets/`.
+- CT+ coaching hand-off (audited 2026-10-28): the perks dashboard (programs.clearerthinking.org/dashboard.html, GT kio8ir3,
+  card text in the subprogram "CT Perks - cards", NOT in Igor's GT account) sends Navigators from a "Find Your Coach" button to
+  Overcome's own form https://signup.overcome.org.uk/clearerthinking; the GT "Coaching Matching Form" (32851) is retired. Welcome
+  series = beehiiv automation aut_fd6df732 (welcome + coaching testimonials + tier-specific check-ins). Memory note
+  `project_navigator_coach_matching_wording` has the full touchpoint map; no CT copy says "choose", the button and the
+  /coaching "Request Your Coach" heading are what imply it.
 - `stripe_cancellations_report.py`: separate scheduled email. `seo_advisor.py`: monthly SEO email,
   schedule removed Sep 2026 at Igor's request (manual `workflow_dispatch` only).
 - `site_health_check.py` (`site-health-check.yml`, daily): sends Igor ONE "Website Checks - <date>" email
