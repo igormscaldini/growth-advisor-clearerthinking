@@ -21,6 +21,7 @@ CACHE_TTL = 600  # 10 minutes
 # Payments) whenever a sponsor pays through Stripe.
 SPONSORSHIP_CHARGE_IDS: dict[str, str] = {
     "ch_3UDUoQAoBs2tgN9p0mf60Ez6": "Game Over (Jesse), $1,500 on 2026-09-08",
+    "ch_3USNTQAoBs2tgN9p0boNJlxb": "Settled (Ann Don Bosco), $1,500 on 2026-10-19 (newsletter sponsorship, manual line already counts it)",
 }
 
 REVENUE_CATEGORIES = ("subscriptions", "pdf", "cognitive", "other")
