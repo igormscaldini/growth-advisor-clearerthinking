@@ -170,6 +170,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   projects (free AI advisor, critical-thinking games) for the year-end donation email; `theories_of_change.md` is the
   source, `render.py` builds the HTML and copies the Markdown to `~/Downloads`. Donations are NOT tax-deductible
   (not a 501(c)(3), per the support page): say so in any appeal or arrange a fiscal sponsor first.
+- `reports/sponsorship_price_sheet_2026-11-02_src/`: sponsor-facing price sheet (reach, cost at $25 CPM, weekly packages,
+  availability). `fetch_newsletter_stats.py` refreshes the beehiiv block of `datapoints.json` (same-day sends grouped into one
+  edition; promos and sends under 20k recipients dropped per post first), `build.py` renders the HTML + A4 PDF (~/Downloads);
+  podcast/YouTube planning figures and the week-by-week availability are hand-edited in `datapoints.json`. Model sold since
+  Oct 2026: one sponsor per week gets both newsletter editions + a podcast read + a YouTube read (~190k impressions, ~$4.7k),
+  billed after the week with a sponsor-set cap. beehiiv gotcha: the posts endpoint's default order is not publish date, and with
+  `order_by=publish_date&direction=desc` plus `platform=email` every post after 2026-10-06 went missing; filter on `status` only and page through everything.
 - `wix/`: sources of the Wix custom-code embeds: `coaching_fab_www.html` ("Get Coaching Button", site-wide, hides on
   /coaching) and `contact_fab_coaching.html` ("Questions? Get in touch", /coaching only). Both open in a new tab.
 - `gtm/`: sources of the GTM-WGXZSLV Custom HTML tags (blog audio tracking; `coaching_fab_tools.html` = the
