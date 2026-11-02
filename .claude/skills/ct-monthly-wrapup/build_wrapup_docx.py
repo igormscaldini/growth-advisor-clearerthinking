@@ -16,6 +16,7 @@ Usage:
 Content JSON shape:
 {
   "title": "Some of Our Most Important Ideas From June, In 2 Minutes",
+  "note": "optional italic paragraph shown above the opener",
   "opener": "You survived another month ...",     # the joke; may sound confident
   "transition": "A few ideas worth keeping:",
   "bullets": [
@@ -142,6 +143,11 @@ def build(spec, out_path, assets_dir):
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p.add_run().add_picture(header, width=Inches(6.5))
+
+    # Optional note shown above the opener (e.g. when an edition goes to the whole list)
+    if spec.get("note"):
+        np_ = doc.add_paragraph()
+        np_.add_run(spec["note"]).italic = True
 
     # Opener
     doc.add_paragraph(spec["opener"])
