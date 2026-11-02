@@ -177,6 +177,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Oct 2026: one sponsor per week gets both newsletter editions + a podcast read + a YouTube read (~190k impressions, ~$4.7k),
   billed after the week with a sponsor-set cap. beehiiv gotcha: the posts endpoint's default order is not publish date, and with
   `order_by=publish_date&direction=desc` plus `platform=email` every post after 2026-10-06 went missing; filter on `status` only and page through everything.
+- `reports/sponsor_copy_2026-11-02_src/`: giving-season sponsor copy (GWWC x4 weeks, FarmKind) as Markdown sources with
+  `facts.md` (every claim's source) and `build_doc_html.py` (Markdown -> Google Doc via the Drive connector);
+  `link_docs_in_sheet.py` writes the Doc links into column G of the "Sponsorships Schedule" sheet. Copy was iterated
+  with a fresh reviewer subagent per round (Igor capped it at 5 rounds; final scores 7.5/10 both, best pieces 8).
+  House format for sponsor boxes: emoji + bold headline, 3-4 short paragraphs, closing line with the CTA links;
+  host reads: Spencer first person, honest about his own relationship (he is not a GWWC pledger), URL spoken at the end.
 - `wix/`: sources of the Wix custom-code embeds: `coaching_fab_www.html` ("Get Coaching Button", site-wide, hides on
   /coaching) and `contact_fab_coaching.html` ("Questions? Get in touch", /coaching only). Both open in a new tab.
 - `gtm/`: sources of the GTM-WGXZSLV Custom HTML tags (blog audio tracking; `coaching_fab_tools.html` = the

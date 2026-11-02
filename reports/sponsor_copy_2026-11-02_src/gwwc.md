@@ -8,7 +8,7 @@ Notes for Max: four weeks, one angle each, as agreed on October 30. Each week ha
 
 🌊 **You would wreck your shoes to pull a child from a pond. Protecting a child through a malaria season costs $7.**
 
-Peter Singer's thought experiment is more than fifty years old and still uncomfortable. Almost everyone who hears it says they would wade in. The question is why the answer changes when the child is far away and the cost is $7, the amount Malaria Consortium needs to protect one child through a malaria season.
+Peter Singer's thought experiment is more than fifty years old and still uncomfortable. The usual answer is yes, of course you wade in. The question is why the answer changes when the child is far away and the cost is $7, the amount Malaria Consortium needs to protect one child through a malaria season.
 
 Agreeing with the argument and acting on it are different things, and the 10% Pledge is a commitment device for the gap between them. It is a public commitment to give at least 10% of your income to the organisations you believe can most effectively use it to improve the lives of others. More than 11,000 people in 121 countries have taken it, and 10% and Trial Pledgers together have given more than $390 million.
 
@@ -18,15 +18,15 @@ Igor, who runs growth at Clearer Thinking, took it this spring after a one-year 
 
 ### Podcast read (Spencer, about 60 seconds)
 
-This episode is sponsored by Giving What We Can. If you've met Peter Singer's drowning child thought experiment, you've probably agreed with it. You'd ruin your shoes to pull a child out of a pond, and Singer's point is that distance shouldn't change the answer when seven dollars protects a child through a malaria season. Agreeing is the easy part. For the harder part, actually doing it, Giving What We Can offers the 10% Pledge: a public commitment to give at least 10% of your income to the organisations you believe can do the most good with it. More than eleven thousand people in 121 countries have taken it. I haven't taken it myself, but my colleague Igor did this year, after a one-year trial pledge, and he's glad he did. If 10% feels like a lot, you can try a smaller percentage first on a Trial Pledge. Go to givingwhatwecan.org/pledge. That's giving what we can dot org, slash pledge.
+This episode is sponsored by Giving What We Can. If you've met Peter Singer's drowning child thought experiment, you've probably agreed with it. You'd ruin your shoes to pull a child out of a pond, and Singer's point is that distance shouldn't change the answer. Today the distant version costs about seven dollars, which is what protects a child through a malaria season. Agreeing is the easy part. For the harder part, actually doing it, Giving What We Can offers the 10% Pledge: a public commitment to give at least 10% of your income to the organisations you believe can do the most good with it. More than eleven thousand people in 121 countries have taken it. I haven't taken it myself, but my colleague Igor did this year, after a one-year trial pledge, and he's glad he did. If 10% feels like a lot, you can try a smaller percentage first on a Trial Pledge. Go to givingwhatwecan.org/pledge. That's giving what we can dot org, slash pledge.
 
 ## Week of December 8: finding the charities that do 100 times more
 
 ### Newsletter box
 
-🔍 **Most of us pick a charity the way we pick a restaurant. Giving What We Can says the best ones can do 100 times more per dollar.**
+🔍 **The best charities can do about 100 times more good per dollar, by Giving What We Can's reckoning. Most of us still pick one the way we pick a restaurant.**
 
-A friend mentions it, the website looks trustworthy, the cause feels right. Fine for dinner. For a charity it can cost most of the good your money could do, if the best really can do 100 times more than others, as Giving What We Can's comparison suggests.
+A friend mentions it, the website looks trustworthy, the cause feels right. Fine for dinner. If the best charities really do 100 times more good per dollar, as Giving What We Can's comparison suggests, picking one that way forfeits most of what your money could do.
 
 Finding them is a research job, and Giving What We Can does not evaluate individual charities itself. It relies on independent, impact-focused evaluators (GiveWell among them), publishes which ones it relies on and why, and assesses their methods first.
 
@@ -40,29 +40,29 @@ This episode is sponsored by Giving What We Can. A lot of us pick a charity the 
 
 ### YouTube read (Spencer, about 20 seconds)
 
-This video is sponsored by Giving What We Can. Their 2026 list of the best charities rests on independent evaluators whose methods they check first. One entry: six dollars buys a malaria net that protects two people for two years. They say the best charities can do a hundred times more good per dollar than others. Link in the description.
+This video is sponsored by Giving What We Can. They say the best charities can do about a hundred times more good per dollar than the rest, and their 2026 list rests on independent evaluators whose methods they check first. One entry: six dollars buys a malaria net that protects two people for two years. The list is linked below, at givingwhatwecan.org.
 
 ## Week of December 22: the last-week gift
 
 ### Newsletter box
 
-⏳ **Yes, this is a last-minute appeal. It points at a list, not a charity.**
+⏳ **$146 gives a child every routine vaccination. One decision before the year ends is enough.**
 
-Around 14,000 children die every day from diseases we know how to prevent or cure; the figure is on Giving What We Can's 2026 charity page. So is this price from the same page: $146 covers a child's full set of routine vaccinations through New Incentives, which pays families cash incentives at government clinics in northern Nigeria when their children are vaccinated.
+Yes, this is a last-minute appeal. Both of its numbers are on Giving What We Can's 2026 charity page: around 14,000 children die every day from diseases we know how to prevent or cure, and $146 covers a child's full set of routine vaccinations through New Incentives, which pays families cash incentives at government clinics in northern Nigeria when their children are vaccinated.
 
-If your year-end gift usually goes to whoever asked last, the list is a better default. It covers global health, animal welfare and global catastrophic risks, it is built on independent evaluators' research, and Giving What We Can vets those evaluators before relying on them.
+If your year-end gift usually goes to whoever asked last, the list is a better default: nine charities and funds across global health, animal welfare and global catastrophic risks, built on the evaluator research we described two weeks ago.
 
-If you have no time to choose, the cause-area funds take one gift and spread it over the top charities in a cause, so a single decision is enough, and it is done before December 31.
+Short on time? That is what the cause-area funds are for. One gift is spread over the top charities in a cause, so a single decision covers it and the year ends with the money already where it does the most.
 
 [Give through a fund before the year ends](https://www.givingwhatwecan.org/donate/organizations) or [see the best charities of 2026](https://www.givingwhatwecan.org/best-charities-to-donate-to-2026).
 
 ### Podcast read (Spencer, about 60 seconds)
 
-This episode is sponsored by Giving What We Can. If you give in the last days of the year, it's easy to give to whoever asked last. Here's a better default. Giving What We Can keeps a short list of charities and funds, nine entries this year, covering global health, animal welfare and global catastrophic risks, and every entry rests on an independent evaluator they've vetted first. One number from the page: around fourteen thousand children die every day from diseases we already know how to prevent or cure. And one price from it: a hundred and forty-six dollars gives a child every routine vaccination through New Incentives. If you don't have time to choose a charity, give to one of their cause-area funds instead. It takes a single gift and spreads it over the top charities in that cause, so one decision covers it before the year ends. The list is linked in the show notes, at givingwhatwecan.org.
+This episode is sponsored by Giving What We Can. If you give in the last days of the year, it's easy to give to whoever asked last. Here's a better default. Giving What We Can keeps a short list of charities and funds, nine entries this year, covering global health, animal welfare and global catastrophic risks, built on independent evaluators they've vetted first. One number from the page: around fourteen thousand children die every day from diseases we already know how to prevent or cure. And one price from it: a hundred and forty-six dollars gives a child every routine vaccination through New Incentives. If you don't have time to choose a charity, give to one of their cause-area funds instead. A fund takes a single gift and spreads it over the top charities in that cause, so one decision covers it, and for a last-week giver that is the whole point. The list is linked in the show notes, at givingwhatwecan.org.
 
 ### YouTube read (Spencer, about 20 seconds)
 
-This video is sponsored by Giving What We Can. If you're giving before the year ends and have no time to research charities, give to one of their cause-area funds. Each spreads your gift over the top charities in that cause, chosen on independent evaluators' research. On their 2026 list, a hundred and forty-six dollars gives a child every routine vaccination. Link in the description.
+This video is sponsored by Giving What We Can. If you're giving before the year ends and short on time, give to one of their cause-area funds. Each spreads your gift over the top charities in that cause, chosen on independent evaluators' research. On their 2026 list, a hundred and forty-six dollars gives a child every routine vaccination. Link in the description, at givingwhatwecan.org.
 
 ## Week of December 29: the resolution that holds
 
@@ -74,16 +74,16 @@ This video is sponsored by Giving What We Can. If you're giving before the year 
 
 Resolutions fail quietly, because nobody notices when you stop. The 10% Pledge is built the other way round. You commit in public to giving at least 10% of your income to the charities you think do the most good, you join [11,397] people who made the same commitment, and each year you report what you gave. That report is the part most resolutions lack.
 
-It also answers a familiar December objection, "I will give more when I earn more". If you earn about $65,000 a year after tax, you are already in the richest 1% of people alive. The pledge turns that fact into a standing decision instead of a December one.
+It also answers a familiar December objection, "I will give more when I earn more". If you earn about $65,000 a year after tax, then by Giving What We Can's calculation you are already in the richest 1% of people alive. The pledge turns that fact into a standing decision instead of a December one.
 
-Igor from our team took the pledge this spring, after a year on a Trial Pledge, and is glad he did. Not ready for 10%? Pick a smaller percentage for a year or two on a Trial Pledge; Igor started there.
+Igor from our team took the pledge this spring, after a year on a Trial Pledge, and is glad he did. Not ready for 10%? Pick a smaller percentage for a year or two on a Trial Pledge.
 
 [Take the 10% Pledge, or start with a Trial Pledge](https://www.givingwhatwecan.org/pledge).
 
 ### Podcast read (Spencer, about 60 seconds)
 
-This episode is sponsored by Giving What We Can. Most resolutions fail quietly, because nobody notices when you stop. The 10% Pledge is a resolution with witnesses. You commit in public to give at least 10% of your income to the charities you think do the most good, alongside more than eleven thousand other people, and each year you report what you actually gave. My colleague Igor took it this spring, after a one-year trial pledge, and he's glad he did. I haven't taken it myself, so I'll just pass on one fact from their site. If you earn around sixty-five thousand dollars a year after tax, you're in the richest one percent of people on the planet. A pledge makes giving a decision you take once, not every December. And if ten percent sounds like too much, start smaller on a Trial Pledge, even at one percent. Go to givingwhatwecan.org/pledge. That's giving what we can dot org, slash pledge.
+This episode is sponsored by Giving What We Can. Most resolutions fail quietly, because nobody notices when you stop. The 10% Pledge is a resolution with witnesses. You commit in public to give at least 10% of your income to the charities you think do the most good, alongside more than eleven thousand other people, and each year you report what you actually gave. My colleague Igor took it this spring, after a one-year trial pledge, and he's glad he did. I haven't taken it myself. One fact from their site, though. If you earn around sixty-five thousand dollars a year after tax, you're in the richest one percent of people on the planet. A pledge makes giving a decision you take once, not every December. And if ten percent sounds like too much, start smaller on a Trial Pledge, even at one percent. Go to givingwhatwecan.org/pledge. That's giving what we can dot org, slash pledge.
 
 ### YouTube read (Spencer, about 20 seconds)
 
-This video is sponsored by Giving What We Can. The 10% Pledge is a resolution with witnesses, a public commitment to give at least 10% of your income to the charities you think do the most good. More than eleven thousand people have taken it, including my colleague Igor. If 10% is too much, start a Trial Pledge at 1%. Link in the description.
+This video is sponsored by Giving What We Can. The 10% Pledge is a public commitment to give 10% of your income to the charities you think do the most good. More than eleven thousand people have taken it. I haven't, but my colleague Igor did this year. If 10% is too much, start a Trial Pledge at 1%. Link below, at givingwhatwecan.org slash pledge.
