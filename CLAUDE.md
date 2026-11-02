@@ -179,9 +179,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `order_by=publish_date&direction=desc` plus `platform=email` every post after 2026-10-06 went missing; filter on `status` only and page through everything.
 - `reports/sponsor_copy_2026-11-02_src/`: giving-season sponsor copy (GWWC x4 weeks, FarmKind) as Markdown sources with
   `facts.md` (every claim's source) and `build_doc_html.py` (Markdown -> Google Doc via the Drive connector);
-  `link_docs_in_sheet.py` writes the Doc links into column G of the "Sponsorships Schedule" sheet. A 5-round reviewer
-  loop flattened the voice (Igor rejected it); the shipped version was rewritten with one idea per piece and no review
-  loop. Use a reviewer once for facts and word budgets, never as a scoring loop on creative copy.
+  `link_docs_in_sheet.py` writes the Doc links into column G of the "Sponsorships Schedule" sheet. The shipped copy is
+  the 5-round reviewed version (Igor tried an unreviewed rewrite and went back). The Drive connector cannot edit a Doc
+  body or untrash: any change means a new Doc, relinking the sheet and trashing the old one.
   House format for sponsor boxes: emoji + bold headline, 3-4 short paragraphs, closing line with the CTA links;
   host reads: Spencer first person, honest about his own relationship (he is not a GWWC pledger), URL spoken at the end.
 - `wix/`: sources of the Wix custom-code embeds: `coaching_fab_www.html` ("Get Coaching Button", site-wide, hides on
