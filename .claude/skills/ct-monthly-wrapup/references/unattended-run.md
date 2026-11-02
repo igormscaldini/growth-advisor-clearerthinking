@@ -62,7 +62,7 @@ Duplicate the previous edition instead of creating a blank post. The copy keeps 
 1. Find the template: the `Monthly Debrief - <Month>` post for the month before the target month, in any status. If there is none, take the most recent earlier edition. Ignore titles that contain `TEST`.
 2. `duplicate_post` on it. The copy is a draft.
 3. `get_post_content` (format `editor_html`) on the copy. The blocks are, in order: logo image, centered title paragraph, banner image, opening paragraph, transition paragraph, one paragraph per bullet, the Actionable Insight section, two closing paragraphs.
-4. One `edit_post_content` call:
+4. One `edit_post_content` call. Its schema is not in `learn_post_authoring` (found by probing, 2026-11-02): `operations` is a list of `{"type": "replace" | "delete" | "insertBefore" | "insertAfter" | "insert", "target": "<the block's data-id>", "content": "<html fragment>"}` (`content` is omitted only for a delete; a `replace` may hold several blocks, which is how one old bullet becomes all the new ones). The response lists the post-edit `block_hashes`, so the result can be checked without a second read. In the call:
    - replace the title, opening and transition paragraphs;
    - replace the first old bullet with all the new bullets, and delete the other old bullets;
    - replace the section with the same wrapper `<div ...>` copied verbatim (every `data-*` attribute and its `data-id`, without `data-node-hash`) around the new heading, steps and source line;
