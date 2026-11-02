@@ -1,6 +1,6 @@
 # Giving What We Can + Clearer Thinking: sponsorship copy for four weeks
 
-Notes for Max: four weeks, one angle each, as agreed on October 30. Each week has the newsletter box (top of both editions that week), the podcast read (Spencer, about 60 seconds, first minute of the episode) and, from December 8, the YouTube read (Spencer, about 20 seconds, inside the video). Spencer has not taken the pledge, so the host reads say so and point to Igor instead. Three things we need from you: tracking links (the pledge, a direct Trial Pledge link if one exists, the best-charities page and a funds or donate page); a short spoken URL for the best-charities page if one exists (the reads currently send listeners to the show notes); and the live counters (pledgers, countries) the day before each send, since the copy quotes the November 2 figures and the December 29 headline is built on the exact number.
+Notes for Max: four weeks, one angle each, as agreed on October 30. Each week has the newsletter box (top of both editions that week), the podcast read (Spencer, about 60 seconds, first minute of the episode) and the YouTube read (Spencer, about 20 seconds, inside the video). Spencer has not taken the pledge, so the host reads say so and point to Igor instead. Three things we need from you: tracking links (the pledge, a direct Trial Pledge link if one exists, the best-charities page and a funds or donate page); a short spoken URL for the best-charities page if one exists (the reads currently send listeners to the show notes); and the live counters (pledgers, countries) the day before each send, since the copy quotes the November 2 figures and the December 29 headline is built on the exact number.
 
 ## Week of November 19: the pledge, by way of the pond
 
@@ -19,6 +19,10 @@ Igor, who runs growth at Clearer Thinking, took it this spring after a one-year 
 ### Podcast read (Spencer, about 60 seconds)
 
 This episode is sponsored by Giving What We Can. If you've met Peter Singer's drowning child thought experiment, you've probably agreed with it. You'd ruin your shoes to pull a child out of a pond, and Singer's point is that distance shouldn't change the answer. Today the distant version costs about seven dollars, which is what protects a child through a malaria season. Agreeing is the easy part. For the harder part, actually doing it, Giving What We Can offers the 10% Pledge: a public commitment to give at least 10% of your income to the organisations you believe can do the most good with it. More than eleven thousand people in 121 countries have taken it. I haven't taken it myself, but my colleague Igor did this year, after a one-year trial pledge, and he's glad he did. If 10% feels like a lot, you can try a smaller percentage first on a Trial Pledge. Go to givingwhatwecan.org/pledge. That's giving what we can dot org, slash pledge.
+
+### YouTube read (Spencer, about 20 seconds)
+
+This video is sponsored by Giving What We Can. You'd wreck your shoes to save a drowning child. Distance shouldn't change the answer, and seven dollars protects a faraway child through a malaria season. Their 10% Pledge is a public commitment to give 10% of your income where you believe it does the most good. I haven't; my colleague Igor did this year. Link below: givingwhatwecan.org slash pledge.
 
 ## Week of December 8: finding the charities that do 100 times more
 
