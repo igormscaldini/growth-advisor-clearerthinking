@@ -30,5 +30,6 @@
 - Cage-free share, independent: USDA 38.8% of the U.S. table-egg laying flock in November 2023 (ers.usda.gov/data-products/charts-of-note/107564); ~48% in May 2026 (iowaegg.org/egg-research/); ~12.1% in December 2016 (USDA). No independent 2015 figure found for the 4% baseline.
 
 ## Clearer Thinking house rules
+- UTM convention for sponsor links (same as the GWWC doc, 2026-11-04): `?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking` on every sponsor-site link; third-party source links stay plain.
 - No em dashes anywhere. Evidence first, no hype, non-partisan, teaches how to think not what to think. Readers: lifelong learners (80%), science enthusiasts, 34% rationalists, ~25% effective altruists, 45% want "a greater positive impact on the world", their blocker is execution (procrastination, follow-through), they distrust hype and want sources.
 - Sponsored box format: emoji at the start of a bold headline, three or four short paragraphs with the sponsor's numbers, a closing line that carries the calls to action as links. Host reads: Spencer in first person, honest about his own relationship to the sponsor, URL spoken out at the end.

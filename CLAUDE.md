@@ -184,7 +184,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   body or untrash: any change means a new Doc, relinking the sheet and trashing the old one.
   House format for sponsor boxes: emoji + bold headline, 3-4 short paragraphs, closing line with the CTA links;
   host reads: Spencer first person, honest about his own relationship (he is not a GWWC pledger), URL spoken at the end.
-  `farmkind_cd.md` (Versions C and D, built on FarmKind's own Instagram carousel and video) is a separate Doc, not linked in the sheet.
+  `farmkind_cd.md` (Versions C and D, from FarmKind's Instagram carousel and video) and `farmkind_ef.md` (Versions E and F,
+  "animal supporter" angle, Igor's preferred frame: animal suffering, never "factory farming" or diet) are separate Docs, not linked in the sheet.
+  Every sponsor-site link carries `utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking` (Igor's rule, 2026-11-04).
   Instagram posts cannot be fetched from the sandbox (JS shell; mirror sites are blocked by the classifier): ask Igor for screenshots.
 - `wix/`: sources of the Wix custom-code embeds: `coaching_fab_www.html` ("Get Coaching Button", site-wide, hides on
   /coaching) and `contact_fab_coaching.html` ("Questions? Get in touch", /coaching only). Both open in a new tab.
