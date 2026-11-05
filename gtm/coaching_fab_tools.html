@@ -1,7 +1,7 @@
 <!--
   "Get Coaching" floating button for the tool pages (programs.clearerthinking.org).
 
-  Where it runs: GTM container GTM-WGXZSLV, Custom HTML tag "Get Coaching FAB - tools",
+  Where it runs: GTM container GTM-WGXZSLV, Custom HTML tag "Coaching Floating Button",
   trigger "All Pages" with the condition Page Hostname equals programs.clearerthinking.org.
   The same container also runs on www.clearerthinking.org, where the Wix custom embed
   "Get Coaching Button" already shows this button; the hostname condition plus the
@@ -83,7 +83,10 @@
     if (document.querySelector('.ct-coaching-fab')) return;
 
     // Path prefixes (lower-case) where the button must not appear. Empty = every page.
-    var HIDE_ON = [];
+    var HIDE_ON = [
+      // Clearer Research prize form: an academic audience, so no CT promotion on it.
+      '/unanswered-questions-in-psychology'
+    ];
     var path = location.pathname.toLowerCase();
     for (var i = 0; i < HIDE_ON.length; i++) {
       if (path.indexOf(HIDE_ON[i]) === 0) return;
