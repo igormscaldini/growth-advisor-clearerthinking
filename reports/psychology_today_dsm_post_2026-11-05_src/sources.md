@@ -24,7 +24,7 @@ DSM-I and DSM-II title pages: "Prepared by The Committee on Nomenclature and Sta
 
 Criterion A (verbatim reproduction in Wachowska & Gałecki, 2021, Table 1): "Five (or more) of the following symptoms have been present during the same 2-week period and represent a change from previous functioning; at least one of the symptoms is either (1) depressed mood or (2) loss of interest or pleasure." Criterion 4: "Insomnia or hypersomnia nearly every day." Criterion 6: "Fatigue or loss of energy nearly every day." Criterion 9 concerns recurrent thoughts of death and suicidal ideation.
 
-A person with only the first two symptoms is below the five required. The DSM category "Other specified depressive disorder" lists the example "depressive episode with insufficient symptoms" (APA DSM-5-TR fact sheet, https://www.psychiatry.org/getContentAsset/9c456082-b1ed-4a7c-84f7-7b340fa10b01/dfc3d011-8f63-43f6-9ed8-4b444333a1d0/APA-DSM5TR-OtherSpecifiedDepressiveDisorder?language=en; paraphrased in Avasthi & Grover, 2018).
+A person with only the first two symptoms is below the five required. The DSM has a category "Other specified depressive disorder"; a peer-reviewed guideline (Avasthi & Grover, 2018) paraphrases one of its examples as depressed affect plus at least one other symptom for two weeks. Correction after review: the APA DSM-5-TR fact sheet on this category only confirms that it exists and does NOT contain the phrase "depressive episode with insufficient symptoms", so the post no longer mentions the fallback label.
 
 ## DSM-5 field trials
 
