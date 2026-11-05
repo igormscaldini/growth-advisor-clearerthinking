@@ -195,6 +195,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   frame: the reader reduces animal suffering with a low-cost, low-effort action, never "factory farming" or diet) are separate Docs, not linked in the sheet.
   Every sponsor-site link carries `utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking` (Igor's rule, 2026-11-04).
   Instagram posts cannot be fetched from the sandbox (JS shell; mirror sites are blocked by the classifier): ask Igor for screenshots.
+- Psychology Today blog ("Clearer Thinking Today", 13 posts): PT's Editorial Process page bans generative AI for authoring or
+  editing contributor text (research and brainstorming are allowed) and the author certifies it per article, so never draft PT
+  prose: deliver a writing kit instead. `reports/psychology_today_dsm_post_2026-11-05_src/` has the first one (`writing_kit.md`:
+  format limits, script map, fact check, references) built from Spencer's video "Are Mental Illnesses Fake?" (`transcript.txt`).
 - `wix/`: sources of the Wix custom-code embeds: `coaching_fab_www.html` ("Get Coaching Button", site-wide, hides on
   /coaching) and `contact_fab_coaching.html` ("Questions? Get in touch", /coaching only). Both open in a new tab.
   `settled_promo_web.html` / `non_trivial_promo_web.html`: sponsor boxes for a blog post's "HTML code" embed, copied
