@@ -179,7 +179,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `order_by=publish_date&direction=desc` plus `platform=email` every post after 2026-10-06 went missing; filter on `status` only and page through everything.
 - `reports/sponsor_copy_2026-11-02_src/`: giving-season sponsor copy (GWWC x4 weeks, FarmKind) as Markdown sources with
   `facts.md` (every claim's source) and `build_doc_html.py` (Markdown -> Google Doc via the Drive connector);
-  `link_docs_in_sheet.py` writes the Doc links into column G of the "Sponsorships Schedule" sheet. The shipped copy is
+  `link_docs_in_sheet.py` writes the Doc links into column G of the "Sponsorships Schedule" sheet; do NOT run it as is:
+  since 2026-11-05 the sheet has no "Copy doc" column and G is "Youtube", so it would overwrite that column (make it
+  find the column by header first). `ace.md` = ACE Greatest Needs Fund match (runs Nov 14; Igor's own draft, lightly
+  polished, Versions A direct / B emotional, each with a podcast read; show-notes links use
+  `utm_source=podcast&utm_medium=audio`). The shipped copy is
   the 5-round reviewed version (Igor tried an unreviewed rewrite and went back). The Drive connector cannot edit a Doc
   body or untrash: any change means a new Doc, relinking the sheet and trashing the old one.
   House format for sponsor boxes: emoji + bold headline, 3-4 short paragraphs, closing line with the CTA links;
