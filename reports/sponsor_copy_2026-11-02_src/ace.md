@@ -1,0 +1,50 @@
+# Animal Charity Evaluators + Clearer Thinking: sponsorship copy (Greatest Needs Fund match, runs November 14)
+
+Notes for ACE: two versions of the newsletter box, each with its own podcast read (Spencer, about 60 seconds). Both stay close to your key messaging and send people to animalcharityevaluators.org/clearer. Every newsletter link carries our tracking parameters (utm_source=newsletter, utm_medium=email, utm_campaign=clearer_thinking) and the show-notes link uses utm_source=podcast, so the visits show up in your analytics as Clearer Thinking traffic. Three things to confirm on your side: the exact end of the match (your brief says December 7 "approx") and what donors see if the $300,000 is used up earlier; the time /clearer goes live on November 14 (the brief says 9am PDT, and the U.S. is back on standard time by then), since our email has to go out after it; and that /clearer keeps the tracking parameters when it loads. Spencer may add a sentence of his own to the read; we have not written one for him.
+
+## Version A: direct
+
+### Newsletter box
+
+**🐔 You can double your donation to help reduce animal suffering.**
+
+A donor has pledged a $300,000 matching gift to [Animal Charity Evaluators](https://animalcharityevaluators.org/?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking) (ACE), a nonprofit that uses evidence and reason to identify the charities that can help the most animals. That means every donation made from November 14 through December 7 will be matched dollar for dollar. The match applies only to gifts to ACE's [Greatest Needs Fund](https://animalcharityevaluators.org/donate/greatest-needs-fund/?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking), which ACE directs to wherever funding is most needed at the time.
+
+This is a good opportunity to make your gift go further in reducing animal suffering: a $50 donation becomes $100.
+
+Billions of animals suffer in silence, with almost no one on their side. These are the hens trapped in cages on factory farms, and the baby animals who die in the wild before they've really had the chance to live.
+
+So if you want to help animals, now is a very good time.
+
+👉 [Donate now and double your gift to help animals](https://animalcharityevaluators.org/clearer?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking)
+
+### Podcast read (Spencer, about 60 seconds)
+
+This episode is sponsored by Animal Charity Evaluators. If you want to help reduce animal suffering, right now you can double your donation. A donor has pledged a three hundred thousand dollar matching gift to Animal Charity Evaluators, or ACE, a nonprofit that uses evidence and reason to identify the charities that can help the most animals. That means every donation to ACE's Greatest Needs Fund, from November fourteenth through December seventh, is matched dollar for dollar. Give fifty dollars, and a hundred goes to the fund. The match only applies to that fund, which ACE directs to wherever funding is most needed at the time. Billions of animals suffer in silence, with almost no one on their side: hens trapped in cages on factory farms, and baby animals who die in the wild before they've really had the chance to live. So if you want to help animals, now is a very good time. Go to animalcharityevaluators.org/clearer. That's animal charity evaluators dot org, slash clearer.
+
+## Version B: emotional
+
+### Newsletter box
+
+**🐔 Billions of animals suffer in silence. Here is how you can help change that.**
+
+Billions of animals have almost no one on their side: the hens trapped in cages on factory farms, and the baby animals who die in the wild before they've really had the chance to live.
+
+For animal lovers, facing up to the scale of this suffering can be overwhelming, and so can deciding how best to help.
+
+Thanks to a donor who pledged a $300,000 matching gift, [Animal Charity Evaluators](https://animalcharityevaluators.org/?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking) (ACE) is running a campaign in which every donation to its [Greatest Needs Fund](https://animalcharityevaluators.org/donate/greatest-needs-fund/?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking) from November 14 through December 7 will be matched dollar for dollar. ACE, a nonprofit that uses evidence and reason to identify the charities that can help the most animals, directs the fund to wherever funding is most needed at the time.
+
+If you care about animals and aren't sure where to donate this year, this is a good opportunity to make your gift go further in reducing animal suffering.
+
+👉 [Donate now and help reduce animal suffering](https://animalcharityevaluators.org/clearer?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking)
+
+### Podcast read (Spencer, about 60 seconds)
+
+This episode is sponsored by Animal Charity Evaluators. Billions of animals suffer in silence, with almost no one on their side. Hens trapped in cages on factory farms. Baby animals who die in the wild before they've really had the chance to live. If you care about animals, facing up to the scale of that suffering can be overwhelming, and so can deciding how best to help. Animal Charity Evaluators, or ACE, is a nonprofit that uses evidence and reason to identify the charities that can help the most animals, and its Greatest Needs Fund goes to wherever funding is most needed at the time. Thanks to a donor who pledged a three hundred thousand dollar matching gift, every donation to that fund from November fourteenth through December seventh is matched dollar for dollar. So if you care about animals and aren't sure where to donate this year, this is a good opportunity to make your gift go further. Go to animalcharityevaluators.org/clearer. That's animal charity evaluators dot org, slash clearer.
+
+## Tracked links
+
+- Donate page (the call to action in both boxes): [https://animalcharityevaluators.org/clearer?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking](https://animalcharityevaluators.org/clearer?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking)
+- Greatest Needs Fund page: [https://animalcharityevaluators.org/donate/greatest-needs-fund/?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking](https://animalcharityevaluators.org/donate/greatest-needs-fund/?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking)
+- ACE homepage: [https://animalcharityevaluators.org/?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking](https://animalcharityevaluators.org/?utm_source=newsletter&utm_medium=email&utm_campaign=clearer_thinking)
+- Podcast show notes: [https://animalcharityevaluators.org/clearer?utm_source=podcast&utm_medium=audio&utm_campaign=clearer_thinking](https://animalcharityevaluators.org/clearer?utm_source=podcast&utm_medium=audio&utm_campaign=clearer_thinking)
