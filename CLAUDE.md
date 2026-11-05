@@ -195,6 +195,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Instagram posts cannot be fetched from the sandbox (JS shell; mirror sites are blocked by the classifier): ask Igor for screenshots.
 - `wix/`: sources of the Wix custom-code embeds: `coaching_fab_www.html` ("Get Coaching Button", site-wide, hides on
   /coaching) and `contact_fab_coaching.html` ("Questions? Get in touch", /coaching only). Both open in a new tab.
+  `settled_promo_web.html` / `non_trivial_promo_web.html`: sponsor boxes for a blog post's "HTML code" embed, copied
+  from the beehiiv draft (web links tagged `utm_source=website&utm_medium=referral`). New Wix posts and beehiiv drafts
+  are duplicated from the previous ones, so they inherit the last sponsor's box and links: check both. Blog HTML embeds
+  use the custom width/height on desktop only; on phones Wix fits the height to the content (measured 2026-11-05).
 - `gtm/`: sources of the GTM-WGXZSLV Custom HTML tags (blog audio tracking; `coaching_fab_tools.html` = the
   "Get Coaching" floating button for programs.* pages, trigger scoped by Page Hostname, assessment in
   `reports/coaching_fab_tools_assessment_2026-10-19.html`). The container is SHARED by www (Wix) and programs.*.
