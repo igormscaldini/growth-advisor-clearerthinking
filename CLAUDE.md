@@ -163,8 +163,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `reports/uqp_daily_runs_src/build.py`; submissions-over-time chart (daily + cumulative vs the 40 target):
   `submissions_timeline.py` beside it. Reddit rules/sizes verified 2026-10-15 via a Redlib mirror (reddit.com
   blocks fetches); ranked list and bans are in the memory note `project_unanswered_questions_psychology_prize`.
-  Form deadline fixed to Nov 10 on 2026-10-21 (source copy in `guidedtrack/`). Deadline extended to Dec 31, 2026 (Igor,
-  2026-11-05); the live form still said Nov 10 in three places that day: check it before any new promotion. University newsletter outreach sheet
+  Form deadline fixed to Nov 10 on 2026-10-21 (source copy in `guidedtrack/`). Deadline is Dec 1, 2026 (Igor, 2026-11-05,
+  replacing the Dec 31 he gave earlier that day); the live form was updated to Dec 1 in all three places (banner, Judging
+  paragraph, rules timeline) and verified in the compiled run. The outreach email and the ACX draft predate it. University newsletter outreach sheet
   (52 verified contacts, tiered, one draft each): `reports/uqp_newsletter_outreach_src/build_sheet.py` builds it from the
   research agents' JSON + an overrides file (both scratchpad-only, they hold named people's emails); sheet id in the memory note.
 - `reports/year_end_appeal_theories_of_change_2026-10-19_src/`: donor-facing theories of change for the two 2027
