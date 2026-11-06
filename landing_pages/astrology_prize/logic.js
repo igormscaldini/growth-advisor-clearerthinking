@@ -241,9 +241,9 @@
 
   /* ---------- chart wheel (decorative, generated; not a real person's chart) ---------- */
 
-  var SIGNS = '♈♉♊♋♌♍♎♏♐♑♒♓';
-  var PLANETS = '☉☽☿♀♂♃♄♅♆♇';
-  var TEXT_STYLE = '︎';   // asks for the text glyph, not the emoji
+  var SIGNS = '\u2648\u2649\u264A\u264B\u264C\u264D\u264E\u264F\u2650\u2651\u2652\u2653';
+  var PLANETS = '\u2609\u263D\u263F\u2640\u2642\u2643\u2644\u2645\u2646\u2647';
+  var TEXT_STYLE = '\uFE0E';   // asks for the text glyph, not the emoji
   var GLYPH_FONT = "'Apple Symbols','Segoe UI Symbol','Noto Sans Symbols2','Noto Sans Symbols','DejaVu Sans',sans-serif";
 
   function wheelSVG(seed, opts) {
