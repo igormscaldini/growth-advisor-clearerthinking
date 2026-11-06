@@ -408,7 +408,11 @@ def build_datapoints(raw_dir):
                        "by_touch": dict(Counter(lbl for p in purchases for lbl in p["touches"])),
                        "by_page": dict(Counter("both" if len(p["pages"]) == 2 else (p["pages"][0] if p["pages"] else "none found") for p in purchases)),
                        "by_tier_matched": dict(Counter(p["tier"] for p in purchases)),
-                       "coincidence_rate_pct": base, "coincidence_pairs": n_pairs, "rows": purchases}
+                       "coincidence_rate_pct": base, "coincidence_pairs": n_pairs, "rows": purchases,
+                       # simplest independent read: the GA4 session channel of EVERY thank-you-page event (no fingerprint join)
+                       "all_events_by_session_channel": dict(Counter(
+                           source_group(*(e["sessionSourceMedium"].split(" / ") + [""])[:2], e["sessionManualCampaignName"]) for e in events)),
+                       "all_events_by_session_campaign": dict(Counter(e["sessionManualCampaignName"] for e in events))}
 
     # ---------- Cognitive Assessment
     def cog_group(r):
