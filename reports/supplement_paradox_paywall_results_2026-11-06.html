@@ -1,0 +1,193 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supplement Paradox paywall results</title><style>
+:root{--bg:#fcfcfb;--ink:#0b0b0b;--ink2:#52514e;--muted:#8a897f;--line:#e6e5e0;--card:#ffffff;--accent:#0b6fd3;--accent2:#eb6834;--accent-soft:#eaf2fd;--ctx:#a9b0bb}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8d8c84;--line:#33332f;--card:#222221;--accent:#4a95ee;--accent2:#e2703f;--accent-soft:#1f2d3f;--ctx:#6b7079}}
+:root[data-theme="dark"]{--bg:#1a1a19;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8d8c84;--line:#33332f;--card:#222221;--accent:#4a95ee;--accent2:#e2703f;--accent-soft:#1f2d3f;--ctx:#6b7079}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+main{max-width:920px;margin:0 auto;padding:40px 16px 80px}h1{font-size:30px;line-height:1.2;margin:0 0 6px}h2{font-size:22px;margin:48px 0 12px;padding-top:12px;border-top:1px solid var(--line)}h3{font-size:18px;margin:28px 0 8px}
+.sub{color:var(--ink2);margin:0 0 24px}.lead{font-size:18px;margin:0}.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:14px 0}.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}.kpi .v{font-size:26px;font-weight:600;line-height:1.1}.kpi .l{color:var(--ink2);font-size:13px;margin-top:4px}
+.chart{width:100%;height:auto;display:block;margin:10px 0 4px}.bar{fill:var(--accent)}.ctx{fill:var(--ctx)}.lbl{fill:var(--ink2);font-size:13px}.lbl.hot,.val.hot{fill:var(--ink);font-weight:600}.lbl.small{font-size:11px}.val{fill:var(--ink);font-size:13px}.axis{stroke:var(--line);stroke-width:1}.gate{stroke:var(--accent2);stroke-width:2;stroke-dasharray:6 5}.gate-lbl{fill:var(--ink2);font-size:12px;font-weight:600}
+.cap{color:var(--muted);font-size:13px;margin:0 0 6px}table{border-collapse:collapse;width:100%;margin:10px 0;font-size:14px}th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--ink2);font-weight:600}
+table.num td:not(:first-child),table.num th:not(:first-child){text-align:right}tr.tot td{font-weight:600;border-bottom:0}
+table.funnel td.n{text-align:right;font-weight:600;font-size:16px;white-space:nowrap;font-variant-numeric:tabular-nums}table.funnel td.note{color:var(--ink2)}table.funnel tr.subrow td:first-child{padding-left:28px;color:var(--ink2)}table.funnel tr.subrow td.n{font-weight:400;font-size:14px}
+.scroll{overflow-x:auto}ul,ol{padding-left:22px}li{margin:6px 0}.warn{border-left:4px solid var(--accent2);padding-left:14px}
+blockquote{margin:10px 0;padding:8px 14px;border-left:3px solid var(--line);color:var(--ink2)}
+</style></head><body><main>
+<h1>The Supplement Paradox paywall: what it earned and what it cost</h1>
+<p class="sub">Clearer Thinking's first members-only cut inside a newsletter. Data from the first send (2026-10-16 12:57 UTC) to 2026-11-06 17:40 UTC, 21 days. Report built 2026-11-06 02:41pm.</p>
+
+<div class="card"><p class="lead"><b>Short answer.</b> The paywall brought in 5 new $9 a month Supporters ($45 of monthly recurring revenue) from 80,249 opens, and all 5 are still paying three weeks later. I can find no measurable damage: unsubscribes per opener were inside the range of the four previous editions, ratings were in the usual range, and one reader complained in writing. It is a small, real, low-risk result. It is not a growth lever at this volume, and the reason is specific: about 1 opener in 1,000 clicked through to the offer, while 1 in 19 of the non-members who did click went on to pay.</p></div>
+
+<div class="kpis">
+<div class="kpi"><div class="v">5</div><div class="l">new paying members, all on the $9 Supporter tier (4 from the email, 1 from the web article)</div></div>
+<div class="kpi"><div class="v">$45</div><div class="l">new monthly recurring revenue, against $5,384 total today</div></div>
+<div class="kpi"><div class="v">84 + 15</div><div class="l">people who reached the offer page: from the email + from the web article</div></div>
+<div class="kpi"><div class="v">5.2%</div><div class="l">of non-member email visitors paid (4 of 77; 95% interval 2% to 13%)</div></div>
+<div class="kpi"><div class="v">0.006%</div><div class="l">of openers paid (5 of 80,249)</div></div>
+</div>
+
+<h2>1. The funnel, step by step</h2>
+<p class="cap">Three systems measured it independently: beehiiv (clicks on the paywall card, one link per subscriber), GuidedTrack (the offer page only records a visit when a real browser runs it) and Stripe (checkouts and payments). The steps span four orders of magnitude, so this is a table, not a bar chart.</p>
+<div class="scroll"><table class='funnel'><tbody>
+<tr class=''><td>Emails delivered, four sends</td><td class='n'>679,613</td><td class='note'></td></tr>
+<tr class=''><td>Opened the email (unique opens)</td><td class='n'>80,249</td><td class='note'>11.7% of recipients</td></tr>
+<tr class=''><td>Clicked the paywall card, bot-filtered (beehiiv)</td><td class='n'>82</td><td class='note'>0.10% of openers</td></tr>
+<tr class=''><td>Loaded the offer page from the email (GuidedTrack)</td><td class='n'>84</td><td class='note'>0.10% of openers</td></tr>
+<tr class='subrow'><td>of them, already members and let straight in</td><td class='n'>7</td><td class='note'></td></tr>
+<tr class='subrow'><td>of them, non-members who saw the offer</td><td class='n'>77</td><td class='note'></td></tr>
+<tr class=''><td>Loaded the offer page from the web article</td><td class='n'>15</td><td class='note'>207 Google Analytics users viewed the web version</td></tr>
+<tr class=''><td>Opened Stripe checkout</td><td class='n'>7</td><td class='note'>7.8% of non-member visitors</td></tr>
+<tr class=''><td>Paid ($9 a month Supporter)</td><td class='n'>5</td><td class='note'>71% of checkouts; 4 from the email, 1 from the web</td></tr>
+<tr class=''><td>Still paying on 2026-11-06</td><td class='n'>5</td><td class='note'>none cancelled or refunded</td></tr>
+</tbody></table></div>
+<ul>
+<li><b>The leak is between the email and the offer page.</b> Once a non-member reached the offer, the page did its job: 7 of 90 opened checkout and 5 of those 7 paid. Ten US metro dailies in the Lenfest data saw 5% (mobile) to 10% (desktop) of offer-page visitors complete a purchase, so 5.2% is ordinary, not weak.</li>
+<li><b>The paywall card was still one of the most clicked things in the email.</b> It drew 82 human clicks, against 137 on the "read online" title link and 3 on the Clearer Thinking Plus line in the footer. The full article sits in the email, so few readers click anything; the cut came at the last section ("What should you do?"), after most of the text.</li>
+<li><b>How many readers actually saw the cut is unknown.</b> Email has no scroll tracking, so "0.10% of openers clicked" mixes two things I cannot separate: readers who never reached the end, and readers who reached it and declined.</li>
+<li><b>Existing members:</b> 7 were recognised by their email link and let straight in, and 2 more got in from the web version by typing their email. That is at most 9 of the 78 members at the time, so the members-only section was opened by roughly one member in 9.</li>
+</ul>
+
+<h2>2. Where the sales came from</h2>
+<div class="scroll"><table class='num'><thead><tr><th>Send</th><th>Recipients</th><th>Unique opens</th><th>Open rate</th><th>Paywall clicks (human)</th><th>Paid</th><th>Unsubscribes</th><th>Spam reports</th></tr></thead><tbody>
+<tr><td>Oct 16, first send (part of the whole list)</td><td>125,521</td><td>11,847</td><td>9.4%</td><td>16</td><td>0</td><td>182</td><td>7</td></tr>
+<tr><td>Oct 16, engaged subscribers</td><td>259,406</td><td>53,286</td><td>20.5%</td><td>55</td><td>3</td><td>575</td><td>4</td></tr>
+<tr><td>Oct 19, resend to frequent openers who had not opened</td><td>47,997</td><td>8,631</td><td>18.0%</td><td>9</td><td>1</td><td>105</td><td>1</td></tr>
+<tr><td>Oct 30, rest of the list (not sent it before)</td><td>252,169</td><td>6,485</td><td>2.6%</td><td>2</td><td>0</td><td>492</td><td>49</td></tr>
+<tr><td>Web version of the article (box under the cut)</td><td></td><td></td><td></td><td>15 visits</td><td>1</td><td></td><td></td></tr>
+<tr class='tot'><td>Total</td><td>685,093</td><td>80,249</td><td>11.7%</td><td>82 + 15</td><td>5</td><td>1,354</td><td>61</td></tr>
+</tbody></table></div>
+<p>The edition went out in four sends: a first one to part of the whole list, the engaged segment a few hours later (both with a subject-line test), a resend on Oct 19 to frequent openers who had not opened, and on Oct 30 everyone who had not been sent it yet. That last group is 252,169 subscribers outside the engaged segment, almost all with under 1% opens in six months: it produced 2 human paywall clicks, 0 sales and 49 of the edition's 61 spam reports. That is a list-hygiene matter, not a paywall one, but it means the paywall result really comes from the 73,764 opens of the first three sends.</p>
+
+<h2>3. Was it more than the usual trickle of Supporters?</h2>
+<p class="cap">New Supporter subscriptions per week, counted in 7-day blocks from the moment of the first send. Team test subscriptions (cancelled the same day) are excluded. The gray bar just before the send is the Oct 14 sign-up made through the offer page during testing (section 7).</p>
+<svg class="chart" viewBox="0 0 640 190" role="img" aria-label="Supporter sign-ups per week">
+<line x1="526.7" x2="526.7" y1="16" y2="150" class="gate"/>
+<text x="520.7" y="26" text-anchor="end" class="gate-lbl">paywall sent, Oct 16</text>
+<text x="27.2" y="174" text-anchor="middle" class="lbl small">Jul</text>
+<rect x="85.4" y="126.0" width="21.4" height="24.0" rx="4" class="ctx"><title>Week from 2026-07-17: 1 sign-up</title></rect>
+<text x="96.1" y="120.0" text-anchor="middle" class="val">1</text>
+<rect x="154.3" y="126.0" width="21.4" height="24.0" rx="4" class="ctx"><title>Week from 2026-07-31: 1 sign-up</title></rect>
+<text x="165.0" y="120.0" text-anchor="middle" class="val">1</text>
+<rect x="188.8" y="102.0" width="21.4" height="48.0" rx="4" class="ctx"><title>Week from 2026-08-07: 2 sign-ups</title></rect>
+<text x="199.4" y="96.0" text-anchor="middle" class="val">2</text>
+<text x="199.4" y="174" text-anchor="middle" class="lbl small">Aug</text>
+<text x="337.2" y="174" text-anchor="middle" class="lbl small">Sep</text>
+<rect x="395.4" y="126.0" width="21.4" height="24.0" rx="4" class="ctx"><title>Week from 2026-09-18: 1 sign-up</title></rect>
+<text x="406.1" y="120.0" text-anchor="middle" class="val">1</text>
+<text x="475.0" y="174" text-anchor="middle" class="lbl small">Oct</text>
+<rect x="498.8" y="126.0" width="21.4" height="24.0" rx="4" class="ctx"><title>Week from 2026-10-09: 1 sign-up</title></rect>
+<text x="509.4" y="120.0" text-anchor="middle" class="val">1</text>
+<rect x="533.2" y="30.0" width="21.4" height="120.0" rx="4" class="bar"><title>Week from 2026-10-16: 5 sign-ups</title></rect>
+<text x="543.9" y="24.0" text-anchor="middle" class="val">5</text>
+<line x1="10" x2="630" y1="150.5" y2="150.5" class="axis"/>
+</svg>
+<p>Yes. In the 103 days before the paywall existed (2026-07-01 to 2026-10-12) Clearer Thinking gained 5 Supporters, one every three weeks. The 21 days since the send brought 5, every one of them through the paywall page: 4.9 times the weekly rate, and unlikely to be chance (one-sided p = 0.017, exact test on two Poisson rates). No one who clicked the paywall link bought a higher tier instead.</p>
+<p>The shape matters as much as the total: all 5 arrived in the first week and the next 2 weeks brought 0. A paywalled article sells when it lands and then stops, so the yield is per article, not per month.</p>
+
+<h2>4. Did it cost anything?</h2>
+<h3>Unsubscribes: no sign of it</h3>
+<p class="cap">Unsubscribes per unique opener, the Oct 16 send to the "Engaged Subs" segment against the four previous article editions sent to the same segment. Per opener, not per recipient, because the delivery problem that week changed how many people saw the email at all.</p>
+<svg class="chart" viewBox="0 0 640 168" role="img" aria-label="bar chart">
+<text x="250" y="19" text-anchor="end" class="lbl">Sep 18, happiness findings</text>
+<rect x="260" y="4" width="316.0" height="22" rx="4" class="ctx"><title>Sep 18, happiness findings: 1.72%</title></rect>
+<text x="584.0" y="19" class="val">1.72%</text>
+<text x="250" y="51" text-anchor="end" class="lbl">Sep 24, career advice</text>
+<rect x="260" y="36" width="233.2" height="22" rx="4" class="ctx"><title>Sep 24, career advice: 1.27%</title></rect>
+<text x="501.2" y="51" class="val">1.27%</text>
+<text x="250" y="83" text-anchor="end" class="lbl">Sep 29, unanswerable questions</text>
+<rect x="260" y="68" width="231.2" height="22" rx="4" class="ctx"><title>Sep 29, unanswerable questions: 1.26%</title></rect>
+<text x="499.2" y="83" class="val">1.26%</text>
+<text x="250" y="115" text-anchor="end" class="lbl">Oct 8, cognitive biases</text>
+<rect x="260" y="100" width="186.9" height="22" rx="4" class="ctx"><title>Oct 8, cognitive biases: 1.02%</title></rect>
+<text x="454.9" y="115" class="val">1.02%</text>
+<text x="250" y="147" text-anchor="end" class="lbl hot">Oct 16, Supplement Paradox</text>
+<rect x="260" y="132" width="198.2" height="22" rx="4" class="bar"><title>Oct 16, Supplement Paradox: 1.08%</title></rect>
+<text x="466.2" y="147" class="val hot">1.08%</text>
+</svg>
+<p>The paywalled edition lost 1.08% of its openers (575 of 53,286); the four before it lost between 1.02% and 1.72%. It sits 0.8 standard deviations below their average, well inside normal variation. Spam reports on that send were 4, against 13 to 23 on the earlier editions. Across all four sends the edition had 1,354 unsubscribes (0.20% of delivered).</p>
+
+<h3>Ratings: in the usual range, and noisy</h3>
+<p class="cap">Share of "Subpar" or "Bad" ratings per article, all rating-box runs since August. Email link scanners click every rating once, so small differences mean nothing.</p>
+<svg class="chart" viewBox="0 0 640 360" role="img" aria-label="bar chart">
+<text x="290" y="19" text-anchor="end" class="lbl">Between you and reality (n=56)</text>
+<rect x="300" y="4" width="276.0" height="22" rx="4" class="ctx"><title>Between you and reality (n=56): 29%</title></rect>
+<text x="584.0" y="19" class="val">29%</text>
+<text x="290" y="51" text-anchor="end" class="lbl">Reason more complexly (n=74)</text>
+<rect x="300" y="36" width="260.6" height="22" rx="4" class="ctx"><title>Reason more complexly (n=74): 27%</title></rect>
+<text x="568.6" y="51" class="val">27%</text>
+<text x="290" y="83" text-anchor="end" class="lbl">Capitalists and Marxists (n=66)</text>
+<rect x="300" y="68" width="219.1" height="22" rx="4" class="ctx"><title>Capitalists and Marxists (n=66): 23%</title></rect>
+<text x="527.1" y="83" class="val">23%</text>
+<text x="290" y="115" text-anchor="end" class="lbl hot">The Supplement Paradox (n=44)</text>
+<rect x="300" y="100" width="219.1" height="22" rx="4" class="bar"><title>The Supplement Paradox (n=44): 23%</title></rect>
+<text x="527.1" y="115" class="val hot">23%</text>
+<text x="290" y="147" text-anchor="end" class="lbl">Cognitive biases (n=54)</text>
+<rect x="300" y="132" width="196.9" height="22" rx="4" class="ctx"><title>Cognitive biases (n=54): 20%</title></rect>
+<text x="504.9" y="147" class="val">20%</text>
+<text x="290" y="179" text-anchor="end" class="lbl">Unanswerable questions (n=36)</text>
+<rect x="300" y="164" width="161.2" height="22" rx="4" class="ctx"><title>Unanswerable questions (n=36): 17%</title></rect>
+<text x="469.2" y="179" class="val">17%</text>
+<text x="290" y="211" text-anchor="end" class="lbl">Steelman people you disagree with (n=63)</text>
+<rect x="300" y="196" width="153.4" height="22" rx="4" class="ctx"><title>Steelman people you disagree with (n=63): 16%</title></rect>
+<text x="461.4" y="211" class="val">16%</text>
+<text x="290" y="243" text-anchor="end" class="lbl">Career advice (n=26)</text>
+<rect x="300" y="228" width="148.6" height="22" rx="4" class="ctx"><title>Career advice (n=26): 15%</title></rect>
+<text x="456.6" y="243" class="val">15%</text>
+<text x="290" y="275" text-anchor="end" class="lbl">Meditation myths (n=133)</text>
+<rect x="300" y="260" width="138.0" height="22" rx="4" class="ctx"><title>Meditation myths (n=133): 14%</title></rect>
+<text x="446.0" y="275" class="val">14%</text>
+<text x="290" y="307" text-anchor="end" class="lbl">Psychology words (n=141)</text>
+<rect x="300" y="292" width="55.0" height="22" rx="4" class="ctx"><title>Psychology words (n=141): 6%</title></rect>
+<text x="363.0" y="307" class="val">6%</text>
+<text x="290" y="339" text-anchor="end" class="lbl">Happiness findings (n=76)</text>
+<rect x="300" y="324" width="51.1" height="22" rx="4" class="ctx"><title>Happiness findings (n=76): 5%</title></rect>
+<text x="359.1" y="339" class="val">5%</text>
+</svg>
+<p>10 of 44 ratings were low (23%; 95% interval 13% to 37%), against 16% across the other articles, which range from 5% to 29%. 3 of the other 10 articles scored the same or worse without a paywall.</p>
+
+<h3>What readers wrote</h3>
+<ul>
+<li>9 readers left a written comment on this article's rating page. None mentions the paywall: the critical ones argue with the content (vitamin D, the choice of trials, the AI image).</li>
+<li>1 comment about paywalls has appeared on any article since the send, left on 2026-10-23 under the next edition (the steelman article, which had no paywall of its own):
+<blockquote>"Paywalling mid article makes me not want to open your emails" (rated Bad)</blockquote></li>
+<li>Of the replies to the sends that reached Igor's mailbox, 3 were written by people (2 readers: one disputes the vitamin D section, one calls the Oct 30 send spam). None mentions the paywall. Replies go to info@clearerthinking.org, so there may be others I cannot see.</li>
+</ul>
+<p class="warn">The March 2026 audience survey (n = 539) listed "paywalls seen as off-mission" among readers' frictions. One written complaint from about 74k opens is a mild reaction to a first paywall, but one edition cannot show what a paywall every week would do to goodwill.</p>
+
+<h2>5. How it compares with paywalls elsewhere</h2>
+<p>The benchmark report of Sep 23 found that news sites convert a median of 0.22% to 0.54% of the readers their paywall stops in a month, and the top tenth of publishers 1.3%. Clearer Thinking's 5 sales are 0.006% of openers. The two are not the same measure (an opener is not a reader stopped by a wall, and most openers never reach the end of a long email), so the fair statement is narrow: if even one opener in ten reached the cut, the conversion per reader stopped was about 0.06%, below the news median; if it was one in fifty, about 0.31%, in line with it. Those two ratios are illustrations, not measurements.</p>
+
+<h2>6. What this test cannot tell you</h2>
+<ul>
+<li><b>Five sales is a small sample.</b> The true conversion of offer-page visitors could be anywhere from 2% to 13%. A second paywalled article could plausibly sell 2 or 10.</li>
+<li><b>Retention is unknown.</b> The first renewals fall between Nov 16 and Nov 22. Past Supporters churned at about 4 to 5% a month (measured Sep 14), but those were supporters by choice, not readers who paid to finish one article.</li>
+<li><b>There was no control group.</b> Unsubscribes, ratings and comments are the only goodwill measures, compared against earlier editions on different topics.</li>
+<li><b>The week was unusual.</b> Opens were about a quarter below normal for the engaged segment (20.5% against 24.8% to 30.4% before) because of the beehiiv delivery bug, so fewer people than usual had the chance to hit the paywall. Opens happen before a reader can see the cut, so the paywall did not cause that.</li>
+</ul>
+
+<h2>7. Loose ends found while measuring</h2>
+<ul>
+<li><b>"Already a member?" confused some readers.</b> 9 of the 77 non-member email visitors typed an address into that box and were told no membership was found. The typed addresses are not stored, so I cannot prove why, but the likeliest reading is that "the email you subscribed with" sounds like the newsletter subscription. Rewording it to "paying member" is a one-line change.</li>
+<li><b>One buyer's first view of the article after paying was the locked page</b> (Oct 19, no access key in the address); they got in about 40 seconds later by typing their email. The other four went straight in. Inferred from timestamps in the two page logs, so the cause is unknown; worth a test purchase on a phone.</li>
+<li><b>One Supporter subscription from Oct 14, two days before the send, is still active.</b> It came through the offer page during testing and is not counted above. If it was a team test, it should be cancelled and refunded.</li>
+<li><b>The Stripe source tag is being overwritten.</b> On 4 of the 7 checkouts the <code>client_reference_id</code> that should name the source (email or web) held an analytics tracking id instead (it starts with "ga-", most likely written by the Stripe-to-GA4 purchase tracking), so this report attributes sales by matching email hashes and timestamps. Fine for five sales, fragile for fifty.</li>
+</ul>
+
+<h2>8. Verdict and next steps</h2>
+<div class="card"><p><b>Verdict: worth repeating, on evidence that it is safe, not on evidence that it is lucrative.</b> One paywalled article added 5 members to a base of 91 (the goal is 100) at no visible cost in unsubscribes or ratings. At $45 a month it does not move the revenue goal, and it will not until many more readers reach the offer page.</p></div>
+<ol>
+<li><b>Run it again and make offer-page visits per opener the number to beat.</b> This edition scored 0.10%. The offer page converts normally, so the next test should change what happens before it: say near the top what members get at the end, and consider cutting earlier than the final section.</li>
+<li><b>Check the five on Nov 23.</b> If most renew, a paywalled article is worth roughly 5 long-lived Supporters; if most cancel, it is worth about $45 once.</li>
+<li><b>Fix the four loose ends above before the next one</b>, the member box wording and the source tag first.</li>
+</ol>
+
+<h2>How this was checked</h2>
+<ul>
+<li>The headline counts were recounted from a second source each: sales from Stripe's subscription list (5, same as the 5 completed checkouts), email visitors from beehiiv's bot-filtered clicks (82, against 84 in GuidedTrack; 79 people appear in both), all visitors from Google Analytics (91 users, against 99).</li>
+<li>Every one of the 84 email visitors is also among beehiiv's 274 raw clickers; the other 192 raw clicks are link scanners that never ran the page.</li>
+<li>58 visits to the offer page before the first send are team tests and are excluded; no team address appears after it.</li>
+<li>The analysis code is unit-tested on hand-worked cases and on two synthetic data sets built to give a known null result and a known positive one (tests/test_supplement_paradox_paywall.py).</li>
+</ul>
+<p class="cap">Sources: beehiiv API (per-post stats and per-link clicks), GuidedTrack run exports (programs 38912, 38913, 38551), Stripe (Checkout Sessions of the paywall Payment Link, subscriptions since Jul 1), Google Analytics 4, Gmail. Built by reports/supplement_paradox_paywall_results_2026-11-06_src/.</p>
+</main></body></html>

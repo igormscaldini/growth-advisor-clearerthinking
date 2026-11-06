@@ -136,6 +136,8 @@ def main() -> None:
     save("stripe_sessions.json", sessions)
     save("stripe_subscriptions.json", subs)
     save("ga4.json", ga4_pull())
+    # Where the goals stand today (GOALS.md: 100 active subscribers, $5,000 MRR), dashboard definitions.
+    save("context.json", {"active_subscribers": dl.stripe_active_subscriber_count(), "mrr_usd": round(dl.stripe_current_mrr(), 2)})
 
 
 if __name__ == "__main__":

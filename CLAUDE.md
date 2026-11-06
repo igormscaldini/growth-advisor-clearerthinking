@@ -223,6 +223,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   ~65% in the week of 2026-09-28, desktop flat). The Jun 2026 "TG @SEO_LINKK_ORDER" referring domains are link-dump
   spam, not CT's: no disavow. All other tool pages share `src/templates/program.liquid` (one footer link = ~150 internal
   links). PageSpeed Insights API quota is exhausted on the shared project: run `npx -y lighthouse@12` locally.
+- `reports/supplement_paradox_paywall_results_2026-11-06_src/`: results of the first newsletter paywall (memory note
+  `project_supplement_paradox_paywall_results`): `fetch_data.py` -> `data/` (gitignored: email hashes, reader feedback),
+  `analysis.py` -> `datapoints.json`, `build_report.py` -> the HTML, `cross_check.py` = independent recount. The funnel joins
+  beehiiv per-link clicks (the paywall link carries each reader's email hash), GT 38912 runs and the Stripe Checkout Sessions of
+  the Payment Link (`Session.list(payment_link=...)`; one session per open of the link). beehiiv gotcha: the posts LIST endpoint
+  truncates `stats.clicks` (25 to 37 rows where the single-post endpoint returns 52 to 349), so pull per-link clicks one post at a
+  time. On the pitch page the Stripe `client_reference_id` is overwritten with a `ga-...` id on most checkouts.
 - `reports/results_paywall_plan_2026-10-26_src/`: results-paywall plan for the UPT, Unique Traits and Rationality tests
   (memory note `project_results_paywall_plan_2026_10`): `datapoints.json` holds every number, `build_report.py` renders
   the HTML. Awaiting Igor's approval; nothing on the tools was changed.

@@ -33,10 +33,10 @@ DATAPOINTS = HERE / "datapoints.json"
 # First real send (post 89bcdaf5); everything before it on the pitch page is team testing.
 SEND_START = datetime(2026, 10, 16, 12, 57, tzinfo=timezone.utc)
 SP_POSTS = {  # the four sends of the edition, in order
-    "post_89bcdaf5-bbcc-4e61-ba15-1024e66142c2": "Oct 16, slice of the whole list (subject-line test)",
+    "post_89bcdaf5-bbcc-4e61-ba15-1024e66142c2": "Oct 16, first send (part of the whole list)",
     "post_49066aa7-3fc8-413b-88d7-3aae0e96eb53": "Oct 16, engaged subscribers",
     "post_e18bfc70-d0cc-4f8b-8b7a-0f2a7ba45fe9": "Oct 19, resend to frequent openers who had not opened",
-    "post_3aacc4ea-e275-428b-a66e-1de88b891a5b": "Oct 30, rest of the list (no opens in 6 months)",
+    "post_3aacc4ea-e275-428b-a66e-1de88b891a5b": "Oct 30, rest of the list (not sent it before)",
 }
 ENGAGED_SEND = "post_49066aa7-3fc8-413b-88d7-3aae0e96eb53"
 # Earlier article editions sent to the same "CT Audience - Engaged Subs" segment (ead5b83a), the
@@ -49,6 +49,11 @@ BASELINE_EDITIONS = {
 }
 PAYWALL_LINK = re.compile(r"members-only-content/[^ ]*[?&]h=([0-9a-f]{32})")
 SUPPORTER_PRICE_USD = 9
+WEB_POST_URL = "https://www.clearerthinking.org/post/the-supplement-paradox"
+PLUS_URL = "https://www.clearerthinking.org/plus"
+# Active + past_due members on the day of the send: the hash list members_only_programs.py --stripe
+# generated on 2026-10-16 for the pitch page's fallback (78 hashes, recorded in the project notes).
+MEMBERS_AT_SEND = 78
 BASELINE_START = datetime(2026, 7, 1, tzinfo=timezone.utc)   # Stripe pull starts here
 BASELINE_END = datetime(2026, 10, 12, tzinfo=timezone.utc)   # first paywall test payments on Oct 12
 RATING_ORDER = ["Excellent", "Good", "Okay", "Subpar", "Bad"]
@@ -152,10 +157,14 @@ def send_stats(posts: list[dict]) -> dict:
     return tot
 
 
-def link_clicks(post: dict, needle: str) -> int:
-    """Unique verified email clicks on every link of `post` whose URL contains `needle`."""
+def link_clicks(post: dict, prefix: str) -> int:
+    """Unique verified email clicks on every link of `post` whose URL starts with `prefix`.
+
+    A prefix, not a substring: the rating links carry the article's URL inside their own query
+    string, so a substring match on the article would count them too.
+    """
     return sum((c.get("email") or {}).get("unique_verified_clicks") or 0
-               for c in (post.get("stats") or {}).get("clicks") or [] if needle in (c.get("url") or ""))
+               for c in (post.get("stats") or {}).get("clicks") or [] if (c.get("url") or "").startswith(prefix))
 
 
 # ---------------------------------------------------------------------------------------------
@@ -179,7 +188,8 @@ def classify_runs(runs: list[dict], send_start: datetime, team_hashes: set[str])
     a run for web runs (no identifier exists there, so web visitors are an upper bound).
     """
     out = {"pre_send_runs": 0, "team_runs": 0,
-           "email": {"runs": 0, "hashes": set(), "member_hashes": set(), "typed_member": 0, "typed_non_member": 0},
+           "email": {"runs": 0, "hashes": set(), "member_hashes": set(), "typed_member_hashes": set(),
+                     "typed_member": 0, "typed_non_member": 0},
            "web": {"runs": 0, "typed_member": 0, "typed_non_member": 0}}
     for r in runs:
         if r["t"] < send_start:
@@ -198,6 +208,8 @@ def classify_runs(runs: list[dict], send_start: datetime, team_hashes: set[str])
         typed = _flag(r.get("emailMember"))
         if typed == 1:
             ch["typed_member"] += 1
+            if h:
+                ch["typed_member_hashes"].add(h)
         elif typed == 0:
             ch["typed_non_member"] += 1
     e, w = out["email"], out["web"]
@@ -239,7 +251,7 @@ def match_sales(sessions: list[dict], runs: list[dict], send_start: datetime,
         else:
             channel = "unknown"
         out.append({"created": s["created"], "paid": s["status"] == "complete", "channel": channel,
-                    "email_md5": s.get("email_md5"), "subscription": s.get("sub")})
+                    "email_md5": s.get("email_md5"), "subscription": s.get("sub"), "ref": s.get("ref") or ""})
     return out
 
 
@@ -263,6 +275,23 @@ def supporter_signups(subs: list[dict], start: datetime, end: datetime) -> list[
         if s.get("lookup") == "supporter" and not is_test_subscription(s) and start <= created < end:
             out.append(s)
     return out
+
+
+def weekly_bins(created: list[datetime], anchor: datetime, first: datetime, now: datetime) -> list[dict]:
+    """Count events in 7-day bins measured from `anchor` (bin 0 starts at the anchor, bin -1 ends there).
+
+    Bins run from the one containing `first` to the last one that has started by `now`; a final bin
+    less than a day old is dropped unless something already happened in it.
+    Returns [{"start": "YYYY-MM-DD", "index": i, "count": n, "after": i >= 0}].
+    """
+    week = timedelta(days=7)
+    lo = math.floor((first - anchor) / week)
+    hi = math.floor((now - anchor) / week)
+    counts = Counter(math.floor((t - anchor) / week) for t in created if first <= t <= now)
+    if hi > 0 and (now - (anchor + hi * week)) < timedelta(days=1) and not counts.get(hi):
+        hi -= 1
+    return [{"start": (anchor + i * week).strftime("%Y-%m-%d"), "index": i, "count": counts.get(i, 0), "after": i >= 0}
+            for i in range(lo, hi + 1)]
 
 
 # ---------------------------------------------------------------------------------------------
@@ -293,22 +322,27 @@ def ratings_by_article(rows: list[dict]) -> dict:
 # main: raw pulls -> datapoints.json
 # ---------------------------------------------------------------------------------------------
 
-def _load(name: str):
-    return json.loads((DATA / name).read_text())
+RAW_FILES = {"posts": "beehiiv_posts.json", "pitch_runs": "gt_pitch_runs.json",
+             "full_version_runs": "gt_full_version_runs.json", "sessions": "stripe_sessions.json",
+             "subscriptions": "stripe_subscriptions.json", "ratings": "gt_ratings.json", "ga4": "ga4.json",
+             "context": "context.json"}
+PAYWALL_WORDS = re.compile(r"\bpay-?wall\w*|\bmembers?(hip|-only)?\b|\bpaid\b|\bpaying\b", re.I)
+
+
+def load_raw() -> dict:
+    """The raw pulls written by fetch_data.py, keyed as build_datapoints expects them."""
+    return {key: json.loads((DATA / name).read_text()) for key, name in RAW_FILES.items()}
 
 
 def _dt(s: str) -> datetime:
     return datetime.strptime(s[:16], "%Y-%m-%d %H:%M").replace(tzinfo=timezone.utc)
 
 
-def build_datapoints(now: datetime) -> dict:
-    posts = _load("beehiiv_posts.json")                 # {post_id: single-post payload}
-    runs_raw = _load("gt_pitch_runs.json")
-    full_runs = _load("gt_full_version_runs.json")
-    sessions_raw = _load("stripe_sessions.json")
-    subs = _load("stripe_subscriptions.json")
-    ratings = _load("gt_ratings.json")
-    ga4 = _load("ga4.json")
+def build_datapoints(raw: dict, now: datetime) -> dict:
+    """Every number of the report from the raw pulls (see RAW_FILES for the keys of `raw`)."""
+    posts = raw["posts"]                                # {post_id: single-post payload}
+    runs_raw, full_runs, sessions_raw = raw["pitch_runs"], raw["full_version_runs"], raw["sessions"]
+    subs, ratings, ga4 = raw["subscriptions"], raw["ratings"], raw["ga4"]
 
     runs = [{**r, "t": _dt(r["t"])} for r in runs_raw]
     sessions = [{**s, "created": _dt(s["created"])} for s in sessions_raw]
@@ -327,6 +361,9 @@ def build_datapoints(now: datetime) -> dict:
 
     gt_hashes = funnel["email"]["hashes"]
     email, web = funnel["email"], funnel["web"]
+    # A buyer who typed their email right after paying is not an "existing member".
+    paid_set = {s["email_md5"] for s in paid}
+    email_typed_existing = len(email["typed_member_hashes"] - paid_set)
     paid_email = sum(1 for s in paid if s["channel"] == "email")
     paid_web = sum(1 for s in paid if s["channel"] == "web")
 
@@ -336,7 +373,9 @@ def build_datapoints(now: datetime) -> dict:
         st = send_stats([posts[pid]])
         c = paywall_clickers([posts[pid]])
         per_send.append({"label": label, **st, "paywall_clickers": len(c["all"]), "paywall_clickers_verified": len(c["verified"]),
-                         "web_version_clicks_verified": link_clicks(posts[pid], "clearerthinking.org/post/the-supplement-paradox")})
+                         "paid": sum(1 for x in paid if x["email_md5"] in c["all"]),
+                         "plus_footer_clicks_verified": link_clicks(posts[pid], PLUS_URL),
+                         "web_version_clicks_verified": link_clicks(posts[pid], WEB_POST_URL)})
     engaged = send_stats([posts[ENGAGED_SEND]])
     baseline = {name: send_stats([posts[p] for p in ids]) for name, ids in BASELINE_EDITIONS.items()}
 
@@ -353,13 +392,16 @@ def build_datapoints(now: datetime) -> dict:
     other_tier = [s for s in subs if _dt(s["created"]) >= SEND_START and not is_test_subscription(s)
                   and s.get("lookup") != "supporter" and s.get("email_md5") in (gt_hashes | clickers["all"])]
     presend_real = [s for s in supporter_signups(subs, BASELINE_END, SEND_START)]
+    weekly = weekly_bins([_dt(s["created"]) for s in supporter_signups(subs, BASELINE_START, now)],
+                         SEND_START, BASELINE_START, now)
+    weekly = [b for b in weekly if b["start"] >= BASELINE_START.strftime("%Y-%m-%d")]   # drop the bin cut by the pull's start
 
     rt = ratings_by_article(ratings)
     sp_r = rt.get("the-supplement-paradox", {"n": 0, "low": 0})
     others = {k: v for k, v in rt.items() if k != "the-supplement-paradox" and v["n"] >= 20}
     oth_n, oth_low = sum(v["n"] for v in others.values()), sum(v["low"] for v in others.values())
     feedback = [r for r in ratings if article_slug(r.get("article")) == "the-supplement-paradox" and r.get("feedback")]
-    paywall_words = re.compile(r"paywall|pay ?wall|member|paid|paying|subscri", re.I)
+    paywall_words = PAYWALL_WORDS
     all_paywall_fb = [{"date": r["t"][:10], "article": article_slug(r.get("article")), "rating": r.get("final_rating"),
                        "text": r["feedback"]} for r in ratings
                       if r.get("feedback") and paywall_words.search(r["feedback"]) and r["t"] >= "2026-10-16"]
@@ -380,6 +422,9 @@ def build_datapoints(now: datetime) -> dict:
             "email_runs": email["runs"], "email_visitors": email["visitors"],
             "email_members_by_hash": email["members_by_hash"], "email_non_member_visitors": email["non_member_visitors"],
             "email_typed_member": email["typed_member"], "email_typed_non_member": email["typed_non_member"],
+            "email_typed_existing_member": email_typed_existing,
+            "existing_members_reached_max": email["members_by_hash"] + email_typed_existing + web["typed_member"],
+            "checkout_refs_overwritten": sum(1 for s in sales if s["ref"].startswith("ga-")),
             "web_runs": web["runs"], "web_typed_member": web["typed_member"], "web_typed_non_member": web["typed_non_member"],
             "web_non_member_visitors": web["non_member_visitors"],
             "checkouts_opened": len(sales), "checkouts_paid": len(paid), "checkouts_abandoned": len(sales) - len(paid),
@@ -415,7 +460,9 @@ def build_datapoints(now: datetime) -> dict:
             "per_week_base": rr["per_week_base"], "per_week_test": rr["per_week_test"], "ratio": rr["ratio"],
             "p_one_sided": rr["p_one_sided"],
             "pre_send_untested_signups": [{"created": s["created"], "status": s["status"]} for s in presend_real],
+            "weekly": weekly,
         },
+        "context": {**(raw.get("context") or {}), "members_at_send": MEMBERS_AT_SEND},
         "engaged_send_vs_baseline": {
             "engaged_send": {k: engaged[k] for k in ("recipients", "delivered", "unique_opens", "unsubscribes", "spam_reports",
                                                      "open_rate", "unsub_per_delivered", "unsub_per_open", "spam_per_delivered", "spam_per_open")},
@@ -444,7 +491,7 @@ def build_datapoints(now: datetime) -> dict:
 
 
 def main() -> None:
-    dp = build_datapoints(datetime.now(timezone.utc).replace(second=0, microsecond=0))
+    dp = build_datapoints(load_raw(), datetime.now(timezone.utc).replace(second=0, microsecond=0))
     DATAPOINTS.write_text(json.dumps(dp, indent=1, ensure_ascii=False, default=list) + "\n")
     f = dp["funnel"]
     print(f"openers {f['unique_opens']:,} -> pitch-page visitors {f['email_visitors']} email + {f['web_runs']} web "
