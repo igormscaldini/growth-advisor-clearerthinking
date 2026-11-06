@@ -55,7 +55,7 @@ The source rows of the all-time call sum to 678,352, which equals the current ac
 
 - Four of every five active subscribers (82%) carry the import channel. Note the import channel also contains the original migration of the pre-beehiiv list, so "import" is not the same as "cold": it mixes long-standing readers with the bulk additions.
 - The API channel (tools) accounts for all 121,722 non-import sign-ups of note, all within the last 12 months, consistent with tools creating subscribers through the API only since 2026-03-09 (project CLAUDE.md).
-- In the last 4 weeks the source rows sum to 39,074 while `new_subscribers` is 52,707: about 13.6k of the people who joined in those 4 weeks are already no longer active (see anomalies).
+- In the last 4 weeks the source rows sum to 39,074 while `new_subscribers` is 52,707. If the source rows count only people who are still active (as the all-time totals suggest), about 13.6k of the people who joined in those 4 weeks, roughly one in four, have already left (see anomalies).
 
 ### Daily growth, 2026-10-01 to 2026-11-06 (get_subscriber_growth, UTC days)
 
@@ -66,13 +66,88 @@ The source rows of the all-time call sum to 678,352, which equals the current ac
 
 ## 2. Segments
 
-Source: `list_segments` (123 segments in total), `get_segment` for definitions. PENDING: definitions and last-calculated dates for most segments. First facts:
+Sources: `list_segments` (all 123 segments: name, type, size, lifetime metrics) and `get_segment` (condition, paused flag, last processed) for the 31 segments that matter most for sending and hygiene. For the other 92 the condition and last-processed date were NOT pulled; they are listed by group with their size only. Types: 112 dynamic, 4 static, 7 manual. `paused: true` means beehiiv is not recalculating the segment on its own; member counts are as of the "last processed" date, not today. In `where` clauses `open_rate` with no window is the subscriber's lifetime open rate.
 
-| Segment | Type | Members | Condition (`where`) | Paused | Last processed (UTC) |
+### Send audiences (used as post recipients)
+
+| Segment | Members | Condition (`where`) | Paused | Last processed (UTC) | Used in recent sends? |
 |---|---|---|---|---|---|
-| Engaged Reades - Open > 40% | dynamic | 133,383 | `open_rate >= 40 AND status = 'active'` | true | 2026-11-05 07:46 |
-| Unengaged | dynamic | 124,881 | `signup_date < NOW() - INTERVAL '6 months' AND status = 'active' AND unique_sends >= 1 AND open_rate(within: '6 months') = 0` | true | 2026-07-10 07:55 |
-| Never Opened an Email | static | 120,674 | `open_rate = 0 AND signup_date <= NOW() - INTERVAL '3 months'` | false | 2026-08-08 01:11 |
+| CT Audience - All Subscribers | 666,924 | `custom_field(clearerthinking.org) = 'true' AND status = 'active' AND signup_date <= NOW() - INTERVAL '1 week'` | no | 2026-11-06 06:59 | Yes: every article since Oct 16 |
+| OHI Audience - All Subscribers | 660,233 | `status = 'active' AND custom_field(one_helpful_idea) = 'true'` | no | 2026-11-06 07:39 | Yes: OHI Oct 14 |
+| CT Audience - Engaged Subs | 341,873 | `status = 'active' AND custom_field(clearerthinking.org) = 'true' AND signup_date <= NOW() - INTERVAL '1 week' AND open_rate(within: '6 months') >= 1` | no | 2026-11-06 06:34 | Yes: every article Sep 18 to Oct 8, and wave 2 on Oct 16 |
+| OHI Audience - Engaged Subs | 161,379 | `status = 'active' AND custom_field(one_helpful_idea) = 'true' AND signup_date <= NOW() - INTERVAL '1 week' AND open_rate >= 30` | no | 2026-11-06 06:31 | Yes: OHI Sep 28, Oct 6, Oct 21 (when it resolved to 371k to 376k people, so its rule was looser then) |
+| CT Audience - Engaged Subs - Open Rate > 60% | 121,133 | `status = 'active' AND custom_field(clearerthinking.org) = 'true' AND signup_date <= NOW() - INTERVAL '1 month' AND open_rate >= 40` (the name says 60%, the rule says 40%) | no | 2026-11-06 11:15 | Yes: workshop invite Sep 26 |
+| Engagement: High (50% to 99% Open Rate) | 94,490 | `open_rate >= 50 AND open_rate < 100 AND status = 'active'` | no | 2026-11-06 07:57 | Yes: coaching promos Oct 14 and 26; as an exclusion on Sep 10 |
+| Engagement: Perfect (100% Open Rate) | 6,470 | `open_rate = 100 AND status = 'active'` | no | 2026-11-06 07:45 | Yes: coaching promo Oct 12; exclusion on the other two |
+| Haven't Opened the Supplement Paradox | 51,231 | CT flag true, active, did not open any of the 8 Supplement Paradox posts, `AND open_rate >= 50` | no | 2026-11-06 05:36 | Yes: the Oct 19 resend |
+| Sent - [Variant B ...] biases | 164,688 | `post_email_event(<Variant B post>) = 'sent'` | no | 2026-11-06 07:35 | Yes: exclusion for Variant A on Oct 8 |
+| Not OHI or CT Audience But Subscribed | 19,892 | `status = 'active'` and both audience flags false | yes | 2026-10-22 07:01 | No (these people get neither newsletter) |
+| [Legacy] OHI Audience - All Subs | 459,014 | `custom_field(one_helpful_idea) = 'true'` (no status filter; 11.0% of members unsubscribed) | yes | 2026-07-11 07:25 | No |
+
+The definition of "engaged" for the main newsletter is therefore: active, flagged for the newsletter, on the list more than a week, and at least a 1% open rate over the last 6 months, which is close to "opened at least once in six months". By that rule 341,873 of the 666,924 CT-audience subscribers are engaged and 325,051 (48.7%) are not.
+
+### Engagement tiers that exist
+
+| Segment | Members | Condition | Paused | Last processed (UTC) | Age on Nov 6 |
+|---|---|---|---|---|---|
+| Engagement: None (0% Open Rate) | 145,662 | `open_rate = 0 AND status = 'active'` | yes | 2026-03-13 05:44 | 238 days |
+| Engagement: Low (1% to 19%) | 183,496 | `open_rate >= 1 AND open_rate <= 19 AND status = 'active'` | yes | 2026-10-10 07:20 | 27 days |
+| Engagement: Okay (20% to 49%) | 96,817 | `open_rate >= 20 AND open_rate <= 49 AND status = 'active'` | yes | 2026-10-10 07:24 | 27 days |
+| Engagement: High (50% to 99%) | 94,490 | see above | no | 2026-11-06 | current |
+| Engagement: Perfect (100%) | 6,470 | see above | no | 2026-11-06 | current |
+| Engaged Reades - Open > 40% | 133,383 | `open_rate >= 40 AND status = 'active'` | yes | 2026-11-05 07:46 | 1 day |
+| Open Rate > 40% | 181,804 | `open_rate >= 40 AND signup_date < DATE '2026-09-01'` (no status filter: 61,385 members, 33.8%, have unsubscribed) | yes | 2026-10-08 07:13 | 29 days |
+| Engaged Readers (Open Rate > 40%) | 124,777 | `open_rate > 39 AND signup_date < DATE '2026-02-01'` (no status filter: 27.1% unsubscribed) | yes | 2026-09-07 05:57 | 60 days |
+| Very Engaged Audience | 49,292 | `open_rate >= 90` (no status filter: 25,157 members, 51.0%, have unsubscribed) | yes | 2026-08-27 05:47 | 71 days |
+| beehiiv - Test | 234,003 | `unique_opens(within: '2 months') >= 1` | yes | 2026-07-16 06:58 | 113 days |
+| Open Rate > 95% | 38,037 | not pulled (62.1% of members unsubscribed) | not pulled | not pulled | |
+| [Drip Campaign - Don't Edit] Engaged Readers [Sign Up > 90 Days AND Open Rate > 30%) | 160,498 | not pulled (22.6% unsubscribed) | not pulled | not pulled | |
+| [Drip Campaign - Don't Edit] Very Engaged Readers [Sign Up > 90 Days AND Open Rate > 80%) | 46,447 | not pulled (47.2% unsubscribed) | not pulled | not pulled | |
+
+About the segment named in the brief, "Engaged Reades - Open > 40%": it exists (created 2026-05-10), is paused, and was last recalculated 2026-11-05 07:46 UTC, so it is fresh today but only because someone recalculated it; it does go stale otherwise. None of the 23 post records I pulled (Sep 10 to Nov 6) uses it as an audience.
+
+What exists and what is missing:
+- Exists: five lifetime open-rate bands (0, 1 to 19, 20 to 49, 50 to 99, 100), three of them paused and stale; three overlapping "40%+" segments; a 30%+ lifetime rule (OHI engaged); a "1%+ in the last 6 months" rule (CT engaged); two "never opened" rules (below).
+- Missing: any tier based on clicks (no segment condition I read uses clicks, although Proton and other image-blocking readers never register opens); recency tiers at 30, 60, 90 or 180 days other than the single 6-month rule and one stale 2-month test; a "new subscriber, first 30 days" audience; any segment by mailbox provider (Gmail vs the rest); any segment built on bounces or complaints.
+- Most open-rate rules use the lifetime rate, so a subscriber who opened everything in 2025 and nothing since still counts as engaged in the 30%, 40% and 50%+ segments.
+
+### Inactive, never-opened and cleanup segments
+
+| Segment | Type | Members | Condition | Paused | Last processed (UTC) |
+|---|---|---|---|---|---|
+| Inactive Contacts | dynamic | 132,558 | `status != 'active'` (everyone who is no longer subscribed; their lifetime open rate was 44.2%) | no | 2026-11-06 08:06 |
+| [Drip Campaign] Disengaged Subscribers | dynamic | 126,284 | `open_rate = 0 AND signup_date <= NOW() - INTERVAL '13 weeks' AND subscriber_tag != <a tag id>` (no status filter: 9,036 of them have unsubscribed, 117,248 are still subscribed) | yes | 2026-10-07 17:08 (status was "failed" in the list call and "processing" later the same day) |
+| Unengaged | dynamic | 124,881 | `signup_date < NOW() - INTERVAL '6 months' AND status = 'active' AND unique_sends >= 1 AND open_rate(within: '6 months') = 0` | yes | 2026-07-10 07:55 (119 days old) |
+| Never Opened an Email | static | 120,674 | `open_rate = 0 AND signup_date <= NOW() - INTERVAL '3 months'` (7,965 have since unsubscribed) | no (static snapshot) | 2026-08-08 01:11 |
+| Engagement: None (0% Open Rate) | dynamic | 145,662 | see tiers table | yes | 2026-03-13 |
+| Subscribers using disposable/throwaway domains [created by beehiiv] | manual | 772 | created by beehiiv on 2026-02-19 with the note "We recommend using the segment actions below to unsubscribe them from your list" | n/a | 2026-02-19 |
+| For deletion | manual | 772 | none (created 2026-02-17) | n/a | 2026-02-17 |
+| email_guard_placement | dynamic | 0 | not pulled; status "failed" | | |
+| Unsubscribed - last 30 days | dynamic | 19,787 | `status = 'inactive' AND unsub_date >= NOW() - INTERVAL '1 month'` | yes | 2026-08-28 09:08 |
+| Unsub 30d - channel import / api / embed / recommendation / website | dynamic | 16,108 / 3,548 / 39 / 20 / 0 | same rule plus `channel = ...` (the import one was pulled) | yes | 2026-08-28 |
+| churn | dynamic | 79 | not pulled | | |
+
+### Imports and acquisition source
+
+| Segment | Members | Condition | Paused | Last processed (UTC) |
+|---|---|---|---|---|
+| Imports - last 12 months | 599,250 | `channel = 'import' AND signup_date >= NOW() - INTERVAL '1 year'` (74,485 of them, 12.4%, unsubscribed; lifetime open rate 30.9%) | yes | 2026-08-28 08:45 |
+| Recent imports - last 30 days | 173,257 | `channel = 'import' AND signup_date >= NOW() - INTERVAL '1 month'` (12,007, 6.9%, already unsubscribed by that date; open rate 29.3%) | yes | 2026-08-28 09:18 |
+| Imports - last 3 months | 173,306 | not pulled | | |
+| Recent imports - last 7 days | 18,729 | not pulled | | |
+| source: meta (8,325), Subscribers From Google - Pmax - UPT (707), Best of CT For Youtube Viewers (125), Subscribers From Challenges (1) | | not pulled | | |
+
+These four import segments are diagnostics frozen on 2026-08-28; none is used as a send audience or exclusion.
+
+### Other segments (sizes from `list_segments`; conditions not pulled unless stated)
+
+- Drip-campaign triggers (12): [Drip Campaign] Attraction Study 264,581 (`tools_tried LIKE '%Attracts%'`, not paused, processed 2026-11-06; 15.6% of members unsubscribed); [Drip Campaign] Dating App Updates 29,319; [Drip Campaign - Don't Edit] Personality Test Users 27,979; Rationality Test Users 17,903; Tried Philosophical Beliefs 2,917; Tried Unique Traits 2,907; Tried Intrinsic Values Test 2,441; Rationality Test - Past 7 Days 2,309; Tried Worth of Your Time Calculator 1,801; Tried Imposter Syndrome Tool 380; Cognitive Assessment Purchases (Non-Supporters) 342; Personality Test 0.
+- Paid members and buyers (7): Clearer Thinking Plus Members 161; Active Supporters (Clearer Thinking Plus) 102; Explorer 82; Navigator 63; Navigators 63 (duplicate of the previous); Supporter 13; UPT PDF Purchase 146.
+- Partner cohorts (7): Leaf Subscribers 3,790; Subscribers From Leaf 2,455; BlueDot Subs 1,150; FarmKind Subscribers 207; ACE Subcribers 69; ACE Subscribers - High Engagement 58; Hive Subscribers 41.
+- Events, launches and one-off campaign segments (29): Second Send - How does society work? 442,191; meditation-launch (static) 176,760; test 46,641; Beta Testers 38,989; Re-launch - Attractiveness Tool 38,384; second batch - coaching trial 5,488; third batch - coaching trial 4,496; Career Event - Sept 2026 1,448; five manual "[Coaching Outreach]" segments (1,395; 827; 682; 138; 116); Spencer Self-Help Workshop - June 2026 1,221; Webinar Sign-Ups - Forked By AI 750; Leads From Decision Making Challenge 603; Completed Decision Challenge 594; Form New Habits Workshop 496; Clicked Audience Survey 2026 361; Enrolled in a 7-day challenge (don't send newsletters to them) 249 (rule: either challenge flag true; paused, last processed 2026-01-21, and not used as an exclusion on any recent post); Correction - Wrap Up Link (static) 166; workshop analysis 144; outreach (delete) 11; Test Segment (static) 6; Meditation 5; email_test 3; productivity_equation_workshop 0; plus the two listed under send audiences above.
+- Temporary probes (26): 14 "[tmp]", 4 "[probe]", 3 "[temp]", 1 "[tmp probe]" and 4 "[tmp ad-cohort]" segments, most with descriptions ending "Safe to delete" (created during earlier Claude analyses of ad cohorts). The largest is "[tmp] active subs WITH any utm_source" at 454,639.
+
+Whether a segment "looks actively used": the audiences in the first table are recalculated daily and appear on recent posts. Everything paused is not in use. Of 123 segments, roughly 15 are doing work today (the audiences, the two top engagement tiers, three drip triggers, the CT+ member segments).
 
 ## 3. Who receives what (recent sends)
 
@@ -135,7 +210,7 @@ Recipient counts do not match the current size of the segment named on the post 
 ### Summary of send practice
 
 - Cadence for a subscriber who is on both audiences and engaged: normally 2 emails a week (One Helpful Idea early in the week, the article later in the week), plus an occasional promotional email to the high-open tiers. It is not steady: no article went to engaged readers in the week of Oct 26 (only wave 3 to the non-engaged and a coaching promo), and no One Helpful Idea has gone out since Oct 20 (none in the weeks of Oct 26 and Nov 2 as of Nov 6).
-- Send days and times actually used (US Eastern). Articles: Fri Sep 18 7:00pm, Thu Sep 24 6:00pm, Tue Sep 29 7:00pm, Thu Oct 8 2:08pm and 3:19pm, Fri Oct 16 8:57am and 1:12pm, Thu Oct 22 7:00pm, Thu Oct 29 8:00pm (wave 3), Thu Nov 5 5:00pm and 7:16pm. One Helpful Idea: Wed Sep 9 12:02am, Mon Sep 21 7:00pm, Mon Sep 28 7:00pm, Mon Oct 5 8:00pm, Tue Oct 13 9:51pm, Tue Oct 20 11:05pm. So Thursday evening is the modal article slot but 4 of the last 7 article sends were at other times, and One Helpful Idea has drifted from Monday 7pm to Tuesday 11pm.
+- Send days and times actually used (US Eastern). Articles: Fri Sep 18 7:00pm, Thu Sep 24 6:00pm, Tue Sep 29 7:00pm, Thu Oct 8 2:08pm and 3:19pm, Fri Oct 16 8:57am and 1:12pm, Thu Oct 22 7:00pm, Thu Oct 29 8:00pm (wave 3), Thu Nov 5 5:00pm and 7:16pm. One Helpful Idea: Wed Sep 9 12:02am, Mon Sep 21 7:00pm, Mon Sep 28 7:00pm, Mon Oct 5 8:00pm, Tue Oct 13 9:51pm, Tue Oct 20 11:05pm. So Thursday evening is the most common article slot, but 4 of the 7 article editions in the window went out at other times (Friday evening, Tuesday evening, Thursday afternoon, Friday morning), and One Helpful Idea has drifted from Monday 7pm to Tuesday 11pm.
 - Resends: one resend to non-openers in the window (Supplement Paradox, Oct 19, 3 days after the first send, limited to people with a lifetime open rate of 50%+ who had not opened: 47,997 recipients, 18.0% opened, 80 verified clicks, 105 unsubscribes, 1 spam report). Before that, the Sep 14 "re-launch" of the Who Attracts You email (232,000 recipients, 5.8% opened).
 - Subject-line A/B tests: used on most large sends through beehiiv's split test (1 hour duration, 10% to 40% of the audience as the sample, winner auto-sent to the rest). Of the 23 posts whose record I pulled, 16 had a split test configured; in 4 of those (three One Helpful Idea sends and the Sep 14 re-launch) the "variant" subject line was identical to the control, so nothing was tested. Winners are picked on tiny gaps after one hour: Steelman 3.15% vs 3.45% vs 3.66% (about 20.8k recipients per arm); Biases Variant A 8.94% vs 8.67% vs 8.91% (about 10.9k per arm).
 - Manual content tests: twice (Oct 8 and Nov 5) the edition was split into two separate posts to test the order of the rating box.
@@ -162,14 +237,14 @@ Source: `get_post_isp_breakdown` on 10 sends, pulled 2026-11-06 (one call by me,
 Which sending address each post used: could not determine per post. The post record (`get_post`) does not expose the From address or sending domain; the publication has one email domain configured today, `ohi.clearerthinking.net` (section 5).
 
 Gmail trend:
-- Gmail is 81% to 86% of the listed volume, so the list's overall open rate is essentially its Gmail open rate.
+- Gmail is 81% to 86% of the listed volume and about 70% to 79% of all recipients of each send (Google sent divided by the post's total recipients; the unlisted remainder is the long tail of small domains), so the list's overall open rate is mostly its Gmail open rate.
 - Gmail opens far below every other provider on the same send. On engaged-segment sends Microsoft and Yahoo/AOL open at 52% to 62% while Gmail opens at 9% to 23%.
 - Against the earlier baseline in the project's Sep 2026 analysis (Gmail on the ohi domain: 34% in July easing to 26% by September, memory note `project_newsletter_send_strategy_2026_09`), Gmail on engaged-segment sends is now lower again: 20.3% (Sep 29), 13.0% (Oct 16), 14.8% (Oct 21, OHI).
-- Gmail swings widely between sends that differ only in timing. Both manual A/B splits went to two halves of the same segment about 1 to 2 hours apart: Oct 8, the first half sent got 9.09% at Gmail and the second 22.73%; Nov 5, the first half got 6.48% and the second 24.84%. Microsoft, Yahoo/AOL and Apple were flat between the halves (within 4 points, and on Nov 5 slightly higher for the first half). On Oct 16 the first send of the day also got the lowest Gmail rate (5.23%). So in all three cases the first large send of the day opened at 5% to 9% at Gmail and the one after it at 13% to 25%. Cause not determined from the API; the pattern is Gmail-specific.
+- Gmail swings widely between sends that differ only in timing. Both manual A/B splits went to two halves of the same segment about 1 to 2 hours apart: Oct 8, the first half sent got 9.09% at Gmail and the second 22.73%; Nov 5, the first half got 6.48% and the second 24.84%. Microsoft, Yahoo/AOL and Apple barely moved between the halves (within 1.5 points on Oct 8; on Nov 5 they were 3 to 6 points higher for the first half, the opposite direction to Gmail). On Oct 16 the first send of the day also got the lowest Gmail rate (5.23%). So in all three cases the first large send of the day opened at 5% to 9% at Gmail and the one after it at 13% to 25%. Cause not determined from the API; the pattern is Gmail-specific.
 - Whole-list sending pulls the non-Gmail providers down by dilution (Microsoft 52% to 58% on engaged sends, 32% on the whole-list Steelman, 14% on the non-engaged remainder), and the non-engaged remainder opened at 1.03% at Gmail (1,980 opens on 192,004 delivered).
 
 Other things visible in the provider rows:
-- Eight look-alike domains (careney.com, rpaintel.com, murkstar.com, dnsink.com, mrworlds.com, lanvos.com, primetor.com, netiren.com), each with about 100 to 125 subscribers, have exactly 0 opens on every one of the four whole-list sends between Oct 22 and Nov 6 (898 to 1,624 addresses per send between them). They do not appear on the engaged-only sends. They look like disposable or bot sign-up domains that are still being mailed.
+- Eight look-alike domains (careney.com, rpaintel.com, murkstar.com, dnsink.com, mrworlds.com, lanvos.com, primetor.com, netiren.com), each with about 100 to 125 subscribers, have exactly 0 opens on every one of the four whole-list sends between Oct 22 and Nov 6 (891 to 1,624 addresses per send between them). They are absent from the Oct 21 send to the OHI engaged segment. They look like disposable or bot sign-up domains that are still being mailed (my reading; the tool only shows the zero opens).
 - Many school and university domains show 98% to 100% opens on some sends and ordinary rates on others (for example one large university domain: 100% on Nov 5 and 6, about 21% on Oct 21 and 22), which is the signature of security scanners opening mail, not people. Counts of rows at 98%+ with 50+ sent: 15 rows on Nov 6 Variant B, 11 on Variant A, 15 on Oct 8 Variant A.
 - Proton addresses show 0.2% to 7% opens on every send (image blocking), so open-based engagement rules treat most Proton readers as inactive.
 - yandex.ru bounced about half of what was sent to it on Oct 16 and Oct 21 (211 sent, 94 delivered; 210 sent, 109 delivered).
@@ -185,7 +260,7 @@ What beehiiv reports:
 - Reply-to address: could not determine (not exposed by `get_publication_settings` or `get_post`).
 - Branded link (click-tracking) domain: `elink7ea.clearerthinking.net`, status `live` (CNAME to `branded-link.beehiiv.com`).
 - Web domain: none (the beehiiv site lives at clearerthinking.beehiiv.com). `white_labeled: true`, private branding on.
-- Workspace plan: Enterprise, `max_subscriptions` 700,000. The publication has 678,349 active subscribers, 96.9% of that ceiling (21,651 left; at the current net growth of about 28k per 4 weeks that is roughly three weeks, assuming the cap counts active subscribers in this publication only, which the tool does not state; the workspace also holds three small sister publications).
+- Workspace plan: Enterprise, `max_subscriptions` 700,000. The publication has 678,349 active subscribers, 96.9% of that ceiling (21,651 left; at the current net growth of about 28k per 4 weeks that is roughly three weeks, assuming the cap counts active subscribers in this publication only, which the tool does not state; the workspace also holds three other publications: 12 Levers, Clearer Research and Transparent Replications).
 - Dedicated IP: could not determine (no tool exposes IP configuration).
 - Publication time zone: Eastern Time (US and Canada).
 
@@ -290,7 +365,16 @@ Per-email results (`get_automation_stats`):
 | Should you have a life coach? (day 28) | 82,163 | 22.71% | 0.01% | 29,539 | 20.40% |
 | You can help advance psychology research (day 42, tagged only) | 2,656 | 59.65% | 0.00% | not listed | not listed |
 
-So from automations alone a new subscriber gets 1 email in the first 7 days (the coaching offer) and 3 in the first 30 days (two of the three are about coaching), and starts receiving the newsletters on day 7. Whether beehiiv's built-in welcome email (a publication setting, separate from automations) is switched on could not be determined: the settings tool does not return it. Unsubscribe rates per automation email: see the line added below once pulled; the project memory note of 2026-10-28 recorded 1.34% unsubscribes per send for "Big news" against 0.21% to 0.26% for the other drip emails.
+So from automations alone a new subscriber gets 1 email in the first 7 days (the coaching offer) and 3 in the first 30 days (two of the three are about coaching), and starts receiving the newsletters on day 7. Whether beehiiv's built-in welcome email (a publication setting, separate from automations) is switched on could not be determined: the settings tool does not return it. Unsubscribes, complaints and clicks per drip email, all time (`list_automation_emails` with `include_stats`; the 2 MB output was parsed from the harness's saved copy, rates per 1,000 delivered computed by me):
+
+| Email | Delivered | Unsubscribes | Unsubs per 1,000 | Spam reports | Spam per 1,000 | Total clicks | Of which on the manage-preferences link |
+|---|---|---|---|---|---|---|---|
+| Big news (day 1) | 110,684 | 1,545 | 13.96 | 28 | 0.253 | 2,835 | 1,924 (68%) |
+| Does IQ actually matter? (day 14) | 112,795 | 344 | 3.05 | 13 | 0.115 | 1,335 | 450 (34%) |
+| Should you have a life coach? (day 28) | 81,414 | 191 | 2.35 | 10 | 0.123 | 737 | 280 (38%) |
+| You can help advance psychology research (day 42) | 2,595 | 3 | 1.16 | 0 | 0 | 217 | 46 (21%) |
+
+"Big news" loses 1.40% of everyone it is delivered to, 4.6 to 6 times the rate of the later drip emails and more than twice the worst article send in section 3 (5.6 per 1,000); only the Oct 12 coaching promo (14.4 per 1,000) matches it. Two thirds of its clicks are people opening the manage-preferences (unsubscribe) page; clicks on its coaching links total 283 (183 unique) from 110,684 delivered. Its reported "click rate" of 6.52% is therefore mostly unsubscribe traffic. The malformed link noted in the project memory (`https://www.clearerthinahttps://...`) is no longer in the live email (`get_automation_email_content`, live workspace, read 2026-11-06; the automation was republished 2026-10-28); the click history still shows 85 clicks (71 unique) on it from before the fix. The second automation that used to send the same email (the Attraction Study drip, memory note of 2026-10-28) no longer exists in the automation list.
 
 ### Sunset and win-back
 
@@ -302,7 +386,40 @@ So from automations alone a new subscriber gets 1 email in the first 7 days (the
 
 ## 8. Hygiene evidence
 
-PENDING.
+Sources: the segment, post and automation calls above. Short version: nothing removes or suppresses inactive subscribers today, and since Oct 16 they are being mailed again.
+
+How inactive subscribers are handled:
+- No automatic removal. The only sunset automation ran for 8 days in June 2026 and has been off since (section 7). No win-back flow exists.
+- Until Oct 8, 2026 the working hygiene rule was audience choice: the article went only to "CT Audience - Engaged Subs" (any open in six months), with occasional whole-list sends. `reports/ohi_open_rate_drop_2026-11-06.html` lists the whole-list One Helpful Idea sends of 2026: Feb 10, Feb 23, Mar 3, Apr 21, Apr 29, May 5, Jun 11, Jul 14, Aug 10.
+- Since Oct 16 every article has gone to all 625k to 650k active CT-flagged subscribers (section 3), including the 325,051 who do not meet CT's own engaged rule.
+- Exclusion segments are not used for hygiene. On the 23 post records pulled, the only exclusions were mechanical: Navigators (on coaching promos), the two top engagement tiers (to split a launch into two posts), and "Sent - Variant B" (to split an A/B). No post excluded the never-opened, unengaged, disposable-domain or "7-day challenge, don't send newsletters" segments.
+
+How many long-inactive subscribers there are (each count is as of the segment's last processing date):
+- 325,051 active CT-audience subscribers below a 1% open rate over the last six months (Nov 6: 666,924 minus 341,873).
+- 124,881 active, on the list more than six months, sent at least one email, zero opens in six months ("Unengaged", Jul 10).
+- 126,284 with a lifetime open rate of zero and on the list more than 13 weeks, of whom 117,248 are still subscribed ("[Drip Campaign] Disengaged Subscribers", Oct 7). They had been sent 3,323,188 emails by then.
+- 120,674 never-openers on the list more than three months in a static snapshot of Aug 8, of whom 7,965 have since unsubscribed ("Never Opened an Email"); 3,198,150 emails sent to them, zero opens.
+- 145,662 active with a lifetime open rate of zero ("Engagement: None", stale since Mar 13).
+- For scale, on Jul 16 only 234,003 subscribers had opened anything in the previous two months ("beehiiv - Test"), when the list had about 448k active.
+
+Bounces and complaints:
+- beehiiv withholds part of every large send on its own: `total_suppressions` was 17,174 (Steelman), 17,630 (Supplement wave 3), 9,271 and 18,460 (the two Reason halves), 5,622 (an engaged-only send). What qualifies an address for suppression is not stated by the tool.
+- Hard bounces per large send: 33 to 685; soft bounces 800 to 5,914; bounce rate 0.5% (engaged) to 1.2% (non-engaged remainder).
+- Spam reports per send: 1 to 80, at most 0.2 per 1,000 delivered. These undercount: per `reports/ohi_open_rate_drop_2026-11-06.html`, Gmail does not pass individual complaints back to senders, so the reports come from the roughly 20% to 30% of recipients who are not on Gmail. On that base the Oct 30 send's 49 reports would be on the order of 1 per 1,000 non-Gmail recipients (my rough arithmetic: 252,169 recipients minus 194,147 at Google; not a measured rate). CT's Gmail complaint rate is not visible anywhere in beehiiv.
+- Complaints and bounces are not turned into segments, tags or automations by CT.
+
+Records of past cleanup:
+- June 18 to 26, 2026: the sunset run described in section 7 (about 21.6k warned, a few thousand at most removed).
+- Feb 17 and 19, 2026: a manual "For deletion" segment (772) and beehiiv's own "disposable/throwaway domains" segment (772) were created. Both still hold 772 members with 0 unsubscribed: nothing was deleted. Those addresses have since received 9,121 emails and produced 12 opens.
+- Nov 2025: a custom field `all_unsubs_from_mailchimp` exists, so unsubscribes from the previous platform were carried over as a flag at migration. How it is enforced (those people may simply not have been imported as active) was not checked.
+- No other trace of a bulk removal: the monthly active count never drops by more than a few hundred (section 1), and all-time churn is 140,896.
+
+Imported versus organic subscribers:
+- Treated the same. No send audience has a `channel` condition; imports and tool sign-ups sit in the same "CT Audience" and "OHI Audience" segments. The only import-specific segments are four diagnostics frozen on 2026-08-28.
+- The August 2026 import: 173,257 import-channel records were added in the 30 days to Aug 28. They are the participants of the attractiveness study (subscriber tag `attractiveness-study`: 192,989; segment on `tools_tried` containing "Attracts": 264,581, which also includes later organic users of the tool). 12,007 of the 173,257 (6.9%) had unsubscribed within that first month.
+- In the 30 days to Aug 28, 16,108 of 19,787 unsubscribes (81%) were import-channel subscribers, which is about the import channel's share of the list (82% of active subscribers today; its exact share on Aug 28 was not computed). So imports were not unsubscribing faster than their share.
+- All imports of the previous 12 months, as of Aug 28: 599,250 records, lifetime open rate 30.9%, 74,485 (12.4%) unsubscribed.
+- New tool sign-ups get a 7-day hold and the drip (section 7). Whether imported records also enter that drip could not be determined.
 
 ## 9. Reader feedback and preferences
 
