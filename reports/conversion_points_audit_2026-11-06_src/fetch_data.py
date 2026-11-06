@@ -20,7 +20,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from analysis import WINDOW_START, WINDOW_END, LOOKBACK_START, STRIPE_START, LANDING_PAGES  # noqa: E402
+from analysis import (WINDOW_START, WINDOW_END, LOOKBACK_START, STRIPE_START, LANDING_PAGES,  # noqa: E402
+                      CAMPAIGN_LANDINGS, FAB_PERIODS)
 
 GT_BASE = "https://www.guidedtrack.com"
 GT_EXPORTS = {"subscribe": 34235, "cognitive_intro": 31137}
@@ -85,14 +86,31 @@ def fetch_ga4():
     out["lp_sources"] = run(["pagePath", "sessionSource", "sessionMedium", "sessionManualCampaignName"], lp_mets, *W, lp)
     # Event-level landings: GA4 keeps a session's FIRST campaign, so a utm link clicked mid-session
     # (floating button, product grid) is invisible in session dimensions. The page URL is not.
-    out["utm_landings"] = run(["date", "pagePath", "pageLocation"], ["screenPageViews", "totalUsers"], *W,
+    out["utm_landings"] = run(["date", "pagePath", "pageLocation", "sessionSource"], ["screenPageViews"], *W,
                               all_of(pv, flt("pageLocation", "utm_campaign=", "CONTAINS")))
+    # Distinct people per tagged link. Hits whose session source is "(not set)" never opened a real
+    # session (link scanners, bots: 3 engaged sessions out of ~1,200 on /coaching), so they are split out.
+    bot = flt("sessionSource", "(not set)")
+    out["campaign_landings"] = []
+    for key, campaign, path in CAMPAIGN_LANDINGS:
+        for period, (a, b) in {"window": W, **(FAB_PERIODS if key == "tools_fab" else {})}.items():
+            base = all_of(pv, flt("pagePath", path), flt("pageLocation", f"utm_campaign={campaign}", "CONTAINS"))
+            clean = run([], ["totalUsers", "screenPageViews", "sessions"], a, b, all_of(base, neg(bot)))
+            bots = run([], ["screenPageViews"], a, b, all_of(base, bot))
+            row = clean[0] if clean else {"totalUsers": 0, "screenPageViews": 0, "sessions": 0}
+            out["campaign_landings"].append({"key": key, "period": period, "users": row["totalUsers"], "views": row["screenPageViews"],
+                                             "sessions": row["sessions"], "bot_views": bots[0]["screenPageViews"] if bots else 0})
+    # GA4 cuts linkUrl at 100 characters, so the campaign value arrives truncated ("tools_float").
+    out["fab_tools_clicks"] = {}
+    for period, (a, b) in FAB_PERIODS.items():
+        r = run([], ["eventCount", "totalUsers"], a, b, all_of(flt("eventName", "click"), programs,
+                                                                flt("linkUrl", "utm_campaign=tools_float", "CONTAINS")))
+        out["fab_tools_clicks"][period] = r[0] if r else {"eventCount": 0, "totalUsers": 0}
     out["www_users_ex_coaching"] = run([], ["totalUsers"], *W, all_of(www, neg(flt("pagePath", "/coaching"))))
     out["www_daily_ex_coaching"] = run(["date"], ["totalUsers"], *W, all_of(www, neg(flt("pagePath", "/coaching"))))
     not_hidden = neg(flt("pagePath", "/unanswered-questions-in-psychology", "BEGINS_WITH"))
     out["programs_daily"] = run(["date", "deviceCategory"], ["totalUsers"], *W, all_of(programs, not_hidden))
-    for name, (a, b) in {"fab_all": ("2026-10-21", WINDOW_END), "fab_wave": ("2026-10-21", "2026-10-23"),
-                         "fab_steady": ("2026-10-24", WINDOW_END)}.items():
+    for name, (a, b) in FAB_PERIODS.items():
         out[f"programs_users_{name}"] = run([], ["totalUsers"], a, b, all_of(programs, not_hidden))
         out[f"programs_pages_{name}"] = run(["pagePath"], ["totalUsers"], a, b, all_of(programs, not_hidden))
     out["clicks_to_www"] = run(["date", "pagePath", "linkUrl"], ["eventCount", "totalUsers"], *W, all_of(
@@ -102,6 +120,12 @@ def fetch_ga4():
                              all_of(programs, in_list("eventName", FUNNEL_EVENTS)))
     out["tool_events_monthly"] = run(["yearMonth", "pagePath", "eventName"], ["eventCount", "totalUsers"], "2026-01-01", WINDOW_END,
                                      all_of(flt("pagePath", "/personality-test.html"), in_list("eventName", FUNNEL_EVENTS)))
+    # Where PDF-page visitors come from (previous page), and what the report-finder page leads to.
+    out["pdf_page_referrers"] = run(["pagePath", "pageReferrer"], ["screenPageViews", "totalUsers"], *W,
+                                    all_of(pv, flt("pagePath", "/personality-test-pdf-generator", "BEGINS_WITH")))
+    out["pdf_events"] = run(["eventName", "pagePath"], ["eventCount", "totalUsers"], *W,
+                            all_of(programs, any_of(flt("pagePath", "/personality-test-pdf-generator", "BEGINS_WITH"),
+                                                    flt("pagePath", "/getmyreport.html"))))
     fp = ["city", "deviceCategory", "browser", "operatingSystem", "screenResolution"]
     out["purchase_events"] = run(["dateHourMinute"] + fp + ["sessionSourceMedium", "sessionManualCampaignName"], ["eventCount"],
                                  LOOKBACK_START, WINDOW_END, flt("eventName", "plus_sign_up"))
