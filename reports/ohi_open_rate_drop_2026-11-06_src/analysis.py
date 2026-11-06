@@ -48,7 +48,7 @@ def metrics(send: dict) -> dict:
     gmail_click, control_click = rate(g["clicks"], g["delivered"]), rate(c["clicks"], c["delivered"])
     yahoo_rate = rate(p["yahoo.com"]["opens"], p["yahoo.com"]["delivered"])
     return {
-        "date": send["date"], "post_id": send["post_id"], "kind": send["kind"], "subject": send["subject"], "title": send["title"],
+        "date": send["date"], "sent_at_et": send.get("sent_at_et"), "post_id": send["post_id"], "kind": send["kind"], "subject": send["subject"], "title": send["title"],
         "from_domain": send["from_domain"], "recipients": send["recipients"], "delivered": send["delivered"],
         "unique_opens": send["unique_opens"], "audience": audience(send["recipients"]),
         "open_rate": rate(send["unique_opens"], send["delivered"]),
@@ -61,7 +61,7 @@ def metrics(send: dict) -> dict:
         "icloud_rate": rate(p["icloud.com"]["opens"], p["icloud.com"]["delivered"]),
         "gmail_share": rate(g["delivered"], send["delivered"]),
         "html_kb": send.get("html_kb"), "pixel_24h": send.get("pixel_24h"), "opens": send["opens"],
-        "unsubscribes": send["unsubscribes"], "spam_reports": send["spam_reports"], "segment": send.get("segment", ""),
+        "unsubscribes": send["unsubscribes"], "spam_reports": send["spam_reports"], "unique_verified_clicks": send["unique_verified_clicks"], "segment": send.get("segment", ""),
     }
 
 
@@ -183,6 +183,9 @@ def build(data: dict, year: str = "2026") -> dict:
                    "gmail_per_10k_october": mean_known(m["gmail_clicks_per_10k"] for m in october),
                    "control_per_10k_before": mean_known(m["control_clicks_per_10k"] for m in before),
                    "control_per_10k_october": mean_known(m["control_clicks_per_10k"] for m in october)},
+        "ratio_after_aug_sep": mean(m["ratio"] for m in after if m["date"][5:7] != "10"), "ratio_october": mean(m["ratio"] for m in october),
+        "largest_ohi_domain_send_before": {s["date"]: max((a["recipients"] for a in data["all_sends"] if a.get("from_domain") == "ohi" and a["date"] < s["date"]), default=0)
+                                           for s in whole},
         "whole_vs_filtered": pairs,
         "domain_months": domain_months(data["all_sends"]),
         "pixel": {"n": len(pix), "first": pix[0]["date"] if pix else None,

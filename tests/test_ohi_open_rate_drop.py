@@ -133,7 +133,7 @@ def synthetic(gmail_rate_fn, engaged_rate=0.60, seed=7):
             g, y, h, o = round(n * 0.80), round(n * 0.04), round(n * 0.04), round(n * 0.12)
             sends.append(send((d0 + timedelta(days=11 * i + 5)).isoformat(), gmail=(g, round(g * 0.9 * c)), yahoo=(y, round(y * c)),
                               hotmail=(h, round(h * c)), other=(o, round(o * c)), recipients=n))
-    return {"pulled": "test", "sends": sends, "all_sends": [{k: s[k] for k in ("date", "from_domain", "delivered", "unique_opens")} for s in sends]}
+    return {"pulled": "test", "sends": sends, "all_sends": [{k: s[k] for k in ("date", "from_domain", "recipients", "delivered", "unique_opens")} for s in sends]}
 
 
 def test_null_dataset_dilution_only_finds_nothing_gmail_specific():

@@ -230,6 +230,7 @@ document.querySelectorAll('[data-tip]').forEach(function(el){
 def ideas() -> str:
     c = DP["counterfactual"]
     pairs = {p["whole_date"]: p for p in DP["whole_vs_filtered"]}
+    oct29 = by_date(OTHER, "2026-10-29")
     items = [
         (9, "Look at Google Postmaster Tools for ohi.clearerthinking.net",
          "Google's free dashboard of how Gmail itself sees a sending domain: the share of recipients who press \"Report spam\", authentication, "
@@ -243,11 +244,13 @@ def ideas() -> str:
          f"Since July, mailing more people has not produced more opens: the Aug 10 send to {k(pairs['2026-08-10']['whole_recipients'])} got "
          f"{abs(pairs['2026-08-10']['extra_unique_opens']):,} fewer opens than the Aug 5 send to {k(pairs['2026-08-10']['filtered_recipients'])}. So there is little to lose, "
          "and steady engagement from a smaller audience is how a sender earns its way back at Gmail.",
-         "The reported subscriber reach of OHI drops, which matters for sponsor numbers, and Gmail readers whose opens are currently not being recorded could be cut by an open-based filter."),
+         "The send count drops by more than half, which looks bad wherever list size is quoted (sponsor pricing based on opens is unaffected), "
+         "and a filter based on opens can cut Gmail readers whose opens are not being recorded right now, so count clicks as engagement too."),
         (8, "Keep resends to non-openers and whole-list blasts off this domain",
-         "The Sep 14 re-launch (6% opened), the Oct 29 resend (2.6% opened, 1.0% at Gmail) and whole-list sends teach Gmail that mail from this domain is mostly ignored. "
+         f"The Sep 14 re-launch (6% opened), the Oct 29 send to the least engaged part of the list ({pct(oct29['open_rate'], 1)} opened, {pct(oct29['gmail_rate'], 1)} at Gmail) "
+         "and whole-list sends teach Gmail that mail from this domain is mostly ignored. "
          "Stop them, or send them rarely and from a different subdomain so OHI and the main newsletter are not graded with them.",
-         "It removes the most likely cause, and it costs only the few hundred clicks each of those sends brings (434 verified clicks on Oct 29).",
+         f"It removes the most likely cause, and it costs only the few hundred clicks each of those sends brings ({oct29['unique_verified_clicks']} verified clicks on Oct 29).",
          "Launch emails lose their second wave, and a separate subdomain is one more thing to maintain."),
         (6, "Test OHI with and without the second tracking pixel",
          "Since Aug 5 every OHI email carries your own open-tracking pixel, hosted on a shared vercel.app address, next to beehiiv's. The main newsletter does not carry it. "
@@ -266,7 +269,7 @@ def ideas() -> str:
         (2, "Move OHI to a fresh sending domain",
          "Set up a new subdomain and send OHI from it.",
          "A new domain starts with no bad history, and the July move did lift opens for a few weeks.",
-         "This is what was done in July. The old domain's Gmail ratio had fallen from 0.98 to 0.51 in six weeks at the start of the year; the new one lasted about six weeks "
+         "This is what was done in July. The old domain's Gmail ratio had fallen from 0.98 to 0.51 in six weeks at the start of the year; the new one lasted about seven weeks "
          "before it followed. The standing follows the sending habits, not the name, and a brand-new domain has to be warmed up slowly."),
     ]
     out = []
@@ -289,7 +292,10 @@ def build() -> str:
     months = {r["month"]: r for r in DP["domain_months"] if r["from_domain"] == "ohi"}
     jul30, oct22, oct29 = by_date(OTHER, "2026-07-30"), by_date(OTHER, "2026-10-22"), by_date(OTHER, "2026-10-29")
     sep1o, sep10o = by_date(OTHER, "2026-09-01"), by_date(OTHER, "2026-09-10")
-    nov5 = sorted((m for m in OTHER if m["date"] == "2026-11-05"), key=lambda m: m["open_rate"])
+    nov5 = sorted((m for m in OTHER if m["date"] == "2026-11-05"), key=lambda m: m["sent_at_et"])     # first half, then second
+    whole_before_g = [m["gmail_rate"] for m in WHOLE if m["date"] < "2026-07-14"]
+    assert aug10["recipients"] > DP["largest_ohi_domain_send_before"]["2026-08-10"]      # "largest send from this domain up to then"
+    assert jul30["pixel_24h"] / jul30["opens"] > 0.2                                     # the Jul 30 email did carry the second pixel
     ct = {m["date"]: m for m in OTHER if m["from_domain"] == "ct"}
     pairs = DP["whole_vs_filtered"]
     stamp = datetime.now().strftime("%Y-%m-%d %I:%M%p").lower()
@@ -312,16 +318,16 @@ def build() -> str:
 
 <p>The open rate of One Helpful Idea (OHI) went from {pct(jan["open_rate"])} in January to {pct(octo["open_rate"])} in October. Most of that is not readers losing interest. It is three separate things stacked on top of each other:</p>
 <ul>
-<li><b>Gmail stopped registering opens, about {100 * gmail_part:.0f} points.</b> Between Aug 5 and Aug 25, on the same engaged audience, Gmail's open rate fell from {pct(aug5["gmail_rate"], 1)} to {pct(aug25["gmail_rate"], 1)}. Readers on Yahoo, Hotmail, Outlook and AOL opened the very same emails at {pct(aug5["control_rate"], 1)} and then {pct(aug25["control_rate"], 1)}. Gmail is {pct(gmail_share)} of the audience, so it drags the whole number, and it has not recovered: {pct(octo["gmail_rate"])} in October.</li>
+<li><b>Gmail, about {100 * gmail_part:.0f} points.</b> Between Aug 5 and Aug 25, on the same engaged audience, Gmail's open rate fell from {pct(aug5["gmail_rate"], 1)} to {pct(aug25["gmail_rate"], 1)}. Readers on Yahoo, Hotmail, Outlook and AOL opened the very same emails at {pct(aug5["control_rate"], 1)} and then {pct(aug25["control_rate"], 1)}. Gmail is {pct(gmail_share)} of the audience, so it drags the whole number, and it has not recovered: {pct(octo["gmail_rate"])} in October.</li>
 <li><b>A slow drift before that, about {100 * drift:.0f} points.</b> From January to early August, on the same size of audience, the rate eased from {pct(jan["open_rate"])} to {pct(bb["open_rate"])} (Gmail {pct(jan["gmail_rate"], 1)} to {pct(bb["gmail_rate"], 1)}, the other providers {pct(jan["control_rate"], 1)} to {pct(bb["control_rate"], 1)}).</li>
-<li><b>A wider audience, about {100 * wider:.1f} points.</b> In September the "engaged" audience OHI goes to grew from about {k(ab["recipients"])} to about {k(octo["recipients"])} people. The added readers open less, which lowers the rate without anyone reading less.</li>
+<li><b>A wider audience, about {100 * wider:.0f} points.</b> In September the "engaged" audience OHI goes to grew from about {k(ab["recipients"])} to about {k(octo["recipients"])} people. The added readers open less, which lowers the rate without anyone reading less.</li>
 </ul>
-<p>The timing points at the sending domain's standing with Gmail, not at the content. On Jul 1 the main newsletter moved onto OHI's sending domain (ohi.clearerthinking.net). Mail from that domain went from {months["2026-06"]["delivered"] / 1e6:.1f}M emails a month to {months["2026-07"]["delivered"] / 1e6:.1f}M, then {months["2026-09"]["delivered"] / 1e6:.1f}M in September, and it started carrying sends to the whole list and resends to people who never open. Gmail's treatment of OHI changed six weeks later.</p>
+<p>The timing points at the sending domain's standing with Gmail, not at the content. On Jul 1 the main newsletter moved onto OHI's sending domain (ohi.clearerthinking.net). Mail from that domain went from {months["2026-06"]["delivered"] / 1e6:.1f}M emails a month to {months["2026-07"]["delivered"] / 1e6:.1f}M, then {months["2026-09"]["delivered"] / 1e6:.1f}M in September, and it started carrying sends to the whole list and to the least engaged part of it. Gmail's numbers for OHI broke in mid August.</p>
 
 <div class="kpis">
-<div class="kpi"><b>{pct(jan["open_rate"])} → {pct(octo["open_rate"])}</b><span>OHI open rate, January vs October (3 sends each)</span></div>
-<div class="kpi"><b>{pct(jan["gmail_rate"])} → {pct(octo["gmail_rate"])}</b><span>Gmail readers</span></div>
-<div class="kpi"><b>{pct(jan["control_rate"])} → {pct(octo["control_rate"])}</b><span>Yahoo, Hotmail, Outlook and AOL readers</span></div>
+<div class="kpi"><b>{pct(jan["open_rate"], 1)} → {pct(octo["open_rate"], 1)}</b><span>OHI open rate, January vs October (3 sends each)</span></div>
+<div class="kpi"><b>{pct(jan["gmail_rate"], 1)} → {pct(octo["gmail_rate"], 1)}</b><span>Gmail readers</span></div>
+<div class="kpi"><b>{pct(jan["control_rate"], 1)} → {pct(octo["control_rate"], 1)}</b><span>Yahoo, Hotmail, Outlook and AOL readers</span></div>
 <div class="kpi"><b>{pct(C["october_cf"], 1)}</b><span>October open rate if Gmail had kept its usual gap to the others (actual {pct(C["october_actual"], 1)}): about {C["october_missing_gmail_opens"] / 1000:.0f}k Gmail opens missing per send</span></div>
 </div>
 
@@ -329,7 +335,7 @@ def build() -> str:
 <div class="fig"><h3>Open rate of every OHI send in 2026</h3>
 <div class="legend"><span><i class="k-dot"></i>Sent to engaged readers only</span><span><i class="k-ring"></i>Sent to the whole list</span></div>
 {chart_headline()}</div>
-<p>Until July, every dip to around 25% is a send to the whole list and every recovery is a send to engaged readers only. Those swings are a choice of audience, not a change in readers. The real change is on the right: from mid August the engaged-only sends fall too, and the audience was then widened (277k on Sep 9, 376k on Sep 28), which pushes the rate down further.</p>
+<p>Until July, every dip to around 25% is a send to the whole list and every recovery is a send to engaged readers only. Those swings are a choice of audience, not a change in readers. The real change is on the right: from mid August the engaged-only sends fall too, and the audience was then widened ({k(sep9["recipients"])} on Sep 9, {k(sep28["recipients"])} on Sep 28), which pushes the rate down further.</p>
 
 <h2>2. From mid August, Gmail and everyone else part ways</h2>
 <div class="fig"><h3>Open rate by mailbox provider, engaged-audience sends</h3>
@@ -347,20 +353,20 @@ def build() -> str:
 <div class="legend"><span><i class="k-b1"></i>Sends that opened at 15% or more</span><span><i class="k-b2"></i>Sends that opened under 15%</span></div>
 {chart_volume()}</div>
 <ul>
-<li><b>Jul 1:</b> the main newsletter starts sending from this domain. Until then it carried OHI only, 3 or 4 sends a month.</li>
-<li><b>Jul 14:</b> first sign. OHI to the whole list ({jul14["recipients"]:,}) gets {pct(jul14["gmail_rate"], 1)} at Gmail, against 23% to 27% for the seven whole-list sends before it, and fewer opens in total than the engaged-only send a week later.</li>
-<li><b>Jul 30:</b> the book-launch email is the first where Gmail collapses against the rest (ratio {jul30["ratio"]:.2f}).</li>
+<li><b>Jul 1:</b> the main newsletter starts sending from this domain. Until then it carried little besides OHI, 3 or 4 sends a month.</li>
+<li><b>Jul 14:</b> first sign. OHI to the whole list ({jul14["recipients"]:,}) gets {pct(jul14["gmail_rate"], 1)} at Gmail, against {pct(min(whole_before_g))} to {pct(max(whole_before_g))} for the {len(whole_before_g)} whole-list sends before it, and fewer opens in total than the engaged-only send a week later.</li>
+<li><b>Jul 30:</b> the book-launch email gets a Gmail ratio of {jul30["ratio"]:.2f}. The main newsletter of Jul 1 had {by_date(OTHER, "2026-07-01")["ratio"]:.2f}.</li>
 <li><b>Aug 10:</b> OHI goes to {aug10["recipients"]:,} people, the largest send from this domain up to then. It returns {abs(pairs[-1]["extra_unique_opens"]):,} fewer opens than the Aug 5 send to {aug5["recipients"]:,}.</li>
 <li><b>Aug 18 and Aug 25:</b> on the engaged audience, Gmail goes {pct(aug5["gmail_rate"], 1)}, {pct(aug18["gmail_rate"], 1)}, {pct(aug25["gmail_rate"], 1)}. The other providers go {pct(aug5["control_rate"], 1)}, {pct(aug18["control_rate"], 1)}, {pct(aug25["control_rate"], 1)}.</li>
-<li><b>September:</b> {months["2026-09"]["sends"]} sends and {months["2026-09"]["delivered"] / 1e6:.1f}M emails, of which {months["2026-09"]["low_open_delivered"] / 1000:.0f}k in three sends that opened under 15% (the dating app update, the "everyone else" half of a tool launch at {pct(sep10o["open_rate"], 1)}, and a re-launch to non-openers). OHI's engaged audience is widened in the same weeks.</li>
-<li><b>Oct 22 and Oct 29:</b> the main newsletter goes to {oct22["recipients"]:,} people, then a resend to {oct29["recipients"]:,} opens at {pct(oct29["open_rate"], 1)} ({pct(oct29["gmail_rate"], 1)} at Gmail).</li>
+<li><b>September:</b> {months["2026-09"]["sends"]} sends and {months["2026-09"]["delivered"] / 1e6:.1f}M emails, of which {months["2026-09"]["low_open_delivered"] / 1000:.0f}k in three sends that opened under 15% (the dating app update at {pct(sep1o["open_rate"], 1)}, the "everyone else" half of a tool launch at {pct(sep10o["open_rate"], 1)}, and its re-launch four days later). OHI's engaged audience is widened in the same weeks.</li>
+<li><b>Oct 22 and Oct 29:</b> the main newsletter goes to {oct22["recipients"]:,} people, then an article already sent to engaged readers goes to the {oct29["recipients"]:,} subscribers who had not received it, the least engaged part of the list, and opens at {pct(oct29["open_rate"], 1)} ({pct(oct29["gmail_rate"], 1)} at Gmail).</li>
 </ul>
 <p><b>Since July, mailing more people no longer produces more opens.</b> Each whole-list OHI send, compared with the nearest send to the narrow engaged audience:</p>
 <div class="scroll"><table><tr><th>Whole-list send</th><th class="n">Recipients</th><th>Nearest engaged-only send</th><th class="n">Recipients</th><th class="n">Extra unique opens</th><th class="n">Extra Gmail opens</th></tr>{pair_rows}</table></div>
-<p>The old sending domain (info@clearerthinking.net) went through the same thing earlier. Its Gmail ratio was {ct["2026-01-08"]["ratio"]:.2f} on Jan 8, then {ct["2026-02-17"]["ratio"]:.2f} on Feb 17, {ct["2026-03-19"]["ratio"]:.2f} on Mar 19 and {ct["2026-06-02"]["ratio"]:.2f} on Jun 2, while it carried the whole-list sends and the next-day resends to non-openers. The pattern moved to the OHI domain along with those sending habits.</p>
+<p>The old sending domain (info@clearerthinking.net) went through the same thing earlier. Its Gmail ratio was {ct["2026-01-08"]["ratio"]:.2f} on Jan 8, then {ct["2026-02-17"]["ratio"]:.2f} on Feb 17, {ct["2026-03-19"]["ratio"]:.2f} on Mar 19 and {ct["2026-06-02"]["ratio"]:.2f} on Jun 2, while it carried the main newsletter's whole-list sends. The pattern moved to the OHI domain along with those sending habits.</p>
 
 <h2>4. Are Gmail readers gone, or just not counted?</h2>
-<p>Partly not counted. Opens overstate the damage. Gmail's click rate, measured against the other providers' click rate on the same send, was {CL["ratio_before"]:.2f} before the break, {CL["ratio_after_aug_sep"]:.2f} from Aug 18 to Sep 28 and {CL["ratio_october"]:.2f} in October. So through September the Gmail readers who click were still receiving and reading OHI, while recorded opens had already halved. In October Gmail clicks are down by about a fifth as well ({CL["gmail_per_10k_october"]:.0f} per 10,000 delivered, from {CL["gmail_per_10k_before"]:.0f}).</p>
+<p>Partly not counted. Opens overstate the damage. Gmail's click rate, measured against the other providers' click rate on the same send, was {CL["ratio_before"]:.2f} before the break, {CL["ratio_after_aug_sep"]:.2f} from Aug 18 to Sep 28 and {CL["ratio_october"]:.2f} in October. So through September the Gmail readers who click were still receiving and reading OHI, while Gmail's opens measured the same way were already down by {pct(1 - DP["ratio_after_aug_sep"] / SP["mean_before"])}. In October opens are down by {pct(1 - DP["ratio_october"] / SP["mean_before"])} and clicks by {pct(1 - CL["ratio_october"] / CL["ratio_before"])} (in absolute terms, {CL["gmail_per_10k_october"]:.0f} Gmail clicks per 10,000 delivered, from {CL["gmail_per_10k_before"]:.0f}).</p>
 <p>That pattern is what you get when Gmail moves a sender's mail out of the inbox (to Spam or Promotions) or stops loading its images, starting with the least engaged recipients. All three are Gmail reacting to a domain whose mail many recipients ignore. Which of the three it is cannot be read from beehiiv: Google Postmaster Tools and an inbox placement test can show it.</p>
 
 <h2>5. What I checked and ruled out</h2>
@@ -377,10 +383,10 @@ def build() -> str:
 <h2>6. What does not add up yet</h2>
 <ul>
 <li><b>The segments have been edited and I cannot see the history.</b> The Oct 20 send targeted "OHI Audience - Engaged Subs" and reached {oct20["recipients"]:,} people, but that segment today is defined as an open rate of 30% or more and holds about 161k. "OHI Audience - All Subscribers" reached 358,641 on Oct 13 and holds about 660k today. I worked from recipient counts, not segment names.</li>
-<li><b>Two halves of the same email get very different results.</b> On Oct 8 the half sent first opened at {pct(SPLIT_OCT8[0], 1)} and the half sent 71 minutes later at {pct(SPLIT_OCT8[1], 1)}. On Nov 5 the first half is at {pct(nov5[0]["open_rate"], 1)} and the second at {pct(nov5[1]["open_rate"], 1)}; the gap is all Gmail ({pct(nov5[0]["gmail_rate"], 1)} against {pct(nov5[1]["gmail_rate"], 1)}) while the other providers lean the opposite way ({pct(nov5[0]["control_rate"], 1)} against {pct(nov5[1]["control_rate"], 1)}). Nov 5 has under a day of data. If the halves are random, Gmail is making different bulk decisions about identical emails, which is filtering and not reader behaviour. It also means the rating-box order test those variants were built for is confounded.</li>
-<li><b>OHI does somewhat worse at Gmail than the main newsletter from the same domain.</b> Gmail opened the main newsletter at {pct(MAIN_NEWSLETTER_GMAIL["2026-08-20"], 1)} on Aug 20 and {pct(MAIN_NEWSLETTER_GMAIL["2026-09-18"], 1)} on Sep 18; OHI got {pct(aug25["gmail_rate"], 1)} on Aug 25 and {pct(sep21["gmail_rate"], 1)} on Sep 21. One known difference: since Aug 5 every OHI email carries your second tracking pixel on a vercel.app address and the main newsletter does not. That is a hypothesis, not a finding (see the fourth idea below).</li>
+<li><b>Two halves of the same email get very different results.</b> On Oct 8 the half sent first opened at {pct(SPLIT_OCT8[0], 1)} and the half sent 71 minutes later at {pct(SPLIT_OCT8[1], 1)}. On Nov 5 the first half is at {pct(nov5[0]["open_rate"], 1)} and the second at {pct(nov5[1]["open_rate"], 1)}; the gap is all Gmail ({pct(nov5[0]["gmail_rate"], 1)} against {pct(nov5[1]["gmail_rate"], 1)}) while the other providers lean the opposite way ({pct(nov5[0]["control_rate"], 1)} against {pct(nov5[1]["control_rate"], 1)}). Nov 5 has under a day of data. If the halves are random, Gmail is making different bulk decisions about identical emails, which is filtering and not reader behaviour. It also confounds whatever those variants were testing (their names suggest the order of the rating box).</li>
+<li><b>OHI does somewhat worse at Gmail than the main newsletter from the same domain.</b> Gmail opened the main newsletter at {pct(MAIN_NEWSLETTER_GMAIL["2026-08-20"], 1)} on Aug 20 and {pct(MAIN_NEWSLETTER_GMAIL["2026-09-18"], 1)} on Sep 18; OHI got {pct(aug25["gmail_rate"], 1)} on Aug 25 and {pct(sep21["gmail_rate"], 1)} on Sep 21. One known difference: since Aug 5 every OHI email carries your second tracking pixel on a vercel.app address and the main newsletter does not; the one main-newsletter email that did carry it, on Jul 30, is the one with the {jul30["ratio"]:.2f} ratio above. That is a hypothesis, not a finding (see the fourth idea below).</li>
 <li><b>An early step in March.</b> Between Feb 3 and Mar 10, after three whole-list sends in a row, Gmail went from {pct(feb3["gmail_rate"], 1)} to {pct(mar10["gmail_rate"], 1)} on the engaged audience while the others stayed at {pct(feb3["control_rate"], 1)} and {pct(mar10["control_rate"], 1)}. Same mechanism, smaller scale.</li>
-<li><b>beehiiv's spam-report counts say nothing about Gmail.</b> Gmail does not pass individual complaints back to senders, so the low counts on these sends (9 to 26 per send) come from the other providers.</li>
+<li><b>beehiiv's spam-report counts say nothing about Gmail.</b> Gmail does not pass individual complaints back to senders, so the low counts on these sends ({min(m["spam_reports"] for m in OHI)} to {max(m["spam_reports"] for m in OHI)} per send) come from the other providers.</li>
 <li><b>No OHI has gone out since Oct 20</b> (as of Nov 6), so there is no reading yet on the current, stricter segment.</li>
 </ul>
 
@@ -388,7 +394,7 @@ def build() -> str:
 {ideas()}
 
 <h2>Method and data</h2>
-<p>Rates are unique opens divided by delivered. Totals per send come from the beehiiv API; the per-provider rows come from beehiiv's deliverability breakdown and cover the six largest providers. "Other providers" is Yahoo, Hotmail, Outlook and AOL pooled (about 13k to 23k recipients per engaged send); iCloud is excluded because Apple's privacy feature makes its open rate meaningless. A send counts as "whole list" at {DP["whole_list_min"]:,} recipients or more; the other providers' open rate confirms the two groups are cleanly apart (25% to 31% against 46% to 67%). The "October if Gmail had kept its usual gap" figure multiplies each October send's other-provider open rate by the median pre-break ratio ({C["baseline_ratio"]:.2f}) and leaves everything else as observed; this assumes a wider audience would dilute Gmail and the other providers in the same proportion. The split of the {100 * total_drop:.0f}-point fall into {100 * drift:.0f}, {100 * wider:.1f} and {100 * gmail_part:.0f} points follows from those definitions. Source, data and tests: <code>reports/ohi_open_rate_drop_2026-11-06_src/</code> and <code>tests/test_ohi_open_rate_drop.py</code>.</p>
+<p>Rates are unique opens divided by delivered. Totals per send come from the beehiiv API; the per-provider rows come from beehiiv's deliverability breakdown and cover the six largest providers. "Other providers" is Yahoo, Hotmail, Outlook and AOL pooled (about 13k to 23k recipients per engaged send); iCloud is excluded because Apple's privacy feature makes its open rate meaningless. A send counts as "whole list" at {DP["whole_list_min"]:,} recipients or more; the other providers' open rate confirms the two groups are cleanly apart (25% to 31% against 46% to 67%). The "October if Gmail had kept its usual gap" figure multiplies each October send's other-provider open rate by the median pre-break ratio ({C["baseline_ratio"]:.2f}) and leaves everything else as observed; this assumes a wider audience would dilute Gmail and the other providers in the same proportion. The split of the {100 * total_drop:.0f}-point fall into {100 * drift:.0f}, {100 * wider:.0f} and {100 * gmail_part:.0f} points follows from those definitions. Source, data and tests: <code>reports/ohi_open_rate_drop_2026-11-06_src/</code> and <code>tests/test_ohi_open_rate_drop.py</code>.</p>
 <details><summary>Every OHI send of 2026</summary><div class="scroll"><table>
 <tr><th>Sent</th><th>Subject</th><th>Audience</th><th class="n">Recipients</th><th class="n">Open rate</th><th class="n">Gmail</th><th class="n">Other providers</th><th class="n">Gmail / others, opens</th><th class="n">Gmail / others, clicks</th></tr>{data_rows}</table></div></details>
 <details><summary>Monthly mail volume from ohi.clearerthinking.net</summary><div class="scroll"><table>
