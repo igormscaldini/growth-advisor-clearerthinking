@@ -229,8 +229,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - `reports/welcome_drip_copy_2026-10-28_src/`: personalized copy for the beehiiv "[Drip Campaign] New Subscribers" automation
   (`drip_copy.md` is the source; `build_doc_html.py --split` renders the three Google Docs, Drive folder
   "New Subscribers drip copy (2026-10-28)"). Branch on the custom field `last_tool_tried` (display names, 98% filled);
-  `first_tool_tried` is never populated. The live "Big news" coaching email has a mangled final link and is sent by BOTH
-  that automation and "[Drip Campaign] Tried Attraction Study"; it unsubscribes 1.3% of recipients per send.
+  `first_tool_tried` is never populated. Checked 2026-11-06: the old "Big news" copy is still live (its mangled link was
+  fixed in the Oct 28 republish; the "Tried Attraction Study" automation that also sent it is gone) and unsubscribes 1.4%
+  per send; email 4 has not sent since 2026-07-08 because its branch tests a tag that no longer exists. beehiiv's
+  automation `click_rate` is unique clicks / unique OPENS and counts footer preferences/unsubscribe-link clicks (84% of
+  "Big news" clickers) plus ~20-25 scanner mailboxes that click every link: judge emails on per-URL unique clicks
+  (`list_automation_emails` with `include_stats`, a 2 MB response to parse from the saved file).
 - `.claude/skills/ct-infographic/` (skill, 2026-11-06): redraws any image or diagram in CT's flat infographic style as HTML -> PNG
   (~/Downloads). Its kit `scripts/ct_infographic.py` is the single source for the palette, title, logo footer and export; each
   graphic is a `reports/<slug>_<date>_src/build.py` that imports it (first one: the integrative-complexity staircase, landscape +
