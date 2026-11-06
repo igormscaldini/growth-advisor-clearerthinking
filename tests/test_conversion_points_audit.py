@@ -99,6 +99,27 @@ def test_sub_tier():
     assert A.sub_tier({**ok, "status": "incomplete_expired"}) is None
     assert A.sub_tier({**ok, "email": "joshrcastle+ga4tests@gmail.com"}) is None
     assert A.sub_tier({**ok, "product_name": "Clearer Thinking Supporter"}) is None     # the legacy, pre-CT+ product
+    # team tests are cancelled the same day; a real customer who leaves after five days still counts
+    assert A.sub_tier({**ok, "status": "canceled", "created": "2026-10-15 13:50:28", "ended": "2026-10-15 14:02:00"}) is None
+    assert A.sub_tier({**ok, "status": "canceled", "created": "2026-10-28 10:00:00", "ended": "2026-11-02 08:00:00"}) == "navigator"
+
+
+def test_article_paywall_checkouts_before_the_first_send_are_tests(tmp_path):
+    _write_raw(tmp_path, positive=True)
+    st = json.loads((tmp_path / "stripe.json").read_text())
+    art = "https://programs.clearerthinking.org/members-only-content-supplement-paradox/"
+    mk = lambda sid, created, status, sub: {"id": sid, "created": created, "mode": "subscription", "status": status, "amount_total": 900,  # noqa: E731
+                                            "email": f"{sid}@example.com", "success_url": art, "metadata": {}, "pi": None, "subscription": sub}
+    sub = lambda sid, created, ended, status: {"id": sid, "created": created, "ended": ended, "status": status, "email": f"{sid}@example.com",  # noqa: E731
+                                               "amount": 900, "product": "p", "product_name": "Clearer Thinking Plus - Supporter", "cancel_reason": None}
+    st["sessions"] += [mk("cs_pre", "2026-10-15 13:50:00", "complete", "sub_pre"),      # before the send: a rehearsal
+                       mk("cs_ok", "2026-10-17 02:25:00", "complete", "sub_ok"),        # a real reader
+                       mk("cs_left", "2026-10-23 13:42:00", "expired", None)]           # a real reader who did not pay
+    st["subs"] += [sub("sub_pre", "2026-10-15 13:50:30", "2026-10-15 13:58:00", "canceled"), sub("sub_ok", "2026-10-17 02:25:30", None, "active")]
+    (tmp_path / "stripe.json").write_text(json.dumps(st))
+    dp = A.build_datapoints(tmp_path)
+    assert dp["ctplus_funnel"]["article_paywall"] == {"stripe_checkouts": 2, "stripe_completed": 1, "paid_subs": 1}
+    assert dp["ctplus_funnel"]["by_tier"]["supporter"]["paid_subs"] == 0          # the paywall sale is not double counted in the sign-up flow
 
 
 @pytest.mark.parametrize("amount,refunded,desc,status", [

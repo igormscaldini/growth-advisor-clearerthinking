@@ -176,28 +176,129 @@ Other things visible in the provider rows:
 
 ## 5. Sending setup
 
-Source so far: `get_publication`, `get_publication_settings`.
+Sources: `get_publication`, `get_publication_settings`, `get_workspace`, `dig` run 2026-11-06 17:46 UTC (default resolver, 8.8.8.8, 1.1.1.1 and the authoritative ns1.hover.com / ns1.wix.com), and two files in this repo for history.
 
-- Email (sending) domain configured on the publication: `ohi.clearerthinking.net`, status reported by beehiiv: `warming_up`.
-- Branded link (click-tracking) domain: `elink7ea.clearerthinking.net`, status `live`.
+What beehiiv reports:
+- Email (sending) domain configured on the publication: `ohi.clearerthinking.net`, status reported by beehiiv: `warming_up`. Only one email domain is attached to the publication today. beehiiv's help centre describes "Smart Warming" as automatic for every custom domain (`search_documentation`, article "Smart Warming and how it applies to you"); the tool does not say why a domain in use since at least Dec 2025 still shows `warming_up`, or what share of volume that affects.
+- From address: `clearerthinking@ohi.clearerthinking.net` (recorded for the Aug 13 2026 split test in `reports/newsletter_send_strategy_2026-09-25_src/datapoints.json`; the connector does not expose the From address per post, so I could not confirm it for each recent send). Sender name: "ClearerThinking.org"; `use_post_author_name: false`.
+- The older sending identity `info@clearerthinking.net` carried the main newsletter until 2026-07-01, when the main newsletter moved onto the ohi domain (same repo sources; verified claim in the brief). Monthly volume delivered from the ohi domain went from about 0.9M (June 2026) to 2.4M (July), 2.5M (August), 3.4M (September) and 2.8M (October), per `reports/ohi_open_rate_drop_2026-11-06.html`.
+- Reply-to address: could not determine (not exposed by `get_publication_settings` or `get_post`).
+- Branded link (click-tracking) domain: `elink7ea.clearerthinking.net`, status `live` (CNAME to `branded-link.beehiiv.com`).
 - Web domain: none (the beehiiv site lives at clearerthinking.beehiiv.com). `white_labeled: true`, private branding on.
-- Sender name: "ClearerThinking.org"; `use_post_author_name: false`.
+- Workspace plan: Enterprise, `max_subscriptions` 700,000. The publication has 678,349 active subscribers, 96.9% of that ceiling (21,651 left; at the current net growth of about 28k per 4 weeks that is roughly three weeks, assuming the cap counts active subscribers in this publication only, which the tool does not state; the workspace also holds three small sister publications).
+- Dedicated IP: could not determine (no tool exposes IP configuration).
 - Publication time zone: Eastern Time (US and Canada).
-- DNS records: PENDING.
+
+### DNS (raw records)
+
+| Name | Type | Record |
+|---|---|---|
+| clearerthinking.net | TXT (SPF) | `v=spf1 include:_spf.hostedemail.com include:hover.com include:servers.mcsv.net include:mailgun.org ~all` |
+| clearerthinking.net | MX | `10 mx.hover.com.cust.hostedemail.com.` |
+| _dmarc.clearerthinking.net | TXT | `v=DMARC1; p=quarantine;` (no `sp=`, no `rua=`, no `ruf=`, no `pct=`) |
+| default._bimi.clearerthinking.net | TXT | none |
+| s1._domainkey.clearerthinking.net, s2._domainkey.clearerthinking.net | CNAME | `s1.domainkey.u45518438.wl189.sendgrid.net.`, `s2.domainkey.u45518438.wl189.sendgrid.net.` (SendGrid DKIM, the infrastructure beehiiv sends through) |
+| k2._domainkey.clearerthinking.net, k3._domainkey.clearerthinking.net | CNAME | `dkim2.mcsv.net.`, `dkim3.mcsv.net.` (Mailchimp DKIM, left from the previous platform) |
+| ohi.clearerthinking.net | TXT, MX, CNAME, NS | none of its own. It answers only through a wildcard A record on the zone (`*.clearerthinking.net` A `216.40.34.41`, TTL 900) |
+| _dmarc.ohi.clearerthinking.net | TXT | none (only the wildcard A), so receivers fall back to the organisational record `p=quarantine` |
+| s1._domainkey.ohi.clearerthinking.net, s2._domainkey.ohi.clearerthinking.net | CNAME / TXT | none (only the wildcard A) |
+| default._bimi.ohi.clearerthinking.net | TXT | none |
+| elink7ea.clearerthinking.net | CNAME | `branded-link.beehiiv.com.` |
+| clearerthinking.org | TXT (SPF) | `v=spf1 include:_spf.hostedemail.com include:hover.com include:servers.mcsv.net ~all` (plus ahrefs, facebook, prowly and google verification strings) |
+| clearerthinking.org | MX | `10 mx.hover.com.cust.hostedemail.com.` |
+| _dmarc.clearerthinking.org | TXT | `v=DMARC1; p=none;` (no `rua=`) |
+| default._bimi.clearerthinking.org | TXT | none |
+| s1._domainkey.clearerthinking.org, s2._domainkey.clearerthinking.org | CNAME | chain through `...s018.ascendbywix.com.` to `s1.domainkey.u55926038.wl039.sendgrid.net.` / `s2...` (Wix's SendGrid account, not beehiiv's) |
+| k1, k2, k3._domainkey.clearerthinking.org | CNAME | `dkim.mcsv.net.`, `dkim2.mcsv.net.`, `dkim3.mcsv.net.` (Mailchimp) |
+| Nameservers | NS | clearerthinking.net: ns1/ns2.hover.com; clearerthinking.org: ns1/ns2.wix.com |
+
+Reading of the DNS, limited to what the records show:
+- The newsletter's DKIM lives at the root `clearerthinking.net` (SendGrid selectors s1 and s2). The sending subdomain `ohi.clearerthinking.net` has no SPF, DKIM, DMARC or MX record of its own; mail from `clearerthinking@ohi.clearerthinking.net` can still pass DMARC through relaxed alignment with the root domain's DKIM. `reports/ohi_open_rate_drop_2026-11-06.html` checked headers of delivered copies (Aug 5, Aug 26, Oct 21) and found SPF and DKIM passing and one-click unsubscribe present.
+- DMARC: `p=quarantine` on .net and `p=none` on .org, and neither has a `rua=` reporting address, so nobody receives DMARC aggregate reports.
+- No MX on `ohi.clearerthinking.net`: a reply typed to the From address has no mail server to go to unless a different reply-to is set (could not determine the reply-to).
+- No BIMI record on any of the three names.
+- The .net SPF still authorises Mailchimp (`servers.mcsv.net`) and Mailgun (`mailgun.org`), and Mailchimp DKIM keys are still published on both domains, although the list moved to beehiiv in 2025.
+- The wildcard A record makes every made-up subdomain of clearerthinking.net resolve, which hides missing records from simple checks.
+- Whether the domain is registered in Google Postmaster Tools: could not determine from DNS (the root has one `google-site-verification` TXT; that string is used for several Google products).
 
 ## 6. Sign-up and opt-in
 
-Source so far: `get_publication_settings`.
+Sources: `get_publication_settings`, `get_opt_in_email`, `list_subscribe_forms`, `list_signup_flows`, `list_custom_fields`, `list_tags`, `list_newsletter_lists`.
 
-- Double opt-in: OFF (`double_opt_in: false`).
+- Double opt-in: OFF (`double_opt_in: false`). A confirmation email template exists ("Confirm your Clearer Thinking subscription", `get_opt_in_email`) but is not in use.
 - Smart nudge (beehiiv's reminder to unconfirmed subscribers): off (`smart_nudge: false`).
 - `require_subscriber_approval: false`; `allow_subscription_pauses: false` (a reader cannot pause instead of unsubscribing).
-- Subscriber tags that exist (`get_publication`): attractiveness-study, career_workshop_sep2026, dating_app, unanswered_outreach.
-- PENDING: forms, signup flows, custom fields, preference lists, opt-in email.
+- How people actually get on the list: 97% of new subscribers in the last 4 weeks arrived through the API from CT's own tools (37,992 of the 39,074 still active; section 1), not through a beehiiv form. So beehiiv's form-level protections do not apply to most sign-ups; whatever validation exists lives in the tools' own code (GuidedTrack programs calling the beehiiv API), which this audit did not inspect.
+- Subscribe forms (7, all beehiiv "v2" inline forms): "Clearer Thinking - Subscribe" and "One Helpful Idea - Subscribe" (Dec 2025; the OHI form has unpublished draft changes), "Critical Thinking Challenge", "Decision Making Challenge", "Best of CT For Youtube Viewers", "Meditation Website" (all Dec 2025), "Workshop - Spencer's #1 Self-Help" (May 2026). The embed channel accounts for 1,154 active subscribers in total.
+- Signup flows (1): "Recommendations Flow", the default; after signing up on the beehiiv page a new subscriber is shown the recommendations modal. No survey, preference or welcome step.
+- Bot protection or email validation: nothing is exposed by the settings tools (no captcha, validation or throttling setting is returned), so could not determine. Indirect evidence that junk gets in: beehiiv itself created a segment of 772 "Subscribers using disposable/throwaway domains" on 2026-02-19 that was never actioned (section 8), and eight look-alike domains with zero opens are still being mailed (section 4).
+- Preference lists: none. `list_newsletter_lists` (archived included) returns 0, so beehiiv's native newsletter lists / preference centre is not used.
+- What stands in for preferences: two boolean custom fields created 2025-08-20, `clearerthinking.org` ("ClearerThinking.org") and `one_helpful_idea` ("One Helpful Idea"). Every send audience is built on them: "CT Audience - All Subscribers" (666,924) requires the first to be true, "OHI Audience - All Subscribers" (660,233) the second. 19,892 active subscribers have both set to false and receive neither newsletter (segment "Not OHI or CT Audience But Subscribed", last processed 2026-10-22). Whether a reader can change these two flags on their own (a manage-preferences page) could not be determined from the connector. There is no flag for events, promotions or sponsor emails, so a reader cannot opt out of coaching promos or workshop invitations while staying on the newsletter.
+- Custom fields (35). Grouped by use:
+  - Audience flags: `clearerthinking.org`, `one_helpful_idea`, `podcast`, `dating_app_updates`, `email_test_group`.
+  - Tool history: `last_tool_tried`, `first_tool_tried` (never populated, per the project memory note), `tools_tried_(pipe_separated)`, `tools_tried_(deprecated)` (a 95-option list), `tags_(comma_separated)`.
+  - Acquisition: `utm_sources_(comma_separated)`, `utm_media_(comma_separated)`, `utm_campaigns_(comma_separated)` (multi-touch), `subsource`, `mla_tags_(comma_separated)`, `leaf`, `bluedot_subs`.
+  - Purchases and membership: `personality_test_pdf_purchase`, `cognitive_assessment_purchase`, `clearer_thinking_plus_tier` and `supporter_tier` (two list fields with the same three options: Supporter, Explorer, Navigator).
+  - Events and programmes: `7_day_critical_thinking_challenge`, `7_day_decision_making_challenge`, `disagreement_workshop_sign_ups_(2025)`, `form_new_habits_workshop`, `meditation`, `beta_testers`, `beta_tester_interviews`.
+  - Feedback: `newsletter_rating`, `newsletter_rating___open_question`.
+  - Migration: `all_unsubs_from_mailchimp` (boolean, created 2025-11-13).
+  - Identity: `first_name`, `last_name`, `company`. Leftover: `any_arbitrary_text_value`.
+- Tags (4): `attractiveness-study` (192,989 subscribers), `dating_app` (72,910), `career_workshop_sep2026` (1,509), `unanswered_outreach` (11).
 
 ## 7. Automations
 
-PENDING.
+Sources: `list_automations` (18 automations: 8 live, 9 inactive, 1 draft; a second call filtered on the `unengaged` trigger returned 0), `get_automation` and `get_automation_stats` for the New Subscribers drip, the Sunset Campaign, Dating App Updates and the CT+ welcome series. For the other 14 only the list-level figures were pulled (trigger type, enrolled count, average open rate); their steps were not read.
+
+| Automation | State | Trigger | Emails | Enrolled all time | In progress | Avg open rate | Class |
+|---|---|---|---|---|---|---|---|
+| [Drip Campaign] New Subscribers | live (republished 2026-10-28) | every signup, no conditions | 4 | 119,302 | 45,673 | 27.1% | welcome/onboarding (in practice mostly coaching sales) |
+| [Drip Campaign] Dating App Updates | live (2026-10-22) | entering segment "[Drip Campaign] Dating App Updates" | 1 | 31,156 | 0 | 18.7% | other (product update) |
+| Decision Making Crash Course | live | signup | not read | 834 | 0 | 44.4% | other (email course) |
+| [Drip Campaign] Welcome Email To Clearer Thinking Plus | live (2026-09-28) | entering segment "Clearer Thinking Plus Members" | 5 (welcome, coaching testimonials, 3 tier-specific check-ins) | 179 | 26 | 66.7% | paid-member onboarding |
+| Bonus To Youtube Viewers | live | signup | not read | 154 | 0 | 48.1% | other (lead magnet) |
+| New Subscribers (Meditation Form) | live (2025-12-27) | signup | not read | 116 | 0 | 0.0% | other |
+| Critical Thinking Crash Course | live | signup, manual | not read | 73 | 3 | 34.8% | other (email course) |
+| [Drip Campaign] Cognitive Assessment Purchases | live (2026-09-22) | segment action | not read | 68 | 0 | 38.2% | other (post-purchase) |
+| [Drip Campaign] Tried Personality Test | inactive (last edit 2026-09-22) | segment action | not read | 25,796 | 0 | 39.9% | drip by tool |
+| [Drip Campaign] Tried Rationality Test | inactive (2026-09-22) | segment action | not read | 14,377 | 0 | 19.6% | drip by tool |
+| [Drip Campaign] Tried Unique Traits Test | inactive (2026-08-12) | segment action | not read | 4,139 | 0 | 15.2% | drip by tool |
+| [Drip Campaign] Tried Intrinsic Values Test | inactive (2026-08-12) | segment action | not read | 4,125 | 0 | 29.3% | drip by tool |
+| [Drip Campaign] Tried Philosophical Beliefs | inactive (2026-08-12) | segment action | not read | 4,125 | 0 | 16.8% | drip by tool |
+| [Drip Campaign] Tried Worth of Your Time Calculator | inactive (2026-08-12) | segment action | not read | 4,112 | 0 | 17.1% | drip by tool |
+| [Drip Campaign] Sunset Campaign | inactive (last edit 2026-06-26) | entering segment "[Drip Campaign] Disengaged Subscribers" | 2 | 2,169 completed (first email sent to 21,646) | 0 | 1.5% | sunset/cleanup |
+| [Drip Campaign] Tried Imposter Syndrome Tool | inactive (2026-09-22) | segment action | not read | 412 | 0 | 28.4% | drip by tool |
+| Workshop - Spencer's #1 Self-Help | inactive | signup, manual | not read | 56 | 0 | 10.9% | event/workshop |
+| Josh's Test Automation (Please Ignore!) | draft | manual | 0 | 0 | 0 | 0 | test |
+
+### The New Subscribers drip, step by step (`get_automation`, live workspace)
+
+| Day after sign-up | Step |
+|---|---|
+| 0 | Sets both audience flags to false (`one_helpful_idea` = false, `clearerthinking.org` = false), so a new subscriber is on neither newsletter. No email is sent by this automation at sign-up. |
+| 1 | Email "Big news" (preview: "Get matched with a life coach who aligns with your personality and goals."): a coaching offer is the first automation email a new subscriber receives. |
+| 7 | Sets both audience flags to true: the subscriber joins both the main newsletter and One Helpful Idea. (The send segments also require `signup_date <= NOW() - 1 week`.) |
+| 14 | Email "Does IQ actually matter?" |
+| 28 | Email "Should you have a life coach?" |
+| 42 | Branch on a subscriber tag (tag id not among the 4 tags that exist today); the "yes" arm gets "You can help advance psychology research". 2,672 went "yes", 60,153 "no". |
+
+Per-email results (`get_automation_stats`):
+
+| Email | All time: sent | All time: open rate | All time: spam rate | Last 4 weeks: sent | Last 4 weeks: open rate |
+|---|---|---|---|---|---|
+| Big news (day 1) | 111,605 | 29.27% | 0.03% | 41,261 | 33.36% |
+| Does IQ actually matter? (day 14) | 113,747 | 25.55% | 0.01% | 37,992 | 25.57% |
+| Should you have a life coach? (day 28) | 82,163 | 22.71% | 0.01% | 29,539 | 20.40% |
+| You can help advance psychology research (day 42, tagged only) | 2,656 | 59.65% | 0.00% | not listed | not listed |
+
+So from automations alone a new subscriber gets 1 email in the first 7 days (the coaching offer) and 3 in the first 30 days (two of the three are about coaching), and starts receiving the newsletters on day 7. Whether beehiiv's built-in welcome email (a publication setting, separate from automations) is switched on could not be determined: the settings tool does not return it. Unsubscribe rates per automation email: see the line added below once pulled; the project memory note of 2026-10-28 recorded 1.34% unsubscribes per send for "Big news" against 0.21% to 0.26% for the other drip emails.
+
+### Sunset and win-back
+
+- No win-back or re-engagement automation is live. No automation uses beehiiv's `unengaged` trigger.
+- One sunset flow exists and is switched off: "[Drip Campaign] Sunset Campaign". Published 2026-06-18, last enrolment 2026-06-26, last edited 2026-06-26, state inactive. Trigger: entering the segment "[Drip Campaign] Disengaged Subscribers" (126,284 members, segment status "failed"). Steps: email "Do you still want to hear from us?"; wait 7 days; if no click in the last 10 days, email "We're going to stop emailing you"; wait 10 days; if no open in the last 10 days, set the subscription to inactive; exit.
+- What it did in its 8 days (`get_automation_stats`, all time): first email sent to 21,646 (delivered 21,131, 1.83% opened), second to 19,296 (delivered 18,851, 1.19% opened). At the final "set inactive" step the counts are 11 completed and 2,678 recorded as unsubscribed; the 10-day wait before it shows 615 completed and 16,735 failed, which is what you would see if the automation was switched off while most people were still waiting. So about 21.6k of the roughly 126k disengaged subscribers were warned, and at most a few thousand were actually removed. The exact number deactivated by the flow could not be determined from these counts.
+- The six per-tool drips built on 2026-08-11 (plus the Imposter Syndrome one) are all inactive; since Sep 22 every tool sign-up gets the same generic New Subscribers drip. The copy for a version personalised by `last_tool_tried` exists in the repo (`reports/welcome_drip_copy_2026-10-28_src/`) but the live automation has no branch on that field.
+- Paid-member onboarding: live ("Welcome Email To Clearer Thinking Plus": welcome email at once, coaching testimonials after 2 days, a tier-specific check-in after a further 21 days; 179 enrolled, 66.7% average open rate).
 
 ## 8. Hygiene evidence
 
@@ -205,7 +306,16 @@ PENDING.
 
 ## 9. Reader feedback and preferences
 
-PENDING.
+Sources: `list_polls`, `list_surveys`, `get_referral_program`, `list_recommendations` (outgoing and incoming), `list_tiers`, `get_publication_stats`.
+
+- Polls: 1, a draft never published ("Welcome Survey": "Which best describes you right now?", created 2026-06-23). No beehiiv poll has ever run.
+- Surveys: 1, a draft with 0 responses ("Help us improve by rating this newsletter", created 2026-01-09). Article ratings are collected outside beehiiv, through a GuidedTrack program linked from each edition (project CLAUDE.md: program 38551, with a separate ratings dashboard); the two `newsletter_rating` custom fields exist in beehiiv, how full they are was not checked.
+- No welcome survey or preference question is asked at sign-up (the only signup flow step is the recommendations modal).
+- Referral program: `enabled: true` but 0 milestones and no rewards configured, so it is switched on and empty. The referral channel accounts for 3 active subscribers all time.
+- Recommendations, outgoing (CT recommending others): 23 records, 6 active (4 free, 2 paid boosts at $2.00 per lead), 20 subscribers driven all time, $1.60 earned.
+- Recommendations, incoming (others recommending CT): 83 records, 67 actively recommending, 599 subscribers gained all time, all free, $0 spent. The largest sources on the first page of results: The How to Live Newsletter (94), vocab with ease (44), The Stoic Systems Thinker (17). CT buys no paid boosts.
+- Paid tiers on beehiiv: 1 active tier, "Supporter" at $9.00 a month, created 2026-10-06 (the same day as two "Monthly Debrief - Testing Paywall" test posts, one of which recorded 1 upgrade). CT+ memberships (Supporter, Explorer, Navigator) are otherwise sold through Stripe and mirrored into beehiiv as custom fields and segments ("Clearer Thinking Plus Members" 161, "Active Supporters" 102). The monthly members email goes to those segments (125 recipients on Oct 3).
+- beehiiv earnings shown by `get_publication_stats`: $1,307.01 all time, $202.50 in the last 4 weeks (the tool does not break this down).
 
 ## Could not determine
 

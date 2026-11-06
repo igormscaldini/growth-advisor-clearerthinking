@@ -33,6 +33,7 @@ UNLINKED_ADS_CAMPAIGN = "20999008925"                     # Google Ads campaign 
 TEST_EMAIL_RE = re.compile(r"igormscaldini|joshrcastle|b\.cobeta|@clearerthinking\.org|sparkwave|\+test|healthcheck", re.I)
 TIER_BY_AMOUNT = {900: "supporter", 2900: "explorer", 9900: "navigator", 17900: "navigator"}
 TOUCH_LOOKBACK_DAYS = 3
+ARTICLE_PAYWALL_FIRST_SEND = "2026-10-16 12:57:00"       # checkouts on the members-only article before this are team tests
 
 
 # ------------------------------------------------------------------ small helpers
@@ -150,10 +151,17 @@ def classify_session(s):
     return "other", real
 
 
+def ended_within_a_day(sub):
+    """The repo's rule for team test subscriptions: cancelled within a day of being created
+    (it has caught every test so far with no false positive; real quick cancellations take days)."""
+    return bool(sub.get("ended")) and (parse_utc(sub["ended"]) - parse_utc(sub["created"])) <= timedelta(days=1)
+
+
 def sub_tier(sub):
     """Tier of a real CT+ subscription, or None (not CT+, never paid, or a team test)."""
     name = sub.get("product_name") or ""
-    if not name.startswith("Clearer Thinking Plus") or sub.get("status") == "incomplete_expired" or is_test_email(sub.get("email")):
+    if (not name.startswith("Clearer Thinking Plus") or sub.get("status") == "incomplete_expired"
+            or is_test_email(sub.get("email")) or ended_within_a_day(sub)):
         return None
     for tier in ("navigator", "explorer", "supporter"):
         if tier in name.lower():
@@ -343,12 +351,18 @@ def build_datapoints(raw_dir):
 
     # ---------- CT+ funnel: sign-up clicks (GT runs) -> checkout (Stripe sessions) -> paid (Stripe subs)
     runs = [r for r in (subscribe_run(x) for x in sub_rows if _in_window(x["Time Started (UTC)"])) if r]
-    sessions = [(s, *classify_session(s)) for s in st["sessions"] if _in_window(s["created"])]
-    article_sub_ids = {s["subscription"] for s, prod, real in sessions if prod == "supporter_article" and s["subscription"]}
+    test_sub_ids = {s["id"] for s in st["subs"] if ended_within_a_day(s)}
+    sessions = []
+    for s in st["sessions"]:
+        if _in_window(s["created"]):
+            prod, real = classify_session(s)
+            real = real and s.get("subscription") not in test_sub_ids and not (prod == "supporter_article" and s["created"] < ARTICLE_PAYWALL_FIRST_SEND)
+            sessions.append((s, prod, real))
+    article_sub_ids = {s["subscription"] for s, prod, real in sessions if prod == "supporter_article" and s["subscription"] and real}
     subs = []
     for s in st["subs"]:
         tier = sub_tier(s)
-        if tier and _in_window(s["created"]):
+        if tier and _in_window(s["created"]) and not (s["id"] in {x["subscription"] for x, prod, real in sessions if prod == "supporter_article" and not real}):
             life_days = (parse_utc(s["ended"]) - parse_utc(s["created"])).days if s.get("ended") else None
             subs.append({**s, "tier": tier, "via_article": s["id"] in article_sub_ids, "life_days": life_days})
     funnel = {}
