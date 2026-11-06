@@ -128,6 +128,15 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   only in the beehiiv UI / MCP connector, not the v2 API; `unique_verified_clicks` is the bot-filtered count.
   Key finding (Aug 2026 split test): the same email got 31% Gmail opens from ohi.clearerthinking.net vs 5%
   from info@clearerthinking.net, so check the sending domain's Gmail reputation first when open rates move.
+- `reports/ohi_open_rate_drop_2026-11-06_src/`: why OHI opens fell 45% -> 21% in 2026 (`assemble_data.py` -> `data.json`,
+  `analysis.py` -> `datapoints.json`, `build_report.py` -> the HTML). Method worth reusing for any open-rate question: compare
+  Gmail with Yahoo+Hotmail+Outlook+AOL INSIDE each send (iCloud excluded, Apple MPP flips it 8% <-> 89%); content, timing and
+  audience hit both, so a falling ratio is Gmail-specific. Finding: the OHI domain's Gmail ratio broke between Aug 5 and Aug 18,
+  2026 (0.62 -> 0.39), seven weeks after the main newsletter and its wide/low-engagement sends moved onto that domain; the old
+  domain did the same in Jan-Feb. Reputation follows sending habits, not the domain name. Gotchas: beehiiv segments get edited
+  with no history (trust recipient counts, not segment names); beehiiv `spam_reports` exclude Gmail (only Google Postmaster Tools
+  has them); per-provider responses are 10-25 KB each, so pull them through subagents that write JSON; `GET /posts/{id}?expand[]=free_email_content`
+  returns the email HTML; the GA4 `email_open` event (Igor's pixel, in every OHI since Aug 5, 2026) is an independent open count.
 - `reports/newsletter_topics_2026-10-02_src/`: 2026 newsletter topic breakdown; `classification.json` is the
   single source (edition grouping, topic, format, why each other send is excluded). Counting editions from
   beehiiv: one edition is often 2-3 posts (segment splits, domain splits, re-sends); post names are internal
