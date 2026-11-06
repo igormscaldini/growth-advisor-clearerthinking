@@ -231,6 +231,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   "New Subscribers drip copy (2026-10-28)"). Branch on the custom field `last_tool_tried` (display names, 98% filled);
   `first_tool_tried` is never populated. The live "Big news" coaching email has a mangled final link and is sent by BOTH
   that automation and "[Drip Campaign] Tried Attraction Study"; it unsubscribes 1.3% of recipients per send.
+- `.claude/skills/ct-infographic/` (skill, 2026-11-06): redraws any image or diagram in CT's flat infographic style as HTML -> PNG
+  (~/Downloads). Its kit `scripts/ct_infographic.py` is the single source for the palette, title, logo footer and export; each
+  graphic is a `reports/<slug>_<date>_src/build.py` that imports it (first one: the integrative-complexity staircase, landscape +
+  square). `Branding assets/` (logo files, Jan 2025 style guide PDF) is gitignored, so the skill carries its own logo copy.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
