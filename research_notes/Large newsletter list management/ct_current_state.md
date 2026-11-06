@@ -2,11 +2,20 @@
 
 Read-only audit, pulled 2026-11-06 through the beehiiv connector (tool named for each fact) plus `dig` for DNS. Publication: "Clearer Thinking" (`pub_d0ed5a5f-...`, created on beehiiv 2025-04-09). Nothing in beehiiv was changed. Aggregates only.
 
-STATUS OF THIS FILE: work in progress (first save). Sections marked PENDING are still being gathered.
+The beehiiv connector worked throughout (no auth errors). Coverage limits are listed under "Could not determine": the main ones are that definitions were pulled for 31 of 123 segments and step-level detail for 4 of 18 automations, and that the connector does not expose the From address, reply-to, IP setup or Gmail-side complaint data. Two in-repo analyses are quoted where they already hold the history: `reports/newsletter_send_strategy_2026-09-25_src/datapoints.json` and `reports/ohi_open_rate_drop_2026-11-06.html` (generated 2026-11-06 02:44pm).
 
 ## Summary of the current state
 
-PENDING (written last, once every section is filled).
+1. Size: 678,349 active subscribers on 2026-11-06 (not the roughly 500k assumed), against a plan ceiling of 700,000. 82% of them carry the import channel and 18% came through the API from CT's tools. Two bulk imports are visible: about +339k in Sep and Oct 2025 and about +179k in Aug 2026. Organic sign-ups run about 500 a day, with a 31k spike on Oct 21 to 23. 140,896 subscriptions have churned all time.
+2. Engagement: by CT's own "engaged" rule (any opens in the last six months) 341,873 of the 666,924 newsletter-audience subscribers qualify and 325,051 (49%) do not. Between about 113k and 146k still-subscribed people, depending on the rule and the date it was last calculated, have never opened a single email.
+3. Who gets what: until Oct 8 the article went to the engaged segment only (about 335k). Since Oct 16 every article has gone to the whole list (625k to 650k), in one send or in waves. One Helpful Idea has gone to about 360k to 375k since late September. Normal cadence is 2 emails a week plus promos to the high-open tiers, but it is irregular: no One Helpful Idea since Oct 20.
+4. Results: engaged-only article sends opened at 26% to 30% in the second half of September; whole-list sends open at 17% to 20% (the lower figure is the Nov 5 edition after less than a day); the non-engaged remainder opened at 2.6% (1.0% at Gmail). Unsubscribes run 1.3 to 5.6 per 1,000 delivered per send (3,457 on the Oct 22 whole-list send); spam reports 0.01 to 0.2 per 1,000, which excludes Gmail.
+5. Gmail is 70% to 82% of recipients and opens far below everyone else: 9% to 23% on engaged sends against 48% to 62% at Microsoft and Yahoo, down from about 36% in July (repo report of Nov 6). On both manual A/B splits the half sent first got 6% to 9% at Gmail and the half sent an hour or two later 23% to 25%.
+6. Sending setup: one sending domain, `ohi.clearerthinking.net`, which beehiiv still labels `warming_up`; it has carried both newsletters since 2026-07-01 (about 2.4M to 3.4M emails a month). DKIM sits on the root domain through SendGrid; DMARC is `p=quarantine` with no reporting address; no BIMI; the sending subdomain has no MX or DNS records of its own. Dedicated IP: unknown.
+7. Sign-up: single opt-in (double opt-in off). 97% of recent sign-ups arrive through the API from tools, not beehiiv forms. No preference lists; two custom-field flags (main newsletter, One Helpful Idea) stand in for them and there is no opt-out for promos or events. New subscribers are held out of both newsletters for 7 days, and the first email they get, 24 hours in, is a coaching offer that loses 1.4% of recipients.
+8. Automations: 18 exist, 8 live. No win-back flow. The one sunset flow ran for 8 days in June 2026 (about 21.6k warned) and has been off since. The per-tool onboarding drips are all inactive.
+9. Hygiene: nothing removes or suppresses inactive subscribers today; exclusion segments are not used on sends; beehiiv's own disposable-domain segment (772 addresses) has sat unactioned since February; imported and organic subscribers are treated identically. beehiiv silently suppresses 9k to 18k addresses per large send.
+10. Feedback and growth features: no beehiiv poll or survey has ever run (ratings are collected through GuidedTrack); the referral program is switched on with no rewards; recommendations have brought 599 subscribers all time; one $9 beehiiv paid tier was created on Oct 6 as a paywall test.
 
 ## 1. List size and composition
 
@@ -219,7 +228,7 @@ Recipient counts do not match the current size of the segment named on the post 
 
 ## 4. Per-mailbox-provider results
 
-Source: `get_post_isp_breakdown` on 10 sends, pulled 2026-11-06 (one call by me, the rest condensed by two helper agents into `isp_breakdown_part1.md` and `isp_breakdown_part2.md` in the session scratchpad; they summed the rows by provider family). The tool lists only recipient domains with 50 or more subscribers, so each row set is a sample (about 83% to 86% of it is Gmail). Opens here include bot and scanner opens (the tool says so), which inflates Apple (Mail Privacy Protection) and some school domains. Open rate = summed opens / summed delivered. Families: Google = gmail.com + googlemail.com; Microsoft = hotmail.*, outlook.*, live.*, msn.com; Yahoo/AOL = yahoo.*, ymail.com, rocketmail.com, aol.com; Apple = icloud.com, me.com, mac.com.
+Source: `get_post_isp_breakdown` on 10 sends, pulled 2026-11-06 (one call read by me in full; all ten condensed by two helper agents, who summed the rows by provider family; their working files were temporary, so the table below is the record). The tool lists only recipient domains with 50 or more subscribers, so each row set is a sample (about 83% to 86% of it is Gmail). Opens here include bot and scanner opens (the tool says so), which inflates Apple (Mail Privacy Protection) and some school domains. Open rate = summed opens / summed delivered. Families: Google = gmail.com + googlemail.com; Microsoft = hotmail.*, outlook.*, live.*, msn.com; Yahoo/AOL = yahoo.*, ymail.com, rocketmail.com, aol.com; Apple = icloud.com, me.com, mac.com.
 
 | Send (UTC) | Post and audience | Google sent | Google open rate | Microsoft open rate | Yahoo/AOL open rate | Apple open rate | Google share of listed sent |
 |---|---|---|---|---|---|---|---|
@@ -237,7 +246,7 @@ Source: `get_post_isp_breakdown` on 10 sends, pulled 2026-11-06 (one call by me,
 Which sending address each post used: could not determine per post. The post record (`get_post`) does not expose the From address or sending domain; the publication has one email domain configured today, `ohi.clearerthinking.net` (section 5).
 
 Gmail trend:
-- Gmail is 81% to 86% of the listed volume and about 70% to 79% of all recipients of each send (Google sent divided by the post's total recipients; the unlisted remainder is the long tail of small domains), so the list's overall open rate is mostly its Gmail open rate.
+- Gmail is 81% to 86% of the listed volume and about 70% to 82% of all recipients of each send (Google sent divided by the post's total recipients; the unlisted remainder is the long tail of small domains), so the list's overall open rate is mostly its Gmail open rate.
 - Gmail opens far below every other provider on the same send. On engaged-segment sends Microsoft and Yahoo/AOL open at 52% to 62% while Gmail opens at 9% to 23%.
 - Against the earlier baseline in the project's Sep 2026 analysis (Gmail on the ohi domain: 34% in July easing to 26% by September, memory note `project_newsletter_send_strategy_2026_09`), Gmail on engaged-segment sends is now lower again: 20.3% (Sep 29), 13.0% (Oct 16), 14.8% (Oct 21, OHI).
 - Gmail swings widely between sends that differ only in timing. Both manual A/B splits went to two halves of the same segment about 1 to 2 hours apart: Oct 8, the first half sent got 9.09% at Gmail and the second 22.73%; Nov 5, the first half got 6.48% and the second 24.84%. Microsoft, Yahoo/AOL and Apple barely moved between the halves (within 1.5 points on Oct 8; on Nov 5 they were 3 to 6 points higher for the first half, the opposite direction to Gmail). On Oct 16 the first send of the day also got the lowest Gmail rate (5.23%). So in all three cases the first large send of the day opened at 5% to 9% at Gmail and the one after it at 13% to 25%. Cause not determined from the API; the pattern is Gmail-specific.
@@ -343,7 +352,7 @@ Sources: `list_automations` (18 automations: 8 live, 9 inactive, 1 draft; a seco
 | [Drip Campaign] Sunset Campaign | inactive (last edit 2026-06-26) | entering segment "[Drip Campaign] Disengaged Subscribers" | 2 | 2,169 completed (first email sent to 21,646) | 0 | 1.5% | sunset/cleanup |
 | [Drip Campaign] Tried Imposter Syndrome Tool | inactive (2026-09-22) | segment action | not read | 412 | 0 | 28.4% | drip by tool |
 | Workshop - Spencer's #1 Self-Help | inactive | signup, manual | not read | 56 | 0 | 10.9% | event/workshop |
-| Josh's Test Automation (Please Ignore!) | draft | manual | 0 | 0 | 0 | 0 | test |
+| A staff test automation ("Please Ignore!") | draft | manual | 0 | 0 | 0 | 0 | test |
 
 ### The New Subscribers drip, step by step (`get_automation`, live workspace)
 
@@ -436,8 +445,40 @@ Sources: `list_polls`, `list_surveys`, `get_referral_program`, `list_recommendat
 
 ## Could not determine
 
-PENDING.
+1. The From address and sending domain of each individual post, and the reply-to address. `get_post` and `get_publication_settings` do not return them. The address `clearerthinking@ohi.clearerthinking.net` comes from a repo file about an August send.
+2. Whether CT sends from a dedicated IP or beehiiv's shared pool, and what `warming_up` currently means for this domain (how much volume is affected, since when). No tool exposes it.
+3. How posts addressed to the same segment with no exclusions reached only part of it (125,521 and 252,169 recipients on the Supplement waves; 324,457 and 324,369 on the two Reason halves, against a 666,924-member segment). The mechanism that formed the halves and kept earlier recipients out of later waves is not on the post record, so it is also unknown whether the halves were random.
+4. What the audience segments' rules were when past sends went out. beehiiv keeps no edit history: "OHI Audience - Engaged Subs" resolved to 371k to 376k people on Sep 28, Oct 6 and Oct 21 and holds 161,379 today; "OHI Audience - All Subscribers" resolved to 358,641 on Oct 14 and holds 660,233 today.
+5. Gmail's view of the domain: complaint rate, reputation, and whether mail lands in Inbox, Promotions or Spam. That needs Google Postmaster Tools or an inbox placement test; whether the domain is registered in Postmaster Tools is also unknown.
+6. Why Gmail open rates differ so much between two halves of one email sent an hour or two apart.
+7. A breakdown of non-active records by reason (unsubscribed, bounced, invalid, pending). Only "active" (678,349) and "not active" (132,558) are available, and the makeup of the per-send `total_suppressions` is not stated.
+8. Acquisition channel for everyone ever added (819,245). The channel breakdown appears to count only currently active subscribers, so churn by channel cannot be read from it.
+9. Whether beehiiv's built-in welcome email is on, and whether imported records enter the New Subscribers drip.
+10. What validation or bot protection the tools apply before calling the beehiiv API (97% of sign-ups); nothing about it is visible in beehiiv settings.
+11. Whether a reader can change the two audience flags on the manage-preferences page.
+12. Conditions and last-processed dates for 92 of the 123 segments, and the steps and per-email results of 14 of the 18 automations (only list-level figures for those).
+13. How many subscribers the June 2026 sunset run actually deactivated (the step counts are ambiguous: 11 completed, 2,678 "unsubscribed" at the final step).
+14. The audience segments of three sends in the table (OHI Sep 9 and Sep 21, Who Attracts You 50%+ on Sep 10): their post records were not pulled. Two "Who Attracts You" sends used an include segment that has since been deleted.
+15. How many editions carried a sponsor box in the last 60 days: post bodies were not read.
+16. The return-path (bounce) hostname and its SPF: SendGrid uses a numbered subdomain that cannot be guessed, and the zone's wildcard A record makes every guess resolve.
+17. How well the `newsletter_rating` custom fields are populated.
 
 ## Anomalies
 
-PENDING.
+Each is stated with the evidence and, where I could find one, the reason.
+
+1. Gmail treats identical emails differently depending on which half is sent first. Oct 8: first half 9.09% Gmail opens, second half (71 minutes later) 22.73%. Nov 5: first half 6.48%, second half (2h16 later) 24.84%, with the other providers flat or leaning the other way. Oct 16: the first send of the day got 5.23% at Gmail. Why: not determinable from beehiiv; the same-day repo report reads it as Gmail making bulk filtering decisions, and beehiiv labels the domain `warming_up`. It also means both rating-box A/B tests are confounded.
+2. Whole-list sending resumed on Oct 16 after months of engaged-only article sends, including a send to the 252,169 least engaged subscribers (Oct 29 evening ET) that opened at 2.6% (1.03% at Gmail) and drew 49 spam reports, the highest spam rate in the window (0.196 per 1,000). The Oct 22 whole-list send produced 3,457 unsubscribes and 80 spam reports. Why it changed: not recorded anywhere I could read. The repo's own report of the same day links exactly this kind of send to the Gmail decline.
+3. The list is at 96.9% of the plan's 700,000 subscriber ceiling (678,349), with net growth of about 28k per 4 weeks, while at least 117k subscribers who have never opened anything are still on it.
+4. An internal test label went out as a subject line. On Oct 8 the control subject of Variant A was "[Variant A - Bad to Excellent] Is what you've been taught about biases wrong?"; beehiiv's split test declared it the winner after one hour (8.94% vs 8.67% vs 8.91% on about 10.9k recipients per arm) and it was then sent to the rest of that post's 164,264 recipients. Why: the post was titled with the test label and the subject line was left equal to the title. The two "Reason More Complexly" variant posts of Nov 5 carry the label in the title too (subject line was set properly), and their web settings have `hide_from_feed: false`, so by their settings the labelled titles are listed on the public beehiiv site.
+5. Subject-line tests are decided on noise or test nothing. Winners are auto-picked after one hour on gaps of 0.03 to 0.5 points (Steelman: 3.15%, 3.45%, 3.66%). In 4 of the 16 split tests pulled, the "variant" was the same text as the control.
+6. The first email a new subscriber gets is a coaching sales email ("Big news", 24 hours after sign-up, before any newsletter), and it loses 1.40% of recipients (1,545 unsubscribes on 110,684 delivered); 68% of its clicks are on the manage-preferences link. During the Oct 21 to 23 spike (31,152 sign-ups) daily unsubscribes hit 4,091 on Oct 23, the day that email reached the bulk of them (and the day after the whole-list Steelman send). The broken link previously found in it has been fixed. Its coaching links still carry inconsistent tracking: two use `utm_source=behiiv` (misspelled) with one campaign name and the third uses `utm_source=email` with another.
+7. The sunset flow was switched off 8 days after launch (Jun 18 to 26, 2026), mid-run: 16,735 people were in its final 10-day wait when it stopped. Why: not recorded. The segment that feeds it was in "failed" then "processing" status today.
+8. Cleanup that was started and never finished: "For deletion" (772, Feb 17) and beehiiv's "disposable/throwaway domains" (772, Feb 19) are both intact, and eight look-alike zero-open domains (about 900 to 1,600 addresses) are mailed on every whole-list send.
+9. Segment names and rules disagree, and several are stale. "CT Audience - Engaged Subs - Open Rate > 60%" applies a 40% rule. "Engagement: None" was last processed on Mar 13. Open-rate segments without a status filter are full of people who left: "Very Engaged Audience" (open rate 90%+) is 51% unsubscribed and "Open Rate > 95%" 62%. Why the last point: very high lifetime open rates mostly belong to people who received only one or two emails, opened them and left, plus addresses whose mail is opened by security scanners (many school domains show 98% to 100% opens). So "100% open rate" is a weak proxy for a loyal reader: the Oct 12 coaching promo to that tier had the highest unsubscribe rate of any post (14.4 per 1,000).
+10. 26 temporary probe segments (most marked "Safe to delete") and 15 test posts with 4 to 6 recipients in the last 60 days sit in the live publication.
+11. Cadence gaps: no One Helpful Idea since Oct 20 (it had been weekly), and no article reached engaged readers in the week of Oct 26.
+12. DNS: no DMARC reporting address on either domain; `ohi.clearerthinking.net` has no MX, SPF, DKIM or DMARC record of its own and resolves only through a wildcard A record; SPF and DKIM for Mailchimp and Mailgun are still published a year after the move to beehiiv; no BIMI.
+13. beehiiv's numbers do not reconcile across tools: 52,707 "new subscribers" in the last 4 weeks against 39,074 in the same call's source rows, and 24,652 "churned" against about 17,100 unsubscribes in the daily series for Oct 9 to Nov 6. Likely reason: the source rows count only people still active, and churn includes removals other than unsubscribes (bounces, invalid addresses). Not confirmed by any tool.
+14. Smaller configuration oddities: the referral program is enabled with no milestones; two custom fields hold the same CT+ tier list and two segments both hold the 63 Navigators; `first_tool_tried` is never filled; the automation "New Subscribers (Meditation Form)" is live with 116 completions and a 0% open rate; the publication description still says "over 300,000 subscribers"; the "don't send newsletters to them" 7-day-challenge segment is not applied to any send.
+15. A correction to the project's own notes: the Sep 2026 memory note says the API does not expose A/B test results. `get_post_stats` on the connector now returns the split-test options with sent, delivered, opens and the winner flag.
