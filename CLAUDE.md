@@ -242,6 +242,14 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - `reports/results_paywall_plan_2026-10-26_src/`: results-paywall plan for the UPT, Unique Traits and Rationality tests
   (memory note `project_results_paywall_plan_2026_10`): `datapoints.json` holds every number, `build_report.py` renders
   the HTML. Awaiting Igor's approval; nothing on the tools was changed.
+- `reports/conversion_points_audit_2026-11-06_src/`: efficiency audit of the coaching floating buttons (www + tools), /coaching,
+  /plus, the Cognitive Assessment page, the PDF, the Product Grid (GT 37774, called only by the UPT report 22897 in Igor's account;
+  the Rationality report also shows it) and the in-tool coaching CTAs. `fetch_data.py --raw-dir <outside the repo>` (raw files hold
+  emails and browser fingerprints) -> `analysis.py --raw-dir` -> `datapoints.json` (aggregates) -> `build_report.py`. Findings
+  and open fixes: memory note `project_conversion_points_audit_2026_11`. GT exports used: subscribe 34235, cognitive intro 31137
+  (it stores utm params, gclid and `gad_campaignid` per run). Stripe Checkout Sessions carry `ga_client_id`/`ga_session_id`
+  metadata; product is told apart by `success_url` (typ-ct-ambassador = CT+ sign-up flow, members-only-content = article paywall,
+  to8e8we = Cognitive, craftmypdf = PDF, two sessions per PDF); the health check leaves ~3 unpaid CT+ sessions a day.
 - `reports/welcome_drip_copy_2026-10-28_src/`: personalized copy for the beehiiv "[Drip Campaign] New Subscribers" automation
   (`drip_copy.md` is the source; `build_doc_html.py --split` renders the three Google Docs, Drive folder
   "New Subscribers drip copy (2026-10-28)"). Branch on the custom field `last_tool_tried` (display names, 98% filled);
@@ -294,6 +302,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   the UPT pages Jul 22 - Aug 10 2026 (through the X/Twitter wave) while its sign-ups kept reaching beehiiv:
   treat UPT GA4 numbers for that window as missing, not low.
 - Tools have created beehiiv subscribers through the API (`utm_channel=api`) only since 2026-03-09.
+- On-site promotions (floating buttons, Product Grid, in-tool CTAs) must be counted from the page URL, never from session
+  dimensions: a GA4 session keeps its FIRST campaign, so a utm link clicked mid-visit is credited to the original source
+  (website button: 555 sessions by `sessionManualCampaignName` vs 1,343 users by `pageLocation` CONTAINS `utm_campaign=`).
+  `pagePathPlusQueryString` strips utm params (`pageLocation` keeps them); `linkUrl` on `click` events is cut at 100 characters
+  (the tools button's campaign arrives as `tools_float`); page views with `sessionSource` = "(not set)" are scanners/bots
+  (0.2% engaged) and inflate tagged-link counts; a request allows 9 dimensions INCLUDING those used only in filters.
+  `plus_sign_up` fires on /typ-ct-ambassador (the CT+ thank-you page) and is the only purchase event with a real session.
 - GA4 attributes Google Ads (auto-tagged) sessions to the Ads CAMPAIGN NAME (e.g. `[PMAX] Rationality Test`),
   not to the `utm_campaign` in the final URL; filtering GA4 on the utm value shows ~1% of the real sessions.
 - GSC reports only against CANONICAL urls, and several CT_TOOLS.md links are the pre-redirect form.
