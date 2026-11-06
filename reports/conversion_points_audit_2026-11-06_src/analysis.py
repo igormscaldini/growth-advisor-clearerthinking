@@ -359,10 +359,11 @@ def build_datapoints(raw_dir):
             real = real and s.get("subscription") not in test_sub_ids and not (prod == "supporter_article" and s["created"] < ARTICLE_PAYWALL_FIRST_SEND)
             sessions.append((s, prod, real))
     article_sub_ids = {s["subscription"] for s, prod, real in sessions if prod == "supporter_article" and s["subscription"] and real}
+    rehearsal_sub_ids = {s["subscription"] for s, prod, real in sessions if prod == "supporter_article" and not real}
     subs = []
     for s in st["subs"]:
         tier = sub_tier(s)
-        if tier and _in_window(s["created"]) and not (s["id"] in {x["subscription"] for x, prod, real in sessions if prod == "supporter_article" and not real}):
+        if tier and _in_window(s["created"]) and s["id"] not in rehearsal_sub_ids:
             life_days = (parse_utc(s["ended"]) - parse_utc(s["created"])).days if s.get("ended") else None
             subs.append({**s, "tier": tier, "via_article": s["id"] in article_sub_ids, "life_days": life_days})
     funnel = {}
