@@ -304,6 +304,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   the UPT pages Jul 22 - Aug 10 2026 (through the X/Twitter wave) while its sign-ups kept reaching beehiiv:
   treat UPT GA4 numbers for that window as missing, not low.
 - Tools have created beehiiv subscribers through the API (`utm_channel=api`) only since 2026-03-09.
+- The Who Attracts You study (`/who_attracts_you_study.html`) has been the dominant sign-up source since Aug 2026: three viral
+  waves (Aug 4-10 12.6k, Sep 7-18 ~25k, Oct 21-23 32k sign-ups) arriving via the API as `utm_source=direct`, so the new-subs
+  cache counts them as genuine; its tail was still 200-300/day in early Nov. Organic tool sign-ups run ~220-280/day and
+  unsubscribes ~1.5-2% of the list per month, so the no-event net is slightly negative (memory note
+  `project_net_subscribers_steady_state_2026_11`). Mar 23-Apr 17 2026 growth was a Google Ads burst; Jan-Feb sign-ups were batch uploads.
 - On-site promotions (floating buttons, Product Grid, in-tool CTAs) must be counted from the page URL, never from session
   dimensions: a GA4 session keeps its FIRST campaign, so a utm link clicked mid-visit is credited to the original source
   (website button: 555 sessions by `sessionManualCampaignName` vs 1,343 users by `pageLocation` CONTAINS `utm_campaign=`).
