@@ -316,6 +316,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   (the tools button's campaign arrives as `tools_float`); page views with `sessionSource` = "(not set)" are scanners/bots
   (0.2% engaged) and inflate tagged-link counts; a request allows 9 dimensions INCLUDING those used only in filters.
   `plus_sign_up` fires on /typ-ct-ambassador (the CT+ thank-you page) and is the only purchase event with a real session.
+- Never judge a Google Ads campaign on its own conversion count: Ads "Submitted Email" runs ~1.7-1.9x the new beehiiv
+  records, and Performance Max buys brand searches ("clearer thinking ...") whenever a viral wave lifts brand demand, which
+  made cost per email look halved in Oct 2026 while the real cost stayed ~$3 per new subscriber. Split brand vs non-brand
+  with `campaign_search_term_view` (has cost) and count the beehiiv utm cohort (memory note
+  `reference_ads_conversions_vs_beehiiv_subscribers`). Ads books conversions on the click date, so recent days read low.
 - GA4 attributes Google Ads (auto-tagged) sessions to the Ads CAMPAIGN NAME (e.g. `[PMAX] Rationality Test`),
   not to the `utm_campaign` in the final URL; filtering GA4 on the utm value shows ~1% of the real sessions.
 - GSC reports only against CANONICAL urls, and several CT_TOOLS.md links are the pre-redirect form.
