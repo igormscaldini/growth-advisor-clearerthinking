@@ -137,6 +137,15 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   with no history (trust recipient counts, not segment names); beehiiv `spam_reports` exclude Gmail (only Google Postmaster Tools
   has them); per-provider responses are 10-25 KB each, so pull them through subagents that write JSON; `GET /posts/{id}?expand[]=free_email_content`
   returns the email HTML; the GA4 `email_open` event (Igor's pixel, in every OHI since Aug 5, 2026) is an independent open count.
+- `reports/Large newsletter list management.md` (2026-11-09): how 1M+ newsletters run their lists and sends vs a read-only audit of
+  CT's beehiiv account, 17 scored recommendations (memory note `project_large_newsletter_list_management_2026_11`). The Markdown is
+  the single source; `reports/large_newsletter_list_management_2026-11-09_src/build.py` renders the HTML (score badges + glance table).
+  Research notes and the audit (`ct_current_state.md`, 2026-11-06) are in `research_notes/Large newsletter list management/`.
+  Proposals await Igor's approval; nothing on beehiiv was changed. Audit facts: 678k active subscribers against a 700k plan ceiling,
+  49% outside the six-month engaged rule, whole-list article sends resumed Oct 16, no sunset or win-back automation running, single
+  opt-in, no Gmail complaint data anywhere but Google Postmaster Tools; the MCP `get_post_stats` returns split-test results.
+- `reports/md_report.py`: shared Markdown -> standalone HTML page (base CSS, `timestamp()` for the subtitle) for report builders
+  whose source is a Markdown file; pass extra CSS and Markdown extensions per report.
 - `reports/newsletter_topics_2026-10-02_src/`: 2026 newsletter topic breakdown; `classification.json` is the
   single source (edition grouping, topic, format, why each other send is excluded). Counting editions from
   beehiiv: one edition is often 2-3 posts (segment splits, domain splits, re-sends); post names are internal
