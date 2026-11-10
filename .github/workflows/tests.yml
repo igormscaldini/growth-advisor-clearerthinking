@@ -17,7 +17,8 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-      # statsmodels is only needed by seo_experiment_analysis.py and its tests; without it the
-      # whole run died at collection (every push was red from 2026-09-19 to 2026-10-02).
-      - run: pip install -r requirements.txt pytest statsmodels
+      # statsmodels (seo_experiment_analysis.py) and markdown (reports/md_report.py) are only
+      # needed by those modules and their tests; without either, the whole run dies at collection
+      # (red from 2026-09-19 to 2026-10-02 for statsmodels, and from 2026-11-06 for markdown).
+      - run: pip install -r requirements.txt pytest statsmodels markdown
       - run: pytest -q
