@@ -237,7 +237,7 @@
   .final-share { margin-top: clamp(44px, 6vw, 64px); }
   .final-share p { font-size: 13.5px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
   .final-share .share-row { justify-content: center; }
-  .signup { margin: clamp(44px, 6vw, 64px) auto 0; max-width: 560px; padding: 28px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; background: rgba(255, 255, 255, 0.06); }
+  .signup { margin: clamp(44px, 6vw, 64px) auto 0; max-width: 560px; padding: 28px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 16px; background: var(--dark-accent); }
   .signup h3 { font-size: 23px; }
   .signup > p { margin-top: 8px; font-size: 15.5px; color: rgba(255, 255, 255, 0.86); }
   .signup form { display: flex; gap: 10px; margin-top: 18px; }
@@ -256,7 +256,7 @@
 
   .dock { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: none; gap: 10px; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, 0.96); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px rgba(48, 48, 48, 0.08); backdrop-filter: blur(8px); transform: translateY(110%); transition: transform 0.25s ease; }
   .dock.show { transform: none; }
-  .dock .btn { flex: 1; min-height: 48px; padding: 10px 14px; font-size: 16px; }
+  .dock .btn { flex: 1; min-height: 48px; padding: 10px 12px; font-size: 15px; white-space: nowrap; }
 
   @media (max-width: 900px) {
     .beats, .receipts, .steps, .record { grid-template-columns: 1fr; }
