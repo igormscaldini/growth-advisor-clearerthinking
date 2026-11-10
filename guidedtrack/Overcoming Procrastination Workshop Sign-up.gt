@@ -1,0 +1,418 @@
+--------------------------------------------------------------------------------
+-- NAME: Overcoming Procrastination Workshop Sign-up
+-- Registration page for the live workshop "Overcoming Procrastination" (Clearer
+-- Thinking with Spencer Greenberg, Nov 26, 2026). Built from the sign-up version of
+-- "Career Change Workshop Sign-up" (git e338df3). Collects an email, asks whether the
+-- registrant wants an accountability partner, sends a confirmation email, and records
+-- where the sign-up came from.
+--
+-- HOW TO USE
+-- 1. Settings block below. When the Zoom link exists, set joinLinkKnown = 1 and fill
+--    workshopJoinLink, workshopMeetingId and workshopPasscode (also add the Zoom URL to
+--    calendarLink's details/location, written with + for spaces, unencoded).
+-- 2. In GuidedTrack: Settings -> Branding, set "Email display name" to "Clearer Thinking"
+--    and the Reply-To address, so the email does not arrive from the program name.
+-- 3. Share the run link with ?src=newsletter, ?src=social, etc. src is saved per sign-up.
+-- 4. Accountability pairs: filter the data export on accountabilityOptIn = 1. The column
+--    projectToWorkOn helps match people with similar projects.
+-- 5. Unlike the career workshop, there is NO live Google Sheet sync: the /api/workshop-signup
+--    endpoint writes to the career workshop's sheet. The GT data export has every field.
+-- 6. Spencer's card shows "SG" initials. For a photo, host it like angel-au.jpg in the
+--    programs.clearerthinking.org repo and replace the .ct-avatar rule on page 1 with a
+--    background-image (URL written literally; {variables} do not work inside <style>).
+--
+-- GUIDEDTRACK GOTCHAS BAKED IN HERE (verified 2026-09-14 with a scratch program)
+-- - 0 and "" are TRUTHY in *if; only an undefined variable is falsy. Every flag
+--   below is therefore tested with "= 1", never as a bare *if: flag.
+-- - text.find returns the 1-based position of the FIRST match, or nothing (falsy).
+-- - An *if condition must test a variable, not a method call. Assign first, then test.
+-- - A text line that starts with *Word:* is parsed as a keyword, so bold leads
+--   are done in HTML (<b>) or with multi-word phrases only.
+-- - <img> is stripped from *html, so the logo is a CSS background image.
+-- - *html styles are cleared on every page change, so each page carries its own.
+--------------------------------------------------------------------------------
+
+-- SETTINGS (edit these) ---------------------------------------------------------
+>> workshopTitle = "Overcoming Procrastination"
+>> workshopSubtitle = "Research-backed techniques to get going on personal and professional projects"
+>> workshopDate = "Thursday, November 26"
+>> workshopTime = "12:30 to 1:30 pm Eastern Time (9:30 am Pacific, 5:30 pm UK)"
+>> joinLinkKnown = 0
+>> workshopJoinLink = ""
+>> workshopMeetingId = ""
+>> workshopPasscode = ""
+-- Google Calendar link: 17:30 to 18:30 UTC (EST is UTC-5 in late November). Use + for spaces.
+>> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Overcoming+Procrastination+(Clearer+Thinking+workshop)&dates=20261126T173000Z/20261126T183000Z&details=Free+live+online+workshop+from+Clearer+Thinking+with+Spencer+Greenberg.+We'll+email+the+Zoom+link+before+the+session."
+>> facilitatorName = "Spencer Greenberg"
+>> facilitatorLine = "Founder of Clearer Thinking, Positly, GuidedTrack and PersonalityMap"
+-- Link shown to registrants for sharing (points back to this program, attributed as referral).
+>> signupUrl = "https://www.guidedtrack.com/programs/af7zpob/run?src=referral"
+---------------------------------------------------------------------------------
+
+-- Tracking parameter from the run URL (?src=newsletter). Empty when absent.
+*if: not src
+	>> src = ""
+
+-- Must be set BEFORE the jump below, or the confirmation page shows an empty "When:" for
+-- people who used the "Sign up now" shortcut (the career workshop template had this bug).
+>> whenText = "{workshopDate}, {workshopTime}"
+
+-- "Sign up now" at the top reloads the page with &jump=form (GuidedTrack strips inline
+-- JavaScript from *html); the run then skips the invitation and opens the form.
+*if: not jump
+	>> jump = ""
+*if: jump = "form"
+	*goto: signupForm
+
+*settings
+	*menu: no
+	*back: yes
+
+--------------------------------------------------------------------------------
+-- PAGE 1: the invitation
+--------------------------------------------------------------------------------
+*html
+	<style>
+		.program_container .main { max-width: 640px; margin-left: auto; margin-right: auto; padding-top: 28px; padding-bottom: 96px; }
+		@media (max-width: 767px) { .program_container .main { padding-top: 64px; padding-left: 20px; padding-right: 20px; } }
+		.program_container p { font-size: 17px; line-height: 1.6; color: #2a2a2a; font-weight: 400; margin: 0 0 14px 0; }
+		.program_container a { color: #0A6FD6; text-decoration: underline; overflow-wrap: anywhere; word-break: break-word; }
+		.program_container .btn { background-color: #0885F8; border: none; border-radius: 8px; padding: 15px 30px; font-size: 19px; font-weight: 700; color: #fff; }
+		.program_container .btn:hover, .program_container .btn:focus { background-color: #0A6FD6; border: none; color: #fff; }
+		.program_container .btn:focus-visible { outline: 3px solid #0A6FD6; outline-offset: 3px; }
+		@media (min-width: 600px) { .program_container .btn.btn-block { display: inline-block; width: auto; min-width: 300px; } }
+		.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
+		.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
+		.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+		.program_container:has(#ct-logo) .ct-brandrow { display: none; }
+		.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
+		.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
+		.program_container p.ct-sub { color: #5b6472; font-size: 20px; line-height: 1.4; margin: 0 0 22px 0; }
+		.program_container p.ct-fine, .program_container .ct-bio p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; font-style: normal; margin: 10px 0 0 0; }
+		.program_container .ct-facts { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #f4f8fd !important; padding: 16px 20px !important; margin: 0 0 24px 0 !important; }
+		.program_container .ct-facts p { margin: 3px 0; font-size: 16px; }
+		.program_container .ct-facts b { color: #1a1a1a; }
+		.program_container ul.ct-list { padding-left: 22px; margin: 0 0 8px 0; }
+		.program_container ul.ct-list li { font-size: 17px; line-height: 1.6; color: #2a2a2a; margin-bottom: 10px; }
+		.program_container ul.ct-list li b { color: #1a1a1a; }
+		@media (max-width: 480px) { .program_container h1.ct-title { font-size: 28px !important; } .program_container p.ct-sub { font-size: 18px; } }
+
+		.program_container p.ct-eyebrow { color: #0A6FD6; font-size: 13px; line-height: 1.3; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 10px 0; }
+		.program_container h1.ct-title.ct-hero { font-size: 34px !important; }
+		.program_container .ct-facts p.ct-skip { margin-top: 10px; font-size: 15px; }
+		.program_container .ct-facts p.ct-skip a { display: inline-block; padding: 6px 0; }
+		.program_container .ct-callout { border: 1px solid #f3c98b !important; border-radius: 10px !important; box-shadow: none !important; background: #fff7ea !important; padding: 16px 20px !important; margin: 14px 0 0 0 !important; }
+		.program_container .ct-callout p { margin: 0; font-size: 16px; color: #3d2c0b; }
+		.program_container .ct-callout.ct-pair { border-color: #b9dfc4 !important; background: #f0faf3 !important; }
+		.program_container .ct-callout.ct-pair p { color: #17391f; }
+		.program_container .ct-callout p + p { margin-top: 8px; }
+		.program_container .ct-bio { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #ffffff !important; padding: 20px 22px !important; margin: 10px 0 28px 0 !important; }
+		.program_container .ct-bio p { margin: 0; font-size: 16px; }
+		.program_container .ct-bio-row { display: grid; grid-template-columns: 112px 1fr; column-gap: 20px; row-gap: 0; align-items: center; }
+		.program_container .ct-avatar { grid-column: 1; grid-row: 1 / 3; width: 112px; height: 112px; border-radius: 50%; background-color: #0885F8; color: #fff; font-size: 36px; font-weight: 700; letter-spacing: 0.02em; display: flex; align-items: center; justify-content: center; }
+		.program_container .ct-bio p.ct-name { grid-column: 2; align-self: end; font-size: 20px; line-height: 1.25; margin: 0 0 4px 0; }
+		.program_container .ct-bio p.ct-role { grid-column: 2; align-self: start; font-size: 15px; line-height: 1.45; color: #5b6472; margin: 0; }
+		.program_container .ct-bio p.ct-bio-para { grid-column: 1 / -1; margin: 16px 0 0 0; line-height: 1.6; }
+		@media (max-width: 480px) { .program_container .ct-bio-row { grid-template-columns: 88px 1fr; column-gap: 16px; } .program_container .ct-avatar { width: 88px; height: 88px; font-size: 28px; } .program_container .ct-bio p.ct-name { font-size: 19px; } .program_container .ct-bio p.ct-role { font-size: 14px; } .program_container .ct-bio p.ct-bio-para { margin-top: 14px; } }
+	</style>
+
+*html
+	<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
+	<p class="ct-eyebrow">Free live workshop with Spencer Greenberg</p>
+	<h1 class="ct-title ct-hero">{workshopTitle}</h1>
+	<p class="ct-sub">{workshopSubtitle}</p>
+
+*component
+	*classes: ct-facts
+	*html
+		<p><b>When:</b> {whenText}</p>
+		<p><b>Where:</b> Online, live on Zoom. We'll email you the link to join.</p>
+		<p><b>Format:</b> Hands-on. A little theory, mostly exercises, including breakout rooms.</p>
+		<p><b>Cost:</b> Free</p>
+		<p class="ct-skip"><a href="?src={src}&jump=form">Sign up now</a></p>
+
+*html
+	<p>You know the project. The side business, the book, the job application, the course you paid for, the report that was due last week. You care about it. You even set time aside for it. And somehow that time goes to email, chores, or your phone instead. Then comes the guilt, and the guilt makes the next start harder still.</p>
+	<p>If that sounds familiar, you're not lazy and you're not alone. Research on procrastination suggests it has less to do with laziness than with how we react to tasks that feel unclear, unpleasant, or uncertain. That's good news, because reactions like that can be changed with the right techniques.</p>
+	<p>This workshop is about those techniques, and about putting them to work on your own project during the session, so you leave having already started.</p>
+	<h2 class="ct-h2">What you'll get</h2>
+	<ul class="ct-list">
+		<li><b>Why you put things off.</b> What the research literature and Clearer Thinking's own studies show about the causes of procrastination, so you can spot the ones behind your own delays.</li>
+		<li><b>Techniques that fit the cause.</b> Different reasons for delay call for different fixes. You'll learn which ones match your situation.</li>
+		<li><b>Practice, not just theory.</b> Most of the hour is exercises you do on a real project of yours, including breakout rooms where you'll meet and work with other participants.</li>
+		<li><b>Two Q&A sessions.</b> Ask Spencer anything you want, about procrastination or otherwise.</li>
+	</ul>
+
+*component
+	*classes: ct-callout
+	*html
+		<p><b>Book giveaway, live attendees only.</b> During the session we'll give away a signed copy of the book <i>12 Levers</i>. Only people attending live are eligible.</p>
+
+*component
+	*classes: ct-callout ct-pair
+	*html
+		<p><b>Optional: an accountability partner.</b> When you sign up, you can choose to be paired with another participant after the workshop, so you can keep each other on track with your projects.</p>
+		<p>We'll make one email introduction a month, for six months. We only do the introduction; the rest is up to the two of you. It's entirely optional.</p>
+
+*html
+	<h2 class="ct-h2">Who it's for</h2>
+
+Anyone with a personal or professional project that keeps slipping: students, employees, founders, writers, and anyone who knows what they want to work on and still struggles to start. Bring a project in mind; you'll be working on it during the session.
+
+*html
+	<h2 class="ct-h2">Who's leading it</h2>
+
+*component
+	*classes: ct-bio
+	*html
+		<div class="ct-bio-row">
+			<span class="ct-avatar" role="img" aria-label="Spencer Greenberg">SG</span>
+			<p class="ct-name"><b>{facilitatorName}</b></p>
+			<p class="ct-role">{facilitatorLine}</p>
+			<p class="ct-bio-para">Spencer Greenberg is a mathematician and entrepreneur who has kept several long-running projects moving at once, for years. He founded Clearer Thinking, which publishes free, research-based tools, studies and articles on decision-making and psychology; Positly, a platform for recruiting research participants; GuidedTrack, the platform behind Clearer Thinking's interactive tools (and this sign-up page); and PersonalityMap, a tool for exploring how human traits relate to one another. He also hosts the Clearer Thinking podcast and has published essays and videos on social media consistently for years. This workshop draws on the research literature on procrastination, Clearer Thinking's own research on the topic, and what Spencer has learned getting his own projects done.</p>
+		</div>
+
+Sign up below. You'll get a confirmation email right away, and the link to join before the session.
+
+*html
+	<div id="ct-signup"></div>
+
+*button: Sign up
+
+--------------------------------------------------------------------------------
+-- PAGE 2: the form
+--------------------------------------------------------------------------------
+>> emailLooksWrong = 0
+
+*label: signupForm
+
+*page
+	*html
+		<style>
+			.program_container .main { max-width: 640px; margin-left: auto; margin-right: auto; padding-top: 28px; padding-bottom: 96px; }
+			@media (max-width: 767px) { .program_container .main { padding-top: 64px; padding-left: 20px; padding-right: 20px; } }
+			.program_container p { font-size: 17px; line-height: 1.6; color: #2a2a2a; font-weight: 400; margin: 0 0 14px 0; }
+			.program_container a { color: #0A6FD6; text-decoration: underline; overflow-wrap: anywhere; word-break: break-word; }
+			.program_container .btn { background-color: #0885F8; border: none; border-radius: 8px; padding: 15px 30px; font-size: 19px; font-weight: 700; color: #fff; }
+			.program_container .btn:hover, .program_container .btn:focus { background-color: #0A6FD6; border: none; color: #fff; }
+			.program_container .btn:focus-visible { outline: 3px solid #0A6FD6; outline-offset: 3px; }
+			@media (min-width: 600px) { .program_container .btn.btn-block { display: inline-block; width: auto; min-width: 300px; } }
+			.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
+			.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
+			.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+			.program_container:has(#ct-logo) .ct-brandrow { display: none; }
+			.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
+			@media (max-width: 480px) { .program_container h1.ct-title { font-size: 28px !important; } }
+			.program_container .prompt { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+			.program_container .tip { color: #6b7380; font-size: 15px; line-height: 1.45; }
+			.program_container .form-control { border-radius: 8px; border: 1px solid #cfd6e0; padding: 12px 14px; height: auto; font-size: 17px; box-shadow: none; }
+			.program_container .form-control:focus { border-color: #0885F8; box-shadow: 0 0 0 3px rgba(8,133,248,0.22); outline: none; }
+			.program_container li.answer { border: 1px solid #dfe6f0; border-radius: 8px; margin-bottom: 8px; }
+			.program_container li.answer:hover, .program_container li.answer:focus-within { border-color: #0885F8; }
+			.program_container .ct-warn { border: 1px solid #f3c98b !important; border-radius: 10px !important; box-shadow: none !important; background: #fff7ea !important; padding: 12px 16px !important; margin: 0 0 18px 0 !important; }
+			.program_container .ct-warn p { margin: 0; font-size: 16px; color: #6b4a12; }
+		</style>
+
+	*if: emailLooksWrong = 1
+		*component
+			*classes: ct-warn
+			*html
+				<p>That email address doesn't look complete (it needs an @ and a dot after it). Please check it and try again.</p>
+
+	*html
+		<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
+		<h1 class="ct-title">Where should we send the link to join?</h1>
+
+	*question: Email address
+		*type: text
+		*placeholder: you@example.com
+		*save: signupEmail
+
+	*question: First name (optional)
+		*type: text
+		*blank
+		*placeholder: Your first name
+		*save: signupFirstName
+
+	*question: Would you like an accountability partner after the workshop?
+		*tip: Optional and free. We'll introduce you by email to another participant, once a month for six months, so you can keep each other on track. We only make the introduction.
+		*save: accountabilityPair
+		Yes, pair me with someone
+		No, thanks
+
+	*question: What's one project you keep putting off? (optional)
+		*type: paragraph
+		*blank
+		*placeholder: e.g., Finishing my portfolio, starting a newsletter, my thesis
+		*tip: You'll work on it during the session. If you opted in above, it also helps us pair you well.
+		*save: projectToWorkOn
+
+	*question: Anything you'd like to ask Spencer in the Q&A? (optional)
+		*type: paragraph
+		*blank
+		*placeholder: Any question, about procrastination or anything else
+		*save: questionForSession
+
+	*button: Confirm sign up
+
+-- Light check that the address can receive mail: exactly one @ with text on both sides, no
+-- spaces, and a dot inside the DOMAIN with at least two characters after it. The dot is looked
+-- for in the domain alone because text.find only returns the FIRST match (first.last@... is valid).
+>> signupEmail = signupEmail.clean
+>> emailLooksWrong = 0
+>> atPosition = signupEmail.find("@")
+>> spacePosition = signupEmail.find(" ")
+*if: not atPosition
+	>> emailLooksWrong = 1
+*if: spacePosition
+	>> emailLooksWrong = 1
+*if: atPosition
+	*if: atPosition < 2
+		>> emailLooksWrong = 1
+	*if: atPosition > 1
+		>> emailParts = signupEmail.split("@")
+		>> emailPartCount = emailParts.size
+		*if: not (emailPartCount = 2)
+			>> emailLooksWrong = 1
+		*if: emailPartCount = 2
+			>> emailDomain = emailParts[2]
+			>> domainDot = emailDomain.find(".")
+			>> domainSize = emailDomain.size
+			*if: not domainDot
+				>> emailLooksWrong = 1
+			*if: domainDot
+				*if: domainDot < 2
+					>> emailLooksWrong = 1
+				*if: domainDot > domainSize - 2
+					>> emailLooksWrong = 1
+*if: emailLooksWrong = 1
+	*goto: signupForm
+
+>> signedUpAt = calendar::now
+
+-- 1 when the registrant wants an accountability partner (filter the export on this).
+>> accountabilityOptIn = 0
+*if: accountabilityPair = "Yes, pair me with someone"
+	>> accountabilityOptIn = 1
+
+--------------------------------------------------------------------------------
+-- CONFIRMATION EMAIL
+--------------------------------------------------------------------------------
+>> greetingName = ""
+>> headingName = ""
+>> hasFirstName = 0
+*if: signupFirstName
+	*if: signupFirstName.size > 0
+		>> hasFirstName = 1
+*if: hasFirstName = 1
+	>> greetingName = " {signupFirstName}"
+	>> headingName = ", {signupFirstName}"
+
+-- Where-to-join lines for the email and the confirmation page. Empty Zoom lines until known.
+>> emailWhereLine = "Online, on Zoom. We'll email you the link to join before the session."
+>> emailZoomLine = ""
+>> emailMeetingLine = ""
+>> emailPasscodeLine = ""
+>> beforeSessionText = "we'll email you the Zoom link to join, plus a reminder 24 hours before the start."
+*if: joinLinkKnown = 1
+	>> emailWhereLine = "Online, on Zoom. Keep these details:"
+	>> emailZoomLine = "Join Zoom Meeting: {workshopJoinLink}"
+	>> emailMeetingLine = "Meeting ID: {workshopMeetingId}"
+	>> emailPasscodeLine = "Passcode: {workshopPasscode}"
+	>> beforeSessionText = "we'll send a reminder with the same Zoom link 24 hours before the start."
+
+>> emailPairLine = "You chose not to be paired with an accountability partner. If you change your mind, reply to this email."
+>> afterSessionText = "if you'd like an accountability partner after all, reply to your confirmation email and we'll add you."
+*if: accountabilityOptIn = 1
+	>> emailPairLine = "You asked to be paired with an accountability partner. After the workshop we'll introduce you by email to another participant, once a month for six months. We only make the introduction; the rest is up to the two of you. If you change your mind, reply to this email."
+	>> afterSessionText = "we'll introduce you by email to your first accountability partner, then make one introduction a month for six months."
+
+*email
+	*to: {signupEmail}
+	*subject: You're registered: {workshopTitle}
+	*body
+		Hi{greetingName},
+
+		You're registered for *{workshopTitle}: {workshopSubtitle}*, a free live workshop from Clearer Thinking with {facilitatorName}.
+
+		*Date and time:* {workshopDate}, {workshopTime}.
+
+		*Where to join:* {emailWhereLine}
+		{emailZoomLine}
+		{emailMeetingLine}
+		{emailPasscodeLine}
+
+		*What to expect:* a hands-on hour. Spencer shares what the research and Clearer Thinking's own studies show about why we procrastinate and what helps, and most of the time goes to exercises on your own project, including breakout rooms with other participants. There are two Q&A sessions where you can ask anything.
+
+		*Come with a project in mind:* the one you keep putting off. You'll be working on it during the session.
+
+		*Book giveaway:* we'll give away a signed copy of 12 Levers during the session. Only people attending live are eligible.
+
+		*Accountability partner:* {emailPairLine}
+
+		*Add it to your calendar:* [Google Calendar|{calendarLink}]
+
+		Igor Scaldini
+		Clearer Thinking
+
+--------------------------------------------------------------------------------
+-- PAGE 3: confirmation
+--------------------------------------------------------------------------------
+*html
+	<style>
+		.program_container .main { max-width: 640px; margin-left: auto; margin-right: auto; padding-top: 28px; padding-bottom: 96px; }
+		@media (max-width: 767px) { .program_container .main { padding-top: 64px; padding-left: 20px; padding-right: 20px; } }
+		.program_container p { font-size: 17px; line-height: 1.6; color: #2a2a2a; font-weight: 400; margin: 0 0 14px 0; }
+		.program_container a { color: #0A6FD6; text-decoration: underline; overflow-wrap: anywhere; word-break: break-word; }
+		.program_container .btn { background-color: #0885F8; border: none; border-radius: 8px; padding: 15px 30px; font-size: 19px; font-weight: 700; color: #fff; }
+		.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
+		.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
+		.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+		.program_container:has(#ct-logo) .ct-brandrow { display: none; }
+		.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
+		.program_container h2.ct-h2 { color: #1a1a1a !important; font-size: 21px !important; line-height: 1.3 !important; font-weight: 700 !important; margin: 40px 0 10px 0 !important; }
+		.program_container .ct-facts { border: 1px solid #dfe6f0 !important; border-radius: 10px !important; box-shadow: none !important; background: #f4f8fd !important; padding: 16px 20px !important; margin: 0 0 24px 0 !important; }
+		.program_container .ct-facts p { margin: 3px 0; font-size: 16px; }
+		.program_container .ct-facts b { color: #1a1a1a; }
+		.program_container ul.ct-list { padding-left: 22px; margin: 0 0 8px 0; }
+		.program_container ul.ct-list li { font-size: 17px; line-height: 1.6; color: #2a2a2a; margin-bottom: 10px; }
+		.program_container ul.ct-list li b { color: #1a1a1a; }
+		@media (max-width: 480px) { .program_container h1.ct-title { font-size: 28px !important; } }
+		.program_container p.ct-fine { color: #6b7380; font-size: 14px; line-height: 1.5; margin: 28px 0 0 0; padding-top: 14px; border-top: 1px solid #e6eaf0; }
+		.program_container p.ct-share { margin: 4px 0 14px 0; }
+		.program_container p.ct-share a { display: inline-block; max-width: 100%; padding: 10px 14px; border: 1px solid #dfe6f0; border-radius: 8px; background: #f4f8fd; color: #0A6FD6; font-size: 15px; line-height: 1.4; text-decoration: none; word-break: break-all; }
+	</style>
+
+*html
+	<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
+	<h1 class="ct-title">You're registered{headingName}.</h1>
+
+A confirmation is on its way to {signupEmail}. If it isn't there in a few minutes, check your spam folder and mark it as not spam so the link to join doesn't end up there too.
+
+*component
+	*classes: ct-facts
+	*html
+		<p><b>Workshop:</b> {workshopTitle}</p>
+		<p><b>When:</b> {whenText}</p>
+	*if: joinLinkKnown = 1
+		*html
+			<p><b>Where:</b> Online, on Zoom. These details are also in your confirmation email.</p>
+			<p><b>Join Zoom Meeting:</b> <a href="{workshopJoinLink}" target="_blank" rel="noopener">{workshopJoinLink}</a></p>
+			<p><b>Meeting ID:</b> {workshopMeetingId}</p>
+			<p><b>Passcode:</b> {workshopPasscode}</p>
+	*if: joinLinkKnown = 0
+		*html
+			<p><b>Where:</b> Online, live on Zoom. We'll email you the link to join.</p>
+
+*html
+	<p>Add it to your calendar now so it doesn't slip, with this <a href="{calendarLink}" target="_blank" rel="noopener">Google Calendar link</a>.</p>
+	<h2 class="ct-h2">What happens next</h2>
+	<ul class="ct-list">
+		<li><b>Before the session:</b> {beforeSessionText}</li>
+		<li><b>During the session:</b> come with your project in mind. The signed copy of <i>12 Levers</i> goes to someone attending live.</li>
+		<li><b>Afterward:</b> {afterSessionText}</li>
+	</ul>
+	<h2 class="ct-h2">Know someone who'd want this?</h2>
+	<p>Procrastination is easier to beat with company. Send a friend or colleague the sign-up link below, and you could even work on your projects side by side.</p>
+	<p class="ct-share"><a href="{signupUrl}">{signupUrl}</a></p>
+	<p class="ct-fine">Clearer Thinking is a not-for-profit project. The workshop is free.</p>
