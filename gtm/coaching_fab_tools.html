@@ -85,7 +85,11 @@
     // Path prefixes (lower-case) where the button must not appear. Empty = every page.
     var HIDE_ON = [
       // Clearer Research prize form: an academic audience, so no CT promotion on it.
-      '/unanswered-questions-in-psychology'
+      '/unanswered-questions-in-psychology',
+      // Workshop sign-up page: keep visitors on the sign-up (Igor, 2026-11-10).
+      '/procrastination-workshop-with-spencer-greenberg',
+      // Cognitive Assessment intro (paid product page): no competing CTA (Igor, 2026-11-10).
+      '/cognitive-test-intro'
     ];
     var path = location.pathname.toLowerCase();
     for (var i = 0; i < HIDE_ON.length; i++) {
