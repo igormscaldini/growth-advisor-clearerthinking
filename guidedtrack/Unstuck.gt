@@ -12,9 +12,11 @@
 --    https://unstuck-suggest-api.vercel.app with the header X-Proto-Token. The request
 --    leaves GuidedTrack's server, so the token is never in the page.
 -- 3. Timers are *countdown questions: the page moves on by itself when time is up.
--- 4. The chime after a round is /unstuck/chime.m4a on programs.clearerthinking.org
+-- 4. The chime after a round is /unstuck/chime.mp3 on programs.clearerthinking.org
 --    (team repo, src/data/programs/unstuck/static). GuidedTrack strips scripts, so the
---    sound cannot be synthesized in the page the way the web prototype does it.
+--    sound cannot be synthesized in the page the way the web prototype does it. *audio
+--    swaps the file extension and asks for an .mp3 and an .ogg version of the URL, so
+--    the file has to be an .mp3 (an .m4a or .wav is never requested).
 -- 5. Add ?fast=1 to the run link to shorten every timer for testing.
 --
 -- GUIDEDTRACK GOTCHAS BAKED IN HERE
@@ -24,6 +26,8 @@
 -- - {variables} are not filled in inside an *html block that also contains <style>,
 --   so styles and markup that uses variables go in separate *html blocks.
 -- - *service does not compile inside *click; the click jumps to a label instead.
+-- - The site's ".program_container p" rules beat bare classes, so styles for <p>
+--   elements are prefixed with .program_container and marked !important.
 --------------------------------------------------------------------------------
 
 *settings
@@ -62,8 +66,8 @@
 
 *html
 	<style>
-		.unstuck-brand { font-size: 26px; font-weight: 700; color: #233b47; margin: 0 0 2px 0; }
-		.unstuck-sub { font-size: 15px; color: #737373; margin: 0 0 22px 0; }
+		.program_container .unstuck-brand { font-size: 30px !important; font-weight: 700 !important; color: #233b47 !important; text-align: center; letter-spacing: -0.01em; margin: 8px 0 2px 0 !important; }
+		.program_container .unstuck-sub { font-size: 15px !important; color: #737373 !important; text-align: center; margin: 0 0 28px 0 !important; }
 	</style>
 	<p class="unstuck-brand">Unstuck</p>
 	<p class="unstuck-sub">Research-backed techniques to help you overcome procrastination, 10 minutes at a time</p>
@@ -344,7 +348,7 @@
 *if: owlStage < 6
 	>> owlStage = owlStage + 1
 
-*audio: https://programs.clearerthinking.org/unstuck/chime.m4a
+*audio: https://programs.clearerthinking.org/unstuck/chime.mp3
 	*start: yes
 
 *label: roundDone

@@ -279,7 +279,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `~/Documents/Claude/unstuck-prototype` and pushes; never edit that clone by hand. AI proxy `unstuck/unstuck-suggest-api`
   (Gemini, Vercel project unstuck-suggest-api, `npx vercel --prod` from that folder, `npm test`); its `.env` / `.vercel`
   are local-only, gitignored copies. Never `git pull --rebase` over an UNPUSHED subtree merge: it flattens it onto the repo root.
-  Plan after Travis's Oct 23 review (safeguards for the Gemini key before testers): memory note `project_unstuck_prototype`.
+  GuidedTrack version (2026-11-10): `guidedtrack/Unstuck.gt` (GT 39188, key `qupjhe3`) calls the subprogram
+  `guidedtrack/Unstuck - owl.gt` (GT 39187, owl card drawn in CSS). "Suggest with AI" goes through the GT service
+  `unstuckSuggest` (program Settings -> Services, header `X-Proto-Token`), so the token is not in the page; `?fast=1` shortens
+  every timer. Page `/unstuck/` = team repo PR #14 (`src/data/programs/unstuck/`, with `static/chime.mp3`). The web and GT
+  versions share their copy: `tests/test_unstuck.py` keeps them in step, so change both. Travis's Oct 23 review is applied
+  in both; the Gemini-key safeguards are still open (memory note `project_unstuck_prototype`).
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
@@ -421,6 +426,14 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   so a page's `*html <style>` must sit INSIDE the `*page`. `{var}` is not interpolated inside
   `<style>`; `<img>` is stripped but CSS `background-image` works. GT's `.program_container h1/p/.btn`
   rules beat bare classes: prefix selectors with `.program_container` (+ `!important` on headings).
+- GT facts verified 2026-11-10 (Unstuck build): `*service` inside `*click` does not compile (the error names only the
+  `*component` line); make the click `*goto` a label that holds the service. `{var}` is NOT filled in inside an `*html`
+  block that also contains `<style>`: use two blocks. `*audio` swaps the URL's extension and requests only `.mp3` and
+  `.ogg`; with `*start: yes` it plays by itself even when the player is hidden with CSS. `*countdown` accepts a duration
+  variable. `*other` adds a Next button to a choice question. Scriptable with basic auth: new program `POST /programs`
+  `{"name":...}`; allowed embed page `POST /programs/{id}/pages` `{"page":{"url":...}}`; a service = the settings form
+  (`GET /programs/{id}/services/new` for the CSRF token with a cookie jar, then `POST /programs/{id}/services` with
+  `service[name|url]` and `service[headers_attributes][0][key|value]`). GT can stall for minutes: give every curl `-m`.
 - Headless testing of GT runs: Playwright with `channel: 'chrome'` works (plain headless Chrome
   screenshots render blank); such runs are real runs, not test runs. Scripts from the 2026-09-14
   session live in the scratchpad only; rebuild from `guidedtrack/` notes if needed.
