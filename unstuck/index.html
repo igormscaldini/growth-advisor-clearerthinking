@@ -105,6 +105,8 @@
   }
   .task-recap b{color:var(--ct-text);}
 
+  .owl-shelf{margin-top:14px;font-size:12.5px;color:var(--ct-text-mid);}
+  .owl-shelf svg{width:34px;height:34px;display:inline-block;vertical-align:middle;margin:4px 1px 0;}
   .completed-log{
     font-size:13px;color:var(--ct-text-mid);background:var(--ct-grey-bg);
     border-radius:10px;padding:10px 14px;margin-top:22px;
@@ -271,12 +273,17 @@
       <!-- STEP: CAUSE -->
       <div class="step" id="step-cause">
         <h1 class="step-title">What's keeping you stuck right now?</h1>
+        <div class="task-recap" id="causeTaskRecap" style="margin-bottom:16px;"></div>
         <div class="cause-grid" id="causeGrid"></div>
+        <div class="btn-row">
+          <button class="link-btn" id="causeBack">← back</button>
+          <span></span>
+        </div>
       </div>
 
       <!-- STEP: TECHNIQUE — ANXIETY OR FEAR (interactive R.A.I.N.-style flow) -->
       <div class="step" id="step-technique-fear">
-        <h1 class="step-title">Anxiety or fear: a one-minute technique</h1>
+        <h1 class="step-title">Anxiety or fear: a quick technique</h1>
 
         <div id="fearStage1">
           <p class="step-help">Briefly describe what you're feeling right now, and notice where in your body you feel it.</p>
@@ -330,16 +337,16 @@
 
       <!-- STEP: TECHNIQUE — LACK OF MOTIVATION (interactive rating + reflection) -->
       <div class="step" id="step-technique-motivation">
-        <h1 class="step-title">Lack of motivation: a one-minute technique</h1>
+        <h1 class="step-title">Lack of motivation: a quick technique</h1>
 
         <div id="motivationStage1">
-          <label style="font-size:14px;color:var(--ct-text-mid);display:block;margin:14px 0 8px;">From 1 to 10, how good would it feel to have this done?</label>
+          <div class="task-recap" id="motivationTaskRecap"></div>
+          <p class="step-help" style="margin-top:16px;">Take a moment to imagine this task is already done.</p>
+          <label style="font-size:14px;color:var(--ct-text-mid);display:block;margin:14px 0 8px;">From 1 to 10, how good would that feel?</label>
           <div style="display:flex;align-items:center;gap:14px;">
             <input type="range" id="motivationRating" min="1" max="10" value="5" style="flex:1;accent-color:var(--ct-blue);">
             <span id="motivationRatingValue" style="font-weight:700;color:var(--ct-blue);font-size:20px;min-width:26px;text-align:center;">5</span>
           </div>
-          <label style="font-size:14px;color:var(--ct-text-mid);display:block;margin:18px 0 8px;">What's one tiny step you could take right now that's on the path toward getting this done? (optional)</label>
-          <textarea id="motivationMilestoneInput" style="min-height:54px;" placeholder="e.g. getting a rough outline down..."></textarea>
           <div class="btn-row">
             <button class="link-btn" id="motivationStage1Back">← back</button>
             <button class="btn btn-primary" id="motivationStage1Continue">Continue →</button>
@@ -362,7 +369,7 @@
 
       <!-- STEP: TECHNIQUE — MENTAL FATIGUE (sequential physical-reset timers) -->
       <div class="step centered" id="step-technique-fatigue">
-        <h1 class="step-title">Mental fatigue: a one-minute technique</h1>
+        <h1 class="step-title">Mental fatigue: a quick technique</h1>
 
         <div id="fatigueTimerStage">
           <h1 class="step-title" style="font-size:19px;text-align:center;" id="fatigueMsg"></h1>
@@ -398,6 +405,18 @@
           </div>
         </div>
 
+        <div id="fatigueChecklistStage" style="display:none;">
+          <p class="step-help">A few more quick pick-me-ups. Do as many of these as you think will help you.</p>
+          <div class="task-recap" style="text-align:left;">
+            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="fatigueCheck1" style="margin-top:3px;width:18px;height:18px;flex:none;"><span>Splash some cold water on your face.</span></label>
+            <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;cursor:pointer;"><input type="checkbox" id="fatigueCheck2" style="margin-top:3px;width:18px;height:18px;flex:none;"><span>Drink some water or caffeine.</span></label>
+            <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;"><input type="checkbox" id="fatigueCheck3" style="margin-top:3px;width:18px;height:18px;flex:none;"><span>Put on some energetic music.</span></label>
+          </div>
+          <div class="btn-row" style="justify-content:center;">
+            <button class="btn btn-primary" id="fatigueChecklistNext">Next →</button>
+          </div>
+        </div>
+
         <div id="fatigueQuestionStage" style="display:none;">
           <p class="step-help">Are you feeling a little better and more ready to take this on? No worries either way, we'll start small.</p>
           <div class="chips" id="fatigueFeelChips">
@@ -413,8 +432,8 @@
 
       <!-- STEP: TECHNIQUE — DISTRACTIONS (precommitment checklist) -->
       <div class="step" id="step-technique-distraction">
-        <h1 class="step-title">Distractions: a one-minute technique</h1>
-        <p class="step-help">Set yourself up to succeed, just like Odysseus did: clear away anything pulling at your attention before you start.</p>
+        <h1 class="step-title">Distractions: a quick technique</h1>
+        <p class="step-help">Set yourself up to succeed, just like Odysseus did: clear away anything pulling at your attention before you start. Do as many of these as you think will help you.</p>
         <div class="task-recap" style="text-align:left;">
           <label style="display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;cursor:pointer;">
             <input type="checkbox" id="distractionCheck1" style="margin-top:3px;width:18px;height:18px;flex:none;">
@@ -430,7 +449,11 @@
           </label>
           <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;">
             <input type="checkbox" id="distractionCheck4" style="margin-top:3px;width:18px;height:18px;flex:none;">
-            <span>Put on music with no lyrics.</span>
+            <span>If music helps you with this kind of task, put some on (many people focus best with no lyrics). If it doesn't, keep it quiet.</span>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:10px;margin-top:12px;cursor:pointer;">
+            <input type="checkbox" id="distractionCheck5" style="margin-top:3px;width:18px;height:18px;flex:none;">
+            <span>Pair the task with something you enjoy that won't pull your attention away, like a favorite drink or a comfortable spot.</span>
           </label>
         </div>
         <div class="btn-row">
@@ -447,7 +470,7 @@
         <div class="not-sure-label">Not sure? Pick one:</div>
         <div class="chips" id="taskChips"></div>
         <div class="btn-row">
-          <button class="link-btn" id="taskBack">← back</button>
+          <span></span>
           <button class="btn btn-primary" id="taskContinue" disabled>Continue →</button>
         </div>
       </div>
@@ -531,6 +554,8 @@
       <div class="owl-stage-caption" id="owlStageCaption"></div>
       <div class="owl-message" id="owlMessage"></div>
       <div class="owl-progress" id="owlProgress"></div>
+      <button class="restart-btn" id="hatchNewOwl" style="display:none;margin-top:14px;">🥚 Hatch a new owl</button>
+      <div class="owl-shelf" id="owlShelf" style="display:none;"></div>
     </div>
   </div>
 
@@ -606,7 +631,7 @@
     "Growing fast, keep going.",
     "Getting its feathers now.",
     "Almost fully grown.",
-    "Fully grown! Thanks for showing up today."
+    "Fully grown! Thanks for showing up today. Hatch a new one whenever you like."
   ];
   var MAX_STAGE = OWL_STAGES.length - 1; // 6 rounds (completed cycles) to reach full growth
 
@@ -667,6 +692,9 @@
       document.getElementById('step-'+s).classList.toggle('active', s === name);
     });
     layoutEl.classList.toggle('no-owl', OWL_VISIBLE_STEPS.indexOf(name) === -1);
+    if (name === 'cause'){
+      document.getElementById('causeTaskRecap').innerHTML = '<b>Task:</b> ' + escapeHtml(state.task);
+    }
   }
 
   // ---------- chips ----------
@@ -694,22 +722,77 @@
   }
 
   // ---------- owl rendering ----------
+  // Stages 2-6 are one owl drawn from the same parts and scaled up, so every round
+  // is a visible step: bigger each time, plus shell, wings, ear tufts, belly, branch.
+  var OWL_LOOKS = [null, null,
+    { s: 0.50, body: '#8fc3fb', wing: '#6fb1f7', belly: '#e3f0fe', wings: 0,    tufts: 0,   shell: true },
+    { s: 0.64, body: '#8fc3fb', wing: '#5aa6f5', belly: '#e3f0fe', wings: 0.6,  tufts: 0 },
+    { s: 0.78, body: '#3d9df9', wing: '#0d74d9', belly: '#fde58a', wings: 0.85, tufts: 0.6 },
+    { s: 0.90, body: '#0885f8', wing: '#0a66c2', belly: '#fecb02', wings: 1,    tufts: 1 },
+    { s: 1.00, body: '#0885f8', wing: '#0a66c2', belly: '#fecb02', wings: 1,    tufts: 1, chest: true, branch: true }
+  ];
+  function owlSvg(stage){
+    var L = OWL_LOOKS[stage], o = '', baseY = L.branch ? 176 : 182;
+    [-1, 1].forEach(function(sx){ // two feet, three toes each
+      var x = sx * 18;
+      o += '<path d="M' + x + ' -9 l-9 9 M' + x + ' -9 l0 10 M' + x + ' -9 l9 9" fill="none" stroke="#f8911b" stroke-width="5" stroke-linecap="round"/>';
+    });
+    if (L.tufts){
+      var h = 118 + 34 * L.tufts;
+      o += '<path d="M-46 -116 L-38 -' + h + ' L-14 -134 Z" fill="' + L.wing + '"/><path d="M46 -116 L38 -' + h + ' L14 -134 Z" fill="' + L.wing + '"/>';
+    }
+    o += '<path d="M0 -150 C-42 -150 -56 -112 -56 -70 C-56 -28 -34 -6 0 -6 C34 -6 56 -28 56 -70 C56 -112 42 -150 0 -150 Z" fill="' + L.body + '"/>';
+    o += '<ellipse cx="0" cy="-48" rx="32" ry="36" fill="' + L.belly + '"/>';
+    if (L.chest){
+      o += '<path d="M-14 -62 l7 6 l7 -6 l7 6 l7 -6 M-7 -44 l7 6 l7 -6" fill="none" stroke="#f8911b" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>';
+    }
+    if (L.wings){
+      [-1, 1].forEach(function(sx){
+        o += '<ellipse cx="' + (sx * 53) + '" cy="-64" rx="' + (13 * L.wings) + '" ry="' + (36 * L.wings) + '" fill="' + L.wing + '" transform="rotate(' + (sx * -8) + ' ' + (sx * 53) + ' -64)"/>';
+      });
+    }
+    [-1, 1].forEach(function(sx){
+      var x = sx * 22;
+      o += '<circle cx="' + x + '" cy="-104" r="20" fill="#fff"/><circle cx="' + x + '" cy="-102" r="9.5" fill="#233b47"/><circle cx="' + (x + 3) + '" cy="-106" r="3" fill="#fff"/>';
+    });
+    o += '<path d="M-7 -92 L7 -92 L0 -79 Z" fill="#f8911b"/>';
+    var svg = '<svg viewBox="0 0 200 200">';
+    svg += L.branch
+      ? '<rect x="26" y="174" width="148" height="12" rx="6" fill="#8a5a2b"/>'
+      : '<ellipse cx="100" cy="186" rx="' + (30 + 30 * L.s) + '" ry="7" fill="#eee2cd"/>';
+    svg += '<g transform="translate(100 ' + baseY + ') scale(' + L.s + ')">' + o + '</g>';
+    if (L.shell){
+      svg += '<path d="M58 152 L70 162 L82 150 L94 162 L106 150 L118 162 L130 150 L142 160 C142 180 124 190 100 190 C76 190 58 180 58 152 Z" fill="#f9f1e3" stroke="#233b47" stroke-width="3.5" stroke-linejoin="round"/>';
+    }
+    return svg + '</svg>';
+  }
   var OWL_SVGS = [
     // 0 Egg
     '<svg viewBox="0 0 200 200"><ellipse cx="100" cy="150" rx="60" ry="14" fill="#eee2cd"/><path d="M100 40 C60 40 42 95 42 130 C42 165 68 178 100 178 C132 178 158 165 158 130 C158 95 140 40 100 40 Z" fill="#f9f1e3" stroke="#233b47" stroke-width="4"/><circle cx="78" cy="110" r="5" fill="#0885f8"/><circle cx="118" cy="90" r="4" fill="#0885f8"/><circle cx="112" cy="140" r="4.5" fill="#0885f8"/><circle cx="70" cy="80" r="3.5" fill="#0885f8"/></svg>',
     // 1 Cracking
     '<svg viewBox="0 0 200 200"><ellipse cx="100" cy="150" rx="60" ry="14" fill="#eee2cd"/><path d="M100 40 C60 40 42 95 42 130 C42 165 68 178 100 178 C132 178 158 165 158 130 C158 95 140 40 100 40 Z" fill="#f9f1e3" stroke="#233b47" stroke-width="4"/><path d="M75 62 L92 82 L80 96 L100 118" fill="none" stroke="#233b47" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="90" cy="108" r="7" fill="#233b47"/><circle cx="112" cy="108" r="7" fill="#233b47"/><circle cx="92" cy="106" r="2" fill="#fff"/><circle cx="114" cy="106" r="2" fill="#fff"/><path d="M97 118 L105 118 L101 126 Z" fill="#f8911b"/></svg>',
-    // 2 Hatchling
-    '<svg viewBox="0 0 200 200"><ellipse cx="100" cy="168" rx="46" ry="8" fill="#eee2cd"/><ellipse cx="100" cy="118" rx="52" ry="48" fill="#8fc3fb"/><ellipse cx="100" cy="150" rx="34" ry="22" fill="#0885f8"/><circle cx="80" cy="105" r="17" fill="#fff"/><circle cx="120" cy="105" r="17" fill="#fff"/><circle cx="82" cy="107" r="8" fill="#233b47"/><circle cx="122" cy="107" r="8" fill="#233b47"/><circle cx="84" cy="104" r="2.5" fill="#fff"/><circle cx="124" cy="104" r="2.5" fill="#fff"/><path d="M94 118 L106 118 L100 128 Z" fill="#f8911b"/><ellipse cx="72" cy="150" rx="9" ry="16" fill="#0885f8" transform="rotate(-18 72 150)"/><ellipse cx="128" cy="150" rx="9" ry="16" fill="#0885f8" transform="rotate(18 128 150)"/><path d="M90 170 L86 178 M100 172 L100 180 M110 170 L114 178" stroke="#f8911b" stroke-width="3" stroke-linecap="round"/></svg>',
-    // 3 Chick
-    '<svg viewBox="0 0 200 200"><ellipse cx="100" cy="172" rx="48" ry="8" fill="#eee2cd"/><path d="M70 88 L80 76 L84 90 Z" fill="#233b47"/><path d="M130 88 L120 76 L116 90 Z" fill="#233b47"/><ellipse cx="100" cy="114" rx="49" ry="45" fill="#8fc3fb"/><ellipse cx="100" cy="152" rx="36" ry="28" fill="#0885f8"/><circle cx="81" cy="103" r="16.5" fill="#fff"/><circle cx="119" cy="103" r="16.5" fill="#fff"/><circle cx="83" cy="105" r="7.8" fill="#233b47"/><circle cx="121" cy="105" r="7.8" fill="#233b47"/><circle cx="85" cy="102" r="2.3" fill="#fff"/><circle cx="123" cy="102" r="2.3" fill="#fff"/><path d="M94.5 117 L105.5 117 L100 126 Z" fill="#f8911b"/><ellipse cx="65" cy="144" rx="11" ry="20" fill="#0885f8" transform="rotate(-20 65 144)"/><ellipse cx="135" cy="144" rx="11" ry="20" fill="#0885f8" transform="rotate(20 135 144)"/><path d="M89 174 L85 182 M100 176 L100 184 M111 174 L115 182" stroke="#f8911b" stroke-width="3.2" stroke-linecap="round"/></svg>',
-    // 4 Fledgling
-    '<svg viewBox="0 0 200 200"><ellipse cx="100" cy="176" rx="50" ry="8" fill="#eee2cd"/><path d="M64 92 L78 74 L86 96 Z" fill="#233b47"/><path d="M136 92 L122 74 L114 96 Z" fill="#233b47"/><ellipse cx="100" cy="112" rx="46" ry="42" fill="#0885f8"/><ellipse cx="100" cy="150" rx="38" ry="34" fill="#0685e8"/><ellipse cx="100" cy="156" rx="22" ry="24" fill="#fecb02"/><circle cx="82" cy="102" r="16" fill="#fff"/><circle cx="118" cy="102" r="16" fill="#fff"/><circle cx="84" cy="104" r="7.5" fill="#233b47"/><circle cx="120" cy="104" r="7.5" fill="#233b47"/><circle cx="86" cy="101" r="2.2" fill="#fff"/><circle cx="122" cy="101" r="2.2" fill="#fff"/><path d="M95 116 L105 116 L100 125 Z" fill="#f8911b"/><ellipse cx="60" cy="140" rx="14" ry="26" fill="#0885f8" transform="rotate(-24 60 140)"/><ellipse cx="140" cy="140" rx="14" ry="26" fill="#0885f8" transform="rotate(24 140 140)"/><ellipse cx="58" cy="146" rx="6" ry="14" fill="#f8911b" transform="rotate(-24 58 146)"/><ellipse cx="142" cy="146" rx="6" ry="14" fill="#f8911b" transform="rotate(24 142 146)"/><path d="M88 178 L84 186 M100 180 L100 188 M112 178 L116 186" stroke="#f8911b" stroke-width="3.5" stroke-linecap="round"/></svg>',
-    // 5 Young owl
-    '<svg viewBox="0 0 200 200"><ellipse cx="100" cy="178" rx="42" ry="7" fill="#eee2cd"/><path d="M62 84 L78 62 L88 90 Z" fill="#233b47"/><path d="M138 84 L122 62 L112 90 Z" fill="#233b47"/><ellipse cx="100" cy="111" rx="50" ry="46" fill="#0885f8"/><ellipse cx="100" cy="155" rx="41" ry="38" fill="#0685e8"/><ellipse cx="100" cy="162" rx="24" ry="27" fill="#fecb02"/><circle cx="81" cy="100" r="17.5" fill="#fff"/><circle cx="119" cy="100" r="17.5" fill="#fff"/><circle cx="83" cy="102" r="8.3" fill="#233b47"/><circle cx="121" cy="102" r="8.3" fill="#233b47"/><circle cx="85.5" cy="98" r="2.4" fill="#fff"/><circle cx="123.5" cy="98" r="2.4" fill="#fff"/><path d="M94.5 115 L105.5 115 L100 124 Z" fill="#f8911b"/><ellipse cx="55" cy="132" rx="15" ry="31" fill="#0885f8" transform="rotate(-18 55 132)"/><ellipse cx="145" cy="132" rx="15" ry="31" fill="#0885f8" transform="rotate(18 145 132)"/><ellipse cx="53" cy="143" rx="6.5" ry="16" fill="#f8911b" transform="rotate(-18 53 143)"/><ellipse cx="147" cy="143" rx="6.5" ry="16" fill="#f8911b" transform="rotate(18 147 143)"/><path d="M87 182 L83 190 M100 184 L100 192 M113 182 L117 190" stroke="#f8911b" stroke-width="3.8" stroke-linecap="round"/></svg>',
-    // 6 Full owl
-    '<svg viewBox="0 0 200 200"><ellipse cx="100" cy="180" rx="30" ry="6" fill="#eee2cd"/><rect x="86" y="168" width="28" height="14" rx="4" fill="#8a5a2b"/><path d="M58 78 L76 52 L88 82 Z" fill="#233b47"/><path d="M142 78 L124 52 L112 82 Z" fill="#233b47"/><ellipse cx="100" cy="110" rx="54" ry="50" fill="#0885f8"/><ellipse cx="100" cy="160" rx="44" ry="42" fill="#0685e8"/><ellipse cx="100" cy="168" rx="26" ry="30" fill="#fecb02"/><path d="M74 168 q26 14 52 0" fill="none" stroke="#f8911b" stroke-width="4" stroke-linecap="round" opacity=".55"/><circle cx="80" cy="98" r="19" fill="#fff"/><circle cx="120" cy="98" r="19" fill="#fff"/><circle cx="82" cy="100" r="9" fill="#233b47"/><circle cx="122" cy="100" r="9" fill="#233b47"/><circle cx="85" cy="96" r="2.6" fill="#fff"/><circle cx="125" cy="96" r="2.6" fill="#fff"/><path d="M94 114 L106 114 L100 124 Z" fill="#f8911b"/><ellipse cx="52" cy="128" rx="16" ry="34" fill="#0885f8" transform="rotate(-16 52 128)"/><ellipse cx="148" cy="128" rx="16" ry="34" fill="#0885f8" transform="rotate(16 148 128)"/><ellipse cx="50" cy="140" rx="7" ry="18" fill="#f8911b" transform="rotate(-16 50 140)"/><ellipse cx="150" cy="140" rx="7" ry="18" fill="#f8911b" transform="rotate(16 150 140)"/><path d="M85 186 L81 194 M100 188 L100 196 M115 186 L119 194" stroke="#f8911b" stroke-width="4" stroke-linecap="round"/></svg>'
+    owlSvg(2), owlSvg(3), owlSvg(4), owlSvg(5), owlSvg(6)
   ];
+
+  // Owls fully grown today: the ones already swapped for a new egg, plus the current one if it is fully grown.
+  var LS_OWLS = 'unstuck_owlsGrown';
+  function todayKey(){ var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+  function owlsHatchedToday(){
+    try {
+      var o = JSON.parse(localStorage.getItem(LS_OWLS) || '{}');
+      return o.date === todayKey() ? (o.count || 0) : 0;
+    } catch (e) { return 0; }
+  }
+  function renderOwlShelf(isFull){
+    var n = owlsHatchedToday() + (isFull ? 1 : 0);
+    var shelf = document.getElementById('owlShelf');
+    document.getElementById('hatchNewOwl').style.display = isFull ? 'inline-block' : 'none';
+    if (!n){ shelf.style.display = 'none'; shelf.innerHTML = ''; return; }
+    var owls = '';
+    for (var i = 0; i < Math.min(n, 12); i++) owls += OWL_SVGS[MAX_STAGE];
+    shelf.innerHTML = '<div>Owls grown today: ' + n + '</div>' + owls;
+    shelf.style.display = 'block';
+  }
 
   function renderOwl(){
     var idx = currentStageIndex();
@@ -723,7 +806,13 @@
       if (i <= idx) dot.className = 'filled';
       prog.appendChild(dot);
     }
+    renderOwlShelf(idx === MAX_STAGE);
   }
+  document.getElementById('hatchNewOwl').addEventListener('click', function(){
+    localStorage.setItem(LS_OWLS, JSON.stringify({ date: todayKey(), count: owlsHatchedToday() + 1 }));
+    setTotalCycles(0);
+    renderOwl();
+  });
 
   function rotateOwlMessage(){
     var m = MESSAGES[Math.floor(Math.random() * MESSAGES.length)];
@@ -795,7 +884,7 @@
       showStep('technique-distraction');
       return;
     }
-    showStep('task'); // 'unsure'
+    goToActionStep(true); // 'unsure'
   }
 
   // ---------- fear-of-failure interactive flow (R.A.I.N.-style) ----------
@@ -906,7 +995,7 @@
 
   function advanceFear(){
     if (fearCountdownHandle){ clearInterval(fearCountdownHandle); fearCountdownHandle = null; }
-    showStep('task');
+    goToActionStep(true);
   }
   document.getElementById('fearNextBtn').addEventListener('click', advanceFear);
   document.getElementById('fearSkipTimer').addEventListener('click', advanceFear);
@@ -924,7 +1013,6 @@
   var motivationWorthChips = document.getElementById('motivationWorthChips');
   var motivationReflectionNote = document.getElementById('motivationReflectionNote');
   var motivationWorthChoice = null;
-  var motivationMilestoneInput = document.getElementById('motivationMilestoneInput');
 
   function showMotivationStage(n){
     [1, 2].forEach(function(i){
@@ -935,7 +1023,7 @@
   function resetMotivationFlow(){
     motivationRating.value = 5;
     motivationRatingValue.textContent = '5';
-    motivationMilestoneInput.value = '';
+    document.getElementById('motivationTaskRecap').innerHTML = '<b>Task:</b> ' + escapeHtml(state.task);
     motivationWorthChoice = null;
     motivationStage2Continue.disabled = true;
     motivationReflectionNote.style.display = 'none';
@@ -970,7 +1058,7 @@
     showMotivationStage(1);
   });
   motivationStage2Continue.addEventListener('click', function(){
-    showStep('task');
+    goToActionStep(true);
   });
 
   // ---------- mental-fatigue interactive flow (sequential physical resets) ----------
@@ -978,11 +1066,10 @@
   var FATIGUE_STAGES = [
     { seconds: FAST ? 5 : 60, message: "Stand up, stretch for 60 seconds." },
     { seconds: FAST ? 3 : 30, message: "Sit down and breathe fast for 30 seconds.",
-      help: "Quick exhale, then a slower, longer inhale. Repeat. Stay seated (not standing) and never do this near water, as it can make you lightheaded. If you feel dizzy, stop and breathe normally." },
-    { seconds: FAST ? 5 : 60, message: "Splash some cold water on your face." },
-    { seconds: FAST ? 5 : 60, message: "Drink some water or caffeine." },
-    { seconds: FAST ? 3 : 30, message: "Put on some energetic music." }
+      help: "Quick exhale, then a slower, longer inhale. Repeat. Fast breathing can make you lightheaded, so stay seated, and don't do it while driving or in water (a bath or a pool). If you feel dizzy, stop and breathe normally." }
   ];
+  var fatigueChecklistStage = document.getElementById('fatigueChecklistStage');
+  var fatigueChecks = [1, 2, 3].map(function(n){ return document.getElementById('fatigueCheck' + n); });
   var fatigueStageIndex = 0;
   var fatigueCountdownHandle = null;
   var fatigueCurrentStageSeconds = 0;
@@ -1030,6 +1117,8 @@
     if (fatigueCountdownHandle){ clearInterval(fatigueCountdownHandle); fatigueCountdownHandle = null; }
     fatigueStageIndex = 0;
     fatigueTimerStage.style.display = 'block';
+    fatigueChecklistStage.style.display = 'none';
+    fatigueChecks.forEach(function(cb){ cb.checked = false; });
     fatigueQuestionStage.style.display = 'none';
     Array.prototype.forEach.call(fatigueFeelChips.children, function(ch){ ch.classList.remove('selected'); });
     runFatigueStage(0);
@@ -1042,14 +1131,18 @@
       runFatigueStage(fatigueStageIndex);
     } else {
       fatigueTimerStage.style.display = 'none';
-      fatigueQuestionStage.style.display = 'block';
+      fatigueChecklistStage.style.display = 'block';
     }
   }
+  document.getElementById('fatigueChecklistNext').addEventListener('click', function(){
+    fatigueChecklistStage.style.display = 'none';
+    fatigueQuestionStage.style.display = 'block';
+  });
   document.getElementById('fatigueNextBtn').addEventListener('click', advanceFatigue);
 
   Array.prototype.forEach.call(fatigueFeelChips.children, function(chip){
     chip.addEventListener('click', function(){
-      showStep('task');
+      goToActionStep(true);
     });
   });
 
@@ -1062,14 +1155,14 @@
 
   // ---------- distractions interactive flow (precommitment checklist) ----------
   // the checklist items are optional: Next is always available
-  var distractionChecks = [1, 2, 3, 4].map(function(n){ return document.getElementById('distractionCheck' + n); });
+  var distractionChecks = [1, 2, 3, 4, 5].map(function(n){ return document.getElementById('distractionCheck' + n); });
 
   function resetDistractionFlow(){
     distractionChecks.forEach(function(cb){ cb.checked = false; });
   }
 
   document.getElementById('distractionNextBtn').addEventListener('click', function(){
-    showStep('task');
+    goToActionStep(true);
   });
 
   document.getElementById('distractionBack').addEventListener('click', function(){
@@ -1085,14 +1178,14 @@
   buildChips(document.getElementById('taskChips'), TASK_PRESETS, taskInput, function(){
     taskContinue.disabled = false;
   });
-  document.getElementById('taskBack').addEventListener('click', function(){
-    showStep('cause');
+  document.getElementById('causeBack').addEventListener('click', function(){
+    showStep('task');
   });
   taskContinue.addEventListener('click', function(){
     state.task = taskInput.value.trim();
     localStorage.setItem(LS_TASK, state.task);
     clearHistory();
-    goToActionStep(true);
+    showStep('cause');
   });
 
   var actionInput = document.getElementById('actionInput');
@@ -1133,7 +1226,7 @@
         }
       })
       .catch(function(err){
-        aiErrorNote.textContent = "Couldn't get a suggestion (" + err.message + "). Feel free to just describe it yourself.";
+        aiErrorNote.textContent = "Couldn't get a suggestion (" + err.message + "). Try again, or just describe it yourself.";
         aiErrorNote.style.display = 'block';
       })
       .finally(function(){
@@ -1144,7 +1237,7 @@
 
   document.getElementById('actionBack').addEventListener('click', function(){
     resetAiNotices();
-    showStep('task');
+    showStep(actionIsFirstCycle ? 'cause' : 'cycledone');
   });
   actionContinue.addEventListener('click', function(){
     state.action = actionInput.value.trim();
@@ -1181,7 +1274,9 @@
     confirmAvoidNote.style.display = 'block';
   });
 
+  var actionIsFirstCycle = true;
   function goToActionStep(isFirstCycleForThisTask){
+    actionIsFirstCycle = isFirstCycleForThisTask;
     document.getElementById('actionTaskRecap').innerHTML = '<b>Task:</b> ' + escapeHtml(state.task);
     document.getElementById('actionTitle').textContent = isFirstCycleForThisTask
       ? "What's one tiny step you could take right now that's on the path toward getting this done?"
@@ -1271,7 +1366,7 @@
     clearHistory();
     taskInput.value = '';
     taskContinue.disabled = true;
-    showStep('cause');
+    showStep('task');
   });
 
   // ---------- restart everything ----------
@@ -1311,7 +1406,7 @@
       goToActionStep(true);
       return;
     }
-    showStep('cause');
+    showStep('task');
   }
 
   boot();

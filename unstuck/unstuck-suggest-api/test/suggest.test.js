@@ -2,6 +2,7 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 
 process.env.GEMINI_API_KEY = "test-key";
+process.env.GEMINI_RETRY_DELAY_MS = "0";
 const handler = require("../api/suggest.js");
 const TOKEN = "Vb2jxJSOSr2RwZxEy12jgJhECuYnzVsm";
 
@@ -101,6 +102,34 @@ test("upstream error surfaces the Gemini status in the message", async () => {
   }));
   assert.equal(res.statusCode, 502);
   assert.match(res.body.error, /Gemini 429 RESOURCE_EXHAUSTED/);
+});
+
+test("a 503 from Gemini is retried once and the second answer is used", async () => {
+  let n = 0;
+  const { res, calls } = await run(makeReq({ body: { task: "Study for the exam" } }), async () => {
+    n += 1;
+    if (n === 1) return { ok: false, status: 503, text: async () => JSON.stringify({ error: { status: "UNAVAILABLE" } }) };
+    return geminiReply("OK\nOpen your notes and skim two pages.");
+  });
+  assert.equal(calls.length, 2);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.suggestion, "Open your notes and skim two pages.");
+});
+
+test("two 503s in a row give up with a message that says to try again", async () => {
+  const { res, calls } = await run(makeReq({ body: { task: "Study for the exam" } }), async () => ({
+    ok: false, status: 503, text: async () => JSON.stringify({ error: { status: "UNAVAILABLE" } }),
+  }));
+  assert.equal(calls.length, 2);
+  assert.equal(res.statusCode, 502);
+  assert.match(res.body.error, /Gemini 503 UNAVAILABLE\)\. Try again/);
+});
+
+test("a non-503 error is not retried", async () => {
+  const { calls } = await run(makeReq({ body: { task: "Study for the exam" } }), async () => ({
+    ok: false, status: 429, text: async () => "{}",
+  }));
+  assert.equal(calls.length, 1);
 });
 
 test("missing API key returns 500 without calling Gemini", async () => {

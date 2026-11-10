@@ -20,6 +20,7 @@ const MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash";
 const hits = new Map(); // ip -> [timestamps]
 const WINDOW_MS = 60_000;
 const MAX_PER_WINDOW = 6;
+const RETRY_DELAY_MS = Number(process.env.GEMINI_RETRY_DELAY_MS || 700);
 
 function rateLimited(ip) {
   const now = Date.now();
@@ -70,7 +71,7 @@ module.exports = async function handler(req, res) {
     req.socket?.remoteAddress ||
     "unknown";
   if (rateLimited(ip)) {
-    res.status(429).json({ error: "Too many requests — slow down a bit and try again." });
+    res.status(429).json({ error: "Too many requests. Slow down a bit and try again." });
     return;
   }
 
@@ -158,7 +159,7 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const upstream = await fetch(
+    const callGemini = () => fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent",
       {
         method: "POST",
@@ -172,6 +173,12 @@ module.exports = async function handler(req, res) {
         }),
       }
     );
+    // Gemini's free tier often answers 503 UNAVAILABLE for a moment; one retry usually works.
+    let upstream = await callGemini();
+    if (upstream.status === 503) {
+      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+      upstream = await callGemini();
+    }
 
     if (!upstream.ok) {
       const errText = await upstream.text();
@@ -179,7 +186,7 @@ module.exports = async function handler(req, res) {
       let errStatus = "";
       try { errStatus = JSON.parse(errText).error.status || ""; } catch (_) { /* not JSON */ }
       res.status(502).json({
-        error: "AI suggestion failed (Gemini " + upstream.status + (errStatus ? " " + errStatus : "") + ") — try describing it yourself.",
+        error: "AI suggestion failed (Gemini " + upstream.status + (errStatus ? " " + errStatus : "") + "). Try again, or describe it yourself.",
       });
       return;
     }
@@ -201,6 +208,6 @@ module.exports = async function handler(req, res) {
     res.status(200).json({ suggestion, tooBroad });
   } catch (err) {
     console.error("suggest.js error", err);
-    res.status(500).json({ error: "AI suggestion failed — try describing it yourself." });
+    res.status(500).json({ error: "AI suggestion failed. Try again, or describe it yourself." });
   }
 };
