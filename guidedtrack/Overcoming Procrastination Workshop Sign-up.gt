@@ -330,7 +330,7 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 >> emailPairLine = "You chose not to be paired with an accountability partner. If you change your mind, reply to this email."
 >> afterSessionText = "if you'd like an accountability partner after all, reply to your confirmation email and we'll add you."
 *if: accountabilityOptIn = 1
-	>> emailPairLine = "You asked to be paired with an accountability partner. After the workshop, and then each month for six months, we'll introduce you by email to a new participant. We only make the introductions; the rest is up to the two of you. The only thing we share with your partner is your email address. If you change your mind, reply to this email."
+	>> emailPairLine = "You asked to be paired with an accountability partner. After the workshop, and then each month for six months, we'll introduce you by email to a new participant. We only make the introductions; the rest is up to the two of you. If you change your mind, reply to this email."
 	>> afterSessionText = "we'll introduce you by email to your first accountability partner, then to a new partner each month, for six months. We only share your email address."
 
 *email
