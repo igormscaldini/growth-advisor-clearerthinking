@@ -37,7 +37,7 @@ test('odds wording', () => {
   assert.equal(L.oneInText(1 / 16077), '16,000');
   assert.equal(L.oneInText(1 / 2.6e9), '3 billion');
   assert.equal(L.chanceMean(), 2.4);
-  assert.equal(L.formatMoney(100000), '$100,000');
+  assert.equal(L.formatMoney(L.CONFIG.prize), '$10,000');
   assert.equal(L.formatPct(0), '0%');
   assert.equal(L.formatPct(0.05), 'under 0.1%');
   assert.equal(L.formatPct(28.3), '28.3%');
@@ -51,49 +51,17 @@ test('seeded generator is reproducible and stays in [0, 1)', () => {
   assert.ok(xs.every((x) => x >= 0 && x < 1));
 });
 
-test('blind game: synthetic generators with a known score', () => {
-  // a generator stuck on one value makes the pick and the real chart coincide every time
-  assert.equal(L.simulateScore(() => 0), 12);
-  assert.equal(L.simulateScore(() => 0.999999), 12);
-  // alternating low/high: the pick is always card 0 and the real chart always card 4
-  let flip = false;
-  assert.equal(L.simulateScore(() => ((flip = !flip) ? 0 : 0.99)), 0);
-  assert.deepEqual(L.playRound(() => 0.5, 2, 5), { real: 2, hit: true });
-  assert.deepEqual(L.playRound(() => 0.5, 0, 5), { real: 2, hit: false });
-});
-
-test('blind game: long-run average is 12 / 5 = 2.4', () => {
-  const rand = L.mulberry32(2024);
-  const games = 100000;
-  let total = 0, most = 0;
-  for (let i = 0; i < games; i++) { const s = L.simulateScore(rand); total += s; most = Math.max(most, s); }
-  close(total / games, 2.4, 0.03);          // standard error is about 0.004
-  assert.ok(most < L.CONFIG.bar);           // 100,000 blind games should not reach the bar (expected 0.02 times)
-});
-
-test('verdicts follow the 2024 distribution', () => {
-  assert.match(L.verdict(0).detail, /^5\.3% of the 152 astrologers/);
-  assert.match(L.verdict(2).headline, /Right where the astrologers landed/);
-  assert.match(L.verdict(3).detail, /^28\.3% .* scored exactly 3\./);
-  assert.match(L.verdict(4).headline, /outscored 77% of the astrologers/);   // 5.3 + 20.4 + 23.0 + 28.3
-  assert.match(L.verdict(5).headline, /tied the best/);
-  assert.match(L.verdict(6).headline, /beat all 152 astrologers/);
-  assert.match(L.verdict(10).headline, /beat all 152 astrologers/);
-  assert.match(L.verdict(11).headline, /won \$100,000/);
-  assert.match(L.verdict(12).detail, /once in 5 million tries/);
-});
-
 test('share links carry the text, the page and the campaign tags', () => {
   const page = 'https://example.org/prize';
-  const text = L.shareText('result', 3);
-  const links = L.shareLinks(page, text, 'result');
+  const text = L.shareText('dare');
+  const links = L.shareLinks(page, text, 'dare');
   assert.deepEqual(Object.keys(links), L.NETWORKS.map((n) => n.id));
   for (const [id, item] of Object.entries(links)) {
     assert.ok(item.link.startsWith(page + '?utm_source=' + id + '&'), id);
-    assert.match(item.link, /utm_campaign=astrology_prize&utm_content=result$/);
+    assert.match(item.link, /utm_campaign=astrology_prize&utm_content=dare$/);
     assert.ok(decodeURIComponent(item.href).includes(page), id);
   }
-  assert.match(links.x.href, /^https:\/\/twitter\.com\/intent\/tweet\?text=I%20matched%203%20of%2012/);
+  assert.match(links.x.href, /^https:\/\/twitter\.com\/intent\/tweet\?text=You%20read%20birth%20charts/);
   assert.match(links.email.link, /utm_medium=email/);
   assert.match(links.whatsapp.link, /utm_medium=social/);
 });
@@ -105,13 +73,12 @@ test('withUtm keeps an existing query and the fragment', () => {
 
 test('share texts fit a post and never use dashes', () => {
   const texts = [L.shareText('page'), L.shareText('dare'), L.shareText('stat', 'A finding.'), L.offer(L.CONFIG)];
-  for (let k = 0; k <= 12; k++) texts.push(L.shareText('result', k), L.verdict(k).headline, L.verdict(k).detail);
   for (const t of texts) {
     assert.ok(!/[–—]/.test(t), t);
     assert.ok(t.length <= 280 - 24, `${t.length} chars: ${t}`);   // X counts any link as 23 + a space
   }
-  assert.match(L.shareText('result', 7), /beats all 152 astrologers/);
-  assert.match(L.shareText('result', 2), /averaged 2\.49 and the best got 5/);
+  assert.match(L.shareText('page'), /^\$10,000 for the first astrologer who can match 11 of 12/);
+  assert.match(L.shareText('dare'), /pay \$10,000 to the first astrologer/);
 });
 
 test('chart wheels are deterministic per seed', () => {

@@ -4,32 +4,33 @@
 <meta charset="utf-8">
 <title>Share card: the astrology prize</title>
 <!-- Source of og.png (the image social networks show for the page). Rebuild with build_og.py.
-     The amount and the pass mark are read from logic.js, so the card cannot drift from the page. -->
+     The amount and the pass mark are read from logic.js, so the card cannot drift from the page.
+     Colours and type follow the CT Digital Style Guide (Jan 2025): main blue, main dark, gold, Avenir. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&display=swap">
 <style>
   html, body { margin: 0; background: #777; }
-  #canvas { position: relative; width: 1200px; height: 630px; overflow: hidden; color: #f6efe0;
-    font-family: "Fraunces", Georgia, serif;
-    background: radial-gradient(760px 560px at 86% 50%, #1c3449 0%, rgba(28, 52, 73, 0) 64%), #0b141c; }
+  #canvas { position: relative; width: 1200px; height: 630px; overflow: hidden; color: #303030;
+    font-family: "Avenir Next", Avenir, "Montserrat", "Helvetica Neue", Arial, sans-serif;
+    background: radial-gradient(640px 520px at 88% 50%, #e8f3fe 0%, rgba(232, 243, 254, 0) 66%), #ffffff; }
   #canvas p { margin: 0; }
-  .wheel { position: absolute; right: -150px; top: 50%; width: 640px; height: 640px; transform: translateY(-50%); color: rgba(246, 239, 224, 0.5); }
+  .wheel { position: absolute; right: -150px; top: 50%; width: 640px; height: 640px; transform: translateY(-50%); color: #233b47; opacity: 0.34; }
   .wheel svg { width: 100%; height: 100%; display: block; }
   .logo { position: absolute; left: 64px; top: 50px; width: 250px; }
-  .kicker { position: absolute; left: 66px; top: 150px; font-family: "IBM Plex Mono", monospace; font-weight: 500; font-size: 19px; letter-spacing: 0.17em; text-transform: uppercase; color: #ee8031; }
-  .amount { position: absolute; left: 60px; top: 196px; font-weight: 620; font-size: 196px; line-height: 0.9; letter-spacing: -0.04em; font-variant-numeric: lining-nums; white-space: nowrap; }
-  .amount .cur { font-size: 0.5em; vertical-align: 0.66em; margin-right: 0.05em; color: #ee8031; letter-spacing: 0; }
-  .stamp { position: absolute; left: 606px; top: -34px; transform: rotate(-7deg); padding: 7px 15px 6px; border: 3px solid #ee8031; border-radius: 8px; background: rgba(11, 20, 28, 0.6); color: #ee8031; font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 21px; line-height: 1.2; letter-spacing: 0.24em; text-transform: uppercase; }
-  .sub { position: absolute; left: 66px; top: 408px; width: 730px; font-weight: 420; font-size: 38px; line-height: 1.16; letter-spacing: -0.008em; }
-  .sub em { font-style: italic; color: #ee8031; white-space: nowrap; }
-  .foot { position: absolute; left: 66px; bottom: 46px; font-family: "IBM Plex Mono", monospace; font-weight: 500; font-size: 19px; letter-spacing: 0.06em; color: rgba(246, 239, 224, 0.74); }
+  .kicker { position: absolute; left: 66px; top: 150px; font-weight: 700; font-size: 19px; letter-spacing: 0.14em; text-transform: uppercase; color: #0a76d8; }
+  .amount { position: absolute; left: 60px; top: 190px; font-weight: 800; font-size: 196px; line-height: 0.92; letter-spacing: -0.045em; font-variant-numeric: lining-nums; white-space: nowrap; }
+  .amount .cur { font-size: 0.52em; vertical-align: 0.6em; margin-right: 0.03em; color: #0885f8; letter-spacing: 0; }
+  .stamp { position: absolute; left: 560px; top: -10px; transform: rotate(-7deg); padding: 9px 16px 8px; border-radius: 8px; background: #fecb02; color: #303030; font-weight: 800; font-size: 21px; line-height: 1.2; letter-spacing: 0.2em; text-transform: uppercase; box-shadow: 0 6px 18px rgba(48, 48, 48, 0.14); }
+  .sub { position: absolute; left: 66px; top: 404px; width: 730px; font-weight: 500; font-size: 38px; line-height: 1.2; letter-spacing: -0.015em; }
+  .sub em { font-style: normal; font-weight: 700; color: #0885f8; white-space: nowrap; }
+  .foot { position: absolute; left: 66px; bottom: 46px; font-weight: 500; font-size: 19px; color: #737373; }
 </style>
 </head>
 <body>
 <div id="canvas">
   <div class="wheel" id="wheel"></div>
-  <img class="logo" src="ct-logo-on-dark.svg" alt="ClearerThinking.org">
+  <img class="logo" src="ct-logo.svg" alt="ClearerThinking.org">
   <p class="kicker">The Clearer Thinking Astrology Prize</p>
   <p class="amount"><span class="cur">$</span><span id="amount"></span><span class="stamp">Unclaimed</span></p>
   <p class="sub">for the first astrologer who can match <em id="bar"></em> strangers to their birth charts.</p>

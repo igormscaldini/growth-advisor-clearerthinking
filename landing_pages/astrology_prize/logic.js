@@ -1,4 +1,4 @@
-/* Astrology prize landing page: numbers, odds, share links, game rules and the chart-wheel drawing.
+/* Astrology prize landing page: numbers, odds, share links and the chart-wheel drawing.
    Loaded by index.html and og_card.html (window.PrizeLogic) and by Node for logic.test.js.
    CONFIG and STUDY_2024 are the single source for every figure the page computes; the static copy in
    index.html is checked against them by tests/test_astrology_prize_lp.py. */
@@ -10,7 +10,7 @@
   'use strict';
 
   var CONFIG = {
-    prize: 100000,      // US dollars
+    prize: 10000,       // US dollars
     questions: 12,      // people to match per round
     bar: 11,            // correct matches needed, in each round
     options: 5,         // charts shown per person (1 real + 4 decoys)
@@ -86,7 +86,7 @@
     return v.toFixed(1) + '%';
   }
 
-  /* ---------- game ---------- */
+  /* ---------- seeded randomness for the decorative wheels ---------- */
 
   // Small seeded generator, so wheels and tests are reproducible.
   function mulberry32(seed) {
@@ -100,64 +100,6 @@
     };
   }
 
-  function randomIndex(rand, options) {
-    return Math.min(options - 1, Math.floor(rand() * options));
-  }
-
-  // One blind round: which card hides the real chart is drawn at random, independently of the pick.
-  function playRound(rand, choice, options) {
-    var real = randomIndex(rand, options);
-    return { real: real, hit: real === choice };
-  }
-
-  // A whole blind game where the picks are random too. Returns the number of matches.
-  function simulateScore(rand, cfg) {
-    cfg = cfg || CONFIG;
-    var hits = 0;
-    for (var q = 0; q < cfg.questions; q++) {
-      var choice = randomIndex(rand, cfg.options);
-      if (playRound(rand, choice, cfg.options).hit) hits++;
-    }
-    return hits;
-  }
-
-  // What a blind score means next to the 2024 astrologers.
-  function verdict(score, cfg, study) {
-    cfg = cfg || CONFIG;
-    study = study || STUDY_2024;
-    var share = study.scorePct[score] || 0;
-    var same = formatPct(share) + ' of the ' + study.astrologers + ' astrologers in our 2024 study scored exactly ' + score + '.';
-    if (score >= cfg.bar) {
-      return {
-        headline: 'That would have won ' + formatMoney(cfg.prize),
-        detail: 'Blind guessing gets there about once in ' + oneInText(luckyWinProbability(cfg)) +
-          ' tries. In the real challenge you would have to do it twice, the second time on camera.'
-      };
-    }
-    if (score > study.bestScore) {
-      return {
-        headline: 'You just beat all ' + study.astrologers + ' astrologers',
-        detail: 'Nobody in our 2024 study matched more than ' + study.bestScore + ' charts. You got ' + score + ' without seeing one.'
-      };
-    }
-    if (score === study.bestScore) {
-      return {
-        headline: 'You tied the best astrologers in the study',
-        detail: same + ' Nobody scored higher.'
-      };
-    }
-    var below = 0;
-    for (var k = 0; k < score; k++) below += study.scorePct[k];
-    if (score === 0) return { headline: 'A clean miss. It happens', detail: same };
-    if (below >= 50) {
-      return { headline: 'You outscored ' + Math.round(below) + '% of the astrologers', detail: same };
-    }
-    return {
-      headline: 'Right where the astrologers landed',
-      detail: same + ' Their average was ' + study.meanScore + '. Blind guessing averages ' + chanceMean(cfg) + '.'
-    };
-  }
-
   /* ---------- sharing ---------- */
 
   function offer(cfg) {
@@ -165,7 +107,7 @@
       ' strangers to their birth charts.';
   }
 
-  // kind: 'page' (anyone), 'dare' (sent to an astrologer), 'result' (after the blind game), 'stat' (one finding)
+  // kind: 'page' (anyone), 'dare' (sent to an astrologer), 'stat' (one finding)
   function shareText(kind, value, cfg, study) {
     cfg = cfg || CONFIG;
     study = study || STUDY_2024;
@@ -174,15 +116,6 @@
       return 'You read birth charts, so this is for you: Clearer Thinking will pay ' + formatMoney(cfg.prize) +
         ' to the first astrologer who can match ' + cfg.bar + ' of ' + cfg.questions +
         ' people to their charts. Free to enter:';
-    }
-    if (kind === 'result') {
-      var opener = 'I matched ' + value + ' of ' + cfg.questions + ' birth charts by guessing blind. ';
-      if (value > study.bestScore) {
-        return opener + 'That beats all ' + study.astrologers + ' astrologers in a 2024 study (best score: ' +
-          study.bestScore + '). Now there is ' + ask;
-      }
-      return opener + 'In a 2024 study, ' + study.astrologers + ' astrologers averaged ' + study.meanScore +
-        ' and the best got ' + study.bestScore + '. Now there is ' + ask;
     }
     if (kind === 'stat') {
       return value + ' Now there is ' + ask;
@@ -249,8 +182,8 @@
   function wheelSVG(seed, opts) {
     var o = opts || {};
     var glyphs = o.glyphs !== false;
-    var soft = o.soft || '#3b84f7';
-    var hard = o.hard || '#ee8031';
+    var soft = o.soft || '#0885f8';   // CT main blue
+    var hard = o.hard || '#f8911b';   // CT orange
     var count = o.planets || (glyphs ? 10 : 7);
     var rand = mulberry32(seed);
     var C = 100, R1 = 97, R2 = glyphs ? 81 : 87, R3 = glyphs ? 60 : 64;
@@ -330,10 +263,6 @@
     formatMoney: formatMoney,
     formatPct: formatPct,
     mulberry32: mulberry32,
-    randomIndex: randomIndex,
-    playRound: playRound,
-    simulateScore: simulateScore,
-    verdict: verdict,
     offer: offer,
     shareText: shareText,
     withUtm: withUtm,
