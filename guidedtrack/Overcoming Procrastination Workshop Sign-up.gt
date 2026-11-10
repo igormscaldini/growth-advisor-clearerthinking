@@ -101,7 +101,7 @@
 		.program_container ul.ct-list li b { color: #1a1a1a; }
 		@media (max-width: 480px) { .program_container h1.ct-title { font-size: 28px !important; } .program_container p.ct-sub { font-size: 18px; } }
 
-		.program_container .ct-hero-img { width: 100%; aspect-ratio: 920 / 410; margin: 0 0 22px 0; background-size: contain; background-repeat: no-repeat; background-position: center; background-image: url("https://programs.clearerthinking.org/procrastination-workshop-with-spencer-greenberg/owl-header.svg"); }
+		.program_container .ct-hero-img { width: 100%; max-width: 360px; aspect-ratio: 2612 / 2332; margin: 0 auto 22px auto; background-size: contain; background-repeat: no-repeat; background-position: center; background-image: url("https://programs.clearerthinking.org/procrastination-workshop-with-spencer-greenberg/owl-header.svg"); }
 		.program_container p.ct-eyebrow { color: #0A6FD6; font-size: 13px; line-height: 1.3; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin: 0 0 10px 0; }
 		.program_container h1.ct-title.ct-hero { font-size: 34px !important; }
 		.program_container .ct-facts p.ct-skip { margin-top: 10px; font-size: 15px; }
@@ -123,7 +123,7 @@
 
 *html
 	<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
-	<div class="ct-hero-img" role="img" aria-label="Drawing of an owl in glasses writing at a desk, next to a to-do list with two items checked"></div>
+	<div class="ct-hero-img" role="img" aria-label="Drawing of an owl in glasses writing at a desk, with a to-do list, a clock, books and a coffee mug"></div>
 	<p class="ct-eyebrow">Free live workshop with Spencer Greenberg</p>
 	<h1 class="ct-title ct-hero">{workshopTitle}</h1>
 	<p class="ct-sub">{workshopSubtitle}</p>
