@@ -21,6 +21,9 @@
 -- - 0 and "" are truthy in *if; flags are tested with "= 1".
 -- - *html styles are cleared on every page change, so each page carries its own.
 -- - A text line that starts with *Word:* is parsed as a keyword; bold leads use <b>.
+-- - {variables} are not filled in inside an *html block that also contains <style>,
+--   so styles and markup that uses variables go in separate *html blocks.
+-- - *service does not compile inside *click; the click jumps to a label instead.
 --------------------------------------------------------------------------------
 
 *settings
@@ -217,7 +220,6 @@
 -- ONE TINY STEP (asked once per round)
 ---------------------------------------------------------------------------------
 *label: askAction
->> actionFromAi = 0
 >> actionQuestion = "What's one tiny step you could take right now that's on the path toward getting this done?"
 *if: roundOfTask > 0
 	>> actionQuestion = "What's the next easy thing you can do in 10 minutes?"
@@ -237,35 +239,47 @@
 *component
 	✨ Suggest with AI
 	*click
-		>> aiState = 0
-		*service: unstuckSuggest
-			*path: /api/suggest
-			*method: POST
-			*send: {"task" -> taskName, "previousActions" -> stepsDone}
-			*success
-				>> aiSuggestion = it["suggestion"]
-				>> aiState = 1
-			*error
-				>> aiError = it
-				>> aiState = 2
-		*if: aiState = 1
-			*question: ✨ AI suggestion: {aiSuggestion}
-				*tip: If your task description was broad, this is a best guess. You can also go back and describe the task in more detail.
-				Use this step
-					>> action = aiSuggestion
-					>> actionFromAi = 1
-				I'll write my own
-		*if: aiState = 2
-			Couldn't get a suggestion ({aiError}). Try again, or just describe it yourself.
-			*button: OK
-		*if: actionFromAi = 1
-			*goto: confirmStep
+		*goto: aiSuggest
 
 *question: {actionQuestion}
 	*tip: Keep it small. It just needs to move things forward a little.
 	*type: paragraph
 	*placeholder: e.g. Open the doc and write a rough outline...
 	*save: action
+
+*goto: confirmStep
+
+---------------------------------------------------------------------------------
+-- AI SUGGESTION (reached only from the "Suggest with AI" box above)
+-- *service cannot be placed inside *click (it does not compile), so the click jumps here.
+---------------------------------------------------------------------------------
+*label: aiSuggest
+>> aiState = 0
+*service: unstuckSuggest
+	*path: /api/suggest
+	*method: POST
+	*send: {"task" -> taskName, "previousActions" -> stepsDone}
+	*success
+		>> aiSuggestion = it["suggestion"]
+		>> aiState = 1
+	*error
+		>> aiError = it
+		>> aiState = 2
+
+*if: aiState = 1
+	*question: ✨ AI suggestion: {aiSuggestion}
+		*tip: If your task description was broad, this is a best guess. You can also go back and describe the task in more detail.
+		Use this step
+			>> action = aiSuggestion
+			*goto: confirmStep
+		I'll write my own
+			*goto: askAction
+
+*if: aiState = 2
+	Couldn't get a suggestion ({aiError}). Try again, or just describe it yourself.
+	*button: OK
+
+*goto: askAction
 
 ---------------------------------------------------------------------------------
 -- CONFIRM (the anxiety path gets a commitment framing)

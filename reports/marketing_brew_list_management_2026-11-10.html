@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Marketing Brew List Teardown</title>
+<style>
+:root{--fg:#1d2330;--muted:#5d6675;--line:#e3e6eb;--accent:#1f6feb;--warn:#b45309;--bg:#fff}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--fg);background:var(--bg);max-width:900px;margin:0 auto;padding:32px 16px 64px;line-height:1.55}
+h1{font-size:28px;margin:0 0 4px}h2{font-size:20px;margin:36px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.sub{color:var(--muted);margin:0 0 24px}table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0 16px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
+td.n{text-align:right;font-variant-numeric:tabular-nums}.box{border-left:4px solid var(--accent);background:#f5f8ff;padding:12px 16px;margin:16px 0}
+.warn{border-left-color:var(--warn);background:#fff8ef}code{background:#f2f3f5;padding:1px 4px;border-radius:3px;font-size:13px}
+ul{padding-left:20px}li{margin:4px 0}
+</style></head><body>
+<h1>How Marketing Brew runs its list</h1>
+<p class="sub">Reverse-engineered from the 963 Marketing Brew emails in Igor's Gmail, Dec 8, 2022 to Nov 9, 2026 (full headers via the Gmail API) · Generated 2026-11-10 04:21pm</p>
+
+<div class="box"><b>In one paragraph.</b> Marketing Brew (Morning Brew Inc.) sends one editorial email at 1:00 pm ET, Monday to Thursday, from Sailthru on four dedicated IPs under <code>morningbrew.com</code>. All event and sponsored promotion goes out from a separate subdomain, <code>community.morningbrew.com</code>, through a different ESP (SparkPost since May 2024). That promotional mail is about 2 emails a month, and non-openers get a rewritten "FW:" resend 2 to 13 days later. They emailed one re-permission check, early in the subscription. After that, Igor went 181 days without opening a single issue and they kept sending every issue, with no re-confirm email, so they show no strict open-based sunset. In Gmail the dailies land in the Updates tab, not Promotions.</div>
+
+<h2>1. Cadence</h2>
+<table><tr><th>Year</th><th class="n">Daily issues</th><th>Pattern</th></tr>
+<tr><td>2022 (from Dec 8)</td><td class="n">15</td><td>Mon to Fri, around noon ET</td></tr>
+<tr><td>2023</td><td class="n">254</td><td>Mon to Fri; time moved to 1:00 pm ET</td></tr>
+<tr><td>2024</td><td class="n">207</td><td><b>Friday dropped after Feb 2, 2024</b>: now Mon to Thu</td></tr>
+<tr><td>2025</td><td class="n">206</td><td>Mon to Thu (4 one-off Fridays, 1 Saturday)</td></tr>
+<tr><td>2026 (to Nov 9)</td><td class="n">178</td><td>Mon to Thu, plus a "special weekend newsletter" Saturday at the end of each quarter (Sep 27 2025, Mar 28, Jun 27, Sep 26 2026)</td></tr></table>
+<ul>
+<li><b>Send time is fixed:</b> since 2024, 95% of issues are stamped 13:00 to 13:02 ET. The issue reaches Gmail a median of under 1 minute after the stamp, and at worst about 5 minutes later. That means the list goes out in a fast blast, not a slow drip spread over hours.</li>
+<li><b>Cutting Fridays</b> (about a 20% cut in volume) is the biggest list-health lever visible here. They chose fewer sends over a stricter list.</li>
+<li><b>Promotional stream:</b> 26 emails in 2023, 26 in 2024, 31 in 2025 and 18 in 2026, so about 2 a month on top of the dailies. They cluster around their own events (The Brief, Marketing Brew Summit, virtual sessions) and sponsored webinars ("Together with Webflow").</li>
+</ul>
+
+<h2>2. Sending identity and infrastructure</h2>
+<table><tr><th>Stream</th><th>From</th><th>Bounce (Return-Path)</th><th>ESP / IPs</th><th>DKIM</th></tr>
+<tr><td>Daily editorial</td><td><code>crew@morningbrew.com</code> to Nov 10 2025, then <code>marketingbrew@morningbrew.com</code></td><td><code>bounce.morningbrew.com</code> (per-recipient address, VERP)</td><td>Sailthru, 4 dedicated hosts <code>morningbrew-a/b/c/d.sailthru.com</code> (one IP each, 192.64.236-238.x), rotated per send</td><td><code>d=morningbrew.com s=sailthru</code></td></tr>
+<tr><td>Events / sponsored promo</td><td><code>crew@community.morningbrew.com</code></td><td><code>bounces.community.morningbrew.com</code></td><td>Sailthru until Mar 2024; <b>SparkPost from May 20, 2024</b></td><td><code>d=community.morningbrew.com</code> (<code>s=scph0224</code> on SparkPost)</td></tr></table>
+<ul>
+<li><b>Reputation isolation:</b> promotional mail never shares a domain with the editorial issue, and since 2024 it doesn't share an ESP or IPs either. If an event blast draws spam complaints, the damage stays on <code>community.</code> and not on the newsletter.</li>
+<li><b>Per-brand sender (Nov 11, 2025):</b> the daily moved off the shared <code>crew@</code> address (used by Morning Brew and Revenue Brew too) to <code>marketingbrew@</code>. A month later, replies went to a dedicated <code>marketingbrewreplies@</code>. Gmail tracks reputation by domain more than by address, so this is mostly about brand recognition and keeping replies separate.</li>
+<li><b>Compliance:</b> RFC 8058 one-click unsubscribe (<code>List-Unsubscribe-Post</code>) appears on every issue from May 29, 2024, when Google and Yahoo started enforcing their bulk-sender rules. It sits alongside a mailto unsubscribe and a tracked web unsubscribe link.</li>
+<li><b>Inbox placement:</b> the dailies landed in Updates (or Primary/Personal), never Promotions, until 3 issues in 2026. Promotional emails moved from Promotions (2023) to Updates from 2024 on.</li>
+</ul>
+
+<h2>3. Engagement rules: what they do with non-openers</h2>
+<table><tr><th>Behaviour</th><th>Evidence</th></tr>
+<tr><td><b>Early re-permission check</b></td><td>Feb 12, 2023, "☕ Action Required: Confirm your subscription": "We noticed that you haven't opened the last few issues…". It came about 23 days (about 16 issues) after Igor's last open, about 2 months into the subscription. He didn't open it and was <i>not</i> removed. He opened an issue a month later.</td></tr>
+<tr><td><b>No later sunset</b></td><td>Igor opened 5% of dailies in 2023, 9% in 2024, 13% in 2025 and 2% in 2026. The longest stretch with no opens, Oct 13, 2025 to Apr 13, 2026, was 181 days and 110 issues. Every issue still arrived and no re-confirm email was sent.</td></tr>
+<tr><td><b>Resends to non-openers ("FW:")</b></td><td>14 promotional emails got a "FW:" follow-up 0 to 13 days later (median about 4). In 13 of them Igor hadn't read the original. The copy is rewritten for urgency ("Early birds caught the worm!…"), not just re-sent. Dailies are never resent.</td></tr></table>
+<p>The likeliest reading: they run an <b>onboarding inactivity check</b> on new subscribers in their first weeks, and after that they keep long-time inactives on the list. Their ad business sells reach, so they cut frequency (no Friday) rather than cutting subscribers.</p>
+
+<div class="box warn"><b>Caveats.</b> (1) This is one subscriber, so it shows the rules that applied to Igor, not the whole list. (2) Gmail's read flag is not the same as Sailthru's open. If Igor reads Gmail in Apple Mail with Mail Privacy Protection, Sailthru logged automatic opens on every issue and Igor never looked "inactive" to them. In that case, "no sunset" could be wrong. <b>Igor: do you use Apple Mail on your phone for this Gmail account?</b> (3) Anomaly: 4 dailies (Aug 17, Sep 10, 17 and 30, 2026) came from <code>morningbrew@mail.sailthru.com</code>, signed by Sailthru's shared domain instead of morningbrew.com. That looks like a fallback or misconfiguration, maybe a test. Five issues from Oct 6, 2026 also came from new Sailthru hosts (<code>pmta*.sailthru.com</code>, 163.47.180.x), which suggests a move to a new IP pool. (4) 4 "Marketing Brew Events" emails reached Igor through a forward from his clearerthinking.org address and are excluded.</div>
+
+<h2>4. What Clearer Thinking can take from this</h2>
+<ul>
+<li><b>Separate promotional mail onto its own subdomain, and ideally its own sending setup.</b> This is the most directly useful finding. The OHI diagnosis showed the OHI domain's Gmail reputation broke after the main newsletter's wide sends moved onto it. Marketing Brew does the opposite: the daily owns <code>morningbrew.com</code>, and everything promotional goes through <code>community.</code></li>
+<li><b>One fixed send slot.</b> Same time, same days, for years. Gmail's filters learn the pattern.</li>
+<li><b>Cut frequency before cutting people.</b> Dropping Friday was their lever. Since CT has no sunset either (678k active vs a 700k plan ceiling), the lever differs: their business sells reach, but CT pays per subscriber and has a Gmail reputation problem. So CT has stronger reasons to sunset than they do.</li>
+<li><b>An onboarding inactivity check</b> (around 3 weeks of no opens leads to "confirm you still want this") is cheap and catches typo'd and bot sign-ups early. That matters given CT's viral waves through the API.</li>
+<li><b>Rewritten resends only for promotional mail,</b> not for the editorial issue. That fits the earlier advice against routine resends of the newsletter.</li>
+</ul>
+</body></html>

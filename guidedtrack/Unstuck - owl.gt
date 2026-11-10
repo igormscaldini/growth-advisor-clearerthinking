@@ -92,6 +92,10 @@
 		.uo-dots { font-size: 12px; letter-spacing: 2px; color: #0885f8; margin-top: 10px; }
 		.uo-shelf { font-size: 13px; color: #737373; margin-top: 8px; }
 	</style>
+
+-- Separate block on purpose: GuidedTrack does not fill in {variables} inside an *html
+-- block that also contains a <style> tag.
+*html
 	<div class="uo-card">
 		<div class="uo s{owlStage}">
 			<div class="uo-branch"></div>
