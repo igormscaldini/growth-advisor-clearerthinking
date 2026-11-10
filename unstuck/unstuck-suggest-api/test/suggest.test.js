@@ -116,13 +116,13 @@ test("a 503 from Gemini is retried once and the second answer is used", async ()
   assert.equal(res.body.suggestion, "Open your notes and skim two pages.");
 });
 
-test("two 503s in a row give up with a message that says to try again", async () => {
+test("two 503s in a row give up and report the Gemini status", async () => {
   const { res, calls } = await run(makeReq({ body: { task: "Study for the exam" } }), async () => ({
     ok: false, status: 503, text: async () => JSON.stringify({ error: { status: "UNAVAILABLE" } }),
   }));
   assert.equal(calls.length, 2);
   assert.equal(res.statusCode, 502);
-  assert.match(res.body.error, /Gemini 503 UNAVAILABLE\)\. Try again/);
+  assert.match(res.body.error, /Gemini 503 UNAVAILABLE\)$/);
 });
 
 test("a non-503 error is not retried", async () => {

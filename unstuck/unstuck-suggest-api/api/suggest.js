@@ -71,7 +71,7 @@ module.exports = async function handler(req, res) {
     req.socket?.remoteAddress ||
     "unknown";
   if (rateLimited(ip)) {
-    res.status(429).json({ error: "Too many requests. Slow down a bit and try again." });
+    res.status(429).json({ error: "Too many requests, slow down a bit" });
     return;
   }
 
@@ -186,7 +186,7 @@ module.exports = async function handler(req, res) {
       let errStatus = "";
       try { errStatus = JSON.parse(errText).error.status || ""; } catch (_) { /* not JSON */ }
       res.status(502).json({
-        error: "AI suggestion failed (Gemini " + upstream.status + (errStatus ? " " + errStatus : "") + "). Try again, or describe it yourself.",
+        error: "AI suggestion failed (Gemini " + upstream.status + (errStatus ? " " + errStatus : "") + ")",
       });
       return;
     }
@@ -208,6 +208,6 @@ module.exports = async function handler(req, res) {
     res.status(200).json({ suggestion, tooBroad });
   } catch (err) {
     console.error("suggest.js error", err);
-    res.status(500).json({ error: "AI suggestion failed. Try again, or describe it yourself." });
+    res.status(500).json({ error: "AI suggestion failed" });
   }
 };
