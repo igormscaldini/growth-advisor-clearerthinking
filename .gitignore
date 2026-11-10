@@ -66,6 +66,8 @@ reports/*.csv
 reports/*.jsonl
 Branding assets/
 assets/
+# ...but the infographic skill must carry its own logo (its tests and fresh clones need it)
+!.claude/skills/ct-infographic/assets/
 .claude/conversation_digest_state.json
 .claude/digest.lock
 
