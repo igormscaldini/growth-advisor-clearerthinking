@@ -95,17 +95,31 @@
   .nav { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 24px; padding-bottom: 24px; }
   .nav img { width: clamp(180px, 20vw, 230px); height: auto; }
   .nav .btn { min-height: 44px; padding: 8px 20px; font-size: 16px; }
-  .hero-body { max-width: 980px; margin: 0 auto; padding: clamp(28px, 5vw, 64px) var(--gutter) 0; text-align: center; }
-  .kicker-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 18px; }
+  .hero-body { max-width: var(--wrap); margin: 0 auto; padding: clamp(24px, 4vw, 48px) var(--gutter) 0; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+  .kicker-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; }
   .kicker-row .kicker { margin: 0; }
-  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: var(--grey); font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dark); }
-  .pill::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); }
-  .hero h1 { margin: 24px auto 0; max-width: 15em; font-size: clamp(36px, 5vw, 62px); line-height: 1.08; letter-spacing: -0.025em; }
+  .hero h1 { margin: 20px 0 0; max-width: 12.5em; font-size: clamp(34px, 4.1vw, 54px); line-height: 1.1; letter-spacing: -0.025em; }
   .hero h1 em { font-style: normal; font-weight: 800; color: var(--blue); white-space: nowrap; }
-  .hero .lede { margin: 22px auto 0; max-width: 32em; }
+  .hero .lede { margin: 20px 0 0; max-width: 30em; }
   .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
-  .hero .cta-row { justify-content: center; }
   .hero-fine { margin-top: 16px; font-size: 15px; color: var(--text-2); }
+  /* the star map: a natal chart on a night sky, in the brand's dark accent */
+  .sky { position: relative; overflow: hidden; aspect-ratio: 1; border-radius: 24px; color: rgba(255, 255, 255, 0.82);
+    background: radial-gradient(62% 62% at 50% 50%, rgba(8, 133, 248, 0.26) 0%, rgba(8, 133, 248, 0) 70%), var(--dark-accent);
+    box-shadow: 0 24px 60px rgba(35, 59, 71, 0.22); }
+  .sky::before { content: ""; position: absolute; inset: 0; opacity: 0.9;
+    background-image:
+      radial-gradient(1.3px 1.3px at 18px 32px, #fff 50%, transparent 51%),
+      radial-gradient(1px 1px at 142px 96px, rgba(255, 255, 255, 0.8) 50%, transparent 51%),
+      radial-gradient(1.5px 1.5px at 236px 18px, rgba(255, 255, 255, 0.85) 50%, transparent 51%),
+      radial-gradient(1px 1px at 84px 198px, rgba(255, 255, 255, 0.6) 50%, transparent 51%),
+      radial-gradient(1.2px 1.2px at 310px 242px, rgba(255, 255, 255, 0.6) 50%, transparent 51%),
+      radial-gradient(1px 1px at 388px 132px, rgba(255, 255, 255, 0.8) 50%, transparent 51%),
+      radial-gradient(1.4px 1.4px at 60px 300px, #fff 50%, transparent 51%);
+    background-size: 430px 330px; }
+  .sky svg { position: absolute; inset: 7%; width: 86%; height: 86%; animation: spin 240s linear infinite; }
+  .sky-label { position: absolute; left: 18px; bottom: 18px; display: inline-flex; align-items: center; gap: 8px; padding: 7px 13px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: var(--white); font-size: 12.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+  .sky-label::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--gold); }
   .showcase { max-width: var(--wrap); margin: clamp(40px, 6vw, 64px) auto 0; padding: 0 var(--gutter) clamp(56px, 7vw, 88px); }
   .show-card { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.7fr); gap: clamp(20px, 3vw, 44px); align-items: center; background: var(--grey); border-radius: 20px; padding: clamp(22px, 3vw, 36px); }
   .show-tag { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-2); }
@@ -262,6 +276,11 @@
     .deal { grid-template-columns: repeat(2, 1fr); }
     .randi-grid { grid-template-columns: 1fr; }
     .show-card { grid-template-columns: 1fr; }
+    .hero-body { grid-template-columns: 1fr; text-align: center; }
+    .kicker-row { justify-content: center; }
+    .hero h1, .hero .lede { margin-left: auto; margin-right: auto; }
+    .hero .cta-row { justify-content: center; }
+    .sky { width: 100%; max-width: 440px; margin: 8px auto 0; }
   }
   @media (max-width: 640px) {
     body { font-size: 16.5px; }
@@ -275,7 +294,7 @@
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .final-wheel svg { animation: none; }
+    .sky svg, .final-wheel svg { animation: none; }
     .btn, .dock { transition: none; }
   }
 </style>
@@ -291,9 +310,9 @@
     <a class="btn btn-outline" href="#win" data-cta="nav">How to win</a>
   </div>
   <div class="hero-body">
+    <div class="hero-copy">
     <div class="kicker-row">
       <p class="kicker">The Clearer Thinking Astrology Prize</p>
-      <span class="pill" aria-label="Status: unclaimed">Unclaimed</span>
     </div>
     <h1><em>$10,000</em> for the first astrologer who can match 11 of 12 strangers to their birth charts.</h1>
     <p class="lede">In 2024, 152 astrologers took our chart-matching test. As a group they scored no better than guessing, and the best of them matched 5 of 12. So we have multiplied the prize by 10, and we would love to be proven wrong.</p>
@@ -302,6 +321,10 @@
       <button class="btn btn-outline" type="button" data-share="dare">Dare an astrologer</button>
     </div>
     <p class="hero-fine">Free to enter.</p>
+    </div>
+    <div class="sky" id="sky">
+      <span class="sky-label">Prize unclaimed</span>
+    </div>
   </div>
   <div class="showcase">
     <div class="show-card">
@@ -605,6 +628,7 @@
   });
 
   /* ----- decorative chart wheels ----- */
+  $('sky').insertAdjacentHTML('afterbegin', L.wheelSVG(42));
   $('final-wheel').innerHTML = L.wheelSVG(2026);
   $('hero-charts').innerHTML = 'ABCDE'.split('').map(function (letter, i) {
     return '<div class="tile">' + L.wheelSVG(70 + i, { glyphs: false }) + '<span>' + letter + '</span></div>';
