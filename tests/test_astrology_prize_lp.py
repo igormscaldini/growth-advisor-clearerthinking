@@ -124,7 +124,7 @@ def test_copy_states_the_2024_study_figures(page, logic):
     assert chance_mean == 2.4 and f"averages {chance_mean}" in page.copy
     assert f'matched {study["bestScore"]} of {config["questions"]}' in page.copy
     assert f'{config["questions"]} real people' in page.copy
-    assert "multiplied the prize by %d" % (config["prize"] / study["prize"]) in page.copy
+    assert f'We offered {money(study["prize"])}' in page.copy
 
 
 def test_social_sharing_tags(page):

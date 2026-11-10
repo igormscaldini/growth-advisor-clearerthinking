@@ -91,7 +91,7 @@
   .is-draft .draft { display: block; background: var(--gold); color: var(--dark); font-size: 13px; font-weight: 600; line-height: 1.45; padding: 9px var(--gutter); text-align: center; }
 
   /* ---------- hero ---------- */
-  .hero { position: relative; overflow: hidden; isolation: isolate; background: linear-gradient(180deg, #f3f8fe 0%, var(--white) 72%); }
+  .hero { position: relative; overflow: hidden; isolation: isolate; padding-bottom: clamp(56px, 7vw, 88px); background: linear-gradient(180deg, #f3f8fe 0%, var(--white) 72%); }
   /* a faint star field over the whole section */
   .hero::before { content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none; opacity: 0.7;
     background-image:
@@ -121,18 +121,6 @@
   .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 30px; }
   .hero .cta-row { justify-content: center; }
   .hero-fine { margin-top: 16px; font-size: 15px; color: var(--text-2); }
-  .showcase { position: relative; max-width: var(--wrap); margin: clamp(40px, 6vw, 64px) auto 0; padding: 0 var(--gutter) clamp(56px, 7vw, 88px); }
-  .show-card { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.7fr); gap: clamp(20px, 3vw, 44px); align-items: center; background: var(--grey); border-radius: 20px; padding: clamp(22px, 3vw, 36px); }
-  .show-tag { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-2); }
-  .show-lines { margin: 14px 0 12px; display: grid; gap: 9px; }
-  .show-lines i { display: block; height: 9px; border-radius: 5px; background: var(--white); }
-  .show-person p:last-child { font-size: 15px; color: var(--text-2); }
-  .show-q { font-weight: 700; font-size: 17px; color: var(--dark); margin-bottom: 14px; }
-  .show-tiles { display: grid; grid-template-columns: repeat(5, 1fr); gap: clamp(8px, 1.2vw, 14px); }
-  .tile { background: var(--white); border-radius: 14px; padding: 12px 8px 10px; text-align: center; box-shadow: 0 2px 10px rgba(48, 48, 48, 0.06); }
-  .tile svg { width: 100%; margin: 0 auto 8px; color: var(--dark-accent); }
-  .tile span { font-size: 13px; font-weight: 700; color: var(--text-2); }
-  .show-note { grid-column: 1 / -1; font-size: 13.5px; color: var(--text-2); padding-top: 14px; border-top: 1px solid var(--line); }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ---------- story ---------- */
@@ -207,9 +195,6 @@
   .deal { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(26px, 4vw, 44px) clamp(22px, 3.4vw, 44px); margin: clamp(36px, 5vw, 56px) 0 0; padding: 0; list-style: none; }
   .deal li { padding-top: 18px; border-top: 3px solid var(--blue); }
   .deal p { margin-top: 8px; font-size: 16.5px; }
-  .pull { margin: clamp(44px, 6vw, 72px) 0 0; padding: 4px 0 4px 26px; border-left: 4px solid var(--blue); max-width: 24em; font-weight: 600; font-size: clamp(22px, 2.8vw, 32px); line-height: 1.3; letter-spacing: -0.015em; color: var(--dark); }
-  .pull footer { margin-top: 14px; font-weight: 400; font-size: 15px; color: var(--text-2); letter-spacing: 0; }
-
   /* ---------- track record ---------- */
   .record { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: clamp(32px, 5vw, 52px); }
   .study { display: flex; flex-direction: column; background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 26px 26px 24px; }
@@ -261,12 +246,11 @@
   .signup-note { min-height: 1.5em; margin-top: 12px; font-size: 14.5px; color: rgba(255, 255, 255, 0.86); }
 
   footer.site { background: var(--dark); color: rgba(255, 255, 255, 0.72); padding: 38px 0 96px; font-size: 14px; }
-  .foot-grid { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 24px 48px; }
+  .foot-grid { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px 48px; }
   .foot-grid img { width: 190px; }
-  .foot-grid ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 7px; max-width: 520px; }
+  .foot-contact { font-size: 15px; }
   .foot-grid a { color: rgba(255, 255, 255, 0.86); text-underline-offset: 3px; }
   .foot-grid a:hover { color: var(--white); }
-  .foot-fine { margin-top: 28px; max-width: 62em; }
 
   .dock { position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; display: none; gap: 10px; padding: 10px 14px calc(10px + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, 0.96); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px rgba(48, 48, 48, 0.08); backdrop-filter: blur(8px); transform: translateY(110%); transition: transform 0.25s ease; }
   .dock.show { transform: none; }
@@ -276,13 +260,11 @@
     .beats, .receipts, .steps, .record { grid-template-columns: 1fr; }
     .deal { grid-template-columns: repeat(2, 1fr); }
     .randi-grid { grid-template-columns: 1fr; }
-    .show-card { grid-template-columns: 1fr; }
     .hero-bg { width: 960px; }
   }
   @media (max-width: 640px) {
     body { font-size: 16.5px; }
     .nav .btn { display: none; }
-    .tile { padding: 8px 4px 6px; border-radius: 10px; }
     .cta-row .btn { width: 100%; }
     .deal { grid-template-columns: 1fr; }
     .dock { display: flex; }
@@ -313,26 +295,12 @@
       <span class="pill" aria-label="Status: unclaimed">Unclaimed</span>
     </div>
     <h1><em>$10,000</em> for the first astrologer who can match 11 of 12 strangers to their birth charts.</h1>
-    <p class="lede">In 2024, 152 astrologers took our chart-matching test. As a group they scored no better than guessing, and the best of them matched 5 of 12. So we have multiplied the prize by 10, and we would love to be proven wrong.</p>
+    <p class="lede">“If astrology works, we want to believe that it works, whereas if it doesn’t work, we want to believe that it doesn’t.”</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="#win" data-cta="hero">Take the challenge <span aria-hidden="true">→</span></a>
       <button class="btn btn-outline" type="button" data-share="dare">Dare an astrologer</button>
     </div>
     <p class="hero-fine">Free to enter.</p>
-  </div>
-  <div class="showcase">
-    <div class="show-card">
-      <div class="show-person">
-        <p class="show-tag">Person 7 of 12</p>
-        <div class="show-lines" aria-hidden="true"><i style="width:92%"></i><i style="width:78%"></i><i style="width:86%"></i><i style="width:64%"></i><i style="width:81%"></i></div>
-        <p>43 answers about their life, in their own words</p>
-      </div>
-      <div>
-        <p class="show-q">Which of these five is their real birth chart?</p>
-        <div class="show-tiles" id="hero-charts" role="img" aria-label="Five birth charts labelled A to E. One is real and four are decoys."></div>
-      </div>
-      <p class="show-note">What one of the 12 questions looks like. The charts drawn on this page are illustrations, not real people's charts. In the test, every chart is shown in both the Placidus and the Whole Sign system.</p>
-    </div>
   </div>
 </header>
 
@@ -340,7 +308,7 @@
 
 <section class="section grey" id="story">
   <div class="wrap">
-    <h2>We have run this test before. <em>Astrologers helped us build it.</em></h2>
+    <h2>Astrologers helped us build it.</h2>
 
     <ol class="beats">
       <li>
@@ -459,10 +427,6 @@
       </li>
     </ul>
 
-    <blockquote class="pull">
-      “If astrology works, we want to believe that it works, whereas if it doesn’t work, we want to believe that it doesn’t.”
-      <footer>From our 2024 study report</footer>
-    </blockquote>
   </div>
 </section>
 
@@ -578,15 +542,8 @@
   <div class="wrap">
     <div class="foot-grid">
       <a href="https://www.clearerthinking.org/" aria-label="ClearerThinking.org home"><img src="ct-logo-on-dark.svg" alt="ClearerThinking.org" width="190" height="30"></a>
-      <ul>
-        <li><a href="https://www.clearerthinking.org/post/does-astrology-work">Does astrology work? We put 152 astrologers to the test</a></li>
-        <li><a href="https://www.clearerthinking.org/post/can-astrologers-use-astrological-charts-to-understand-people-s-character-and-lives-our-new-study-pu">The full 2024 study report, with limitations</a></li>
-        <li><a href="https://www.clearerthinking.org/post/we-tested-the-predictive-power-of-astrology-here-are-the-results">The sun sign study</a></li>
-        <li><a href="https://www.clearerthinking.org/post/can-you-experience-enlightenment-through-sam-harris-meditation-app">The meditation app study</a></li>
-        <li><a href="https://en.wikipedia.org/wiki/One_Million_Dollar_Paranormal_Challenge">About James Randi's One Million Dollar Paranormal Challenge</a></li>
-      </ul>
+      <p class="foot-contact">Questions? <a href="mailto:info@clearerthinking.org">info@clearerthinking.org</a></p>
     </div>
-    <p class="foot-fine">Every figure about past results on this page comes from the Clearer Thinking studies linked above. One study is evidence, not proof: the 2024 report lists its own limitations, including the small number of people to match, and this prize is one way to keep testing.</p>
   </div>
 </footer>
 
@@ -624,10 +581,6 @@
   /* ----- decorative chart wheels ----- */
   $('hero-bg').innerHTML = L.wheelSVG(42);
   $('final-wheel').innerHTML = L.wheelSVG(2026);
-  $('hero-charts').innerHTML = 'ABCDE'.split('').map(function (letter, i) {
-    return '<div class="tile">' + L.wheelSVG(70 + i, { glyphs: false }) + '<span>' + letter + '</span></div>';
-  }).join('');
-
   /* ----- sharing ----- */
   function renderShare(host, kind, value) {
     var text = L.shareText(kind, value);
