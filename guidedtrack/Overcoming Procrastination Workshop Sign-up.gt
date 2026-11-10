@@ -37,7 +37,7 @@
 
 -- SETTINGS (edit these) ---------------------------------------------------------
 >> workshopTitle = "Overcoming Procrastination"
->> workshopSubtitle = "Research-backed techniques to get going on personal and professional projects"
+>> workshopSubtitle = "Learn and apply research-backed techniques to finally get going on personal and professional projects."
 >> workshopDate = "Tuesday, November 24"
 >> workshopTime = "12:30 to 1:30 pm Eastern Time (9:30 am Pacific, 5:30 pm UK)"
 >> joinLinkKnown = 0
@@ -47,7 +47,7 @@
 -- Google Calendar link: 17:30 to 18:30 UTC (EST is UTC-5 in late November). Use + for spaces.
 >> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Overcoming+Procrastination+(Clearer+Thinking+workshop)&dates=20261124T173000Z/20261124T183000Z&details=Free+live+online+workshop+from+Clearer+Thinking+with+Spencer+Greenberg.+We'll+email+the+Zoom+link+before+the+session."
 >> facilitatorName = "Spencer Greenberg"
->> facilitatorLine = "Founder of Clearer Thinking, Positly, GuidedTrack and PersonalityMap"
+>> facilitatorLine = "Founder of ClearerThinking.org"
 >> icsLink = "https://programs.clearerthinking.org/procrastination-workshop-with-spencer-greenberg/overcoming-procrastination.ics"
 -- Link shown to registrants for sharing.
 >> signupUrl = "https://programs.clearerthinking.org/procrastination-workshop-with-spencer-greenberg"
@@ -138,21 +138,21 @@
 		<p class="ct-skip"><a href="?src={src}&jump=form">Sign up now</a></p>
 
 *html
-	<p>You know the project. The side business, the book, the job application, the course you paid for, the report that was due last week. You care about it. You even set time aside for it. And somehow that time goes to email, chores, or your phone instead. Then comes the guilt, and the guilt makes the next start harder still.</p>
+	<p>You know the project. The side business, the book, the job application, the course you paid for, the report that was due last week. You care about it. You even set time aside for it. And somehow that time goes to email, chores, or your phone instead. <b>Then comes the guilt, and the guilt makes the next start harder still.</b></p>
 	<p>If that sounds familiar, you're not lazy and you're not alone. Research on procrastination suggests it has less to do with laziness than with how we react to tasks that feel unclear, unpleasant, or uncertain. That's good news, because reactions like that can be changed with the right techniques.</p>
 	<p>This workshop is about those techniques, and about putting them to work on your own project during the session, so you leave having already started.</p>
 	<h2 class="ct-h2">What you'll get</h2>
 	<ul class="ct-list">
-		<li><b>Why you put things off.</b> What the research literature and Clearer Thinking's own studies show about the causes of procrastination, so you can spot the ones behind your own delays.</li>
+		<li><b>Why you put things off.</b> What the research literature shows about the causes of procrastination, so you can spot the ones behind your own delays.</li>
 		<li><b>Techniques that fit the cause.</b> Different reasons for delay call for different fixes. You'll learn which ones match your situation.</li>
 		<li><b>Practice, not just theory.</b> Most of the hour is exercises you do on a real project of yours, including breakout rooms where you'll meet and work with other participants.</li>
-		<li><b>Two Q&A sessions.</b> Ask Spencer anything you want, about procrastination or otherwise.</li>
+		<li><b>Q&A Session.</b> Ask Spencer anything you want, about procrastination or otherwise.</li>
 	</ul>
 
 *component
 	*classes: ct-callout
 	*html
-		<p><b>Book giveaway, live attendees only.</b> During the session we'll give away a signed copy of the book <i>12 Levers</i>. Only people attending live are eligible.</p>
+		<p><b>Book giveaway, live attendees only.</b> During the session we'll give away a signed copy of the book <a href="https://www.12leversbook.com/" target="_blank" rel="noopener"><i>12 Levers</i></a>. Only people attending live are eligible.</p>
 
 *component
 	*classes: ct-callout ct-pair
@@ -175,13 +175,8 @@ Anyone with a personal or professional project that keeps slipping: students, em
 			<span class="ct-avatar" role="img" aria-label="Photo of Spencer Greenberg"></span>
 			<p class="ct-name"><b>{facilitatorName}</b></p>
 			<p class="ct-role">{facilitatorLine}</p>
-			<p class="ct-bio-para">Spencer Greenberg is a mathematician and entrepreneur who has kept several long-running projects moving at once, for years. He founded Clearer Thinking, which publishes free, research-based tools, studies and articles on decision-making and psychology; Positly, a platform for recruiting research participants; GuidedTrack, the platform behind Clearer Thinking's interactive tools (and this sign-up page); and PersonalityMap, a tool for exploring how human traits relate to one another. He also hosts the Clearer Thinking podcast and has published essays and videos on social media consistently for years. This workshop draws on the research literature on procrastination, Clearer Thinking's own research on the topic, and what Spencer has learned getting his own projects done.</p>
+			<p class="ct-bio-para">Spencer Greenberg is a mathematician and entrepreneur who has kept several long-running projects moving at once, for years. He founded Clearer Thinking, which publishes free, research-based tools, studies and articles on decision-making and psychology; Positly, a platform for recruiting research participants; GuidedTrack, the platform behind Clearer Thinking's interactive tools (and this sign-up page); and PersonalityMap, a tool for exploring how human traits relate to one another. He also hosts the Clearer Thinking podcast and has published essays and videos on social media consistently for years. This workshop draws on the research literature on procrastination and what Spencer has learned getting his own projects done.</p>
 		</div>
-
-*html
-	<h2 class="ct-h2">Can't make it live?</h2>
-
-Sign up anyway: the session will be recorded, and we'll send the recording to everyone who registered. But this is a hands-on workshop, so most of its value comes from being there live: the exercises, the breakout rooms, the Q&A, and the book giveaway.
 
 Sign up below. You'll get a confirmation email right away, and the link to join before the session.
 
@@ -246,7 +241,7 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 		*save: signupFirstName
 
 	*question: Would you like an accountability partner after the workshop?
-		*tip: Optional and free. Each month for six months, we'll introduce you by email to a new participant, so you can keep each other on track. We only share your email address, nothing else.
+		*tip: Optional and free. Each month for six months, we'll introduce you by email to a new participant, so you can keep each other on track.
 		*save: accountabilityPair
 		Yes, pair me with someone
 		No, thanks
@@ -344,7 +339,7 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 	*body
 		Hi{greetingName},
 
-		You're registered for *{workshopTitle}: {workshopSubtitle}*, a free live workshop from Clearer Thinking with {facilitatorName}.
+		You're registered for *{workshopTitle}*, a free live workshop from Clearer Thinking with {facilitatorName}.
 
 		*Date and time:* {workshopDate}, {workshopTime}.
 
@@ -353,11 +348,11 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 		{emailMeetingLine}
 		{emailPasscodeLine}
 
-		*What to expect:* a hands-on hour. Spencer shares what the research and Clearer Thinking's own studies show about why we procrastinate and what helps, and most of the time goes to exercises on your own project, including breakout rooms with other participants. There are two Q&A sessions where you can ask anything.
+		*What to expect:* a hands-on hour. Spencer shares what the research shows about why we procrastinate and what helps, and most of the time goes to exercises on your own project, including breakout rooms with other participants. There's a Q&A session where you can ask anything.
 
 		*Come with a project in mind:* the one you keep putting off. You'll be working on it during the session.
 
-		*Book giveaway:* we'll give away a signed copy of 12 Levers during the session. Only people attending live are eligible.
+		*Book giveaway:* we'll give away a signed copy of [12 Levers|https://www.12leversbook.com/] during the session. Only people attending live are eligible.
 
 		*Accountability partner:* {emailPairLine}
 
@@ -422,7 +417,7 @@ A confirmation is on its way to {signupEmail}. If it isn't there in a few minute
 	<h2 class="ct-h2">What happens next</h2>
 	<ul class="ct-list">
 		<li><b>Before the session:</b> {beforeSessionText}</li>
-		<li><b>During the session:</b> come with your project in mind. The signed copy of <i>12 Levers</i> goes to someone attending live.</li>
+		<li><b>During the session:</b> come with your project in mind. The signed copy of <a href="https://www.12leversbook.com/" target="_blank" rel="noopener"><i>12 Levers</i></a> goes to someone attending live.</li>
 		<li><b>Afterward:</b> we'll send the recording to everyone who registered. Also, {afterSessionText}</li>
 	</ul>
 	<h2 class="ct-h2">Know someone who'd want this?</h2>
