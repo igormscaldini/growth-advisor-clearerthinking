@@ -277,14 +277,14 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - `unstuck/` (merged 2026-11-10 with history via `git subtree`): Unstuck procrastination-tool prototype, live at
   https://igormscaldini.github.io/unstuck-prototype/. Edit here, then `unstuck/deploy.sh` rsyncs into the Pages clone
   `~/Documents/Claude/unstuck-prototype` and pushes; never edit that clone by hand. AI proxy `unstuck/unstuck-suggest-api`
-  (Gemini, Vercel project unstuck-suggest-api, `npx vercel --prod` from that folder, `npm test`); its `.env` / `.vercel`
-  are local-only, gitignored copies. Never `git pull --rebase` over an UNPUSHED subtree merge: it flattens it onto the repo root.
+  (Gemini, Vercel project unstuck-suggest-api; its README has the callers, limits and env vars; `bash rollout.sh` sets them
+  and deploys); its `.env`, `.env.gt-key` (the secret GT key) and `.vercel` are local-only, gitignored. Never `git pull --rebase`
+  over an UNPUSHED subtree merge: it flattens it onto the repo root.
   GuidedTrack version (2026-11-10): `guidedtrack/Unstuck.gt` (GT 39188, key `qupjhe3`) calls the subprogram
   `guidedtrack/Unstuck - owl.gt` (GT 39187, owl card drawn in CSS). "Suggest with AI" goes through the GT service
-  `unstuckSuggest` (program Settings -> Services, header `X-Proto-Token`), so the token is not in the page; `?fast=1` shortens
-  every timer. Page `/unstuck/` = team repo PR #14 (`src/data/programs/unstuck/`, with `static/chime.mp3`). The web and GT
-  versions share their copy: `tests/test_unstuck.py` keeps them in step, so change both. Travis's Oct 23 review is applied
-  in both; the Gemini-key safeguards are still open (memory note `project_unstuck_prototype`).
+  `unstuckSuggest` (Settings -> Services, headers `X-Unstuck-Key` + `X-Proto-Token`, added server-side); `?fast=1` shortens every
+  timer and the AI cap. Page `/unstuck/` = team repo PR #14 (noindex + out of the sitemap while in tester review). The web and GT
+  versions share their copy: `tests/test_unstuck.py` keeps them in step, so change both. Test runs carry `fast = 1` / `src = qa`.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
@@ -426,6 +426,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   so a page's `*html <style>` must sit INSIDE the `*page`. `{var}` is not interpolated inside
   `<style>`; `<img>` is stripped but CSS `background-image` works. GT's `.program_container h1/p/.btn`
   rules beat bare classes: prefix selectors with `.program_container` (+ `!important` on headings).
+- GT back arrow and revisits (verified live 2026-11-11, Unstuck): the arrow does NOT cancel a running `*countdown`; when the
+  orphan runs out GT jumps to the page after it from wherever the person is, so no countdown page may offer the arrow. Per-question
+  `*back: no` removes the arrow from the NEXT page, but GT stores it under the page's first content node and looks it up under its
+  restart node: it only works on a page that starts with content (prefix an invisible `*html` div). A page revisited by the arrow, a
+  reload or a return visit restarts at its first `*if`/`*program`/`*for`/`*service` node (or first content) and re-runs from
+  there; guard one-time effects with a flag set before that point. In `*error`, `it` is `{text: <parsed body>, code: <HTTP
+  status>, ...}`; printing it dumps the association. Reading a missing association key is a runtime error.
 - GT facts verified 2026-11-10 (Unstuck build): `*service` inside `*click` does not compile (the error names only the
   `*component` line); make the click `*goto` a label that holds the service. `{var}` is NOT filled in inside an `*html`
   block that also contains `<style>`: use two blocks. `*audio` swaps the URL's extension and requests only `.mp3` and
