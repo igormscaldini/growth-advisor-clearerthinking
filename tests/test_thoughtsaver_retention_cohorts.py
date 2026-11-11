@@ -1,8 +1,8 @@
-"""Tests for reports/thoughtsaver_retention_cohorts_2026-11-11_src/analysis.py.
+"""Tests for reports/thoughtsaver_retention_cohorts_2026-11-11_src/analysis.py (day-by-day cohorts).
 
 Layers: hand-worked unit cases; tiny synthetic cohorts whose rates are known by construction; and two
-realistic synthetic pulls with the same structure as data/ga4_pull.json, one NULL (nobody returns) and one
-POSITIVE (a known retention curve), run through build_datapoints end to end.
+realistic synthetic pulls with the same structure as data/ga4_pull.json, one NULL (nobody completes or
+returns) and one POSITIVE (a known curve), run through build_datapoints end to end.
 """
 import datetime as dt
 import importlib.util
@@ -17,26 +17,32 @@ A = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(A)
 
 EV = A.RETURN_EVENTS
+END = dt.date(2026, 11, 10)
 
 
-def counts(created, returns):
-    """Counts dict with `returns` = list of 10 user counts for 1d..10d."""
-    return {"account_created": created, **dict(zip(EV, returns))}
+def signup(created, completed, returns):
+    return {"account_created": created, "onboarding_completed": completed, **dict(zip(EV, returns))}
+
+
+def cohort(day, created, completed, returns, entered=(0, 0)):
+    return {"day": day, "signup": signup(created, completed, returns),
+            "entered": {"onboarding_entered": entered[0], "account_created": entered[1]}}
 
 
 # ------------------------------------------------------------------ hand-worked units
-def test_week_days_and_mondays():
-    assert A.week_days(dt.date(2026, 9, 14)) == [f"202609{d}" for d in range(14, 21)]
-    # weeks must end on or before the end date: the week of Nov 9 ends Nov 15, so it is left out
-    got = A.cohort_mondays(dt.date(2026, 10, 26), dt.date(2026, 11, 10))
-    assert got == [dt.date(2026, 10, 26), dt.date(2026, 11, 2)]
-    assert A.cohort_mondays(dt.date(2026, 11, 9), dt.date(2026, 11, 10)) == []
+def test_events_are_exactly_the_sheet():
+    assert A.EVENTS == ["onboarding_entered", "account_created", "onboarding_completed"] + \
+        [f"user_return_{n}d" for n in range(1, 11)]
+    assert len(A.EVENTS) == 13
 
 
-def test_is_mature_uses_last_day_of_week():
-    monday = dt.date(2026, 11, 2)  # last sign-up day Sunday Nov 8
-    assert A.is_mature(monday, 2, dt.date(2026, 11, 10))  # Nov 8 + 2 = Nov 10
-    assert not A.is_mature(monday, 3, dt.date(2026, 11, 10))
+def test_days_and_maturity():
+    assert A.cohort_days(dt.date(2026, 11, 8), END) == [dt.date(2026, 11, 8), dt.date(2026, 11, 9), END]
+    assert A.ga_date(dt.date(2026, 10, 11)) == "20261011"
+    assert A.return_n("user_return_10d") == 10 and A.return_n("onboarding_completed") == 0
+    assert A.is_mature(dt.date(2026, 11, 8), "user_return_2d", END)  # Nov 8 + 2 = Nov 10
+    assert not A.is_mature(dt.date(2026, 11, 8), "user_return_3d", END)
+    assert A.is_mature(END, "onboarding_completed", END)  # same-day event: always counted
 
 
 def test_wilson_and_rate_textbook_values():
@@ -49,113 +55,88 @@ def test_wilson_and_rate_textbook_values():
 
 def test_parse_funnel_visualization_fills_missing_steps_with_zero():
     resp = {"funnelVisualization": {"rows": [
-        {"dimensionValues": [{"value": "1. account_created"}], "metricValues": [{"value": "36"}]},
+        {"dimensionValues": [{"value": "1. account_created"}], "metricValues": [{"value": "6"}]},
         {"dimensionValues": [{"value": "2. user_return_3d"}], "metricValues": [{"value": "2"}]},
     ]}}
     assert A.parse_funnel_visualization(resp, ["account_created", "user_return_3d"]) == \
-        {"account_created": 36, "user_return_3d": 2}
-    # GA4 returns no rows at all when nobody entered the funnel
+        {"account_created": 6, "user_return_3d": 2}
     assert A.parse_funnel_visualization({}, ["account_created", "user_return_1d"]) == \
         {"account_created": 0, "user_return_1d": 0}
 
 
 def test_combine_two_step():
-    funnels = [{"account_created": 10, ev: 10 - i} for i, ev in enumerate(EV)]
+    funnels = [{"account_created": 10, ev: 10 - i} for i, ev in enumerate(A.AFTER_SIGNUP)]
     out = A.combine_two_step(funnels)
-    assert out["account_created"] == 10 and out["user_return_1d"] == 10 and out["user_return_10d"] == 1
+    assert out["account_created"] == 10 and out["onboarding_completed"] == 10 and out["user_return_10d"] == 0
     with pytest.raises(ValueError):
         A.combine_two_step([{"account_created": 10, EV[0]: 1}, {"account_created": 9, EV[1]: 1}])
     with pytest.raises(ValueError):
-        A.combine_two_step(funnels[:9])
+        A.combine_two_step(funnels[:10])
 
 
-def test_is_monotonic():
-    assert A.is_monotonic(counts(10, [5, 3, 3, 1, 0, 0, 0, 0, 0, 0]))
-    assert not A.is_monotonic(counts(10, [1, 2, 0, 0, 0, 0, 0, 0, 0, 0]))
+def test_is_monotonic_ignores_completion():
+    assert A.is_monotonic(signup(10, 9, [5, 3, 3, 1, 0, 0, 0, 0, 0, 0]))
+    assert not A.is_monotonic(signup(10, 9, [1, 2, 0, 0, 0, 0, 0, 0, 0, 0]))
 
 
 # ------------------------------------------------------------------ small synthetic cohorts
-END = dt.date(2026, 11, 10)
-OLD = {"cohort": "2026-10-05", "to_date": counts(20, [10, 5, 4, 2, 2, 2, 1, 1, 1, 1]),
-       "strict_to_date": counts(20, [10, 4, 3, 1, 1, 1, 0, 0, 0, 0]),
-       "window": counts(20, [8, 4, 2, 1, 1, 0, 0, 0, 0, 0])}
-NEW = {"cohort": "2026-11-02", "to_date": counts(10, [5, 1, 0, 0, 0, 0, 0, 0, 0, 0]),
-       "strict_to_date": counts(10, [5, 1, 0, 0, 0, 0, 0, 0, 0, 0]), "window": None}
+OLD = cohort("2026-10-20", 10, 6, [4, 2, 2, 1, 1, 1, 1, 0, 0, 0], entered=(20, 5))
+NEW = cohort("2026-11-09", 5, 2, [1, 0, 0, 0, 0, 0, 0, 0, 0, 0], entered=(10, 1))
 
 
 def test_cohort_table_blanks_immature_cells():
     old, new = A.cohort_table([OLD, NEW], END)
-    assert old["to_date"][1]["pct"] == 50.0 and old["to_date"][10]["pct"] == 5.0
-    assert old["window"][2]["pct"] == 20.0 and old["window_signups"] == 20
-    assert new["to_date"][2]["pct"] == 10.0  # Nov 8 + 2 days = Nov 10: mature
-    assert new["to_date"][3] is None  # not enough days yet
-    assert new["window"][1] is None and new["window_signups"] is None
+    assert old["cells"]["onboarding_completed"]["pct"] == 60.0
+    assert old["cells"]["user_return_1d"]["pct"] == 40.0 and old["cells"]["user_return_10d"]["pct"] == 0.0
+    assert (old["entered"], old["entered_created"], old["signups"]) == (20, 5, 10)
+    assert new["cells"]["user_return_1d"]["pct"] == 20.0  # Nov 9 + 1 = Nov 10: mature
+    assert new["cells"]["user_return_2d"] is None
 
 
-def test_pooled_drops_immature_cohorts_from_denominator():
-    p = A.pooled([OLD, NEW], END, "to_date")
-    assert (p[1]["k"], p[1]["n"]) == (15, 30)  # both cohorts mature for N=1
-    assert (p[2]["k"], p[2]["n"]) == (6, 30)
-    assert (p[3]["k"], p[3]["n"]) == (4, 20)  # only the old cohort
-    w = A.pooled([OLD, NEW], END, "window")
-    assert (w[1]["k"], w[1]["n"]) == (8, 20)
-    s = A.pooled([OLD, NEW], END, "strict_to_date")
-    assert (s[2]["k"], s[2]["n"]) == (5, 30)
+def test_pooled_drops_immature_days_from_denominator():
+    p = A.pooled([OLD, NEW], END)
+    assert (p["onboarding_completed"]["k"], p["onboarding_completed"]["n"]) == (8, 15)
+    assert (p["user_return_1d"]["k"], p["user_return_1d"]["n"]) == (5, 15)
+    assert (p["user_return_2d"]["k"], p["user_return_2d"]["n"]) == (2, 10)
 
 
-def test_cross_check_sums_cohorts():
-    pooled_two_step = {ev: {"account_created": 30, ev: OLD["to_date"][ev] + NEW["to_date"][ev]} for ev in EV}
-    cc = A.cross_check([OLD, NEW], pooled_two_step)
-    assert all(v["per_cohort_sum"] == v["pooled_two_step"] for v in cc.values())
-    assert cc["account_created"]["per_cohort_sum"] == 30
-
-
-def test_first_visit_cohorts_buckets_by_monday_and_skips_not_set():
-    rows = [["20261005", "account_created", "3"], ["20261011", "account_created", "2"],
-            ["20261012", "user_return_1d", "4"], ["(not set)", "user_return_1d", "9"],
-            ["20260601", "user_return_1d", "7"]]
-    got = A.first_visit_cohorts(rows, dt.date(2026, 7, 6), END)
-    assert got == {"2026-10-05": {"account_created": 5}, "2026-10-12": {"user_return_1d": 4}}
+def test_onboarding_funnel_and_cross_check():
+    f = A.onboarding_funnel([OLD, NEW])
+    assert (f["entered"], f["created_from_entered"], f["entered_to_created"]["pct"]) == (30, 6, 20.0)
+    pooled_pull = {ev: {"account_created": 15, ev: OLD["signup"][ev] + NEW["signup"][ev]} for ev in A.AFTER_SIGNUP}
+    cc = A.cross_check([OLD, NEW], pooled_pull)
+    assert all(v["per_day_sum"] == v["pooled"] for v in cc.values())
 
 
 # ------------------------------------------------------------------ realistic synthetic pulls
-def synthetic_pull(curve):
-    """A pull shaped like data/ga4_pull.json; `curve` = share of sign-ups reaching 1d..10d."""
-    cohorts = []
-    for monday in A.cohort_mondays(dt.date(2026, 9, 14), END):
-        n = 100
-        c = counts(n, [round(n * s) for s in curve])
-        win_end = monday + dt.timedelta(days=6 + A.WINDOW_DAYS)
-        cohorts.append({"cohort": monday.isoformat(), "to_date": c, "strict_to_date": c,
-                        "window": c if win_end <= END else None})
-    total = 100 * len(cohorts)
-    return {"pulled_at": "2026-11-11T12:00", "end": END.isoformat(), "window_days": A.WINDOW_DAYS,
-            "cohorts": cohorts,
-            "pooled_two_step": {ev: {"account_created": total, ev: sum(c["to_date"][ev] for c in cohorts)}
-                                for ev in EV},
-            "naive_last_28d": [["account_created", "50"]],
-            "first_visit_cohorts": [["20261005", "account_created", "40"]],
-            "weekly_events": [["202641", "account_created", "36", "37"]]}
+def synthetic_pull(completion, curve, n=20):
+    days = A.cohort_days(A.FIRST_DAY, END)
+    cohorts = [cohort(d.isoformat(), n, round(n * completion), [round(n * s) for s in curve], entered=(4 * n, n))
+               for d in days]
+    pooled = {ev: {"account_created": n * len(days), ev: sum(c["signup"][ev] for c in cohorts)}
+              for ev in A.AFTER_SIGNUP}
+    return {"pulled_at": "2026-11-11T12:00", "first_day": A.FIRST_DAY.isoformat(), "end": END.isoformat(),
+            "cohorts": cohorts, "pooled": pooled,
+            "order_check": {"created_then_2d": {}, "created_then_1d_then_2d": {}},
+            "naive": [["account_created", str(n * len(days))]]}
 
 
-def test_null_pull_gives_zero_retention_everywhere():
-    dp = A.build_datapoints(synthetic_pull([0] * 10))
-    assert dp["total_signups"] == 800 and dp["window_signups"] == 600
-    for view in ("pooled_to_date", "pooled_window", "pooled_strict_to_date"):
-        assert all(r["pct"] == 0.0 and r["lo"] == 0.0 for r in dp[view].values())
-    assert all(c["monotonic"] for c in dp["cohorts"])
+def test_null_pull_gives_zero_everywhere():
+    dp = A.build_datapoints(synthetic_pull(0, [0] * 10))
+    assert dp["total_signups"] == 20 * 31  # Oct 11 to Nov 10 = 31 days
+    assert all(r["pct"] == 0.0 and r["lo"] == 0.0 for r in dp["pooled"].values())
+    assert dp["non_monotonic_days"] == []
 
 
 def test_positive_pull_recovers_the_known_curve():
-    curve = [0.5, 0.3, 0.2, 0.15, 0.1, 0.08, 0.06, 0.05, 0.04, 0.03]
-    dp = A.build_datapoints(synthetic_pull(curve))
+    curve = [0.5, 0.3, 0.2, 0.15, 0.1, 0.05, 0.05, 0.05, 0.05, 0.05]
+    dp = A.build_datapoints(synthetic_pull(0.65, curve))
+    assert dp["pooled"]["onboarding_completed"]["pct"] == 65.0
     for i, share in enumerate(curve, start=1):
-        assert dp["pooled_to_date"][i]["pct"] == round(share * 100, 1)
-        assert dp["pooled_window"][i]["pct"] == round(share * 100, 1)
-    # maturity: the Nov 2 cohort (last day Nov 8) is in N=1..2 only, Oct 26 in N<=9, so n falls with N
-    assert dp["pooled_to_date"][2]["n"] == 800
-    assert dp["pooled_to_date"][3]["n"] == 700
-    assert dp["pooled_to_date"][10]["n"] == 600
-    assert dp["window_cohorts"] == ["2026-09-14", "2026-09-21", "2026-09-28", "2026-10-05",
-                                    "2026-10-12", "2026-10-19"]
-    assert all(v["per_cohort_sum"] == v["pooled_two_step"] for v in dp["cross_check"].values())
+        assert dp["pooled"][f"user_return_{i}d"]["pct"] == round(share * 100, 1)
+    # maturity: N return days needs day + N <= Nov 10, so 31 - N days count
+    assert dp["pooled"]["onboarding_completed"]["n"] == 20 * 31
+    assert dp["pooled"]["user_return_1d"]["n"] == 20 * 30
+    assert dp["pooled"]["user_return_10d"]["n"] == 20 * 21
+    assert dp["onboarding"]["entered_to_created"]["pct"] == 25.0
+    assert all(v["per_day_sum"] == v["pooled"] for v in dp["cross_check"].values())
