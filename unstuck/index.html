@@ -453,7 +453,7 @@
           </label>
           <label style="display:flex;align-items:flex-start;gap:10px;margin-top:12px;cursor:pointer;">
             <input type="checkbox" id="distractionCheck5" style="margin-top:3px;width:18px;height:18px;flex:none;">
-            <span>Pair the task with something you enjoy that won't pull your attention away, like a favorite drink or a comfortable spot.</span>
+            <span>Try temptation bundling: pair the task with a small treat you only allow yourself while working on it, like a favorite drink or snack.</span>
           </label>
         </div>
         <div class="btn-row">
@@ -685,7 +685,7 @@
 
   // ---------- steps ----------
   var steps = ['cause','technique-fear','technique-motivation','technique-fatigue','technique-distraction','task','action','confirm','timer','cycledone'];
-  var OWL_VISIBLE_STEPS = ['task','action','confirm','timer','cycledone'];
+  var OWL_VISIBLE_STEPS = ['action','confirm','timer','cycledone'];
   var layoutEl = document.querySelector('.layout');
   function showStep(name){
     steps.forEach(function(s){
@@ -774,8 +774,13 @@
     owlSvg(2), owlSvg(3), owlSvg(4), owlSvg(5), owlSvg(6)
   ];
 
-  // Owls fully grown today: the ones already swapped for a new egg, plus the current one if it is fully grown.
+  // Owls fully grown today: the ones already swapped for a new egg, plus the current one if it
+  // finished growing today (LS_OWL_FULL holds that day; missing means today, for older visitors).
   var LS_OWLS = 'unstuck_owlsGrown';
+  var LS_OWL_FULL = 'unstuck_owlFullDate';
+  function fullOwlIsFromToday(){
+    return (localStorage.getItem(LS_OWL_FULL) || todayKey()) === todayKey();
+  }
   function todayKey(){ var d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
   function owlsHatchedToday(){
     try {
@@ -784,7 +789,7 @@
     } catch (e) { return 0; }
   }
   function renderOwlShelf(isFull){
-    var n = owlsHatchedToday() + (isFull ? 1 : 0);
+    var n = owlsHatchedToday() + (isFull && fullOwlIsFromToday() ? 1 : 0);
     var shelf = document.getElementById('owlShelf');
     document.getElementById('hatchNewOwl').style.display = isFull ? 'inline-block' : 'none';
     if (!n){ shelf.style.display = 'none'; shelf.innerHTML = ''; return; }
@@ -809,7 +814,8 @@
     renderOwlShelf(idx === MAX_STAGE);
   }
   document.getElementById('hatchNewOwl').addEventListener('click', function(){
-    localStorage.setItem(LS_OWLS, JSON.stringify({ date: todayKey(), count: owlsHatchedToday() + 1 }));
+    var grownToday = fullOwlIsFromToday() ? 1 : 0;
+    localStorage.setItem(LS_OWLS, JSON.stringify({ date: todayKey(), count: owlsHatchedToday() + grownToday }));
     setTotalCycles(0);
     renderOwl();
   });
@@ -1204,6 +1210,14 @@
     aiErrorNote.style.display = 'none';
   }
 
+  // Same wording as the GuidedTrack version (guidedtrack/Unstuck.gt, AI SUGGESTION section).
+  function aiErrorMessage(status){
+    if (status === 429) return "Lots of AI suggestions were asked for in a short time, so they are paused for now. Try again later, or just describe the step yourself.";
+    if (status === 503 || status === 401) return "AI suggestions are switched off right now. Describe the step yourself, it works just as well.";
+    if (status === 400) return "The AI can't work with this task description (it may be too long). Describe the step yourself, or start a new task with a shorter description.";
+    return "Couldn't get a suggestion right now. Try again, or just describe it yourself.";
+  }
+
   aiSuggestBtn.addEventListener('click', function(){
     resetAiNotices();
     aiSuggestBtn.disabled = true;
@@ -1214,19 +1228,23 @@
       body: JSON.stringify({ task: state.task, previousActions: state.history })
     })
       .then(function(r){
-        if (!r.ok) return r.json().then(function(d){ throw new Error(d.error || ('HTTP ' + r.status)); });
+        if (!r.ok) return r.json().catch(function(){ return {}; }).then(function(d){
+          var e = new Error(d.error || ('HTTP ' + r.status));
+          e.status = r.status;
+          throw e;
+        });
         return r.json();
       })
       .then(function(data){
         actionInput.value = data.suggestion || '';
         actionInput.dispatchEvent(new Event('input'));
         if (data.tooBroad){
-          tooBroadNotice.textContent = "Your input was too broad, but I tried my best shot. If you want to be more specific, click the back button and describe it more.";
+          tooBroadNotice.textContent = "Your task description was quite broad, so this is a best guess. Feel free to edit it.";
           tooBroadNotice.style.display = 'block';
         }
       })
       .catch(function(err){
-        aiErrorNote.textContent = "Couldn't get a suggestion (" + err.message + "). Try again, or just describe it yourself.";
+        aiErrorNote.textContent = aiErrorMessage(err.status);
         aiErrorNote.style.display = 'block';
       })
       .finally(function(){
@@ -1345,6 +1363,7 @@
     }
     playBell();
     setTotalCycles(totalCycles() + 1);
+    if (totalCycles() === MAX_STAGE) localStorage.setItem(LS_OWL_FULL, todayKey());
     renderOwl();
     showStep('cycledone');
   }
@@ -1403,7 +1422,10 @@
     }
     if (storedTask){
       state.task = storedTask;
-      goToActionStep(true);
+      // After a finished round: straight to the next step. Before one: back to the cause
+      // screen, so a reload does not skip the technique (or the anxiety commitment framing).
+      if (state.history.length) goToActionStep(false);
+      else showStep('cause');
       return;
     }
     showStep('task');

@@ -1,8 +1,9 @@
 --------------------------------------------------------------------------------
 -- NAME: Unstuck - owl
 -- Subprogram of "Unstuck": draws the owl companion card. No page breaks, so it can be
--- called at the top of any page. Reads owlStage (0 egg ... 6 full owl), owlMessage and
--- owlsGrownToday from the caller.
+-- called at the top of any page. Reads owlStage (0 egg ... 6 full owl), owlMessage,
+-- owlsGrownToday, owlsDate and owlFullDate from the caller, and is the one place where a
+-- new day starts the "Owls grown today" count again (so every page shows today's count).
 -- The owl is drawn with CSS shapes only: GuidedTrack strips <img>, <svg> is not safe to
 -- rely on, and data: URLs in CSS are removed. Stages 2-6 are the same owl scaled up,
 -- plus shell, wings, ear tufts, belly colour and a branch, so every round is a visible step.
@@ -21,16 +22,31 @@
 >> owlCaption = owlCaptions[owlStage + 1]
 >> owlDots = owlDotRows[owlStage + 1]
 
--- Owls fully grown today: the ones already swapped for a new egg, plus the current one if it is fully grown.
+-- A new day starts the owl count again.
+>> owlToday = calendar::date
+*if: not owlsDate
+	>> owlsDate = owlToday
+*if: not (owlsDate = owlToday)
+	>> owlsDate = owlToday
+	>> owlsGrownToday = 0
+
+-- Owls fully grown today: the ones already swapped for a new egg, plus the current one
+-- if it finished growing today. Shown as a row of little drawn owls (at most 12).
 >> owlShelfCount = owlsGrownToday
 *if: owlStage = 6
-	>> owlShelfCount = owlShelfCount + 1
->> owlShelf = ""
+	*if: not owlFullDate
+		>> owlFullDate = owlToday
+	*if: owlFullDate = owlToday
+		>> owlShelfCount = owlShelfCount + 1
+>> owlShelfLabel = ""
+>> owlShelfIcons = ""
 *if: owlShelfCount > 0
-	>> owlShelfIcons = ""
-	*repeat: owlShelfCount
-		>> owlShelfIcons = "{owlShelfIcons}🦉"
-	>> owlShelf = "Owls grown today: {owlShelfCount} {owlShelfIcons}"
+	>> owlShelfLabel = "Owls grown today: {owlShelfCount}"
+	>> owlShelfShown = owlShelfCount
+	*if: owlShelfShown > 12
+		>> owlShelfShown = 12
+	*repeat: owlShelfShown
+		>> owlShelfIcons = "{owlShelfIcons}<span class='uo-mini'></span>"
 
 *html
 	<style>
@@ -91,6 +107,7 @@
 		.uo-msg { font-size: 14px; line-height: 1.5; color: #303030; background: #f5f5f5; border-radius: 12px; padding: 12px 14px; }
 		.uo-dots { font-size: 12px; letter-spacing: 2px; color: #0885f8; margin-top: 10px; }
 		.uo-shelf { font-size: 13px; color: #737373; margin-top: 8px; }
+		.uo-mini { display: inline-block; width: 22px; height: 26px; margin: 6px 2px 0; vertical-align: middle; border-radius: 50% 50% 46% 46% / 54% 54% 46% 46%; background: radial-gradient(circle at 32% 34%, #233b47 0 2px, #fff 2.5px 5px, transparent 5.5px), radial-gradient(circle at 68% 34%, #233b47 0 2px, #fff 2.5px 5px, transparent 5.5px), radial-gradient(ellipse 7px 8px at 50% 76%, #fecb02 98%, transparent 100%), #0885f8; }
 	</style>
 
 -- Separate block on purpose: GuidedTrack does not fill in {variables} inside an *html
@@ -115,5 +132,5 @@
 		<div class="uo-cap">{owlCaption}</div>
 		<div class="uo-msg">{owlMessage}</div>
 		<div class="uo-dots">{owlDots}</div>
-		<div class="uo-shelf">{owlShelf}</div>
+		<div class="uo-shelf">{owlShelfLabel}<br>{owlShelfIcons}</div>
 	</div>

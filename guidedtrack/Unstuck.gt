@@ -4,20 +4,26 @@
 -- unstuck/ folder, https://igormscaldini.github.io/unstuck-prototype/). Same flow:
 -- task -> what's keeping you stuck -> a quick technique -> one tiny step -> 10-minute
 -- timer -> next round. An owl grows one stage per finished round.
+-- Published at https://programs.clearerthinking.org/unstuck/ (team repo,
+-- src/data/programs/unstuck/).
 --
 -- HOW IT IS WIRED
--- 1. The owl card (drawing, caption, encouragement, progress) is the subprogram
---    "Unstuck - owl". It reads owlStage, owlMessage and owlsGrownToday from here.
+-- 1. The owl card (drawing, caption, encouragement, progress, owls grown today) is the
+--    subprogram "Unstuck - owl". It reads owlStage, owlMessage, owlsGrownToday and
+--    owlFullDate from here, and starts the daily owl count again on a new day.
 -- 2. "Suggest with AI" calls the service unstuckSuggest (Settings -> Services): URL
---    https://unstuck-suggest-api.vercel.app with the header X-Proto-Token. The request
---    leaves GuidedTrack's server, so the token is never in the page.
+--    https://unstuck-suggest-api.vercel.app, headers X-Unstuck-Key (the secret the proxy
+--    checks) and X-Proto-Token (the old public token, only for the proxy version before
+--    unstuck/unstuck-suggest-api/rollout.sh). GuidedTrack's server adds the headers, so
+--    they never reach the page. The program sends a per-run clientId so the proxy limits
+--    each person separately (every call comes from GuidedTrack's IP).
 -- 3. Timers are *countdown questions: the page moves on by itself when time is up.
 -- 4. The chime after a round is /unstuck/chime.mp3 on programs.clearerthinking.org
 --    (team repo, src/data/programs/unstuck/static). GuidedTrack strips scripts, so the
 --    sound cannot be synthesized in the page the way the web prototype does it. *audio
 --    swaps the file extension and asks for an .mp3 and an .ogg version of the URL, so
 --    the file has to be an .mp3 (an .m4a or .wav is never requested).
--- 5. Add ?fast=1 to the run link to shorten every timer for testing.
+-- 5. Add ?fast=1 to the run link to shorten every timer and the AI daily cap for testing.
 --
 -- GUIDEDTRACK GOTCHAS BAKED IN HERE
 -- - 0 and "" are truthy in *if; flags are tested with "= 1".
@@ -25,9 +31,24 @@
 -- - A text line that starts with *Word:* is parsed as a keyword; bold leads use <b>.
 -- - {variables} are not filled in inside an *html block that also contains <style>,
 --   so styles and markup that uses variables go in separate *html blocks.
+-- - Text people typed (task, step, feeling) and AI text go on plain text lines, never
+--   inside *html: *html is not escaped, so anything that looks like a tag would vanish.
 -- - *service does not compile inside *click; the click jumps to a label instead.
 -- - The site's ".program_container p" rules beat bare classes, so styles for <p>
 --   elements are prefixed with .program_container and marked !important.
+-- - The back arrow (*settings *back: yes) does not cancel a running *countdown: when
+--   the abandoned countdown runs out, GuidedTrack jumps to the page after it from
+--   wherever the person is. So no page with a countdown may offer the back arrow: the
+--   question shown just before each one has *back: no (the per-question setting removes
+--   the arrow from the NEXT page), and the timer has its own "Pick a different step".
+--   GuidedTrack stores that setting under the page's first CONTENT node but looks it up
+--   under the page's restart node, so it only works on a page that starts with content.
+--   Pages that would start with an *if or *program therefore begin with an invisible
+--   *html marker (class ut-anchor).
+-- - A page revisited by the back arrow, a reload or a return visit restarts at its first
+--   *if/*program/*for/*service node (or its first content), re-running everything from
+--   there. Anything that must happen once (crediting a round, calling the AI) is guarded
+--   by a flag set BEFORE that restart point and cleared when it runs.
 --------------------------------------------------------------------------------
 
 *settings
@@ -36,13 +57,35 @@
 *if: not fast
 	>> fast = 0
 
--- First visit only (a returning visitor keeps their owl).
-*if: not unstuckReady
-	>> unstuckReady = 1
+-- AI SAFEGUARDS (edit these) ---------------------------------------------------
+-- aiEnabled: set to 0 and save to hide "Suggest with AI" for everyone (kill switch).
+-- aiDailyLimit: suggestions one person can ask for per day. A courtesy cap for honest
+-- testers; the proxy enforces its own per-person and overall limits.
+>> aiEnabled = 1
+>> aiDailyLimit = 20
+*if: fast = 1
+	>> aiDailyLimit = 3
+---------------------------------------------------------------------------------
+
+-- Set once per person (and filled in for runs that started before a variable existed).
+*if: not owlStage
 	>> owlStage = 0
+*if: not owlsGrownToday
 	>> owlsGrownToday = 0
+*if: not owlsDate
 	>> owlsDate = calendar::date
+*if: not owlMessage
 	>> owlMessage = "Whatever you're feeling about this task right now is okay. No judgment here, just the next small step."
+*if: not aiCallsToday
+	>> aiCallsToday = 0
+*if: not aiCallsDate
+	>> aiCallsDate = calendar::date
+*if: not actionDefault
+	>> actionDefault = ""
+*if: not aiClientId
+	>> idChars = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+	>> idChars.shuffle
+	>> aiClientId = "gt-{idChars[1]}{idChars[2]}{idChars[3]}{idChars[4]}{idChars[5]}{idChars[6]}{idChars[7]}{idChars[8]}{idChars[9]}{idChars[10]}"
 
 >> timerLength = 10.minutes
 >> stretchLength = 60.seconds
@@ -60,9 +103,6 @@
 -- TASK
 ---------------------------------------------------------------------------------
 *label: newTask
->> stepsDone = []
->> roundOfTask = 0
->> taskFinished = 0
 
 *html
 	<style>
@@ -77,6 +117,13 @@
 	*type: text
 	*placeholder: e.g. Writing the first draft of that report...
 	*save: taskName
+
+-- A new task starts with a clean slate. These run only once the task is entered, so
+-- the back arrow from this page leaves the previous task untouched.
+>> stepsDone = []
+>> roundOfTask = 0
+>> taskFinished = 0
+>> actionDefault = ""
 
 ---------------------------------------------------------------------------------
 -- CAUSE
@@ -96,6 +143,10 @@
 	Not sure
 		>> cause = "unsure"
 
+-- Invisible marker: makes this page start with content (see the header, back arrow).
+*html
+	<div class="ut-anchor"></div>
+
 ---------------------------------------------------------------------------------
 -- TECHNIQUE: ANXIETY OR FEAR
 ---------------------------------------------------------------------------------
@@ -114,8 +165,7 @@
 		*save: fearFeeling
 
 	*header: Anxiety or fear: a quick technique
-	*html
-		<p><b>You wrote:</b> {fearFeeling}</p>
+	You wrote: {fearFeeling}
 	Whatever it is, it's okay to feel it. No need to push it away or judge it right now.
 
 	*question: Is what you're fearing or anxious about a fact, or just a subjective interpretation?
@@ -127,11 +177,15 @@
 			>> fearReflection = "That's okay. Not being sure is itself a sign it isn't a settled fact. You don't have to resolve it now; you can hold it lightly and still take one small step."
 
 	*header: Anxiety or fear: a quick technique
-	{fearReflection}
-	*button: Okay, I'm ready
+
+	-- A question (not a *button) so it can take *back: no: the next page has a countdown.
+	*question: {fearReflection}
+		*back: no
+		Okay, I'm ready
 
 	*question: Take one deep inhale and one deep exhale.
 		*countdown: inhaleLength
+		*back: no
 		Next
 
 ---------------------------------------------------------------------------------
@@ -139,8 +193,7 @@
 ---------------------------------------------------------------------------------
 *if: cause = "motivation"
 	*header: Lack of motivation: a quick technique
-	*html
-		<p><b>Task:</b> {taskName}</p>
+	Task: {taskName}
 	Take a moment to imagine this task is already done.
 
 	*question: From 1 to 10, how good would that feel?
@@ -172,13 +225,24 @@
 ---------------------------------------------------------------------------------
 -- TECHNIQUE: MENTAL FATIGUE
 -- Only the stretch and the breathing are timed; the rest is an optional checklist.
+-- The intro page exists so the stretch countdown never has a back arrow (see the
+-- header): putting *back: no on the cause question instead would remove the way back
+-- to the cause screen from every technique.
 ---------------------------------------------------------------------------------
 *if: cause = "fatigue"
+	*header: Mental fatigue: a quick technique
+	A quick reset for body and brain: one minute of stretching, then 30 seconds of energizing breathing.
+
+	*question: Ready?
+		*back: no
+		Start the stretch
+
 	*header: Mental fatigue: a quick technique
 
 	*question: Stand up, stretch for 60 seconds.
 		*tip: Reach up, bend to each side, then fold forward.
 		*countdown: stretchLength
+		*back: no
 		Next
 
 	*header: Mental fatigue: a quick technique
@@ -186,6 +250,7 @@
 	*question: Sit down and breathe fast for 30 seconds.
 		*tip: Quick exhale, then a slower, longer inhale. Repeat. Fast breathing can make you lightheaded, so stay seated, and don't do it while driving or in water (a bath or a pool). If you feel dizzy, stop and breathe normally.
 		*countdown: breathLength
+		*back: no
 		Next
 
 	*header: Mental fatigue: a quick technique
@@ -217,7 +282,7 @@
 		Close extra tabs and silence notifications.
 		Let people know you'll be heads-down for a few minutes.
 		If music helps you with this kind of task, put some on (many people focus best with no lyrics). If it doesn't, keep it quiet.
-		Pair the task with something you enjoy that won't pull your attention away, like a favorite drink or a comfortable spot.
+		Try temptation bundling: pair the task with a small treat you only allow yourself while working on it, like a favorite drink or snack.
 		*save: distractionPrep
 
 ---------------------------------------------------------------------------------
@@ -231,8 +296,7 @@
 
 *program: Unstuck - owl
 
-*html
-	<p><b>Task:</b> {taskName}</p>
+Task: {taskName}
 
 *if: stepsCount > 0
 	*html
@@ -240,70 +304,107 @@
 	*for: doneStep in stepsDone
 		✓ {doneStep}
 
-*component
-	✨ Suggest with AI
-	*click
-		*goto: aiSuggest
+*if: aiEnabled = 1
+	*component
+		✨ Suggest with AI
+		*click
+			>> aiRequested = 1
+			*goto: aiSuggest
 
 *question: {actionQuestion}
 	*tip: Keep it small. It just needs to move things forward a little.
 	*type: paragraph
 	*placeholder: e.g. Open the doc and write a rough outline...
+	*default: actionDefault
 	*save: action
 
+>> actionDefault = ""
 *goto: confirmStep
 
 ---------------------------------------------------------------------------------
 -- AI SUGGESTION (reached only from the "Suggest with AI" box above)
--- *service cannot be placed inside *click (it does not compile), so the click jumps here.
+-- *service cannot be placed inside *click (it does not compile), so the click jumps
+-- here. The click sets aiRequested; the request runs only while it is 1, so coming back
+-- to this page (back arrow, reload, return visit) shows the last answer instead of
+-- asking the AI again. The *header comes first on purpose: it is this page's restart
+-- point, so a revisit re-checks aiRequested instead of re-running the *service.
 ---------------------------------------------------------------------------------
 *label: aiSuggest
->> aiState = 0
-*service: unstuckSuggest
-	*path: /api/suggest
-	*method: POST
-	*send: {"task" -> taskName, "previousActions" -> stepsDone}
-	*success
-		>> aiSuggestion = it["suggestion"]
-		>> aiState = 1
-	*error
-		>> aiError = it
-		>> aiState = 2
+*header: Suggest with AI
+
+-- A new day starts the per-person count again.
+>> todayDate = calendar::date
+*if: not (aiCallsDate = todayDate)
+	>> aiCallsDate = todayDate
+	>> aiCallsToday = 0
+
+*if: aiRequested = 1
+	>> aiRequested = 0
+	>> aiState = 0
+	*if: aiCallsToday >= aiDailyLimit
+		>> aiState = 3
+	*if: aiState = 0
+		>> aiCallsToday = aiCallsToday + 1
+		*service: unstuckSuggest
+			*path: /api/suggest
+			*method: POST
+			*send: {"task" -> taskName, "previousActions" -> stepsDone, "clientId" -> aiClientId}
+			*success
+				>> aiSuggestion = it["suggestion"]
+				>> aiState = 1
+			*error
+				>> aiErrorCode = it["code"]
+				>> aiState = 2
 
 *if: aiState = 1
-	*question: ✨ AI suggestion: {aiSuggestion}
-		*tip: If your task description was broad, this is a best guess. You can also go back and describe the task in more detail.
+	*question: ✨ {aiSuggestion}
+		*tip: You can edit it on the next screen. If your task description was broad, this is a best guess.
 		Use this step
-			>> action = aiSuggestion
-			*goto: confirmStep
+			>> actionDefault = aiSuggestion
 		I'll write my own
-			*goto: askAction
+			>> actionDefault = ""
 
 *if: aiState = 2
-	Couldn't get a suggestion ({aiError}). Try again, or just describe it yourself.
+	*if: aiErrorCode = 429
+		Lots of AI suggestions were asked for in a short time, so they are paused for now. Try again later, or just describe the step yourself.
+	*if: aiErrorCode = 503
+		AI suggestions are switched off right now. Describe the step yourself, it works just as well.
+	*if: aiErrorCode = 400
+		The AI can't work with this task description (it may be too long). Describe the step yourself, or start a new task with a shorter description.
+	*if: not (aiErrorCode = 429 or aiErrorCode = 503 or aiErrorCode = 400)
+		Couldn't get a suggestion right now. Try again, or just describe it yourself.
+	*button: OK
+
+*if: aiState = 3
+	You've used today's AI suggestions. Describe the step yourself, it works just as well.
 	*button: OK
 
 *goto: askAction
 
 ---------------------------------------------------------------------------------
 -- CONFIRM (the anxiety path gets a commitment framing)
+-- Every question here leads to the timer, so each has *back: no (see the header).
 ---------------------------------------------------------------------------------
 *label: confirmStep
 
+*html
+	<div class="ut-anchor"></div>
+
 *program: Unstuck - owl
 
-*html
-	<p><b>Task:</b> {taskName}</p>
-	<p><b>Next 10 minutes:</b> {action}</p>
+Task: {taskName}
+Next 10 minutes: {action}
 
 *if: cause = "fear"
 	*question: You can start on the task even though it makes you anxious. Will you work on this task now?
 		*tip: If yes, a 10-minute timer will start. Leave this tab open, go do it, and come back when the time is up.
+		*back: no
 		Yes, start the 10-minute timer
 		No, I'm going to keep avoiding it
 			Fair enough, and no judgment. Avoiding it is a choice too, and you can come back any time. If this step feels too big, pick a smaller one. The timer's here whenever you're ready.
 
 			*question: What would you like to do?
+				*back: no
 				Start the 10-minute timer
 				Pick a smaller step
 					*goto: askAction
@@ -311,45 +412,53 @@
 *if: not (cause = "fear")
 	*question: Ready to start?
 		*tip: A 10-minute timer will start. Leave this tab open, go do it, and come back when the time is up.
+		*back: no
 		Yes, let's go
 		Pick a different step
 			*goto: askAction
 
 ---------------------------------------------------------------------------------
 -- TIMER
+-- roundPending and taskFinished are set before the page's restart point (the marker
+-- below), so a revisit or reload of this page skips them: a round is credited only once.
 ---------------------------------------------------------------------------------
 >> owlMessages.shuffle
 >> owlMessage = owlMessages[1]
+>> roundPending = 1
+>> taskFinished = 0
+
+*html
+	<div class="ut-anchor"></div>
 
 *program: Unstuck - owl
 
-*html
-	<p><b>Working on:</b> {taskName}</p>
-	<p><b>This round:</b> {action}</p>
+Working on: {taskName}
+This round: {action}
 
 *question: Go do it. Come back here when the timer ends.
 	*countdown: timerLength
+	*back: no
 	I've finished this step
+		>> taskFinished = 0
 	I've finished the whole task
 		>> taskFinished = 1
+	Pick a different step
+		>> roundPending = 0
+		*goto: askAction
 
 ---------------------------------------------------------------------------------
--- ROUND DONE: the owl grows one stage
+-- ROUND DONE: the owl grows one stage (once per round, see roundPending above)
 ---------------------------------------------------------------------------------
->> stepsDone.add(action)
->> roundOfTask = roundOfTask + 1
-
--- "Owls grown today" starts again on a new day.
->> todayDate = calendar::date
-*if: not (owlsDate = todayDate)
-	>> owlsDate = todayDate
-	>> owlsGrownToday = 0
-
-*if: owlStage < 6
-	>> owlStage = owlStage + 1
-
-*audio: https://programs.clearerthinking.org/unstuck/chime.mp3
-	*start: yes
+*if: roundPending = 1
+	>> roundPending = 0
+	>> stepsDone.add(action)
+	>> roundOfTask = roundOfTask + 1
+	*if: owlStage < 6
+		>> owlStage = owlStage + 1
+		*if: owlStage = 6
+			>> owlFullDate = calendar::date
+	*audio: https://programs.clearerthinking.org/unstuck/chime.mp3
+		*start: yes
 
 *label: roundDone
 
@@ -379,6 +488,11 @@
 		Start a different task
 			*goto: newTask
 		🥚 Hatch a new owl
-			>> owlsGrownToday = owlsGrownToday + 1
+			-- It counts as grown today only if it finished growing today.
+			>> todayDate = calendar::date
+			*if: not owlFullDate
+				>> owlFullDate = todayDate
+			*if: owlFullDate = todayDate
+				>> owlsGrownToday = owlsGrownToday + 1
 			>> owlStage = 0
 			*goto: roundDone

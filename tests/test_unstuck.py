@@ -131,7 +131,7 @@ def test_html_blocks_with_a_style_tag_use_no_variables(name):
 
 def test_chime_is_an_mp3():
     """*audio rewrites the extension and requests only .mp3 and .ogg."""
-    url = re.search(r"^\*audio: (\S+)$", GT_MAIN, flags=re.M).group(1)
+    url = re.search(r"^\t*\*audio: (\S+)$", GT_MAIN, flags=re.M).group(1)
     assert url == "https://programs.clearerthinking.org/unstuck/chime.mp3"
 
 
@@ -142,6 +142,135 @@ def test_owl_subprogram_covers_all_seven_stages():
     for stage in range(7):
         assert f".uo.s{stage} " in GT_OWL, f"no CSS for stage {stage}"
     assert 'class="uo s{owlStage}"' in GT_OWL
+
+
+def block_under(text, parent_starts_with):
+    """Every non-comment line nested (at any depth) under the first line that starts with the prefix."""
+    lines = gt_lines(text)
+    for i, (indent, content) in enumerate(lines):
+        if content.startswith(parent_starts_with):
+            out = []
+            for child_indent, child in lines[i + 1:]:
+                if child_indent <= indent:
+                    break
+                out.append(child)
+            return out
+    raise AssertionError(f"no line starts with {parent_starts_with!r}")
+
+
+def section(text, start_marker, end_marker):
+    return text[text.index(start_marker):text.index(end_marker, text.index(start_marker))]
+
+
+# Review 2026-11-11, back arrow: GuidedTrack's back arrow does not cancel a running countdown,
+# so the question shown just before every countdown page (and the timer itself) has *back: no.
+QUESTIONS_BEFORE_A_COUNTDOWN = [
+    "*question: {fearReflection}",                       # -> inhale
+    "*question: Take one deep inhale",                   # inhale -> the step (no way back onto it)
+    "*question: Ready?",                                 # tiredness intro -> stretch
+    "*question: Stand up, stretch",                      # stretch -> breathing
+    "*question: Sit down and breathe fast",              # breathing -> checklist
+    "*question: You can start on the task even though",  # -> timer
+    "*question: What would you like to do?",             # -> timer
+    "*question: Ready to start?",                        # -> timer
+    "*question: Go do it.",                              # timer -> round done
+]
+
+
+@pytest.mark.parametrize("question", QUESTIONS_BEFORE_A_COUNTDOWN)
+def test_no_back_arrow_onto_or_out_of_a_countdown_page(question):
+    assert "*back: no" in gt_children(GT_MAIN, question), question
+
+
+def test_every_countdown_question_is_in_the_protected_list():
+    countdowns = [c for c in QUESTIONS_BEFORE_A_COUNTDOWN if any(
+        k.startswith("*countdown") for k in gt_children(GT_MAIN, c))]
+    in_code = sum(1 for _, c in gt_lines(GT_MAIN) if c.startswith("*countdown:"))
+    assert len(countdowns) == in_code == 4
+
+
+def test_pages_with_a_back_setting_start_with_content():
+    """The per-question back setting is looked up under the page's restart node but stored
+    under its first content node; a page that starts with *if/*program needs the marker."""
+    after_cause = section(GT_MAIN, '>> cause = "unsure"', '*if: cause = "fear"')
+    assert 'class="ut-anchor"' in after_cause
+    confirm = section(GT_MAIN, "*label: confirmStep", "*program: Unstuck - owl")
+    assert 'class="ut-anchor"' in confirm
+    timer = section(GT_MAIN, ">> roundPending = 1", "*question: Go do it.")
+    assert timer.index('class="ut-anchor"') < timer.index("*program: Unstuck - owl")
+
+
+def test_a_round_is_credited_once():
+    timer = section(GT_MAIN, ">> owlMessages.shuffle", "*question: Go do it.")
+    # set before the page's restart point (the marker), so a revisit or reload skips it
+    assert timer.index(">> roundPending = 1") < timer.index('class="ut-anchor"')
+    credit = block_under(GT_MAIN, "*if: roundPending = 1")
+    for line in (">> roundPending = 0", ">> stepsDone.add(action)", ">> owlStage = owlStage + 1",
+                 "*audio: https://programs.clearerthinking.org/unstuck/chime.mp3"):
+        assert line in credit, line
+    assert GT_MAIN.count(">> stepsDone.add(action)") == 1
+    timer_q = block_under(GT_MAIN, "*question: Go do it.")
+    i = timer_q.index("Pick a different step")
+    assert timer_q[i + 1:i + 3] == [">> roundPending = 0", "*goto: askAction"]
+
+
+def test_task_finished_resets_every_round():
+    timer = section(GT_MAIN, ">> owlMessages.shuffle", "*question: Go do it.")
+    assert ">> taskFinished = 0" in timer
+    assert ">> taskFinished = 0" in gt_children(GT_MAIN, "I've finished this step")
+
+
+def test_a_new_task_resets_only_after_it_is_entered():
+    """So 'Start a different task' then the back arrow keeps the previous task's steps."""
+    task_q = GT_MAIN.index("*save: taskName")
+    reset = GT_MAIN.index(">> stepsDone = []")
+    assert GT_MAIN.index("*label: newTask") < task_q < reset < GT_MAIN.index("*label: pickCause")
+
+
+def test_ai_request_runs_once_per_click_and_is_capped():
+    click = block_under(GT_MAIN, "*click")
+    assert click == [">> aiRequested = 1", "*goto: aiSuggest"]
+    ai = section(GT_MAIN, "*label: aiSuggest", "*goto: askAction\n")
+    assert ai.splitlines()[1].strip() == "*header: Suggest with AI", "the page must start with content"
+    guarded = block_under(GT_MAIN, "*if: aiRequested = 1")
+    assert any(l.startswith("*service: unstuckSuggest") for l in guarded)
+    assert guarded[0] == ">> aiRequested = 0"
+    assert "*if: aiCallsToday >= aiDailyLimit" in guarded
+    assert '*send: {"task" -> taskName, "previousActions" -> stepsDone, "clientId" -> aiClientId}' in guarded
+    assert re.search(r"^>> aiEnabled = 1$", GT_MAIN, flags=re.M)
+    assert "*component" in block_under(GT_MAIN, "*if: aiEnabled = 1")
+
+
+def test_ai_errors_are_readable_and_worded_the_same_in_both_versions():
+    assert "{aiError" not in GT_MAIN and ">> aiError = it" not in GT_MAIN
+    messages = [
+        "Lots of AI suggestions were asked for in a short time, so they are paused for now. Try again later, or just describe the step yourself.",
+        "AI suggestions are switched off right now. Describe the step yourself, it works just as well.",
+        "The AI can't work with this task description (it may be too long). Describe the step yourself, or start a new task with a shorter description.",
+        "Couldn't get a suggestion right now. Try again, or just describe it yourself.",
+    ]
+    for m in messages:
+        assert m in GT_MAIN and m in WEB, m
+
+
+def test_ai_suggestion_prefills_an_editable_step():
+    assert "*default: actionDefault" in gt_children(GT_MAIN, "*question: {actionQuestion}")
+    assert ">> actionDefault = aiSuggestion" in gt_children(GT_MAIN, "Use this step")
+
+
+@pytest.mark.parametrize("name", GT_FILES)
+def test_typed_and_ai_text_never_goes_inside_html(name):
+    """*html is not escaped, so text that looks like a tag would vanish."""
+    for block in html_blocks(GT_FILES[name]):
+        for var in ("{taskName}", "{action}", "{fearFeeling}", "{aiSuggestion}", "{doneStep}"):
+            assert var not in block, (var, block.strip()[:80])
+
+
+def test_owl_count_resets_by_date_in_the_subprogram_only():
+    assert "*if: not (owlsDate = owlToday)" in GT_OWL
+    assert ">> owlsGrownToday = 0" in block_under(GT_OWL, "*if: not (owlsDate = owlToday)")
+    assert "owlsDate = todayDate" not in GT_MAIN, "one place resets the daily owl count"
+    assert ">> owlFullDate = calendar::date" in GT_MAIN
 
 
 def test_fast_mode_shortens_every_timer():
@@ -333,11 +462,78 @@ def test_browser_ai_suggestion_fills_the_step_and_failure_says_try_again(page):
     assert page.input_value("#actionInput") == "Open the doc and write three bullet points."
     assert page.is_enabled("#actionContinue")
 
-    _open(page, '{"error": "AI suggestion failed (Gemini 503 UNAVAILABLE)"}', 502)
-    page.fill("#taskInput", "Write the report")
+    expected = {
+        502: "Couldn't get a suggestion right now. Try again, or just describe it yourself.",
+        429: "Lots of AI suggestions were asked for in a short time, so they are paused for now. Try again later, or just describe the step yourself.",
+        401: "AI suggestions are switched off right now. Describe the step yourself, it works just as well.",
+        400: "The AI can't work with this task description (it may be too long). Describe the step yourself, or start a new task with a shorter description.",
+    }
+    for status, message in expected.items():
+        _open(page, '{"error": "AI suggestion failed (Gemini 503 UNAVAILABLE)"}', status)
+        page.fill("#taskInput", "Write the report")
+        page.click("#taskContinue")
+        page.click(".cause-card:nth-child(5)")
+        page.click("#aiSuggestBtn")
+        page.wait_for_selector("#aiErrorNote", state="visible")
+        assert page.inner_text("#aiErrorNote") == message, status
+
+
+def test_browser_too_broad_note_does_not_send_people_to_the_back_button(page):
+    _open(page, '{"suggestion": "Open your task list and pick the first item.", "tooBroad": true}')
+    page.fill("#taskInput", "work")
     page.click("#taskContinue")
     page.click(".cause-card:nth-child(5)")
     page.click("#aiSuggestBtn")
-    page.wait_for_selector("#aiErrorNote", state="visible")
-    note = page.inner_text("#aiErrorNote")
-    assert "Gemini 503 UNAVAILABLE" in note and note.endswith("Try again, or just describe it yourself.")
+    page.wait_for_selector("#tooBroadNotice", state="visible")
+    note = page.inner_text("#tooBroadNotice")
+    assert "back" not in note.lower() and "edit" in note
+
+
+def test_browser_reload_resumes_at_the_technique_before_the_first_round(page):
+    _open(page)
+    page.fill("#taskInput", "Call the landlord")
+    page.click("#taskContinue")
+    page.click(".cause-card:nth-child(1)")  # anxiety
+    page.reload()
+    assert _step(page) == "step-cause"
+    assert "Call the landlord" in page.inner_text("#causeTaskRecap")
+    page.click(".cause-card:nth-child(5)")
+    page.fill("#actionInput", "Find the number")
+    page.click("#actionContinue")
+    page.click("#confirmStart")
+    page.click("#timerSkip")
+    page.reload()  # after a finished round the next step comes straight up
+    assert _step(page) == "step-action"
+    assert page.inner_text("#actionTitle").startswith("What's the next easy thing")
+
+
+def test_browser_owl_panel_appears_only_from_the_step_screen(page):
+    _open(page)
+    hidden = lambda: "no-owl" in page.get_attribute(".layout", "class")
+    assert hidden()  # task screen
+    page.fill("#taskInput", "Write the report")
+    page.click("#taskContinue")
+    assert hidden()  # cause screen
+    page.click(".cause-card:nth-child(2)")
+    assert hidden()  # technique
+    page.click("#motivationStage1Continue")
+    page.click("#motivationWorthChips .chip")
+    page.click("#motivationStage2Continue")
+    assert not hidden()  # tiny step
+
+
+def test_browser_an_owl_grown_yesterday_does_not_count_today(page):
+    _open(page)
+    page.evaluate("""() => {
+        const d = new Date(); d.setDate(d.getDate() - 1);
+        localStorage.setItem('unstuck_totalCycles', '6');
+        localStorage.setItem('unstuck_owlFullDate', d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate());
+    }""")
+    page.reload()
+    page.fill("#taskInput", "Write the report")
+    page.click("#taskContinue")
+    page.click(".cause-card:nth-child(5)")
+    assert page.is_visible("#hatchNewOwl")
+    assert page.is_hidden("#owlShelf")
+    page.click("#hatchNewOwl")
+    assert page.is_hidden("#owlShelf"), "hatching yesterday's owl does not add to today's count"
