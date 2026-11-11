@@ -285,13 +285,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `unstuckSuggest` (Settings -> Services, headers `X-Unstuck-Key` + `X-Proto-Token`, added server-side); `?fast=1` shortens every
   timer and the AI cap. Page `/unstuck/` = team repo PR #14 (noindex + out of the sitemap while in tester review). The web and GT
   versions share their copy: `tests/test_unstuck.py` keeps them in step, so change both. Test runs carry `fast = 1` / `src = qa`.
-- `reports/thoughtsaver_retention_cohorts_2026-11-11_src/`: Thought Saver (Samar's app, GA4 property 253193728) sign-up cohort retention
-  (`fetch_data.py` -> `data/ga4_pull.json`, `analysis.py` -> `datapoints.json`, `build_report.py`). Event definitions: Samar's sheet
-  13UFJobdGF4_Wex55sPZF4gOtohCGXE0_J_pVhh3mT1M. Use GA4 CLOSED FUNNELS (v1alpha runFunnelReport, step 1 = account_created filtered on
-  hostName + the cohort's firstSessionDate list), one 2-step funnel per `user_return_Nd`: requiring milestones in order undercounts
-  (cross-device), and first-visit cohorts without a funnel are contaminated by old users on new devices. Property gotchas: event retention is
-  TWO MONTHS (funnels return nothing older), localhost/Vercel previews report to it (filter hostName), funnels cap at 10 steps and 15
-  breakdown values; a BigQuery export exists (project 200310840257) we have no access to.
+- `reports/thoughtsaver_retention_cohorts_2026-11-11_src/`: Thought Saver (Samar's app, GA4 property 253193728) day-by-day sign-up cohorts
+  (`fetch_data.py` -> `data/ga4_pull.json`, `analysis.py` -> `datapoints.json`, `build_report.py`). Igor's scope (2026-11-11): ONLY the 13
+  events in Samar's sheet 13UFJobdGF4_Wex55sPZF4gOtohCGXE0_J_pVhh3mT1M, data from Oct 11, 2026, one cohort per day. Use GA4 CLOSED FUNNELS
+  (v1alpha runFunnelReport; step 1 = account_created with `hostName` + `date` field filters), one 2-step funnel per later event: requiring
+  return milestones in order undercounts (cross-device), and first-visit cohorts without a funnel are contaminated by old users on new
+  devices. Property gotchas: event retention is TWO MONTHS (funnels return nothing older), localhost/Vercel previews report to it (filter
+  hostName), funnels cap at 10 steps and 15 breakdown values; a BigQuery export exists (project 200310840257) we have no access to.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)

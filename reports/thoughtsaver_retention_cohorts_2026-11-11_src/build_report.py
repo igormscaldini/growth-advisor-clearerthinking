@@ -10,13 +10,11 @@ EV = [f"user_return_{n}d" for n in range(1, 11)]
 
 
 def fmt_date(iso):
-    d = dt.date.fromisoformat(iso)
-    return d.strftime("%b %-d")
+    return dt.date.fromisoformat(iso).strftime("%b %-d")
 
 
-def week_label(iso):
-    d = dt.date.fromisoformat(iso)
-    return f"{fmt_date(iso)} to {(d + dt.timedelta(days=6)).strftime('%b %-d')}"
+def day_label(iso):
+    return dt.date.fromisoformat(iso).strftime("%a %b %-d")
 
 
 def timestamp():
@@ -32,26 +30,24 @@ def curve_svg(pooled):
     y = lambda v: top + ph - v / ymax * ph  # noqa: E731
     slot = pw / 10
     bw = slot * 0.56
-    parts = []
-    for t in (0, 5, 10, 15, 20):
-        parts.append(f'<text x="{left - 8}" y="{y(t) + 4:.1f}" class="ax" text-anchor="end">{t}%</text>')
+    parts = [f'<text x="{left - 8}" y="{y(t) + 4:.1f}" class="ax" text-anchor="end">{t}%</text>' for t in (0, 5, 10, 15, 20)]
     parts.append(f'<line x1="{left}" x2="{w - right}" y1="{y(0):.1f}" y2="{y(0):.1f}" class="base"/>')
-    for i in range(1, 11):
-        r = pooled[str(i)]
+    for i, ev in enumerate(EV, start=1):
+        r = pooled[ev]
         cx = left + slot * (i - 0.5)
         x0 = cx - bw / 2
         top_y = y(r["pct"])
         bar_h = max(y(0) - top_y, 0)
-        rad = min(4, bar_h)
+        rad = min(4, bar_h / 2)
         tip = f"{i}+ return days: {r['k']} of {r['n']} sign-ups = {r['pct']}% (95% CI {r['lo']} to {r['hi']}%)"
+        bar = (f'<path d="M{x0:.1f},{y(0):.1f} V{top_y + rad:.1f} Q{x0:.1f},{top_y:.1f} {x0 + rad:.1f},{top_y:.1f} '
+               f'H{x0 + bw - rad:.1f} Q{x0 + bw:.1f},{top_y:.1f} {x0 + bw:.1f},{top_y + rad:.1f} V{y(0):.1f} Z" class="bar"/>'
+               if bar_h > 0 else "")
         parts.append(f'<g class="m"><title>{html.escape(tip)}</title>'
-                     f'<rect x="{x0 - 6:.1f}" y="{top}" width="{bw + 12:.1f}" height="{ph}" fill="transparent"/>'
-                     f'<path d="M{x0:.1f},{y(0):.1f} V{top_y + rad:.1f} Q{x0:.1f},{top_y:.1f} {x0 + rad:.1f},{top_y:.1f} '
-                     f'H{x0 + bw - rad:.1f} Q{x0 + bw:.1f},{top_y:.1f} {x0 + bw:.1f},{top_y + rad:.1f} V{y(0):.1f} Z" class="bar"/>'
+                     f'<rect x="{x0 - 6:.1f}" y="{top}" width="{bw + 12:.1f}" height="{ph}" fill="transparent"/>{bar}'
                      f'<line x1="{cx:.1f}" x2="{cx:.1f}" y1="{y(r["lo"]):.1f}" y2="{y(r["hi"]):.1f}" class="ci"/>'
-                     f'<line x1="{cx - 5:.1f}" x2="{cx + 5:.1f}" y1="{y(r["hi"]):.1f}" y2="{y(r["hi"]):.1f}" class="ci"/>'
-                     f'<line x1="{cx - 5:.1f}" x2="{cx + 5:.1f}" y1="{y(r["lo"]):.1f}" y2="{y(r["lo"]):.1f}" class="ci"/></g>')
-        if i in (1, 2, 3):
+                     f'<line x1="{cx - 5:.1f}" x2="{cx + 5:.1f}" y1="{y(r["hi"]):.1f}" y2="{y(r["hi"]):.1f}" class="ci"/></g>')
+        if i in (1, 2):
             parts.append(f'<text x="{cx + bw / 2 + 4:.1f}" y="{top_y + 12:.1f}" class="lbl">{r["pct"]}%</text>')
         parts.append(f'<text x="{cx:.1f}" y="{h - bottom + 18}" class="ax" text-anchor="middle">{i}</text>')
     parts.append(f'<text x="{left + pw / 2:.1f}" y="{h - 6}" class="ax" text-anchor="middle">'
@@ -60,158 +56,148 @@ def curve_svg(pooled):
             + "".join(parts) + "</svg>")
 
 
-def cell(r):
+def cell(r, scale):
     if r is None:
-        return '<td class="na">not yet</td>'
-    alpha = min(r["pct"] / 30, 1) if r["pct"] else 0
-    return (f'<td style="background: rgba(37,99,235,{alpha * 0.55:.2f})" title="{r["k"]} of {r["n"]}">'
-            f'{r["pct"]:.0f}%<span class="k">{r["k"]}</span></td>')
+        return '<td class="na">·</td>'
+    if r["n"] == 0:
+        return '<td class="na">–</td>'
+    alpha = min(r["pct"] / scale, 1) * 0.55
+    return (f'<td style="background: rgba(37,99,235,{alpha:.2f})" title="{r["k"]} of {r["n"]}">'
+            f'{r["k"]}<span class="p">{r["pct"]:.0f}%</span></td>')
 
 
-def cohort_table(cohorts, view, n_key):
+def cohort_table(rows):
     head = "".join(f"<th>{i}+</th>" for i in range(1, 11))
-    rows = []
-    for c in cohorts:
-        n = c[n_key]
-        if n is None:
-            continue
-        flag = "" if c["monotonic"] or view != "to_date" else ' <span class="flag" title="More users at a higher N than a lower one: a milestone event went missing in GA4">*</span>'
-        rows.append(f'<tr><th class="wk">{week_label(c["cohort"])}{flag}</th><td class="n">{n}</td>'
-                    + "".join(cell(c[view][str(i)]) for i in range(1, 11)) + "</tr>")
-    return (f'<table class="ct"><thead><tr><th>Sign-up week</th><th>Sign-ups</th>{head}</tr></thead>'
-            f'<tbody>{"".join(rows)}</tbody></table>')
+    body = []
+    for r in rows:
+        flag = "" if r["monotonic"] else ' <span class="flag" title="More people at a higher N than a lower one: a milestone event went missing in GA4">*</span>'
+        body.append(f'<tr><th class="wk">{day_label(r["day"])}{flag}</th>'
+                    f'<td class="n">{r["entered"]}</td><td class="n">{r["entered_created"]}</td>'
+                    f'<td class="n sep">{r["signups"]}</td>'
+                    + cell(r["cells"]["onboarding_completed"], 100)
+                    + "".join(cell(r["cells"][ev], 50) for ev in EV) + "</tr>")
+    return (f'<table class="ct"><thead><tr><th rowspan="2">Day</th><th colspan="2">Onboarding that day</th>'
+            f'<th rowspan="2" class="sep">Sign-ups<br>that day</th><th rowspan="2">Completed<br>onboarding</th>'
+            f'<th colspan="10">Came back on at least N later days</th></tr>'
+            f'<tr><th>entered</th><th>signed up</th>{head}</tr></thead><tbody>{"".join(body)}</tbody></table>')
 
 
-def naive_table(naive, pooled):
-    rows = []
-    for i, ev in enumerate(EV, start=1):
-        rows.append(f"<tr><td>{ev}</td><td class='n'>{naive.get(ev, 0)}</td><td class='n'>{pooled[str(i)]['k']}</td></tr>")
-    return ("<table class='nv'><thead><tr><th>Event</th><th>All users firing it, last 28 days</th>"
-            "<th>Of the sign-ups since Sep 14 (cohort method)</th></tr></thead><tbody>" + "".join(rows) + "</tbody></table>")
-
-
-def weekly_table(weekly, end):
-    rows = []
-    for wk, ev in weekly.items():
-        y, w = int(wk[:4]), int(wk[4:])
-        monday_d = dt.date.fromisocalendar(y, w, 1)
-        if wk < "202632" or monday_d + dt.timedelta(days=6) > dt.date.fromisoformat(end):
-            continue  # before account_created existed, or a partial week
-        monday = monday_d.isoformat()
-        oe = ev.get("onboarding_entered", [0, 0])
-        ac = ev.get("account_created", [0, 0])
-        oc = ev.get("onboarding_completed", [0, 0])
-        share = f"{ac[0] / oe[0] * 100:.0f}%" if oe[0] else ""
-        per = f"{ac[1] / ac[0]:.1f}" if ac[0] else ""
-        rows.append(f"<tr><td>{week_label(monday)}</td><td class='n'>{oe[0]}</td><td class='n'>{ac[0]}</td>"
-                    f"<td class='n'>{share}</td><td class='n'>{per}</td><td class='n'>{oc[0]}</td></tr>")
-    return ("<table class='nv'><thead><tr><th>Week</th><th>Users entering onboarding</th><th>Users firing account_created</th>"
-            "<th>Ratio</th><th>account_created events per user</th><th>Users completing onboarding</th></tr></thead><tbody>"
-            + "".join(rows) + "</tbody></table>")
+def naive_table(naive, pooled, total):
+    rows = [f"<tr><td>account_created</td><td class='n'>{naive.get('account_created', 0)}</td><td class='n'>{total}</td></tr>"]
+    for ev in ["onboarding_completed"] + EV:
+        rows.append(f"<tr><td>{ev}</td><td class='n'>{naive.get(ev, 0)}</td><td class='n'>{pooled[ev]['k']}</td></tr>")
+    return ("<table class='nv'><thead><tr><th>Event</th><th>All users firing it in the period</th>"
+            "<th>Of the people who signed up in the period</th></tr></thead><tbody>" + "".join(rows) + "</tbody></table>")
 
 
 def main():
     d = json.loads((HERE / "datapoints.json").read_text())
-    pt, pw, ps = d["pooled_to_date"], d["pooled_window"], d["pooled_strict_to_date"]
-    cc_ok = all(v["per_cohort_sum"] == v["pooled_two_step"] for v in d["cross_check"].values())
-    first, last = d["cohorts"][0]["cohort"], d["cohorts"][-1]["cohort"]
-    last_end = (dt.date.fromisoformat(last) + dt.timedelta(days=6)).isoformat()
-    win_last_end = (dt.date.fromisoformat(d["window_cohorts"][-1]) + dt.timedelta(days=6)).isoformat()
-    deep = sum(1 for i in range(5, 11) if pt[str(i)]["k"])
+    p, ob = d["pooled"], d["onboarding"]
+    oc = d["order_check"]
+    cc_ok = all(v["per_day_sum"] == v["pooled"] for v in d["cross_check"].values())
+    first, end = d["first_day"], d["end"]
+    deep = max((i for i, ev in enumerate(EV, start=1) if p[ev]["k"]), default=0)
+    no_entry = d["total_signups"] - ob["created_from_entered"]
+    entered_dupes = ob["entered"] - d["naive"].get("onboarding_entered", 0)
+    retention_cutoff = (dt.date.fromisoformat(first) + dt.timedelta(days=61)).strftime("%b %-d")
 
     css = """
 :root{--bg:#fff;--ink:#1a1a1a;--ink2:#555;--muted:#888;--line:#ddd;--bar:#2563eb;--flag:#b45309;--card:#f6f7f9}
 @media (prefers-color-scheme:dark){:root{--bg:#141518;--ink:#eee;--ink2:#bbb;--muted:#888;--line:#333;--bar:#5b8def;--flag:#f0a050;--card:#1d1f23}}
 body{background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0}
-main{max-width:860px;margin:0 auto;padding:32px 16px 64px}
+main{max-width:980px;margin:0 auto;padding:32px 16px 64px}
 h1{font-size:28px;margin:0 0 4px}.sub{color:var(--muted);font-size:14px;margin:0 0 28px}
-h2{font-size:20px;margin:40px 0 8px}p,li{color:var(--ink)}.note{color:var(--ink2);font-size:14px}
+h2{font-size:20px;margin:40px 0 8px}.note{color:var(--ink2);font-size:14px}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:20px 0}
 .kpi{background:var(--card);border-radius:10px;padding:14px 16px}.kpi b{font-size:28px;display:block}.kpi span{color:var(--ink2);font-size:14px}
-svg{width:100%;height:auto}.ax{fill:var(--muted);font-size:12px}.lbl{fill:var(--ink2);font-size:12px}
-.base{stroke:var(--line);stroke-width:1}.bar{fill:var(--bar)}.ci{stroke:var(--ink2);stroke-width:1.5}
-.m:hover .bar{opacity:.8}
+svg{width:100%;max-width:760px;height:auto}.ax{fill:var(--muted);font-size:12px}.lbl{fill:var(--ink2);font-size:12px}
+.base{stroke:var(--line);stroke-width:1}.bar{fill:var(--bar)}.ci{stroke:var(--ink2);stroke-width:1.5}.m:hover .bar{opacity:.8}
 .scroll{overflow-x:auto}table{border-collapse:collapse;font-size:13px;width:100%}
-th,td{padding:6px 6px;text-align:center;border-bottom:1px solid var(--line)}th{color:var(--ink2);font-weight:600}
-.ct td{min-width:40px}.ct .k{display:block;color:var(--ink2);font-size:11px}.wk{text-align:left;white-space:nowrap}
-.na{color:var(--muted);font-size:11px}.n{font-variant-numeric:tabular-nums}.flag{color:var(--flag);font-weight:700}
-.nv td:first-child,.nv th:first-child{text-align:left}
+th,td{padding:5px 5px;text-align:center;border-bottom:1px solid var(--line)}th{color:var(--ink2);font-weight:600;font-size:12px}
+.ct td{min-width:34px;font-variant-numeric:tabular-nums}.ct .p{display:block;color:var(--ink2);font-size:10px}
+.wk{text-align:left;white-space:nowrap}.na{color:var(--muted)}.n{font-variant-numeric:tabular-nums}.sep{border-left:1px solid var(--line)}
+.flag{color:var(--flag);font-weight:700}.nv td:first-child,.nv th:first-child{text-align:left}
+.funnel{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}.funnel div{background:var(--card);border-radius:8px;padding:10px 14px}
+.funnel b{font-size:22px;display:block}.funnel span{color:var(--ink2);font-size:13px}.arrow{color:var(--muted)}
 ol li{margin-bottom:10px}code{font-size:13px}
 """
     body = f"""
 <main>
-<h1>Thought Saver: who comes back after signing up</h1>
-<p class="sub">{timestamp()} · GA4 property "Thought Saver - App And Landing Page", app.thoughtsaver.com only · sign-ups {fmt_date(first)} to {fmt_date(last_end)}, 2026 · returns counted through {fmt_date(d['end'])}</p>
+<h1>Thought Saver: sign-up cohorts, day by day</h1>
+<p class="sub">{timestamp()} · GA4 property "Thought Saver - App And Landing Page", app.thoughtsaver.com only · sign-ups {fmt_date(first)} to {fmt_date(end)}, 2026 · only the 13 events in Samar's sheet</p>
 
-<p>This is the cohort analysis agreed with Samar (thread "clarification on user events", Oct 9-13). The old event totals mixed in people who
-signed up months ago, which is how <code>user_return_8d</code> could beat <code>user_return_7d</code>. Here each person is followed from their own sign-up.</p>
+<p>The cohort analysis agreed with Samar (thread "clarification on user events", Oct 9-13). Each day's sign-ups are followed from their own
+<code>account_created</code>, so people who signed up earlier can no longer inflate the return counts (how <code>user_return_8d</code> once beat <code>user_return_7d</code>).</p>
 
 <div class="kpis">
-<div class="kpi"><b>{d['total_signups']}</b><span>accounts created, {fmt_date(first)} to {fmt_date(last_end)}</span></div>
-<div class="kpi"><b>{pt['1']['pct']}%</b><span>came back on at least 1 later day ({pt['1']['k']} people; 95% CI {pt['1']['lo']:.0f} to {pt['1']['hi']:.0f}%)</span></div>
-<div class="kpi"><b>{pt['2']['pct']}%</b><span>came back on 2 or more days ({pt['2']['k']} people)</span></div>
-<div class="kpi"><b>{pt['5']['k']}</b><span>{'person' if pt['5']['k'] == 1 else 'people'} reached 5+ return days; {pt['10']['k']} reached 10</span></div>
+<div class="kpi"><b>{d['total_signups']}</b><span>accounts created, {fmt_date(first)} to {fmt_date(end)}</span></div>
+<div class="kpi"><b>{p['onboarding_completed']['pct']:.0f}%</b><span>of them completed onboarding ({p['onboarding_completed']['k']} people)</span></div>
+<div class="kpi"><b>{p['user_return_1d']['pct']}%</b><span>came back on at least 1 later day ({p['user_return_1d']['k']} of {p['user_return_1d']['n']}; 95% CI {p['user_return_1d']['lo']:.0f} to {p['user_return_1d']['hi']:.0f}%)</span></div>
+<div class="kpi"><b>{p['user_return_2d']['pct']}%</b><span>came back on 2 or more days ({p['user_return_2d']['k']} people); nobody past {deep} so far</span></div>
 </div>
 
-<p><b>The bottom line:</b> about 7 in 8 people who create an account never come back on a later day. Most of the drop happens before the
-first return, so that is where to look first (the first-session experience and what brings someone back on day two). Beyond 3 return days
-the numbers are single people, too few to read anything into.</p>
+<p><b>The bottom line:</b> {100 - p['user_return_1d']['pct']:.0f}% of the people who sign up never come back on a later day, even though about two thirds finish onboarding.
+The big drop is between finishing onboarding and the first return, so that is the step to work on (what brings someone back on day two).
+Past 2 return days the numbers are 1 to 3 people, too few to read anything into.</p>
+
+<h2>Onboarding funnel</h2>
+<div class="funnel">
+<div><b>{ob['entered']}</b><span>entered onboarding</span></div><span class="arrow">→</span>
+<div><b>{ob['created_from_entered']}</b><span>of them created an account ({ob['entered_to_created']['pct']}%)</span></div><span class="arrow">·</span>
+<div><b>{d['total_signups']}</b><span>accounts created in all</span></div><span class="arrow">→</span>
+<div><b>{p['onboarding_completed']['k']}</b><span>completed onboarding ({p['onboarding_completed']['pct']}%)</span></div>
+</div>
+<p class="note">Entered = people who fired <code>onboarding_entered</code> on a given day, summed over days; signed up = those of them who later fired
+<code>account_created</code>. {no_entry} of the {d['total_signups']} sign-ups have no <code>onboarding_entered</code> before it in this period (data issue 3).</p>
 
 <h2>Share of sign-ups reaching each number of return days</h2>
-<p class="note">All sign-ups whose week has had at least N days to get there (so the base drops from {pt['1']['n']} to {pt['10']['n']} as N grows).
+<p class="note">All sign-up days that have had at least N days to get there (so the base drops from {p['user_return_1d']['n']} to {p['user_return_10d']['n']} as N grows).
 Whiskers are 95% confidence intervals. Hover a bar for the counts.</p>
-<div class="scroll">{curve_svg(pt)}</div>
+<div class="scroll">{curve_svg(p)}</div>
 
-<h2>By sign-up week, all returns so far</h2>
-<p class="note">Each cell: % of that week's sign-ups who reached N return days (count underneath). "Not yet" = the week's last sign-ups have not had N days.
-Older weeks have had more time, so compare rows with the next table instead.
-<span class="flag">*</span> = a higher N has more people than a lower one, which a clean count can't do (see data issue 2).</p>
-<div class="scroll">{cohort_table(d['cohorts'], 'to_date', 'signups')}</div>
-
-<h2>By sign-up week, same {d['window_days']}-day window for everyone</h2>
-<p class="note">Returns counted only up to {d['window_days']} days after the end of the sign-up week (14 to 20 days after signing up), so every row had the same time.
-Only weeks up to {fmt_date(win_last_end)} have a complete window. Pooled: {pw['1']['pct']}% at 1+, {pw['2']['pct']}% at 2+, {pw['3']['pct']}% at 3+ of {d['window_signups']} sign-ups.</p>
-<div class="scroll">{cohort_table(d['cohorts'], 'window', 'window_signups')}</div>
-<p class="note">Weekly sign-ups range from 6 to 36, so a week-to-week difference of a couple of people is noise. No week stands out.</p>
+<h2>Day by day</h2>
+<p class="note">One row per sign-up day. Cells show the number of that day's sign-ups who did it, with the % of the day's sign-ups underneath (darker = higher).
+"·" = not enough days have passed yet; "–" = nobody signed up that day.
+<span class="flag">*</span> = more people at a higher N than a lower one, which a clean count can't do (data issue 2).
+"Onboarding that day" counts different people from the sign-up columns: those who entered onboarding that day, and how many of them went on to sign up.
+With 0 to 8 sign-ups a day, single days are noisy; read the pooled numbers above for rates.</p>
+<div class="scroll">{cohort_table(d['cohorts'])}</div>
 
 <h2>Why the old numbers looked wrong</h2>
-<p class="note">Left: what GA4 shows if you count users per event over the last 28 days (the view that confused us). Right: the cohort count above.
-At least {d['naive_last_28d'].get('user_return_1d', 0) - pt['1']['k']} of the {d['naive_last_28d'].get('user_return_1d', 0)} people firing <code>user_return_1d</code> in the last 28 days
-are not among the recent sign-ups as GA4 sees them: they signed up earlier, or are a recent sign-up returning on another device (issue 2). The higher milestones are almost all such people.</p>
-<div class="scroll">{naive_table(d['naive_last_28d'], pt)}</div>
+<p class="note">Left: users per event over the same period with no cohort (the view that confused us). Right: the cohort count.
+{d['naive'].get('user_return_1d', 0) - p['user_return_1d']['k']} of the {d['naive'].get('user_return_1d', 0)} people who fired <code>user_return_1d</code> in the period
+are not among its sign-ups as GA4 sees them: they signed up earlier, or are a sign-up returning on another device (issue 2). All the 8+ day returns are such people.</p>
+<div class="scroll">{naive_table(d['naive'], p, d['total_signups'])}</div>
 
 <h2>Data issues to raise with Samar</h2>
 <ol>
-<li><b>GA4 keeps event data for only two months on this property.</b> Admin → Data settings → Data retention is set to "2 months", so user-level
-analysis (funnels, cohorts, explorations) cannot see anything before Sep 11, 2026. That is why this report starts there. Switching it to 14 months
-takes one click and is free, but only protects data from now on. I did not change it.</li>
-<li><b>Milestone events go missing for some accounts.</b> 13 accounts fired <code>user_return_2d</code> after signing up, but only 9 of them fired
-<code>user_return_1d</code> first; requiring the milestones in order would give {ps['2']['pct']}% at 2+ and {ps['4']['k']} at 4+ instead of {pt['2']['pct']}% and {pt['4']['k']}.
-The likeliest cause is a return on another device or browser, which GA4 treats as a different person, or a blocked tracker. Ask Samar whether the GA4
-<code>user_id</code> is set on every event once someone is logged in (only ~1,500 GA4 users carry one); that would let GA4 join devices. Until then, every
-number here is a <b>floor</b>: returns made only on a second device are invisible.</li>
-<li><b>Sign-up tracking has changed several times.</b> In August <code>account_created</code> fired about 1.8 times per user (the duplicates Samar retired on Oct 8);
-from Aug 31 to Oct 4 only 7 to 22 people a week fired it while 65 to 115 entered onboarding; since Oct 5 it is about 1 per user and 18 to 36 a week.
-Worth checking against the app's own database: were sign-ups really that low in September, or was the event broken?</li>
-<li><b>Developer traffic lands in the production property.</b> <code>localhost</code> (49 users firing account_created since July) and Vercel preview deploys report to it.
-This report filters to app.thoughtsaver.com; a GA4 data filter or a separate dev property would keep it clean everywhere.</li>
-<li><b>The full history may already exist in BigQuery.</b> The property has had a BigQuery export since Sep 2022 (Google Cloud project 200310840257). Export tables are
-not subject to the two-month limit, and they hold per-user rows, so the same analysis could go back to July (when the return events started).
-I don't have access to that project; if Samar or Spencer can grant read access, this becomes a much bigger sample.</li>
+<li><b>GA4 keeps event data for only two months on this property.</b> Admin → Data settings → Data retention is set to "2 months". This analysis fits inside it
+today, but per-person queries will lose Oct 11 around {retention_cutoff} and keep losing a day each day, so it cannot be re-run on this period later.
+Switching to 14 months is one click and free (I did not change it).</li>
+<li><b>Return milestones go missing for some accounts.</b> {oc['created_then_2d']['user_return_2d']} sign-ups fired <code>user_return_2d</code>, but only
+{oc['created_then_1d_then_2d']['user_return_2d']} of them fired <code>user_return_1d</code> before it; {len(d['non_monotonic_days'])} sign-up days show more people at a higher N.
+The likeliest cause is a return on another device or browser, which GA4 treats as a different person. Ask Samar whether the GA4 <code>user_id</code> is set on every
+event once someone is logged in, so GA4 can join devices. Until then, every return number here is a <b>floor</b>.</li>
+<li><b><code>onboarding_entered</code> does not behave as the sheet describes.</b> The sheet says it fires once per user, but summed by day it counts {ob['entered']} people
+against {d['naive'].get('onboarding_entered', 0)} distinct people over the period, so it fired on more than one day for some of them ({entered_dupes} extra), and {no_entry} of {d['total_signups']} sign-ups have no <code>onboarding_entered</code> before their <code>account_created</code> in the period
+(they may have entered before Oct 11, used "I have an account", or the event did not fire). Worth asking Samar which.</li>
+<li><b>Developer traffic lands in the production property.</b> <code>localhost</code> and Vercel preview deploys report to it. This report keeps only
+app.thoughtsaver.com; a GA4 data filter or a separate dev property would keep it clean everywhere.</li>
+<li><b>The full history may already exist in BigQuery.</b> The property has a BigQuery export (Google Cloud project 200310840257) that is not subject to the
+two-month limit. I don't have access; with read access the per-person data would be kept permanently.</li>
 </ol>
-<details><summary>Sign-up tracking by week (issue 3)</summary><div class="scroll">{weekly_table(d['weekly_events'], d['end'])}</div></details>
 
 <h2>How this was measured</h2>
-<p class="note">A <b>sign-up cohort</b> = people whose first visit fell in that Monday-to-Sunday week and who fired <code>account_created</code> on app.thoughtsaver.com
-(97% sign up on the day of their first visit). A person counts for "N return days" if they fired <code>user_return_Nd</code> at any point after
-<code>account_created</code>, the definition in Samar's spreadsheet (separate days, not necessarily in a row). Built with GA4 closed funnels, which follow each
-person, so returns from people who signed up earlier cannot leak in. Independent check: one pooled query per N over all weeks gave exactly the same totals as
-the per-week queries ({'all matched' if cc_ok else 'MISMATCH, see datapoints.json'}). Confidence intervals: Wilson 95%.
+<p class="note">Only the events in Samar's sheet: <code>onboarding_entered</code>, <code>account_created</code>, <code>onboarding_completed</code>, <code>user_return_1d</code> to
+<code>user_return_10d</code>. A <b>sign-up cohort</b> = people who fired <code>account_created</code> on app.thoughtsaver.com on that day. They count for an event if they fired it at any
+point after their <code>account_created</code> (for returns: on at least N separate later days, per the sheet). Built with GA4 closed funnels, which follow each person, one funnel per
+day and event. Independent check: one funnel per event over the whole period gave exactly the same totals as the per-day funnels
+({'all matched' if cc_ok else 'MISMATCH, see datapoints.json'}). Confidence intervals: Wilson 95%. Returns counted through {fmt_date(end)}; data pulled {d['pulled_at'].replace('T', ' ')}.
 Code: <code>reports/thoughtsaver_retention_cohorts_2026-11-11_src/</code>; tests: <code>tests/test_thoughtsaver_retention_cohorts.py</code>.</p>
 </main>"""
     OUT.write_text(f'<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-                   f'<title>Thought Saver retention</title><style>{css}</style></head><body>{body}</body></html>')
-    print("wrote", OUT, "deep milestones with people:", deep)
+                   f'<title>Thought Saver cohorts</title><style>{css}</style></head><body>{body}</body></html>')
+    print("wrote", OUT)
 
 
 if __name__ == "__main__":
