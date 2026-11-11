@@ -1,17 +1,21 @@
-"""Pure functions for the Thought Saver sign-up cohort retention analysis (no network).
+"""Pure functions for the Thought Saver day-by-day sign-up cohort analysis (no network).
 
 data/ga4_pull.json (fetch_data.py) -> datapoints.json (this file's main()) -> build_report.py.
 
+Scope (Igor, 2026-11-11): only the 13 events in Samar's sheet (EVENTS below), only data from
+FIRST_DAY on (after Samar's Oct 8 event clean-up), one cohort per DAY.
+
 Definitions
-- Cohort: users whose first visit (GA4 firstSessionDate) falls in a Monday-Sunday week AND who fired
-  account_created on app.thoughtsaver.com. 97% of sign-ups happen on the first-visit day.
-- Reached N: the user fired user_return_Nd at any time after account_created, i.e. the account came
-  back on at least N distinct days after the sign-up day (Samar's definition; days need not be
-  consecutive). Order of the earlier milestones is not required (see fetch_data.py for why).
-- "to_date": every return up to the end of the data. A cell is MATURE only if even the last sign-up day of
-  the week has had N full days since, otherwise it is shown as partial and left out of pooled rates.
-- "window": returns within WINDOW_DAYS after the end of the cohort week (14-20 days after sign-up), which
-  gives every cohort the same amount of time and so is the fair comparison across weeks.
+- Cohort of day D: users who fired account_created on app.thoughtsaver.com on day D.
+- Completed onboarding / reached N return days: the user fired onboarding_completed / user_return_Nd at
+  any time after that account_created (GA4 closed funnel, so earlier sign-ups cannot leak in). Return
+  milestones are not required in order: a return on another device is a different GA4 user, so the
+  earlier milestone can be missing even though the account (whose counter is server-side) passed it.
+- Mature: day D can only have reached N return days if D + N <= the last day of data; immature cells are
+  shown as "not yet" and left out of pooled rates.
+- Entered onboarding (day D): users who fired onboarding_entered on D, and how many of them later fired
+  account_created. This is a separate funnel from the sign-up cohort (same day, different people when a
+  sign-up entered onboarding on an earlier day).
 """
 import datetime as dt
 import json
@@ -19,28 +23,29 @@ import math
 from pathlib import Path
 
 RETURN_EVENTS = [f"user_return_{n}d" for n in range(1, 11)]
-WINDOW_DAYS = 14
+AFTER_SIGNUP = ["onboarding_completed"] + RETURN_EVENTS
+EVENTS = ["onboarding_entered", "account_created"] + AFTER_SIGNUP  # exactly the sheet's 13 events
+FIRST_DAY = dt.date(2026, 10, 11)
 HERE = Path(__file__).resolve().parent
 
 
 # ------------------------------------------------------------------ dates
-def week_days(monday):
-    """The seven GA4 date strings (YYYYMMDD) of the week starting on `monday`."""
-    return [(monday + dt.timedelta(days=i)).strftime("%Y%m%d") for i in range(7)]
+def ga_date(day):
+    return day.strftime("%Y%m%d")
 
 
-def cohort_mondays(first, end):
-    """Mondays from `first` whose whole week (Mon-Sun) ends on or before `end`."""
-    out, m = [], first
-    while m + dt.timedelta(days=6) <= end:
-        out.append(m)
-        m += dt.timedelta(days=7)
-    return out
+def cohort_days(first, end):
+    """Every day from `first` to `end` inclusive."""
+    return [first + dt.timedelta(days=i) for i in range((end - first).days + 1)]
 
 
-def is_mature(monday, n, end):
-    """True when the LAST sign-up day of the cohort week has had at least n later days by `end`."""
-    return monday + dt.timedelta(days=6 + n) <= end
+def return_n(event):
+    """user_return_7d -> 7; onboarding_completed -> 0 (it can happen on the sign-up day)."""
+    return int(event[len("user_return_"):-1]) if event.startswith("user_return_") else 0
+
+
+def is_mature(day, event, end):
+    return day + dt.timedelta(days=return_n(event)) <= end
 
 
 # ------------------------------------------------------------------ GA4 parsing
@@ -55,25 +60,24 @@ def parse_funnel_visualization(data, events):
 
 
 def combine_two_step(funnels):
-    """Merge the ten (account_created, user_return_Nd) funnels of one cohort into one counts dict."""
+    """Merge the (account_created, X) funnels of one cohort into {account_created: n, X: k, ...}."""
     created = {f["account_created"] for f in funnels}
     if len(created) != 1:
         raise ValueError(f"step 1 differs between funnels of the same cohort: {sorted(created)}")
     out = {"account_created": created.pop()}
     for f in funnels:
         out.update({k: v for k, v in f.items() if k != "account_created"})
-    missing = [e for e in RETURN_EVENTS if e not in out]
+    missing = [e for e in AFTER_SIGNUP if e not in out]
     if missing:
         raise ValueError(f"no funnel for {missing}")
     return out
 
 
 def is_monotonic(counts):
-    """An account at N+1 return days has passed N, so counts should never rise with N.
+    """An account at N+1 return days has passed N, so the counts should never rise with N.
 
-    With the any-order measure a rise is still possible when the Nth return happened on another
-    device; a rise is therefore flagged, not corrected."""
-    seq = [counts["account_created"]] + [counts[e] for e in RETURN_EVENTS]
+    A rise is possible here when the Nth return happened on another device, so it is flagged, not fixed."""
+    seq = [counts[e] for e in RETURN_EVENTS]
     return all(a >= b for a, b in zip(seq, seq[1:]))
 
 
@@ -96,102 +100,64 @@ def rate(k, n):
 
 # ------------------------------------------------------------------ tables
 def cohort_table(cohorts, end):
-    """Per-cohort rows: sign-ups plus, for each N, the to-date rate (None if immature) and window rate."""
+    """One row per sign-up day; a cell is None when that day is not mature for the event."""
     rows = []
     for c in cohorts:
-        monday = dt.date.fromisoformat(c["cohort"])
-        td, win = c["to_date"], c["window"]
-        n = td["account_created"]
-        row = {"cohort": c["cohort"], "signups": n, "monotonic": is_monotonic(td),
-               "to_date": {}, "window": {}}
-        for i, ev in enumerate(RETURN_EVENTS, start=1):
-            row["to_date"][i] = rate(td[ev], n) if is_mature(monday, i, end) else None
-            row["window"][i] = rate(win[ev], win["account_created"]) if win else None
-        row["window_signups"] = win["account_created"] if win else None
-        rows.append(row)
+        day = dt.date.fromisoformat(c["day"])
+        s = c["signup"]
+        n = s["account_created"]
+        cells = {ev: (rate(s[ev], n) if is_mature(day, ev, end) else None) for ev in AFTER_SIGNUP}
+        rows.append({"day": c["day"], "entered": c["entered"]["onboarding_entered"],
+                     "entered_created": c["entered"]["account_created"], "signups": n,
+                     "monotonic": is_monotonic(s), "cells": cells})
     return rows
 
 
-def pooled(cohorts, end, view):
-    """Pooled rate per N over every cohort usable for that N.
-
-    view="to_date" / "strict_to_date": cohorts mature for N (so the denominator shrinks as N grows);
-    view="window": cohorts with a complete window (same set for every N).
-    """
+def pooled(cohorts, end):
+    """Per event after sign-up: sum over the cohorts mature for it (the base shrinks as N grows)."""
     out = {}
-    for i, ev in enumerate(RETURN_EVENTS, start=1):
+    for ev in AFTER_SIGNUP:
         k = n = 0
         for c in cohorts:
-            monday = dt.date.fromisoformat(c["cohort"])
-            if view == "window":
-                if not c["window"]:
-                    continue
-            elif not is_mature(monday, i, end):
-                continue
-            src = c[view]
-            k += src[ev]
-            n += src["account_created"]
-        out[i] = rate(k, n)
+            if is_mature(dt.date.fromisoformat(c["day"]), ev, end):
+                k += c["signup"][ev]
+                n += c["signup"]["account_created"]
+        out[ev] = rate(k, n)
     return out
 
 
-def first_visit_cohorts(rows, start, end):
-    """Weekly users per event from firstSessionDate x eventName rows (NO funnel: the contaminated view)."""
-    weeks = {}
-    for fsd, event, users in rows:
-        if fsd in ("(not set)", ""):
-            continue
-        d = dt.datetime.strptime(fsd, "%Y%m%d").date()
-        if d < start or d > end:
-            continue
-        monday = (d - dt.timedelta(days=d.weekday())).isoformat()
-        weeks.setdefault(monday, {}).setdefault(event, 0)
-        weeks[monday][event] += int(users)
-    return dict(sorted(weeks.items()))
+def onboarding_funnel(cohorts):
+    entered = sum(c["entered"]["onboarding_entered"] for c in cohorts)
+    created_from_entered = sum(c["entered"]["account_created"] for c in cohorts)
+    return {"entered": entered, "created_from_entered": created_from_entered,
+            "entered_to_created": rate(created_from_entered, entered)}
 
 
-def weekly_events(rows):
-    """{iso week: {event: [users, events]}} from isoYearIsoWeek x eventName rows."""
+def cross_check(cohorts, pooled_pull):
+    """Sum of the per-day funnels vs one funnel over all days at once: each user signs up (first fires
+    account_created) once, so they must match unless a user fired account_created on two days."""
     out = {}
-    for week, event, users, count in rows:
-        out.setdefault(week, {})[event] = [int(users), int(count)]
-    return dict(sorted(out.items()))
-
-
-def naive_counts(rows):
-    return {e: int(u) for e, u in rows}
-
-
-def cross_check(cohorts, pooled_two_step):
-    """Sum of the per-cohort funnels (one query per week and N) vs one funnel per N over all cohort days.
-
-    Each user has exactly one firstSessionDate, so the two must agree exactly; a gap means the cohort
-    split or the per-cohort date ranges lose or double-count users."""
-    out = {}
-    for ev in RETURN_EVENTS:
-        summed = sum(c["to_date"][ev] for c in cohorts)
-        out[ev] = {"per_cohort_sum": summed, "pooled_two_step": pooled_two_step[ev][ev]}
-    out["account_created"] = {"per_cohort_sum": sum(c["to_date"]["account_created"] for c in cohorts),
-                              "pooled_two_step": pooled_two_step[RETURN_EVENTS[0]]["account_created"]}
+    for ev in AFTER_SIGNUP:
+        out[ev] = {"per_day_sum": sum(c["signup"][ev] for c in cohorts), "pooled": pooled_pull[ev][ev]}
+    out["account_created"] = {"per_day_sum": sum(c["signup"]["account_created"] for c in cohorts),
+                              "pooled": pooled_pull[AFTER_SIGNUP[0]]["account_created"]}
     return out
 
 
 def build_datapoints(pull):
     end = dt.date.fromisoformat(pull["end"])
     cohorts = pull["cohorts"]
+    table = cohort_table(cohorts, end)
     return {
-        "pulled_at": pull["pulled_at"], "end": pull["end"], "window_days": pull["window_days"],
-        "cohorts": cohort_table(cohorts, end),
-        "pooled_to_date": pooled(cohorts, end, "to_date"),
-        "pooled_window": pooled(cohorts, end, "window"),
-        "pooled_strict_to_date": pooled(cohorts, end, "strict_to_date"),
-        "total_signups": sum(c["to_date"]["account_created"] for c in cohorts),
-        "window_signups": sum(c["window"]["account_created"] for c in cohorts if c["window"]),
-        "window_cohorts": [c["cohort"] for c in cohorts if c["window"]],
-        "cross_check": cross_check(cohorts, pull["pooled_two_step"]),
-        "naive_last_28d": naive_counts(pull["naive_last_28d"]),
-        "first_visit_cohorts": first_visit_cohorts(pull["first_visit_cohorts"], dt.date(2026, 7, 6), end),
-        "weekly_events": weekly_events(pull["weekly_events"]),
+        "pulled_at": pull["pulled_at"], "first_day": pull["first_day"], "end": pull["end"],
+        "cohorts": table,
+        "non_monotonic_days": [r["day"] for r in table if not r["monotonic"]],
+        "pooled": pooled(cohorts, end),
+        "onboarding": onboarding_funnel(cohorts),
+        "total_signups": sum(c["signup"]["account_created"] for c in cohorts),
+        "cross_check": cross_check(cohorts, pull["pooled"]),
+        "order_check": pull["order_check"],
+        "naive": {e: int(u) for e, u in pull["naive"]},
     }
 
 
@@ -201,8 +167,8 @@ def main():
     (HERE / "datapoints.json").write_text(json.dumps(dp, indent=1))
     print("wrote", HERE / "datapoints.json")
     for k, v in dp["cross_check"].items():
-        flag = "" if v["per_cohort_sum"] == v["pooled_two_step"] else "  <-- MISMATCH"
-        print(f"{k:22s} per-cohort {v['per_cohort_sum']:4d}  pooled 2-step {v['pooled_two_step']:4d}{flag}")
+        flag = "" if v["per_day_sum"] == v["pooled"] else "  <-- MISMATCH"
+        print(f"{k:22s} per-day {v['per_day_sum']:4d}  pooled {v['pooled']:4d}{flag}")
 
 
 if __name__ == "__main__":
