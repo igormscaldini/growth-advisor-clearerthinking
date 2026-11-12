@@ -296,6 +296,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Thought Saver Google Ads = customer 9679377392 (reachable with the shared token, login_customer_id = itself); read-only GAQL helper and
   audit pull in `reports/thoughtsaver_google_ads_audit_2026-11-12_src/`. Only the ENGAGEMENT goal is biddable (the 13 sheet events with
   stepped values), so the legacy primary actions do not affect bidding. Ads `account_created` matched GA4's ad sign-ups (88 vs 87, Oct 11-Nov 10).
+  2026-11-12 changes (`apply_changes.py`, log + true originals in `changes_2026-11-12_1612.json`): 6d value $1 -> $85, onboarding_entered and 5
+  old GA4 actions made secondary, search themes re-aimed at diary/journal/planner/habit tracker. API limits found: UA, Smart-campaign and
+  Android-install actions and VIDEO campaigns reject mutates (UI only); counting_type of GA4-imported actions is immutable (set in GA4); a
+  field mask built with protobuf_helpers.field_mask drops fields set to False/0, giving a silent no-op "ok": list mask paths by hand.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
