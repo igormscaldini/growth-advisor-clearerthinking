@@ -44,16 +44,20 @@ SEGMENTS = {"all": None,
             "ads": {"fieldName": "firstUserMedium", "stringFilter": {"value": "cpc"}}}
 
 
-def _headers():
+def _headers(headers=None):
+    """Fresh bearer header. Pass the shared dict to refresh it in place (the access token lasts 1 hour
+    and a full pull can take longer when GA4 is slow)."""
     creds = Credentials.from_authorized_user_file(str(ROOT / "secrets" / "ga4-token.json"))
     creds.refresh(Request())
-    return {"Authorization": "Bearer " + creds.token}
+    headers = {} if headers is None else headers
+    headers["Authorization"] = "Bearer " + creds.token
+    return headers
 
 
 def _post(url, headers, body):
     for attempt in range(6):
         try:
-            resp = requests.post(url, headers=headers, json=body, timeout=120)
+            resp = requests.post(url, headers=dict(headers), json=body, timeout=120)
             data = resp.json()
         except (ValueError, requests.RequestException) as exc:
             data = {"error": {"message": str(exc)[:300]}}
@@ -61,6 +65,8 @@ def _post(url, headers, body):
             return data
         if attempt == 5:
             raise SystemExit(f"GA4 error: {data['error']}")
+        if data["error"].get("code") == 401:
+            _headers(headers)
         time.sleep(4 * (attempt + 1))
 
 
@@ -139,7 +145,17 @@ def main():
     days = A.cohort_days(first, end)
 
     all_days = [A.ga_date(d) for d in days]
-    segments = {name: pull_segment(headers, seg, days, all_days, first, end) for name, seg in SEGMENTS.items()}
+    (HERE / "data").mkdir(exist_ok=True)
+    segments = {}
+    for name, seg in SEGMENTS.items():
+        # Each segment is saved as soon as it is done, so a failure later does not redo it.
+        part = HERE / "data" / f"segment_{name}_{first}_{end}.json"
+        if part.exists():
+            segments[name] = json.loads(part.read_text())
+            print("reusing", part.name)
+            continue
+        segments[name] = pull_segment(headers, seg, days, all_days, first, end)
+        part.write_text(json.dumps(segments[name]))
     out = {"pulled_at": dt.datetime.now().isoformat(timespec="minutes"), "first_day": first.isoformat(),
            "end": end.isoformat(), "property": PROPERTY, "host": HOST,
            "segment_filters": SEGMENTS, "segments": segments}
