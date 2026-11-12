@@ -140,3 +140,27 @@ def test_positive_pull_recovers_the_known_curve():
     assert dp["pooled"]["user_return_10d"]["n"] == 20 * 21
     assert dp["onboarding"]["entered_to_created"]["pct"] == 25.0
     assert all(v["per_day_sum"] == v["pooled"] for v in dp["cross_check"].values())
+
+
+# ------------------------------------------------------------------ ads segment
+def test_subtract_gives_everyone_else():
+    a = {"user_return_1d": A.rate(13, 122), "onboarding_completed": A.rate(79, 123)}
+    b = {"user_return_1d": A.rate(9, 86), "onboarding_completed": A.rate(60, 87)}
+    out = A.subtract(a, b)
+    assert (out["user_return_1d"]["k"], out["user_return_1d"]["n"]) == (4, 36)
+    assert out["onboarding_completed"]["pct"] == round(100 * 19 / 36, 1)
+    with pytest.raises(ValueError):
+        A.subtract(b, a)
+
+
+def test_build_all_splits_ads_from_the_rest():
+    everyone = synthetic_pull(0.6, [0.2] + [0] * 9, n=20)
+    ads = synthetic_pull(0.75, [0.25] + [0] * 9, n=8)  # 6 of 8 complete, 2 of 8 return
+    pull = {"pulled_at": everyone["pulled_at"], "first_day": everyone["first_day"], "end": everyone["end"],
+            "segments": {"all": everyone, "ads": ads}}
+    dp = A.build_all(pull)
+    assert dp["segments"]["ads"]["pooled"]["user_return_1d"]["pct"] == 25.0
+    assert dp["others_signups"] == 12 * 31
+    # everyone else per day: 12 sign-ups, 12 - 6 = 6 complete, 4 - 2 = 2 return
+    assert dp["others_pooled"]["onboarding_completed"]["pct"] == 50.0
+    assert dp["others_pooled"]["user_return_1d"]["pct"] == round(100 * 2 / 12, 1)

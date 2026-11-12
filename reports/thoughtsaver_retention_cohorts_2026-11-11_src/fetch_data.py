@@ -37,6 +37,11 @@ import analysis as A  # noqa: E402
 PROPERTY = "properties/253193728"  # "Thought Saver - App And Landing Page"
 HOST = "app.thoughtsaver.com"
 API = "https://analyticsdata.googleapis.com"
+# Igor (2026-11-12): filter to users coming from ads. The ads thread with Samar ("Note about tracking users from
+# Ads", Jul 2026) identifies them by utm_medium=cpc; in this period that is the Google Ads PMax campaign
+# "[MAX] User Acq. - Classic". First-visit medium is user-scoped, so it can sit in a funnel step filter.
+SEGMENTS = {"all": None,
+            "ads": {"fieldName": "firstUserMedium", "stringFilter": {"value": "cpc"}}}
 
 
 def _headers():
@@ -59,27 +64,30 @@ def _post(url, headers, body):
         time.sleep(4 * (attempt + 1))
 
 
-def _step(event, days=None):
+def _step(event, days=None, segment=None):
     exprs = [{"funnelEventFilter": {"eventName": event}},
              {"funnelFieldFilter": {"fieldName": "hostName", "stringFilter": {"value": HOST}}}]
     if days:
         exprs.append({"funnelFieldFilter": {"fieldName": "date", "inListFilter": {"values": days}}})
+    if segment:
+        exprs.append({"funnelFieldFilter": segment})
     return {"name": event, "filterExpression": {"andGroup": {"expressions": exprs}}}
 
 
-def funnel_counts(headers, events, days, start, end):
-    """Users reaching each step of a closed funnel whose FIRST step must happen on one of `days`."""
-    steps = [_step(events[0], days)] + [_step(e) for e in events[1:]]
+def funnel_counts(headers, events, days, start, end, segment=None):
+    """Users reaching each step of a closed funnel whose FIRST step must happen on one of `days` (and,
+    with `segment`, be done by a user matching that user-scoped filter)."""
+    steps = [_step(events[0], days, segment)] + [_step(e) for e in events[1:]]
     body = {"dateRanges": [{"startDate": start.isoformat(), "endDate": end.isoformat()}],
             "funnel": {"isOpenFunnel": False, "steps": steps}}
     return A.parse_funnel_visualization(_post(f"{API}/v1alpha/{PROPERTY}:runFunnelReport", headers, body), events)
 
 
-def day_cohort(headers, day, end):
+def day_cohort(headers, day, end, segment):
     d = [A.ga_date(day)]
-    signup = A.combine_two_step([funnel_counts(headers, ["account_created", ev], d, day, end)
+    signup = A.combine_two_step([funnel_counts(headers, ["account_created", ev], d, day, end, segment)
                                  for ev in A.AFTER_SIGNUP])
-    entered = funnel_counts(headers, ["onboarding_entered", "account_created"], d, day, end)
+    entered = funnel_counts(headers, ["onboarding_entered", "account_created"], d, day, end, segment)
     return {"day": day.isoformat(), "signup": signup, "entered": entered}
 
 
@@ -94,6 +102,33 @@ def run_report(headers, body):
             return rows
 
 
+def pull_segment(headers, segment, days, all_days, first, end):
+    with ThreadPoolExecutor(max_workers=6) as pool:  # GA4 allows 10 concurrent requests per property
+        cohorts = list(pool.map(lambda day: day_cohort(headers, day, end, segment), days))
+        # Independent cross-check: one funnel per event over ALL cohort days in a single query.
+        pooled = dict(zip(A.AFTER_SIGNUP, pool.map(
+            lambda ev: funnel_counts(headers, ["account_created", ev], all_days, first, end, segment), A.AFTER_SIGNUP)))
+    for c in cohorts:
+        print(c["day"], c["entered"], c["signup"])
+
+    # Why the returns are not required in order: people with 2d after sign-up vs those with 1d then 2d.
+    order_check = {
+        "created_then_2d": funnel_counts(headers, ["account_created", "user_return_2d"], all_days, first, end, segment),
+        "created_then_1d_then_2d": funnel_counts(
+            headers, ["account_created", "user_return_1d", "user_return_2d"], all_days, first, end, segment),
+    }
+    # The naive view (what produced 8d > 7d): users per event over the same period, no cohort.
+    exprs = [{"filter": {"fieldName": "hostName", "stringFilter": {"value": HOST}}},
+             {"filter": {"fieldName": "eventName", "inListFilter": {"values": A.EVENTS}}}]
+    if segment:
+        exprs.append({"filter": segment})
+    naive = run_report(headers, {
+        "dateRanges": [{"startDate": first.isoformat(), "endDate": end.isoformat()}],
+        "dimensions": [{"name": "eventName"}], "metrics": [{"name": "totalUsers"}],
+        "dimensionFilter": {"andGroup": {"expressions": exprs}}})
+    return {"cohorts": cohorts, "pooled": pooled, "order_check": order_check, "naive": naive}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--end", default=(dt.date.today() - dt.timedelta(days=1)).isoformat(),
@@ -103,32 +138,11 @@ def main():
     headers = _headers()
     days = A.cohort_days(first, end)
 
-    with ThreadPoolExecutor(max_workers=4) as pool:  # GA4 allows 10 concurrent requests per property
-        cohorts = list(pool.map(lambda day: day_cohort(headers, day, end), days))
-        all_days = [A.ga_date(d) for d in days]
-        # Independent cross-check: one funnel per event over ALL cohort days in a single query.
-        pooled = dict(zip(A.AFTER_SIGNUP, pool.map(
-            lambda ev: funnel_counts(headers, ["account_created", ev], all_days, first, end), A.AFTER_SIGNUP)))
-    for c in cohorts:
-        print(c["day"], c["entered"], c["signup"])
-
-    # Why the returns are not required in order: people with 2d after sign-up vs those with 1d then 2d.
-    order_check = {
-        "created_then_2d": funnel_counts(headers, ["account_created", "user_return_2d"], all_days, first, end),
-        "created_then_1d_then_2d": funnel_counts(headers, ["account_created", "user_return_1d", "user_return_2d"],
-                                                 all_days, first, end),
-    }
-    # The naive view (what produced 8d > 7d): users per event over the same period, no cohort.
-    naive = run_report(headers, {
-        "dateRanges": [{"startDate": first.isoformat(), "endDate": end.isoformat()}],
-        "dimensions": [{"name": "eventName"}], "metrics": [{"name": "totalUsers"}],
-        "dimensionFilter": {"andGroup": {"expressions": [
-            {"filter": {"fieldName": "hostName", "stringFilter": {"value": HOST}}},
-            {"filter": {"fieldName": "eventName", "inListFilter": {"values": A.EVENTS}}}]}}})
-
+    all_days = [A.ga_date(d) for d in days]
+    segments = {name: pull_segment(headers, seg, days, all_days, first, end) for name, seg in SEGMENTS.items()}
     out = {"pulled_at": dt.datetime.now().isoformat(timespec="minutes"), "first_day": first.isoformat(),
-           "end": end.isoformat(), "property": PROPERTY, "host": HOST, "cohorts": cohorts,
-           "pooled": pooled, "order_check": order_check, "naive": naive}
+           "end": end.isoformat(), "property": PROPERTY, "host": HOST,
+           "segment_filters": SEGMENTS, "segments": segments}
     (HERE / "data").mkdir(exist_ok=True)
     (HERE / "data" / "ga4_pull.json").write_text(json.dumps(out, indent=1))
     print("wrote", HERE / "data" / "ga4_pull.json")

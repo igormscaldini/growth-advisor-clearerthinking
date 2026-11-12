@@ -144,6 +144,31 @@ def cross_check(cohorts, pooled_pull):
     return out
 
 
+def subtract(a, b):
+    """Pooled rates of (group a minus subgroup b), e.g. everyone except ad users.
+
+    Valid because b's users are a subset of a's and both use the same maturity rule per event."""
+    out = {}
+    for ev in a:
+        k, n = a[ev]["k"] - b[ev]["k"], a[ev]["n"] - b[ev]["n"]
+        if k < 0 or n < 0:
+            raise ValueError(f"{ev}: subgroup larger than group ({b[ev]} vs {a[ev]})")
+        out[ev] = rate(k, n)
+    return out
+
+
+def build_all(pull):
+    """Datapoints per segment (e.g. "all", "ads") plus "others" = all minus ads."""
+    segs = {name: build_datapoints(dict(seg, pulled_at=pull["pulled_at"], first_day=pull["first_day"], end=pull["end"]))
+            for name, seg in pull["segments"].items()}
+    out = {"pulled_at": pull["pulled_at"], "first_day": pull["first_day"], "end": pull["end"],
+           "segment_filters": pull.get("segment_filters"), "segments": segs}
+    if "all" in segs and "ads" in segs:
+        out["others_pooled"] = subtract(segs["all"]["pooled"], segs["ads"]["pooled"])
+        out["others_signups"] = segs["all"]["total_signups"] - segs["ads"]["total_signups"]
+    return out
+
+
 def build_datapoints(pull):
     end = dt.date.fromisoformat(pull["end"])
     cohorts = pull["cohorts"]
@@ -163,12 +188,13 @@ def build_datapoints(pull):
 
 def main():
     pull = json.loads((HERE / "data" / "ga4_pull.json").read_text())
-    dp = build_datapoints(pull)
+    dp = build_all(pull)
     (HERE / "datapoints.json").write_text(json.dumps(dp, indent=1))
     print("wrote", HERE / "datapoints.json")
-    for k, v in dp["cross_check"].items():
-        flag = "" if v["per_day_sum"] == v["pooled"] else "  <-- MISMATCH"
-        print(f"{k:22s} per-day {v['per_day_sum']:4d}  pooled {v['pooled']:4d}{flag}")
+    for name, seg in dp["segments"].items():
+        for k, v in seg["cross_check"].items():
+            flag = "" if v["per_day_sum"] == v["pooled"] else "  <-- MISMATCH"
+            print(f"{name:4s} {k:22s} per-day {v['per_day_sum']:4d}  pooled {v['pooled']:4d}{flag}")
 
 
 if __name__ == "__main__":

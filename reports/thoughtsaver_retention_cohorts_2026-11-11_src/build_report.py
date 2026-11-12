@@ -90,9 +90,31 @@ def naive_table(naive, pooled, total):
             "<th>Of the people who signed up in the period</th></tr></thead><tbody>" + "".join(rows) + "</tbody></table>")
 
 
+COMPARE = [("onboarding_completed", "Completed onboarding")] + [(f"user_return_{n}d", f"Came back on {n}+ later days") for n in (1, 2, 3, 5)]
+
+
+def compare_table(full):
+    """Pooled rates: ad users vs everyone else vs all sign-ups."""
+    segs = full["segments"]
+    cols = [("From ads", segs["ads"]["pooled"]), ("Everyone else", full["others_pooled"]), ("All sign-ups", segs["all"]["pooled"])]
+
+    def c(r):
+        if not r["n"]:
+            return "<td>–</td>"
+        return f"<td class='n'><b>{r['pct']}%</b><span class='p'>{r['k']} of {r['n']} · CI {r['lo']:.0f} to {r['hi']:.0f}%</span></td>"
+    head = "".join(f"<th>{name}</th>" for name, _ in cols)
+    signups = "".join(f"<td class='n'><b>{n}</b></td>" for n in (
+        segs["ads"]["total_signups"], full["others_signups"], segs["all"]["total_signups"]))
+    rows = [f"<tr><td>Sign-ups</td>{signups}</tr>"]
+    rows += [f"<tr><td>{label}</td>" + "".join(c(p[ev]) for _, p in cols) + "</tr>" for ev, label in COMPARE]
+    return f"<table class='nv cmp'><thead><tr><th></th>{head}</tr></thead><tbody>{''.join(rows)}</tbody></table>"
+
+
 def main():
-    d = json.loads((HERE / "datapoints.json").read_text())
+    full = json.loads((HERE / "datapoints.json").read_text())
+    d = full["segments"]["ads"]  # Igor (2026-11-12): the report is filtered to users coming from ads
     p, ob = d["pooled"], d["onboarding"]
+    share_ads = d["total_signups"] / full["segments"]["all"]["total_signups"] * 100
     oc = d["order_check"]
     cc_ok = all(v["per_day_sum"] == v["pooled"] for v in d["cross_check"].values())
     first, end = d["first_day"], d["end"]
@@ -120,25 +142,33 @@ th,td{padding:5px 5px;text-align:center;border-bottom:1px solid var(--line)}th{c
 .funnel{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}.funnel div{background:var(--card);border-radius:8px;padding:10px 14px}
 .funnel b{font-size:22px;display:block}.funnel span{color:var(--ink2);font-size:13px}.arrow{color:var(--muted)}
 ol li{margin-bottom:10px}code{font-size:13px}
+.cmp td{text-align:left}.cmp .p{display:block;color:var(--ink2);font-size:11px;font-weight:400}
 """
     body = f"""
 <main>
-<h1>Thought Saver: sign-up cohorts, day by day</h1>
-<p class="sub">{timestamp()} · GA4 property "Thought Saver - App And Landing Page", app.thoughtsaver.com only · sign-ups {fmt_date(first)} to {fmt_date(end)}, 2026 · only the 13 events in Samar's sheet</p>
+<h1>Thought Saver: sign-ups from ads, day by day</h1>
+<p class="sub">{timestamp()} · GA4 property "Thought Saver - App And Landing Page", app.thoughtsaver.com only · sign-ups {fmt_date(first)} to {fmt_date(end)}, 2026 · only the 13 events in Samar's sheet · <b>users whose first visit came from an ad</b></p>
 
-<p>The cohort analysis agreed with Samar (thread "clarification on user events", Oct 9-13). Each day's sign-ups are followed from their own
-<code>account_created</code>, so people who signed up earlier can no longer inflate the return counts (how <code>user_return_8d</code> once beat <code>user_return_7d</code>).</p>
+<p>The cohort analysis agreed with Samar (thread "clarification on user events", Oct 9-13), filtered to people who came from ads: first visit with
+<code>utm_medium=cpc</code>, the marker agreed in the "Note about tracking users from Ads" thread. In this period every one of them came from the Google Ads
+Performance Max campaign "[MAX] User Acq. - Classic" (no Meta traffic appears). They are {share_ads:.0f}% of all sign-ups. Each day's sign-ups are followed from their
+own <code>account_created</code>, so people who signed up earlier cannot inflate the return counts.</p>
 
 <div class="kpis">
-<div class="kpi"><b>{d['total_signups']}</b><span>accounts created, {fmt_date(first)} to {fmt_date(end)}</span></div>
+<div class="kpi"><b>{d['total_signups']}</b><span>accounts created from ads, {fmt_date(first)} to {fmt_date(end)}</span></div>
 <div class="kpi"><b>{p['onboarding_completed']['pct']:.0f}%</b><span>of them completed onboarding ({p['onboarding_completed']['k']} people)</span></div>
 <div class="kpi"><b>{p['user_return_1d']['pct']}%</b><span>came back on at least 1 later day ({p['user_return_1d']['k']} of {p['user_return_1d']['n']}; 95% CI {p['user_return_1d']['lo']:.0f} to {p['user_return_1d']['hi']:.0f}%)</span></div>
 <div class="kpi"><b>{p['user_return_2d']['pct']}%</b><span>came back on 2 or more days ({p['user_return_2d']['k']} people); nobody past {deep} so far</span></div>
 </div>
 
-<p><b>The bottom line:</b> {100 - p['user_return_1d']['pct']:.0f}% of the people who sign up never come back on a later day, even though about two thirds finish onboarding.
-The big drop is between finishing onboarding and the first return, so that is the step to work on (what brings someone back on day two).
-Past 2 return days the numbers are 1 to 3 people, too few to read anything into.</p>
+<p><b>The bottom line:</b> {100 - p['user_return_1d']['pct']:.0f}% of the people who sign up from an ad never come back on a later day, although
+{p['onboarding_completed']['pct']:.0f}% finish onboarding. The big drop is between finishing onboarding and the first return.
+Beyond 2 return days the counts are a handful of people at most, too few to read anything into.</p>
+
+<h2>Ad users vs everyone else</h2>
+<p class="note">Pooled over all sign-up days old enough for each row. "Everyone else" = the 12 Levers newsletter, Clearer Thinking referrals, direct and organic visitors.
+CI = 95% confidence interval; with {full['others_signups']} non-ad sign-ups the intervals are wide, so only a large gap would mean anything.</p>
+<div class="scroll">{compare_table(full)}</div>
 
 <h2>Onboarding funnel</h2>
 <div class="funnel">
