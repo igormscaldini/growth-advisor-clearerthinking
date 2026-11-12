@@ -95,8 +95,9 @@ def pending_drafts(svc, lab: str) -> list[dict]:
     while True:
         res = svc.users().drafts().list(userId="me", maxResults=500, pageToken=page).execute()
         for d in res.get("drafts", []):
-            m = svc.users().drafts().get(userId="me", id=d["id"], format="metadata",
-                                         metadataHeaders=["From"]).execute()["message"]
+            # drafts.get takes no metadataHeaders; messages.get on the draft's message does.
+            m = svc.users().messages().get(userId="me", id=d["message"]["id"], format="metadata",
+                                           metadataHeaders=["From"]).execute()
             if lab not in m.get("labelIds", []):
                 continue
             frm = next((h["value"] for h in m["payload"].get("headers", []) if h["name"] == "From"), "")
