@@ -1,0 +1,44 @@
+name: UQP researcher outreach send
+
+# Sends 10 of the "UQP researcher outreach" Gmail drafts per weekday at 9:30am US Eastern
+# (Nov 13-30, 2026, skipping Nov 26-27). GitHub throttles schedule events on this repo, so the
+# job is scheduled hourly through the afternoon; uqp_draft_sender.py tops up to 10 per day and
+# does nothing outside 9:30am-5pm ET, so the extra runs are harmless. Delete this file once all
+# drafts are sent. To pause: disable the workflow (gh workflow disable uqp-outreach-send.yml).
+on:
+  schedule:
+    - cron: "30 14-21 * * 1-5"  # 9:30am-4:30pm EST, hourly
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Report what would be sent, send nothing"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: uqp-outreach-send
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Send today's batch
+        env:
+          GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+          OAUTH_CLIENT_JSON: ${{ secrets.OAUTH_CLIENT_JSON }}
+        run: python uqp_draft_sender.py ${{ (github.event_name == 'workflow_dispatch' && inputs.dry_run) && '--dry-run --ignore-window' || '' }}
