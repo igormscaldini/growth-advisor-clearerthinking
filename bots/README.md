@@ -8,6 +8,7 @@ Last verified: 2026-10-02 (states and last runs below are from that day).
 
 | Bot | What it does | When (UTC) | Runs on | Since | State on 2026-10-02 |
 |---|---|---|---|---|---|
+| [UQP researcher outreach send](#uqp-researcher-outreach-send) | Sends 10 "UQP researcher outreach" Gmail drafts per weekday (temporary) | Weekdays hourly 14:30-21:30 (sends from 9:30am ET) | GitHub Actions | 2026-11-12 | Active until the 90 remaining drafts are gone (Nov 25); delete afterwards |
 | [Daily site health check](#daily-site-health-check) | Six checks of the CT site; emails only when one does not pass | Daily 10:00 | GitHub Actions | 2026-10-01 | Active. Only run so far (manual, 2026-10-01) reported failed sign-up links on /plus and /coaching |
 | [All Articles hub sync](#all-articles-hub-sync) | Keeps the Wix "All Clearer Thinking Articles" post in step with the sitemap | Mondays 12:20 | GitHub Actions | 2026-09-30 | Active. Two manual runs passed; first scheduled run 2026-10-05 |
 | [Navigator subscribers sync](#navigator-subscribers-sync) | Upserts CT+ Navigator subscribers from Stripe into a Google Sheet | Every 15 min (nominal) | GitHub Actions | 2026-09-09 | Active, passing |
@@ -46,6 +47,12 @@ None are scheduled right now (checked 2026-10-02).
 The Friday letter can also run as a cloud routine instead of through GitHub Actions. It is documented in [ADVISOR_ROUTINE.md](ADVISOR_ROUTINE.md) and is not set up as a routine today; the GitHub workflow below is the live path.
 
 ## GitHub Actions bots (this repository)
+
+### UQP researcher outreach send
+
+- **Does:** sends the Unanswered Questions in Psychology Prize outreach drafts in Igor's Gmail (label "UQP researcher outreach", From igor@clearerthinking.org), oldest-first, topping up to 10 per weekday between 9:30am and 5pm ET; skips Nov 26-27. Igor sent the first 10 by hand on 2026-11-12; the remaining 90 run Nov 13-25. Never logs recipients (the Actions logs are public).
+- **Code:** `uqp_draft_sender.py`, workflow `uqp-outreach-send.yml`. Pause with `gh workflow disable uqp-outreach-send.yml`; retire both files once the label has no drafts left.
+- **Try it safely:** `gh workflow run uqp-outreach-send.yml -f dry_run=true` (lists what it would send, sends nothing).
 
 ### Daily site health check
 
