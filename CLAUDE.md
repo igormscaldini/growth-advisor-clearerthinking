@@ -287,7 +287,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   versions share their copy: `tests/test_unstuck.py` keeps them in step, so change both. Test runs carry `fast = 1` / `src = qa`.
 - `reports/thoughtsaver_retention_cohorts_2026-11-11_src/`: Thought Saver (Samar's app, GA4 property 253193728) day-by-day sign-up cohorts
   (`fetch_data.py` -> `data/ga4_pull.json`, `analysis.py` -> `datapoints.json`, `build_report.py`). Igor's scope (2026-11-11): ONLY the 13
-  events in Samar's sheet 13UFJobdGF4_Wex55sPZF4gOtohCGXE0_J_pVhh3mT1M, data from Oct 11, 2026, one cohort per day. Use GA4 CLOSED FUNNELS
+  events in Samar's sheet 13UFJobdGF4_Wex55sPZF4gOtohCGXE0_J_pVhh3mT1M, data from Oct 11, 2026, one cohort per day; report filtered to ad users
+  (2026-11-12: `firstUserMedium` = cpc, the marker agreed with Samar; all Google PMax "[MAX] User Acq. - Classic") vs everyone else. Use GA4 CLOSED FUNNELS
   (v1alpha runFunnelReport; step 1 = account_created with `hostName` + `date` field filters), one 2-step funnel per later event: requiring
   return milestones in order undercounts (cross-device), and first-visit cohorts without a funnel are contaminated by old users on new
   devices. Property gotchas: event retention is TWO MONTHS (funnels return nothing older), localhost/Vercel previews report to it (filter

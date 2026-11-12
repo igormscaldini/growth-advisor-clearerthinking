@@ -115,6 +115,7 @@ def main():
     d = full["segments"]["ads"]  # Igor (2026-11-12): the report is filtered to users coming from ads
     p, ob = d["pooled"], d["onboarding"]
     share_ads = d["total_signups"] / full["segments"]["all"]["total_signups"] * 100
+    others_entered = full["segments"]["all"]["onboarding"]["created_from_entered"] - ob["created_from_entered"]
     oc = d["order_check"]
     cc_ok = all(v["per_day_sum"] == v["pooled"] for v in d["cross_check"].values())
     first, end = d["first_day"], d["end"]
@@ -169,6 +170,10 @@ Beyond 2 return days the counts are a handful of people at most, too few to read
 <p class="note">Pooled over all sign-up days old enough for each row. "Everyone else" = the 12 Levers newsletter, Clearer Thinking referrals, direct and organic visitors.
 CI = 95% confidence interval; with {full['others_signups']} non-ad sign-ups the intervals are wide, so only a large gap would mean anything.</p>
 <div class="scroll">{compare_table(full)}</div>
+<p class="note">Ad users come back for a first time about as often as everyone else ({p['user_return_1d']['pct']}% vs {full['others_pooled']['user_return_1d']['pct']}%).
+All {p['user_return_2d']['k'] + full['others_pooled']['user_return_2d']['k']} people with 2+ return days came from ads ({full['others_pooled']['user_return_2d']['k']} of
+{full['others_pooled']['user_return_2d']['n']} others), but with so few people that could easily be chance. The one large, solid gap is onboarding completion, which most likely
+reflects a different sign-up path for non-ad users rather than ad users being more engaged (data issue 3).</p>
 
 <h2>Onboarding funnel</h2>
 <div class="funnel">
@@ -190,7 +195,7 @@ Whiskers are 95% confidence intervals. Hover a bar for the counts.</p>
 "·" = not enough days have passed yet; "–" = nobody signed up that day.
 <span class="flag">*</span> = more people at a higher N than a lower one, which a clean count can't do (data issue 2).
 "Onboarding that day" counts different people from the sign-up columns: those who entered onboarding that day, and how many of them went on to sign up.
-With 0 to 8 sign-ups a day, single days are noisy; read the pooled numbers above for rates.</p>
+With {min(r["signups"] for r in d["cohorts"])} to {max(r["signups"] for r in d["cohorts"])} sign-ups a day, single days are noisy; read the pooled numbers above for rates.</p>
 <div class="scroll">{cohort_table(d['cohorts'])}</div>
 
 <h2>Why the old numbers looked wrong</h2>
@@ -210,7 +215,10 @@ The likeliest cause is a return on another device or browser, which GA4 treats a
 event once someone is logged in, so GA4 can join devices. Until then, every return number here is a <b>floor</b>.</li>
 <li><b><code>onboarding_entered</code> does not behave as the sheet describes.</b> The sheet says it fires once per user, but summed by day it counts {ob['entered']} people
 against {d['naive'].get('onboarding_entered', 0)} distinct people over the period, so it fired on more than one day for some of them ({entered_dupes} extra), and {no_entry} of {d['total_signups']} sign-ups have no <code>onboarding_entered</code> before their <code>account_created</code> in the period
-(they may have entered before Oct 11, used "I have an account", or the event did not fire). Worth asking Samar which.</li>
+(they may have entered before Oct 11, used "I have an account", or the event did not fire). Worth asking Samar which.
+Outside ads the gap is far bigger: only {others_entered} of the {full['others_signups']} non-ad sign-ups entered onboarding before signing up, and
+{full['others_pooled']['onboarding_completed']['pct']:.0f}% completed it, against {p['onboarding_completed']['pct']:.0f}% of ad sign-ups. They seem to arrive through a different
+sign-up path (for example a link from the 12 Levers newsletter) that skips onboarding; Samar can confirm.</li>
 <li><b>Developer traffic lands in the production property.</b> <code>localhost</code> and Vercel preview deploys report to it. This report keeps only
 app.thoughtsaver.com; a GA4 data filter or a separate dev property would keep it clean everywhere.</li>
 <li><b>The full history may already exist in BigQuery.</b> The property has a BigQuery export (Google Cloud project 200310840257) that is not subject to the
