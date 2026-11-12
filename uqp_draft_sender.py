@@ -125,6 +125,11 @@ def main() -> int:
     from secrets_loader import materialize_ci_secrets
     materialize_ci_secrets()
     svc = gmail_service()
+    if args.dry_run:
+        import json
+        from ga4_client import TOKEN_FILE
+        print("token scopes:", json.loads(TOKEN_FILE.read_text()).get("scopes"))
+        print("mailbox domain:", svc.users().getProfile(userId="me").execute()["emailAddress"].split("@")[-1])
     lab = label_id(svc)
     drafts = pending_drafts(svc, lab)
     sent_today = count_sent_today(svc, now_et)
