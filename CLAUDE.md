@@ -293,6 +293,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   return milestones in order undercounts (cross-device), and first-visit cohorts without a funnel are contaminated by old users on new
   devices. Property gotchas: event retention is TWO MONTHS (funnels return nothing older), localhost/Vercel previews report to it (filter
   hostName), funnels cap at 10 steps and 15 breakdown values; a BigQuery export exists (project 200310840257) we have no access to.
+  Thought Saver Google Ads = customer 9679377392 (reachable with the shared token, login_customer_id = itself); read-only GAQL helper and
+  audit pull in `reports/thoughtsaver_google_ads_audit_2026-11-12_src/`. Only the ENGAGEMENT goal is biddable (the 13 sheet events with
+  stepped values), so the legacy primary actions do not affect bidding. Ads `account_created` matched GA4's ad sign-ups (88 vs 87, Oct 11-Nov 10).
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
