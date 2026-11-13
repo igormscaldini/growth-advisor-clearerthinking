@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { sankey, sankeyJustify, sankeyLinkHorizontal } from "d3-sankey";
+import { sankey, sankeyLinkHorizontal } from "d3-sankey";
 import type { SankeyLink, SankeyNode } from "d3-sankey";
 import { fmtInt } from "@/lib/format";
 import { PeriodEntry } from "@/lib/snapshot";
@@ -52,7 +52,7 @@ export function FlowTab({ period }: Props) {
     const gen = sankey<FlowNode, FlowLink>()
       .nodeWidth(12)
       .nodePadding(12)
-      .nodeAlign(sankeyJustify)
+      .nodeAlign((n) => n.col) // pin columns: justify alignment pushed a page with no outcome bands into the outcome column
       .nodeSort(() => 0) // a stable no-op comparator keeps the fixed source/page order (the typings reject null)
       .extent([
         [ML, MT],

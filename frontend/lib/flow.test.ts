@@ -20,10 +20,11 @@ test("buildFlowGraph: nodes in fixed order, links and totals worked by hand", ()
   const g = buildFlowGraph(block, false, 0);
   assert.deepEqual(
     g.nodes.map((n) => n.id),
-    ["s:Organic Search", "s:Direct", "s:Email", "p:Home", "p:Tools", "o:Email Submitted", "o:CT+ Sign Up"],
+    ["s:Organic Search", "s:Direct", "p:Home", "p:Tools", "o:Email Submitted", "o:CT+ Sign Up"],
   );
-  // Email only has a zero row: it is a node (present in the block) but owns no link
+  // Email only has a zero row: no link, so no node either (d3-sankey cannot place a link-less node)
   assert.equal(g.links.filter((l) => l.src === "Email").length, 0);
+  assert.ok(!g.nodes.some((n) => n.id === "s:Email"));
   const id = (i: number) => g.nodes[i].id;
   const sourceLinks = g.links.filter((l) => l.kind === "source").map((l) => [id(l.source), id(l.target), l.value]);
   assert.deepEqual(sourceLinks, [
@@ -57,6 +58,17 @@ test("buildFlowGraph: sources under the fold threshold merge into Other", () => 
   assert.deepEqual(g2.nodes.filter((n) => n.col === 0).map((n) => n.name), ["Direct", "Other"]);
   const other = g2.links.find((l) => l.src === "Other" && g2.nodes[l.target].id === "p:Tools");
   assert.equal(other?.value, 40);
+});
+
+test("buildFlowGraph: an outcome nobody reached is dropped from the diagram, links stay consistent", () => {
+  const noPlus: FlowBlock = { landing: block.landing, outcomes: block.outcomes.filter((r) => r.outcome !== "CT+ Sign Up") };
+  const g = buildFlowGraph(noPlus, false, 0);
+  assert.ok(!g.nodes.some((n) => n.id === "o:CT+ Sign Up"));
+  assert.equal(g.totals.plus, 0);
+  for (const l of g.links) assert.ok(l.source < g.nodes.length && l.target < g.nodes.length);
+  const email = g.links.find((l) => g.nodes[l.target].id === "o:Email Submitted");
+  assert.equal(email?.value, 42);
+  assert.equal(g.nodes[email!.source].id, "p:Tools");
 });
 
 test("sliceFlowDaily sums only the days inside the range", () => {

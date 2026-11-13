@@ -140,7 +140,20 @@ export function buildFlowGraph(block: FlowBlock, showNone: boolean, foldBelow = 
     email: block.outcomes.filter((r) => r.outcome === "Email Submitted").reduce((s, r) => s + r.users, 0),
     plus: block.outcomes.filter((r) => r.outcome === "CT+ Sign Up").reduce((s, r) => s + r.users, 0),
   };
-  return { nodes, links, totals, pageUsers, pageOutcomes };
+  // A node with no link (an outcome nobody reached this week) cannot be placed by d3-sankey: it would
+  // land in the first column. Drop it from the diagram; the KPI row still shows its zero.
+  const used = new Set<number>();
+  for (const l of links) {
+    used.add(l.source);
+    used.add(l.target);
+  }
+  const remap = new Map<number, number>();
+  const keptNodes = nodes.filter((_, i) => used.has(i));
+  nodes.forEach((_, i) => {
+    if (used.has(i)) remap.set(i, remap.size);
+  });
+  const keptLinks = links.map((l) => ({ ...l, source: remap.get(l.source)!, target: remap.get(l.target)! }));
+  return { nodes: keptNodes, links: keptLinks, totals, pageUsers, pageOutcomes };
 }
 
 /** Rows for the table view: one per (source, page), largest first. */
