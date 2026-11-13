@@ -194,6 +194,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   projects (free AI advisor, critical-thinking games) for the year-end donation email; `theories_of_change.md` is the
   source, `render.py` builds the HTML and copies the Markdown to `~/Downloads`. Donations are NOT tax-deductible
   (not a 501(c)(3), per the support page): say so in any appeal or arrange a fiscal sponsor first.
+- `newsletter_editions.py`: the one classifier of beehiiv sends into regular EDITIONS (One Helpful Idea + main article
+  newsletter; same-US-Eastern-day sends summed, promos/reminders/debriefs/tests dropped by subject or internal title, 100k+
+  readers, 15%+ opens). Powers the "Average Unique Opens Per Campaign" goal (`beehiiv_avg_unique_opens_per_campaign`, rolling
+  90 days, last 3 days left out; Igor's definition 2026-11-13, GOALS.md) and is re-exported by the price sheet's `pricing.py`.
 - `reports/sponsorship_price_sheet_2026-11-02_src/`: sponsor-facing price sheet (reach, cost at $25 CPM, weekly packages,
   availability). `fetch_newsletter_stats.py` refreshes the beehiiv block of `datapoints.json` (same-day sends grouped into one
   edition; promos and sends under 20k recipients dropped per post first), `build.py` renders the HTML + A4 PDF (~/Downloads);
