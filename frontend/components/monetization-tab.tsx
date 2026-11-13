@@ -1,6 +1,7 @@
 "use client";
 
 import { fmtMoney } from "@/lib/format";
+import { monetizationTotals } from "@/lib/revenue";
 import { PeriodEntry, Snapshot } from "@/lib/snapshot";
 
 interface Props {
@@ -42,7 +43,7 @@ export function MonetizationTab({ snapshot, period }: Props) {
   }));
 
   const all = [...stripeRows, ...manualRows].sort((a, b) => b.revenue - a.revenue);
-  const total = all.reduce((s, r) => s + r.revenue, 0);
+  const { total } = monetizationTotals(snapshot, period); // same rows as above, one definition
   const sources = Object.keys(snapshot.manual_revenue.lines).join(", ");
 
   return (

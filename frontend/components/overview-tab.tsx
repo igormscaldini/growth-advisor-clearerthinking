@@ -4,6 +4,7 @@ import { KpiCard } from "./kpi-card";
 import { GoalsTable } from "./goals-table";
 import { DailyBars } from "./daily-bars";
 import { fmtInt, fmtMoney, fmtPct, variance } from "@/lib/format";
+import { monetizationTotals } from "@/lib/revenue";
 import { PeriodEntry, Snapshot } from "@/lib/snapshot";
 
 interface Props {
@@ -95,9 +96,8 @@ export function OverviewTab({ snapshot, period }: Props) {
   // 5. Total Revenue
   const revDaily = (cur.stripe_m.daily || []).map((d) => ({ date: d.date, value: d.revenue }));
   const grossRev = cur.stripe_m.gross_usd;
-  const manualRevenueTotal = Object.values(snapshot.manual_revenue.lines)
-    .flat()
-    .reduce((s, i) => s + i.amount, 0);
+  const monetization = monetizationTotals(snapshot, period);
+  const manualRevenueTotal = monetization.manual;
 
   // 6. MRR
   const mrrDaily = (cur.mrr_history || []).map((d) => ({ date: d.date, value: d.mrr }));
@@ -209,13 +209,19 @@ export function OverviewTab({ snapshot, period }: Props) {
       <KpiCard
         label="Total Revenue (Gross)"
         value={fmtMoney(grossRev)}
-        helpText="Stripe • gross volume = sum of all successful charge amounts (pre-refund) in window, excluding sponsorship payments made through Stripe (those are counted in the manual Content Sponsorships line)."
+        helpText="Stripe • gross volume = sum of all successful charge amounts (pre-refund) in window, excluding sponsorship payments made through Stripe (those are counted in the manual Content Sponsorships line). The total below is the Monetization tab's Total revenue row: Stripe net of refunds in the window plus every manual line (MLA, sponsorships, affiliates, ad network), which are absolute totals, not window-scoped."
         data={revDaily}
         color="#16A34A"
         yLabel="Revenue ($)"
         delta={variance(grossRev, pri.stripe_m.gross_usd)}
         comparisonNote={`vs prior ${period.days}d`}
-        footer={<span>Note: Stripe revenue only — excludes manual lines (MLA, sponsorships, affiliates).</span>}
+        footer={
+          <span>
+            Total incl. manual lines:{" "}
+            <strong className="text-zinc-700 dark:text-zinc-300">{fmtMoney(monetization.total)}</strong>{" "}
+            ({fmtMoney(monetization.stripe)} Stripe net + {fmtMoney(monetization.manual)} manual; the Monetization tab&apos;s total)
+          </span>
+        }
       />
 
       <KpiCard
