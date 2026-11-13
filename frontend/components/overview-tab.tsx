@@ -219,7 +219,7 @@ export function OverviewTab({ snapshot, period }: Props) {
           <span>
             Total incl. manual lines:{" "}
             <strong className="text-zinc-700 dark:text-zinc-300">{fmtMoney(monetization.total)}</strong>{" "}
-            ({fmtMoney(monetization.stripe)} Stripe net + {fmtMoney(monetization.manual)} manual; the Monetization tab&apos;s total)
+            {`(${fmtMoney(monetization.stripe)} Stripe net + ${fmtMoney(monetization.manual)} manual; the Monetization tab total)`}
           </span>
         }
       />
