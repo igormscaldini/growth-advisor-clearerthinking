@@ -48,6 +48,7 @@ function buildSlice(snapshot: Snapshot, start: string, end: string): RangeSlice 
   const newSubsDaily = filterDaily(win.new_subs_daily.daily, start, end);
   const cogDaily = filterDaily(win.cog_sales.daily, start, end);
   const pdfDaily = filterDaily(win.pdf_sales.daily, start, end);
+  const newStripeSubsDaily = filterDaily(win.new_stripe_subs?.daily || [], start, end);
   const adsDaily = filterDaily(win.ads.daily, start, end);
   const kwDaily = filterDaily(win.kw_pos.daily, start, end);
 
@@ -61,11 +62,21 @@ function buildSlice(snapshot: Snapshot, start: string, end: string): RangeSlice 
   const subUsd = stripeDailySplit.reduce((s, r) => s + (r.subscription || 0), 0);
   const nonSubUsd = stripeDailySplit.reduce((s, r) => s + (r.non_subscription || 0), 0);
 
-  // --- Aggregate beehiiv rates (weighted average — simple mean is fine here since campaigns are ~same size) ---
+  // --- beehiiv campaigns sent in [start, end]: totals and rates defined exactly as the presets
+  // define them in data_layer.beehiiv_metrics (opens / sent, clicks / sent, unsubs / sent). The
+  // per-campaign rows also feed the New Newsletter Subscribers card's unsubscriber bars.
+  const campaigns = filterDaily(win.bh?.per_campaign || [], start, end);
+  const sentTotal = campaigns.reduce((s, c) => s + (c.sent || 0), 0);
+  const opensTotal = campaigns.reduce((s, c) => s + (c.opens || 0), 0);
+  const clicksTotal = campaigns.reduce((s, c) => s + (c.clicks || 0), 0);
+  const unsubsTotal = campaigns.reduce((s, c) => s + (c.unsubs || 0), 0);
+  // Fallback when the window carries no per-campaign rows: mean of the daily rates.
   const bhRatesNonZero = bhDailyRates.filter((r) => r.open_rate || r.unsubscribe_rate || r.click_rate);
-  const avgOpen = bhRatesNonZero.length ? bhRatesNonZero.reduce((s, r) => s + r.open_rate, 0) / bhRatesNonZero.length : 0;
-  const avgClick = bhRatesNonZero.length ? bhRatesNonZero.reduce((s, r) => s + r.click_rate, 0) / bhRatesNonZero.length : 0;
-  const avgUnsub = bhRatesNonZero.length ? bhRatesNonZero.reduce((s, r) => s + r.unsubscribe_rate, 0) / bhRatesNonZero.length : 0;
+  const meanRate = (key: "open_rate" | "click_rate" | "unsubscribe_rate") =>
+    bhRatesNonZero.length ? bhRatesNonZero.reduce((s, r) => s + r[key], 0) / bhRatesNonZero.length : 0;
+  const avgOpen = sentTotal ? opensTotal / sentTotal : meanRate("open_rate");
+  const avgClick = sentTotal ? clicksTotal / sentTotal : meanRate("click_rate");
+  const avgUnsub = sentTotal ? unsubsTotal / sentTotal : meanRate("unsubscribe_rate");
 
   // --- Aggregate new subscribers daily ---
   const newSubsTotal = newSubsDaily.reduce((s, r) => s + (r.count || 0), 0);
@@ -73,6 +84,7 @@ function buildSlice(snapshot: Snapshot, start: string, end: string): RangeSlice 
   // --- Aggregate cog/pdf/ads ---
   const cogTotal = cogDaily.reduce((s, r) => s + (r.count || 0), 0);
   const pdfTotal = pdfDaily.reduce((s, r) => s + (r.count || 0), 0);
+  const newStripeSubsTotal = newStripeSubsDaily.reduce((s, r) => s + (r.count || 0), 0);
   const adsSpend = adsDaily.reduce((s, r) => s + (r.spend || 0), 0);
   const adsImps = adsDaily.reduce((s, r) => s + (r.impressions || 0), 0);
   const adsClicks = adsDaily.reduce((s, r) => s + (r.clicks || 0), 0);
@@ -139,17 +151,17 @@ function buildSlice(snapshot: Snapshot, start: string, end: string): RangeSlice 
       error: null,
       total_subscribers: 0,
       new_subscribers: 0,
-      campaigns_count: bhRatesNonZero.length,
-      emails_sent: 0,
-      email_opens: 0,
-      email_clicks: 0,
+      campaigns_count: campaigns.length || bhRatesNonZero.length,
+      emails_sent: sentTotal,
+      email_opens: opensTotal,
+      email_clicks: clicksTotal,
       open_rate: avgOpen,
       click_rate: avgClick,
-      unsubscribes: 0,
+      unsubscribes: unsubsTotal,
       unsubscribe_rate: avgUnsub,
       engaged_readers: 0,
-      opens_per_campaign: 0,
-      per_campaign: [],
+      opens_per_campaign: campaigns.length ? opensTotal / campaigns.length : 0,
+      per_campaign: campaigns,
       period_used_for_new_subs: "custom",
     },
     bh_daily_rates: bhDailyRates,
@@ -161,6 +173,7 @@ function buildSlice(snapshot: Snapshot, start: string, end: string): RangeSlice 
     },
     cog_sales: { total: cogTotal, daily: cogDaily },
     pdf_sales: { total: pdfTotal, daily: pdfDaily },
+    new_stripe_subs: { total: newStripeSubsTotal, daily: newStripeSubsDaily, error: null },
     ads: {
       spend_usd: adsSpend,
       impressions: adsImps,
@@ -215,10 +228,11 @@ function zeroOutForNoComparison(slice: RangeSlice): RangeSlice {
     ga4: { users: 0, sessions: 0, pageviews: 0, modules_started: 0, modules_finished: 0 },
     stripe_m: { ...slice.stripe_m, gross_usd: 0, revenue_usd: 0, subscription_usd: 0, non_subscription_usd: 0, daily: [], daily_split: [] },
     mrr_history: [],
-    bh: { ...slice.bh, open_rate: 0, click_rate: 0, unsubscribe_rate: 0 },
+    bh: { ...slice.bh, open_rate: 0, click_rate: 0, unsubscribe_rate: 0, unsubscribes: 0, per_campaign: [] },
     new_subs_daily: { total: 0, daily: [], error: null, capped: false },
     cog_sales: { total: 0, daily: [] },
     pdf_sales: { total: 0, daily: [] },
+    new_stripe_subs: { total: 0, daily: [], error: null },
     ads: { ...slice.ads, spend_usd: 0, impressions: 0, clicks: 0, conversions: 0, daily: [] },
     kw_pos: { ...slice.kw_pos, avg_position: null, clicks: 0, impressions: 0, daily: [] },
     revenue_cat: { subscriptions: 0, pdf: 0, cognitive: 0, other: 0 },

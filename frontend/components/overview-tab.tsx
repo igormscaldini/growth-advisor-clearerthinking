@@ -11,6 +11,17 @@ interface Props {
   period: PeriodEntry;
 }
 
+/** "Revenue: $X" line for a sales card, with the prior window's figure when there is one. */
+function revenueFooter(current: number | undefined, prior: number | undefined): React.ReactNode {
+  if (typeof current !== "number") return null;
+  return (
+    <>
+      Revenue: <strong className="text-zinc-700 dark:text-zinc-300">{fmtMoney(current)}</strong>
+      {typeof prior === "number" && prior > 0 ? ` (prior window ${fmtMoney(prior)})` : ""}
+    </>
+  );
+}
+
 export function OverviewTab({ snapshot, period }: Props) {
   const cur = period.current;
   const pri = period.prior;
@@ -38,7 +49,7 @@ export function OverviewTab({ snapshot, period }: Props) {
   const modulesFinishedDaily = fillRange(cur.ga4_daily || [], "modules_finished");
   const modulesFinished = cur.ga4.modules_finished;
 
-  // 2. New Subscribers (beehiiv daily) + Unsubscribers (derived from per_campaign by date)
+  // 2. New Newsletter Subscribers (beehiiv daily) + Unsubscribers (derived from per_campaign by date)
   const unsubsByDate = new Map<string, number>();
   for (const c of cur.bh.per_campaign || []) {
     unsubsByDate.set(c.date, (unsubsByDate.get(c.date) || 0) + (c.unsubs || 0));
@@ -119,9 +130,9 @@ export function OverviewTab({ snapshot, period }: Props) {
         <div className="flex items-baseline justify-between mb-3">
           <h3
             className="text-sm font-semibold text-zinc-700 dark:text-zinc-300"
-            title="beehiiv • new subscriptions created in window vs unsubscribers (sum of campaign unsubs by send date)."
+            title="beehiiv • new newsletter subscriptions created in window vs unsubscribers (sum of campaign unsubs by send date)."
           >
-            New Subscribers
+            New Newsletter Subscribers
           </h3>
           <span
             className="text-[10px] text-zinc-400 dark:text-zinc-500 cursor-help"
@@ -219,12 +230,12 @@ export function OverviewTab({ snapshot, period }: Props) {
       />
 
       <KpiCard
-        label="New Subscribers"
+        label="New CT+ Members"
         value={fmtInt(newStripeSubsTotal)}
-        helpText="Stripe • new paid subscriptions created in the selected window (by subscription created date). Excludes churn/cancellations."
+        helpText="Stripe • new CT+ subscriptions created in the selected window (by subscription created date). Excludes churn/cancellations."
         data={newStripeSubsDaily}
         color="#0EA5E9"
-        yLabel="New subs / day"
+        yLabel="New members / day"
         delta={variance(newStripeSubsTotal, pri.new_stripe_subs?.total ?? null)}
         comparisonNote={`vs prior ${period.days}d`}
       />
@@ -232,23 +243,25 @@ export function OverviewTab({ snapshot, period }: Props) {
       <KpiCard
         label="Cognitive Assessment Sales"
         value={fmtInt(cur.cog_sales.total)}
-        helpText="Stripe • count of successful charges with amount $35.00 or $17.50 in window."
+        helpText="Stripe • count of successful charges with amount $35.00 or $17.50 in window. Revenue = those charges net of refunds (same figure as the Monetization tab)."
         data={cogDaily}
         color="#F5A524"
         yLabel="Sales / day"
         delta={variance(cur.cog_sales.total, pri.cog_sales.total)}
         comparisonNote={`vs prior ${period.days}d`}
+        footer={revenueFooter(cur.revenue_cat?.cognitive, pri.revenue_cat?.cognitive)}
       />
 
       <KpiCard
         label="Personality Test PDF Sales"
         value={fmtInt(cur.pdf_sales.total)}
-        helpText="Stripe • count of $9.00 charges, excluding subscriptions."
+        helpText="Stripe • count of $9.00 charges, excluding subscriptions. Revenue = those charges net of refunds (same figure as the Monetization tab)."
         data={pdfDaily}
         color="#A855F7"
         yLabel="Sales / day"
         delta={variance(cur.pdf_sales.total, pri.pdf_sales.total)}
         comparisonNote={`vs prior ${period.days}d`}
+        footer={revenueFooter(cur.revenue_cat?.pdf, pri.revenue_cat?.pdf)}
       />
 
       <KpiCard

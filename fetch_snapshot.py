@@ -82,11 +82,13 @@ MANUAL_REVENUE_LAST_UPDATED = "2026-11-13"
 MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
     "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00), ("Hive", 2_500.00)],
     "Affiliates": [("Kitted Decks", 350.00)],
-    # One line for every newsletter, podcast and YouTube sponsorship deal on the books (Igor's
-    # round figure, 2026-11-13). Until then the table listed each sponsor: 80,000 Hours $4,200
-    # + $5,000, Game Over $3,000, Non-Trivial $1,500, Settled $1,500, ACE podcast $800 = $16,000.
-    "Content Sponsorships": [("Current deals, approx. (newsletter, podcast, YouTube reads)", 35_000.00)],
-    "Beehiiv Ad Network": [("Beehiiv, paid out", 1_102.91), ("Beehiiv, pending payout", 438.00)],
+    # One line for every newsletter, podcast and YouTube sponsorship deal: the deals listed per
+    # sponsor until 2026-11-13 (80,000 Hours $4,200 + $5,000, Game Over $3,000, Non-Trivial $1,500,
+    # Settled $1,500, ACE podcast $800 = $16,000) plus Igor's round figure of ~$35,000 for the
+    # giving-season deals booked since (2026-11-13). Change the one number when deals close.
+    "Content Sponsorships": [("Deals to Oct 16 $16,000 + giving-season deals approx. $35,000", 51_000.00)],
+    # 2026-11-13: 12 placements paid (Mar 27 to Sep 28) + 3 approved for the Nov 20 payout (Oct 6, 14, 21).
+    "Beehiiv Ad Network": [("Beehiiv, paid out", 1_305.41), ("Beehiiv, pending payout", 592.02)],
 }
 
 
