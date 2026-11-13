@@ -180,4 +180,6 @@ export interface Snapshot {
     last_updated: string;
     lines: Record<string, { source: string; amount: number }[]>;
   };
+  /** Sources that failed while the snapshot was fetched, path -> message (filled by lib/normalize.ts). */
+  errors?: Record<string, string>;
 }

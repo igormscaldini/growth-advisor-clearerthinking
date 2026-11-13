@@ -9,6 +9,7 @@ import { PersonasTab } from "./personas-tab";
 import { FlowTab } from "./flow-tab";
 import { presetLabel } from "@/lib/format";
 import { buildCustomPeriod } from "@/lib/aggregate";
+import { describeErrors } from "@/lib/normalize";
 import { PeriodEntry, PresetKey, Snapshot } from "@/lib/snapshot";
 
 interface Props {
@@ -156,6 +157,12 @@ export function Dashboard({ snapshot }: Props) {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-6">
+        {snapshot.errors && Object.keys(snapshot.errors).length > 0 && (
+          <p className="mb-4 text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md px-3 py-2">
+            Some sources failed when this snapshot was fetched ({generatedLocal}); their cards show zero until the next
+            successful refresh. {describeErrors(snapshot.errors).join(" · ")}
+          </p>
+        )}
         {preset === "custom" && (
           <p className="mb-4 text-xs text-zinc-500 dark:text-zinc-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900 rounded-md px-3 py-2">
             Custom ranges are limited to the snapshot window: {dailyMin} → {dailyMax}. Prior-period
