@@ -71,7 +71,15 @@ def main(scratch: Path) -> None:
         reads = df[df.read].et.dt.tz_localize(None)
         rug.vlines(reads, 0, 1, color=TICK, lw=0.8)
         rug.set_ylim(0, 1)
-        rug.axis("off")
+        rug.set_yticks([])
+        for spine in rug.spines.values():
+            spine.set_visible(False)
+        last = i == len(series) - 1
+        rug.xaxis.set_major_locator(mdates.YearLocator())
+        rug.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+        rug.tick_params(axis="x", colors=INK2, labelsize=9, length=3 if last else 0, color=AXIS, pad=4, labelbottom=last)
+        if last:
+            rug.set_xlabel("Year", fontsize=10, color=INK2, labelpad=4)
         ax.text(0, 1.04, f"{'ABC'[i]}", transform=ax.transAxes, fontsize=12, fontweight="bold", color=INK, va="bottom")
         ax.text(0.022, 1.04, name, transform=ax.transAxes, fontsize=11, color=INK, va="bottom")
         ax.set_xlim(X_MIN, X_MAX)
@@ -81,12 +89,9 @@ def main(scratch: Path) -> None:
             ax.spines[side].set_visible(False)
         for side in ("left", "bottom"):
             ax.spines[side].set_color(AXIS)
-        ax.tick_params(colors=INK2, labelsize=9, length=3, color=AXIS, pad=3)
+        ax.tick_params(axis="y", colors=INK2, labelsize=9, length=3, color=AXIS, pad=3)
         ax.xaxis.set_major_locator(mdates.YearLocator())
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
-        ax.tick_params(axis="x", labelbottom=(i == len(series) - 1))
-        if i == len(series) - 1:
-            ax.set_xlabel("Year", fontsize=10, color=INK2, labelpad=4)
+        ax.tick_params(axis="x", length=0, labelbottom=False)  # years are labelled under the rug strip
         print(name, f"band {start.date()} to {end.date()} ({gap_days} d): {rate_in:.1f}/30d, before {rate_before:.1f}/30d, "
               f"reads {len(reads)}")
 
