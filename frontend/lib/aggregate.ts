@@ -217,6 +217,7 @@ export function buildCustomPeriod(snapshot: Snapshot, start: string, end: string
     end,
     prior_start: priorStartIso,
     prior_end: priorEndIso,
+    derived: true,
     days,
     current: buildSlice(snapshot, start, end),
     prior: priorFits ? priorSlice : zeroOutForNoComparison(priorSlice),

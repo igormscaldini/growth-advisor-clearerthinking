@@ -117,6 +117,8 @@ export interface PeriodEntry {
   end: string;
   prior_start: string;
   prior_end: string;
+  /** True when the entry was built in the browser from daily rows (This month, Year to date, Custom): user counts are summed per day. */
+  derived?: boolean;
   days: number;
   current: RangeSlice;
   prior: RangeSlice;

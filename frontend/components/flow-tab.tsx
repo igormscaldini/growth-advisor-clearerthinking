@@ -104,7 +104,7 @@ export function FlowTab({ period }: Props) {
 
   const t = graph.totals;
   const kpis: [string, string, string][] = [
-    ["Users", fmtInt(t.users), "GA4 · web sessions with a landing page"],
+    ["Users", fmtInt(t.users), period.derived ? "GA4 · unique per day, days summed" : "GA4 · unique in the window, with a landing page"],
     ["Email Submitted", fmtInt(t.email), `${share(t.email, t.users)} of users · a tool finished`],
     ["CT+ Sign Up", fmtInt(t.plus), `GA4 plus_sign_up · Stripe: ${fmtInt(stripe.subs)} new subscriptions`],
     ["Cognitive Assessment sales", fmtInt(stripe.cognitive), "Stripe · path not trackable yet"],
