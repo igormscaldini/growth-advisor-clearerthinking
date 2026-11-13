@@ -21,6 +21,7 @@ OUT = Path.home() / "Downloads" / "newsletter_emails_after_last_open.png"
 
 def load(scratch: Path) -> dict[str, pd.DataFrame]:
     mb = pd.read_pickle(scratch / "mbrew" / "mb2.pkl")
+    mb = mb[mb.rp_domain != "clearerthinking.org"]  # 4 event emails forwarded from Igor's work address
     mb = mb.assign(et=mb.hdr.dt.tz_convert("America/New_York"), read=~mb.labels.str.contains("UNREAD"))
     mck = pd.read_pickle(scratch / "mck" / "flat.pkl")
     mck = mck[mck.from_domain == "email.mckinsey.com"]
