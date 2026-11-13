@@ -607,14 +607,23 @@ def _ga4_flow_report(date_ranges: list[tuple[date, date]], page_expr, events: Op
     exprs = [to_ga4_filter(page_expr)]
     if events:
         exprs.append(FilterExpression(filter=Filter(field_name="eventName", in_list_filter=Filter.InListFilter(values=events))))
-    resp = get_client().run_report(RunReportRequest(
+    request = RunReportRequest(
         property=property_path(),
         date_ranges=[DateRange(start_date=str(s), end_date=str(e)) for s, e in date_ranges],
         dimensions=[Dimension(name=d) for d in dims],
         metrics=[Metric(name="totalUsers")],
         dimension_filter=FilterExpression(and_group=FilterExpressionList(expressions=exprs)),
         limit=100_000,
-    ), timeout=240)
+    )
+    # GA4 answered these with transient 502/503/429s all through 2026-11-13: three tries, 30 s apart.
+    for attempt in range(3):
+        try:
+            resp = get_client().run_report(request, timeout=240)
+            break
+        except Exception:
+            if attempt == 2:
+                raise
+            time.sleep(30)
     names = dims + (["dateRange"] if len(date_ranges) > 1 else [])
     return [dict(zip(names, [v.value for v in r.dimension_values]), totalUsers=int(r.metric_values[0].value))
             for r in resp.rows]
