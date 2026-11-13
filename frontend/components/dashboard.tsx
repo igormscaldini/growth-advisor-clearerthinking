@@ -88,7 +88,7 @@ export function Dashboard({ snapshot }: Props) {
         <div className="max-w-7xl mx-auto px-6 py-4 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
             <h1 className="text-xl md:text-2xl font-bold">ClearerThinking Growth Dashboard</h1>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1" suppressHydrationWarning>
               {period.start} → {period.end} · {period.days} days · Last refreshed: {generatedLocal}
             </p>
           </div>
@@ -158,7 +158,7 @@ export function Dashboard({ snapshot }: Props) {
 
       <main className="max-w-7xl mx-auto px-6 py-6">
         {snapshot.errors && Object.keys(snapshot.errors).length > 0 && (
-          <p className="mb-4 text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md px-3 py-2">
+          <p className="mb-4 text-xs text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-md px-3 py-2" suppressHydrationWarning>
             Some sources failed when this snapshot was fetched ({generatedLocal}); their cards show zero until the next
             successful refresh. {describeErrors(snapshot.errors).join(" · ")}
           </p>
