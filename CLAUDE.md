@@ -353,7 +353,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - GA4 Data API outages happen (2026-11-13: 504/502/429 for anything beyond a trivial query, from CI too, property quota
   untouched). `fetch_snapshot._safe` keeps the run GREEN and writes `{"error": ...}` blocks, so the dashboard's GA4 cards go
   empty behind a successful run: check `periods.30d.current.ga4.error` in the live snapshot.json before trusting it or
-  diagnosing a tracking break. The REST transport fails the same way; waiting is the only fix.
+  diagnosing a tracking break. The REST transport fails the same way; waiting is the only fix. Those error blocks also
+  killed the Next prerender (`.forEach is not a function`) and with it every Vercel deploy for six hours, so `app/page.tsx`
+  now runs the file through `lib/normalize.ts` (empty values of the right shape + `snapshot.errors` for the red banner);
+  any new snapshot block must be added to `normalizeSlice` or an outage can break the build again.
 - Key-event volume is a traffic signal, not a tracking signal: it moves 10x when ad or partner campaigns
   (`/p/<partner>/` pages) start or stop. Only "an event stopped entirely" indicates breakage. The UPT has
   fired no `Viewed Privacy Policy` since Sep 2025 (intentional, Igor 2026-10-01). GA4 recorded NOTHING on
