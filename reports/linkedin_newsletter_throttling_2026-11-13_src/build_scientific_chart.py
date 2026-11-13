@@ -1,9 +1,10 @@
 """Figure for the report: monthly email volume from three newsletters against the recipient's open activity.
 
 Per newsletter (one panel each): emails received per calendar month (line), every email flagged as read
-in Gmail (rug ticks under the panel), the longest interval with no read email (shaded) with the email rate
-inside it and in the 365 days before it. Reuses the loaders of the sibling scripts (scratchpad pickles,
-personal data, never committed). Writes ~/Downloads/newsletter_volume_vs_opens_figure.png.
+in Gmail (rug ticks under the panel), and a dot at the last read email before the longest interval without
+one, annotated with the email rate during that interval and in the 365 days before it. Reuses the loaders
+of the sibling scripts (scratchpad pickles, personal data, never committed).
+Writes ~/Downloads/newsletter_volume_vs_opens_figure.png.
 
 Usage: python build_scientific_chart.py <scratchpad dir holding mbrew/, mck/, skimm/>
 """
@@ -14,22 +15,23 @@ import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.lines import Line2D
-from matplotlib.patches import Patch
+
 
 sys.path.insert(0, str(Path(__file__).parent))
 from build_cumulative_chart import AXIS, INK, INK2, MUTED, SURFACE, load, longest_stretch  # noqa: E402
 from build_timeline_chart import monthly_series  # noqa: E402
 
-LINE, BAND, TICK = "#1c5cab", "#e9e9e5", "#c2410c"
+LINE, TICK = "#1c5cab", "#c2410c"
 OUT = Path.home() / "Downloads" / "newsletter_volume_vs_opens_figure.png"
 X_MIN, X_MAX = pd.Timestamp("2016-01-01"), pd.Timestamp("2027-01-01")
 CAPTION = (
     "Figure 1. Emails received per calendar month from theSkimm (A), McKinsey & Company (B) and Marketing Brew (C) "
     "in one Gmail account, from the first full month of each subscription to October 2026 (n = 6,454 messages, "
     "identified from full message headers). Ticks mark the emails flagged as read in Gmail (a proxy for opens: a "
-    "read flag can be missed in Gmail and set without reading in other clients). The shaded band is the longest "
-    "interval with no read email; its annotation gives the email rate per 30 days inside the band and in the 365 "
-    "days before it. Partial first and current months are excluded. Promotional and event emails are included."
+    "read flag can be missed in Gmail and set without reading in other clients). The dot marks the last read email "
+    "before the longest interval with no read email; its annotation gives the length of that interval and the email "
+    "rate per 30 days during it and in the 365 days before it. Partial first and current months are excluded. "
+    "Promotional and event emails are included."
 )
 
 
@@ -57,17 +59,19 @@ def main(scratch: Path) -> None:
         ax = fig.add_axes([left, bottom + rug_h, width, height], facecolor=SURFACE)
         rug = fig.add_axes([left, bottom, width, rug_h], facecolor=SURFACE, sharex=ax)
 
-        s_naive, e_naive = start.tz_localize(None), end.tz_localize(None)
-        ax.axvspan(s_naive, e_naive, color=BAND, lw=0, zorder=0)
         ax.plot(s.index, s.values, color=LINE, lw=1.4, zorder=2)
-        band_years = (e_naive - s_naive).days / 365
-        label = f"{gap_days:,} d without a read email\n{rate_in:.1f} emails / 30 d (prior 365 d: {rate_before:.1f})"
-        if band_years >= 1.5:
-            ax.text(s_naive + (e_naive - s_naive) / 2, y_max * 0.97, label, ha="center", va="top", fontsize=8.5,
-                    color=INK2, linespacing=1.35)
-        else:
-            ax.text(s_naive - pd.Timedelta(days=40), y_max * 0.97, label, ha="right", va="top", fontsize=8.5,
-                    color=INK2, linespacing=1.35)
+        # the dot: the month of the last read email before the longest interval without one
+        dot_month = start.tz_localize(None).to_period("M").start_time
+        dot_y = s[dot_month]
+        ax.scatter([dot_month], [dot_y], s=55, color=TICK, edgecolor=SURFACE, linewidth=1.2, zorder=4)
+        label = (f"Last read email: {start.strftime('%-d %b %Y')}\n"
+                 f"next {gap_days:,} d: {rate_in:.1f} emails / 30 d (prior 365 d: {rate_before:.1f})")
+        # the label sits above the line's highest point under its own width, so it never crosses the line
+        frac = (dot_month - X_MIN) / (X_MAX - X_MIN)
+        ha, lo, hi = ("right", -32, 1) if frac > 0.7 else ("left", -1, 32) if frac < 0.2 else ("center", -16, 16)
+        under_label = s[(s.index >= dot_month + pd.DateOffset(months=lo)) & (s.index <= dot_month + pd.DateOffset(months=hi))]
+        ax.annotate(label, (mdates.date2num(dot_month), under_label.max()), xytext=(0, 8), textcoords="offset points",
+                    ha=ha, va="bottom", fontsize=8.5, color=INK2, linespacing=1.35)
         reads = df[df.read].et.dt.tz_localize(None)
         rug.vlines(reads, 0, 1, color=TICK, lw=0.8)
         rug.set_ylim(0, 1)
@@ -100,7 +104,8 @@ def main(scratch: Path) -> None:
              fontsize=12.5, fontweight="bold", color=INK, va="bottom")
     handles = [Line2D([], [], color=LINE, lw=1.4, label="Emails received per month"),
                Line2D([], [], color=TICK, lw=0.8, marker="|", markersize=9, linestyle="none", label="Email flagged as read"),
-               Patch(color=BAND, label="Longest interval with no read email")]
+               Line2D([], [], color=TICK, marker="o", markersize=6, linestyle="none",
+                      label="Last read email before the longest interval without one")]
     fig.legend(handles=handles, loc="upper left", bbox_to_anchor=(0.075, 0.95), ncol=3, frameon=False, fontsize=9,
                handlelength=1.6, columnspacing=1.6, labelcolor=INK2)
     fig.text(0.08, 0.13, wrap(CAPTION, 150), fontsize=8.2, color=INK2, va="top", linespacing=1.45)
