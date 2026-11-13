@@ -1,76 +1,21 @@
-"""Pure helpers for the sponsorship price sheet: grouping beehiiv sends into editions, reach statistics
-and CPM arithmetic. No I/O here, so tests/test_sponsorship_price_sheet.py can exercise everything with
-synthetic data. fetch_newsletter_stats.py and build.py are the only callers.
+"""Pure helpers for the sponsorship price sheet: reach statistics and CPM arithmetic, plus the edition
+classifier re-exported from newsletter_editions.py. No I/O here, so tests/test_sponsorship_price_sheet.py
+can exercise everything with synthetic data. fetch_newsletter_stats.py and build.py are the only callers.
 """
 from __future__ import annotations
 
 import math
-import re
 import statistics
+import sys
 from collections import defaultdict
 from datetime import datetime
+from pathlib import Path
 
-# Sends that are Clearer Thinking's own promotions (tool launches, workshops, coaching, the monthly
-# debrief, book launch asks, tests). A sponsor box runs in the regular article and One Helpful Idea editions,
-# not in these. Anchored at the start of the subject on purpose: "Debunking meditation myths (and a new tool
-# for meditation)" is a regular article, "New Tool: Who attracts you?" is a launch blast.
-PROMO = re.compile(
-    r"^\s*(\[[^\]]*\]\s*)?(free tool|new tool|early access|you['\u2019]re invited|our most important ideas|"
-    r"limited spots|a personal ask|what['\u2019]s next|stuck with|we['\u2019]re about to start|free live workshop|"
-    r"missed our workshop|details about your workshop|career change workshop|quick note|igor testing|"
-    r"\[(real )?test\]|\[regular\]|\[no html\]|\[fixed\])",
-    re.I,
-)
-
-
-def group_editions(posts: list[dict], min_post_recipients: int = 20_000) -> list[dict]:
-    """Group same-day sends (segment splits, A/B variants, re-sends) into one edition.
-
-    beehiiv stores one edition as two or three posts when it is split by segment or variant, so counting
-    posts understates both recipients and unique opens of the edition a sponsor box appears in. Test sends,
-    workshop reminders and other posts under `min_post_recipients`, and our own promo blasts (PROMO), are
-    dropped per post first, so a small promo sent the same day cannot swallow a real edition.
-    Each post needs date (YYYY-MM-DD), recipients, unique_opens and subject.
-    """
-    by_day: dict[str, list[dict]] = defaultdict(list)
-    for p in posts:
-        if int(p.get("recipients") or 0) < min_post_recipients or is_promo(p.get("subject") or ""):
-            continue
-        by_day[p["date"]].append(p)
-    out = []
-    for day, ps in sorted(by_day.items()):
-        recipients = sum(int(p.get("recipients") or 0) for p in ps)
-        opens = sum(int(p.get("unique_opens") or 0) for p in ps)
-        subjects = sorted({(p.get("subject") or "").strip() for p in ps if (p.get("subject") or "").strip()})
-        out.append({
-            "date": day,
-            "weekday": datetime.strptime(day, "%Y-%m-%d").strftime("%a"),
-            "posts": len(ps),
-            "recipients": recipients,
-            "unique_opens": opens,
-            "open_rate": (opens / recipients) if recipients else 0.0,
-            "subject": " | ".join(subjects),
-        })
-    return out
-
-
-def is_promo(subject: str) -> bool:
-    return bool(PROMO.search(subject or ""))
-
-
-def regular_editions(editions: list[dict], min_recipients: int = 200_000, min_open_rate: float = 0.15,
-                     until: str | None = None) -> list[dict]:
-    """The editions a sponsor box would run in: an article or One Helpful Idea send to the engaged list
-    (recipients >= min_recipients), with a normal open rate (a reactivation blast to dormant readers opens
-    under 10%), not one of our own promos, and old enough for its opens to have accrued (`until`)."""
-    out = []
-    for e in editions:
-        if until and e["date"] > until:
-            continue
-        if e["recipients"] < min_recipients or e["open_rate"] < min_open_rate or is_promo(e["subject"]):
-            continue
-        out.append(e)
-    return out
+# The edition classifier (same-day grouping, promo detection, regular-edition rules) is shared with the
+# "Average Unique Opens Per Campaign" goal in data_layer.py; it lives in newsletter_editions.py at the
+# repo root and is re-exported here for fetch_newsletter_stats.py and the tests.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from newsletter_editions import PROMO, group_editions, is_promo, regular_editions  # noqa: E402,F401
 
 
 def summarize(values) -> dict:

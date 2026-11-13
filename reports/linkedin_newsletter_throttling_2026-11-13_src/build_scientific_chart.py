@@ -2,7 +2,7 @@
 
 Per newsletter (one panel each): emails received per calendar month (line), every email flagged as read
 in Gmail (rug ticks under the panel), and a dot at the last read email before the longest interval without
-one, annotated with the email rate during that interval and in the 365 days before it. Reuses the loaders
+one (the rates during and before that interval are stated in the caption). Reuses the loaders
 of the sibling scripts (scratchpad pickles, personal data, never committed).
 Writes ~/Downloads/newsletter_volume_vs_opens_figure.png.
 
@@ -29,8 +29,9 @@ CAPTION = (
     "in one Gmail account, from the first full month of each subscription to October 2026 (n = 6,454 messages, "
     "identified from full message headers). Ticks mark the emails flagged as read in Gmail (a proxy for opens: a "
     "read flag can be missed in Gmail and set without reading in other clients). The dot marks the last read email "
-    "before the longest interval with no read email; its annotation gives the length of that interval and the email "
-    "rate per 30 days during it and in the 365 days before it. Partial first and current months are excluded. "
+    "before the longest interval with no read email (1,083, 439 and 181 days for A, B and C; the email rate per 30 "
+    "days during those intervals was 19.5, 27.1 and 18.2, against 15.9, 25.9 and 19.2 in the 365 days before them). "
+    "Partial first and current months are excluded. "
     "Promotional and event emails are included."
 )
 
@@ -64,8 +65,7 @@ def main(scratch: Path) -> None:
         dot_month = start.tz_localize(None).to_period("M").start_time
         dot_y = s[dot_month]
         ax.scatter([dot_month], [dot_y], s=55, color=TICK, edgecolor=SURFACE, linewidth=1.2, zorder=4)
-        label = (f"Last read email: {start.strftime('%-d %b %Y')}\n"
-                 f"next {gap_days:,} d: {rate_in:.1f} emails / 30 d (prior 365 d: {rate_before:.1f})")
+        label = f"Last read email: {start.strftime('%-d %b %Y')}"
         # the label sits above the line's highest point under its own width, so it never crosses the line
         frac = (dot_month - X_MIN) / (X_MAX - X_MIN)
         ha, lo, hi = ("right", -32, 1) if frac > 0.7 else ("left", -1, 32) if frac < 0.2 else ("center", -16, 16)

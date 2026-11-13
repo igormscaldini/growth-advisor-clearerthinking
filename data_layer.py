@@ -1315,46 +1315,51 @@ def beehiiv_engaged_readers() -> dict:
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
-def beehiiv_avg_unique_opens_per_campaign(min_recipients: int = 100_000) -> dict:
-    """Average unique email opens across confirmed email campaigns sent to MORE than
-    `min_recipients` subscribers. Powers the 'Average Unique Opens Per Campaign' goal.
+def beehiiv_avg_unique_opens_per_campaign(window_days: int = 90, fresh_days: int = 3,
+                                          min_recipients: int = 100_000, today: Optional[date] = None) -> dict:
+    """Average unique email opens per REGULAR EDITION over the last `window_days`: One Helpful Idea and
+    the main article newsletter only. Powers the 'Average Unique Opens Per Campaign' goal.
 
-    Only campaigns whose email `recipients` exceed the threshold are counted, so small
-    or segment-only sends don't drag the average down.
+    An edition is every send on one US Eastern day summed (segment splits, A/B variants, sending-domain
+    splits), after dropping per post the test sends and anything under 20k recipients, and our own promos
+    (tool launches, workshop invitations and reminders, coaching blasts, the Monthly Debrief) by subject or
+    internal title. An edition then counts when it reached at least `min_recipients`, opened at 15%+ (a
+    re-send to dormant readers opens under 10%) and is at least `fresh_days` old (opens still accruing).
+    Rules and grouping: newsletter_editions.py (shared with the sponsorship price sheet).
     """
     api_key = os.getenv("BEEHIIV_API_KEY", "").strip()
     pub_id = os.getenv("BEEHIIV_PUB_CLEARER_THINKING", "").strip()
-    empty = {"avg_unique_opens": 0, "campaigns_count": 0, "min_recipients": min_recipients}
+    empty = {"avg_unique_opens": 0, "campaigns_count": 0, "window_days": window_days, "min_recipients": min_recipients}
     if not api_key or not pub_id:
         return {**empty, "error": "BEEHIIV_API_KEY missing"}
 
+    today = today or date.today()
+    floor_ts = datetime(today.year, today.month, today.day, tzinfo=timezone.utc).timestamp() - (window_days + 2) * 86400
     headers = {"Authorization": f"Bearer {api_key}", "Accept": "application/json"}
     posts: list[dict] = []
     page = 1
     while True:
+        # status only: adding platform=email to an order_by query made beehiiv drop recent posts (2026-11-02).
         r = _beehiiv_get(
             f"{BEEHIIV_BASE}/publications/{pub_id}/posts",
             headers=headers,
-            params={"page": page, "limit": 100, "expand[]": "stats", "platform": "email", "status": "confirmed"},
+            params={"page": page, "limit": 100, "expand[]": "stats", "status": "confirmed",
+                    "order_by": "publish_date", "direction": "desc"},
         )
         if r.status_code != 200:
             return {**empty, "error": f"HTTP {r.status_code}"}
         data = r.json()
-        posts.extend(data.get("data", []))
-        if page >= data.get("total_pages", 1):
+        batch = data.get("data", [])
+        posts.extend(batch)
+        oldest = min([p.get("publish_date") or 10**12 for p in batch] or [0])
+        if page >= data.get("total_pages", 1) or oldest < floor_ts:
             break
         page += 1
 
-    unique_opens: list[int] = []
-    for p in posts:
-        em = (p.get("stats") or {}).get("email") or {}
-        recipients = em.get("recipients", 0) or 0
-        if recipients > min_recipients:
-            unique_opens.append(int(em.get("unique_opens", em.get("opens", 0)) or 0))
+    from newsletter_editions import average_unique_opens, post_rows
 
-    n = len(unique_opens)
-    avg = round(sum(unique_opens) / n) if n else 0
-    return {"avg_unique_opens": avg, "campaigns_count": n, "min_recipients": min_recipients, "error": None}
+    return average_unique_opens(post_rows(posts), today, window_days=window_days, fresh_days=fresh_days,
+                                min_recipients=min_recipients)
 
 
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
