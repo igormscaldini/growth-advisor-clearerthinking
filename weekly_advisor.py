@@ -360,7 +360,8 @@ def gather_goals(ref: date) -> tuple[dict, dict]:
     goals["personality_test_google_position"]["note"] = "GSC average position, last 28 days (lower is better)"
     if isinstance(opens, dict):
         goals["avg_unique_opens_per_campaign"]["note"] = (
-            f"average over {opens.get('campaigns_count')} campaigns sent to >100k subscribers")
+            f"average over {opens.get('campaigns_count')} regular editions (One Helpful Idea + main newsletter, "
+            f"splits summed, promos excluded) sent {opens.get('since')} to {opens.get('until')}")
     return goals, errors
 
 

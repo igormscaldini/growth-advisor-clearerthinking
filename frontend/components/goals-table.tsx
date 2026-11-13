@@ -68,7 +68,9 @@ export function GoalsTable({ snapshot, stripeGrossUsd, manualRevenueUsd }: Props
       goal: "Average Unique Opens Per Campaign",
       current: fmtInt(avgOpens),
       sub: avgOpensCampaigns
-        ? `avg over ${avgOpensCampaigns} campaigns sent to 100k+ subscribers`
+        ? avgOpensData?.window_days
+          ? `avg over ${avgOpensCampaigns} regular editions (OHI + main newsletter) in the last ${avgOpensData.window_days} days`
+          : `avg over ${avgOpensCampaigns} campaigns sent to 100k+ subscribers`
         : "awaiting next data refresh",
       target: fmtInt(AVG_OPENS_TARGET),
       pct: (avgOpens / AVG_OPENS_TARGET) * 100,

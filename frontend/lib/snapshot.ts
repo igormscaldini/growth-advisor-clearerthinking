@@ -136,6 +136,11 @@ export interface Snapshot {
       avg_unique_opens: number;
       campaigns_count: number;
       min_recipients: number;
+      // Present since 2026-11-13: regular editions (OHI + main newsletter) over a rolling window.
+      window_days?: number;
+      since?: string;
+      until?: string;
+      editions?: { date: string; posts: number; recipients: number; unique_opens: number; subject: string }[];
       error: string | null;
     };
     keyword_overall: {
