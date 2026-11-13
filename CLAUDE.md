@@ -26,6 +26,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   25-minute budget) -> Vercel dashboard at https://growth-advisor-clearerthinking.vercel.app/.
   `frontend/public/beehiiv_new_subs_cache.json` is an incremental cache committed with the
   snapshot; delete it to force a full re-walk (takes ~25 min).
+  The 7d/30d/90d presets read `periods` as fetched; Custom, This month and Year to date are rebuilt in the
+  browser by `frontend/lib/aggregate.ts` (`buildSlice`) from `daily_window.kpi`, so every series added to
+  `fetch_range` must also be sliced there or those three views show 0 (new_stripe_subs and the per-campaign
+  unsubscribes did exactly that until 2026-11-13). Verify with `period.current` under "This month", not 30d.
 - MLA = MailList Accelerator: CT brands a copy of a tool for a partner org (e.g. `/p/hive/worlds-biggest-problems-quiz`,
   the main quiz program 20481 fed a `brand_data` variable), runs ads under the partner's name and sells the subscribers at a
   $3-15 CPA; opt-ins are stamped in beehiiv's `MLA Tags` custom field. The Hive pilot (2026) is dissected in the memory note
