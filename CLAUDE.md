@@ -30,6 +30,15 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   browser by `frontend/lib/aggregate.ts` (`buildSlice`) from `daily_window.kpi`, so every series added to
   `fetch_range` must also be sliced there or those three views show 0 (new_stripe_subs and the per-campaign
   unsubscribes did exactly that until 2026-11-13). Verify with `period.current` under "This month", not 30d.
+- Flow tab (2026-11-13): first-touch source -> landing page (Home / Articles / Tools / Other) -> outcome (Submitted Email,
+  plus_sign_up), unique users. `flow_model.py` is the single source of the page rules: an expression tree compiled into GA4
+  dimension filters AND evaluated in Python (`tests/test_flow_model.py` checks both agree), plus the channel -> source map.
+  `data_layer.ga4_flow_ranges` (exact users for the 3 presets, one multi-range query set) and `ga4_flow_daily` (daily rows
+  for custom ranges) only ask GA4 for date x firstUserDefaultChannelGroup reports: on 2026-11-13 every report that RETURNED
+  `landingPage` timed out (504/429/502) while trivial queries passed, so pages live in filters only. Frontend: `lib/flow.ts`
+  (graph builder, `lib/flow.test.ts`), `components/flow-tab.tsx` (d3-sankey, labels dodged with leader lines, table view,
+  no-outcome band off by default). Cognitive and PDF sales are Stripe-only boxes because GA4 purchases arrive "(not set)".
+  Reviewed mockup + its builder: `reports/flow_tab_mockup_2026-11-13_src/` (build.py renders from data.json or data_interim.json).
 - MLA = MailList Accelerator: CT brands a copy of a tool for a partner org (e.g. `/p/hive/worlds-biggest-problems-quiz`,
   the main quiz program 20481 fed a `brand_data` variable), runs ads under the partner's name and sells the subscribers at a
   $3-15 CPA; opt-ins are stamped in beehiiv's `MLA Tags` custom field. The Hive pilot (2026) is dissected in the memory note
@@ -341,6 +350,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   ~200k in Aug 2026, ~350k Sep-Oct 2025) are excluded from "new subscribers". Cursor-paginate
   (offset paging caps at 10k). Genuine sign-ups run ~300-500/day.
 - GA4 event names do not mean what they say: see `GA4_EVENTS.md`. "Tools finished" = Submitted Email.
+- GA4 Data API outages happen (2026-11-13: 504/502/429 for anything beyond a trivial query, from CI too, property quota
+  untouched). `fetch_snapshot._safe` keeps the run GREEN and writes `{"error": ...}` blocks, so the dashboard's GA4 cards go
+  empty behind a successful run: check `periods.30d.current.ga4.error` in the live snapshot.json before trusting it or
+  diagnosing a tracking break. The REST transport fails the same way; waiting is the only fix.
 - Key-event volume is a traffic signal, not a tracking signal: it moves 10x when ad or partner campaigns
   (`/p/<partner>/` pages) start or stop. Only "an event stopped entirely" indicates breakage. The UPT has
   fired no `Viewed Privacy Policy` since Sep 2025 (intentional, Igor 2026-10-01). GA4 recorded NOTHING on
