@@ -35,6 +35,7 @@ def main() -> None:
         "colorsLight": SOURCE_COLORS_LIGHT,
         "colorsDark": SOURCE_COLORS_DARK,
         "fetched": data["fetched"],
+        "only30d": bool(data.get("only_30d")),
     }
     html = TEMPLATE.replace("__DATA__", json.dumps(payload)).replace("__STAMP__", stamp)
     OUT.write_text(html)
@@ -109,7 +110,7 @@ TEMPLATE = r"""<!doctype html>
   .cols { display: grid; grid-template-columns: 1fr 1fr 1fr; font-size: .75rem; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; margin: 0 0 .25rem; }
   .cols span:nth-child(2) { text-align: center; } .cols span:nth-child(3) { text-align: right; }
   svg { display: block; width: 100%; height: auto; }
-  .node-label { font-size: 12px; fill: var(--text); }
+  .node-label { font-size: 12px; fill: var(--text); paint-order: stroke; stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; }
   .node-label .n { fill: var(--text-3); }
   .leader { stroke: var(--text-4); stroke-width: 1; fill: none; }
   .stripe-box { font-size: 12px; }
@@ -196,7 +197,7 @@ function model(w, showNone) {
   const byPage = d3.rollup(w.landing, v => d3.sum(v, r => r.users), r => r.page);
   const floor = users * 0.004;
   const srcName = s => (bySource.get(s) || 0) >= floor || s === "Other" ? s : "Other";
-  const pageName = p => (byPage.get(p) || 0) >= floor || p === "Other pages" ? p : "Other pages";
+  const pageName = p => (byPage.get(p) || 0) >= users * 0.001 || p === "Other pages" ? p : "Other pages";
   const sp = d3.rollup(w.landing, v => d3.sum(v, r => r.users), r => srcName(r.source), r => pageName(r.page));
   const po = d3.rollup(w.outcomes, v => d3.sum(v, r => r.users), r => pageName(r.page), r => r.outcome);
   const sources = DATA.sourceOrder.filter(s => sp.has(s));
@@ -223,6 +224,7 @@ function render() {
   const m = model(w, showNone);
   document.getElementById("sub").textContent = `${w.start} → ${w.end} · ${w.days} days · Mockup built __STAMP__ (GA4 + Stripe pulled ${DATA.fetched})`;
   document.querySelectorAll("#presets button").forEach(b => b.setAttribute("aria-selected", b.dataset.w === windowKey));
+  if (DATA.only30d) document.querySelectorAll("#presets button[data-w]").forEach(b => { if (b.dataset.w !== "30d") { b.disabled = true; b.title = "GA4's hourly API quota was exhausted while building this mockup; the real tab carries every window."; } });
 
   // KPI row
   const k = [
@@ -336,7 +338,7 @@ function drawNotes(w) {
     <h4>How this is measured</h4>
     <ul>
       <li><strong>Users</strong>: GA4 <code>totalUsers</code> by session default channel group and landing page (host + path). A person with sessions from two sources is counted under both. Sessions with no landing page are left out: in this window ${fmt(w.dropped_no_landing_page)} users, almost all the One Helpful Idea open pixel (<code>email_open</code>) and server-side purchase events.</li>
-      <li><strong>Traffic source</strong> folds GA4's channel groups: Paid Media = Paid Search, Paid Social, Paid Other, Display and Cross-network (Performance Max); Social = Organic Social + Organic Video; Other = Unassigned and the rest. Sources and pages under 0.4% of users fold into Other.</li>
+      <li><strong>Traffic source</strong> folds GA4's channel groups: Paid Media = Paid Search, Paid Social, Paid Other, Display and Cross-network (Performance Max); Social = Organic Social + Organic Video; Other = Unassigned and the rest. Sources under 0.4% of users fold into Other; pages under 0.1% into Other pages. "Unknown page" = sessions on a known host whose first hit was not a page view (GA4 records no landing page).</li>
       <li><strong>Landing page</strong> families: Who Attracts You study, Homepage, Personality Test (incl. the report page), Rationality Test, Cognitive Assessment page, Coaching page, CT+ page, Tools gallery, Articles (every /post/), Podcast, Other tools (other programs.* pages), Other pages. Top raw pages in this window: ${top}.</li>
       <li><strong>Email Submitted</strong> = users whose session fired GA4 "Submitted Email" (a tool finished, per GA4_EVENTS.md). <strong>CT+ Sign Up</strong> = users whose session fired <code>plus_sign_up</code> (the thank-you page of the sign-up flow). Stripe counts ${fmt(w.stripe.new_subscriptions)} new subscriptions in the window: the difference is sign-ups from the member dashboard, the article paywall and sessions GA4 could not tie to a page.</li>
       <li><strong>Cognitive Assessment and Personality PDF</strong> are Stripe sale counts. GA4 receives their purchase events from Paytics with source "(not set)", so they cannot be placed on a source or page until checkout carries the GA client id (the ct-checkout project). The <em>page</em> is known in principle (Cognitive page, Personality Test report); the <em>source</em> is not.</li>

@@ -41,21 +41,22 @@ def ga4_rows(start: date, end: date, dims: list[str], metrics: list[str], event_
     req = RunReportRequest(property=property_path(), date_ranges=[DateRange(start_date=str(start), end_date=str(end))],
                            dimensions=[Dimension(name=d) for d in dims], metrics=[Metric(name=m) for m in metrics],
                            limit=100_000, dimension_filter=filt)
-    for attempt in range(5):
+    for attempt in range(8):
         try:
             resp = get_client().run_report(req, timeout=240)
             return [dict(zip(dims, [v.value for v in r.dimension_values]),
                          **dict(zip(metrics, [float(v.value) for v in r.metric_values]))) for r in resp.rows]
         except Exception as e:  # 429s and deadline errors: back off and retry
             print(f"  GA4 attempt {attempt + 1} failed: {type(e).__name__}: {str(e)[:100]}", file=sys.stderr)
-            time.sleep(15 * (attempt + 1))
-    raise RuntimeError("GA4 query failed after 5 attempts")
+            time.sleep(300)
+    raise RuntimeError("GA4 query failed after 8 attempts")
 
 
 def main() -> None:
     today = date.today()
     end = today - timedelta(days=1)
     out = {"fetched": today.isoformat(), "windows": {}}
+    raw: dict = {}
     for key, days in WINDOWS.items():
         start = end - timedelta(days=days - 1)
         print(f"[{key}] {start} to {end}")
@@ -64,6 +65,7 @@ def main() -> None:
         outcomes = ga4_rows(start, end, ["sessionDefaultChannelGroup", "hostName", "landingPage", "eventName"],
                             ["totalUsers"], list(OUTCOME_EVENTS))
         time.sleep(5)
+        raw[key] = {"start": start.isoformat(), "end": end.isoformat(), "landing": landing, "outcomes": outcomes}
         grouped, dropped = group_landing(landing)
         oc = group_outcomes(outcomes, OUTCOME_EVENTS)
         cog = dl.stripe_charges_daily_by_amounts(start, end, COG_AMOUNTS, False)
@@ -86,7 +88,8 @@ def main() -> None:
               f"plus_sign_up {sum(r['users'] for r in w['outcomes'] if r['outcome'] == 'CT+ Sign Up'):,}; "
               f"stripe {w['stripe']}")
     (HERE / "data.json").write_text(json.dumps(out, indent=1))
-    print("saved", HERE / "data.json")
+    (HERE / "data_raw.json").write_text(json.dumps(raw, indent=0))
+    print("saved", HERE / "data.json", "and data_raw.json")
 
 
 if __name__ == "__main__":

@@ -20,7 +20,8 @@ SOURCE_MAP = {
 
 # Column 2: landing pages folded into families, in display order.
 PAGE_ORDER = ["Who Attracts You study", "Homepage", "Personality Test", "Rationality Test", "Other tools",
-              "Tools gallery", "Articles", "Coaching page", "CT+ page", "Cognitive Assessment page", "Podcast", "Other pages"]
+              "Tools gallery", "Articles", "Coaching page", "CT+ page", "Cognitive Assessment page", "Podcast", "Other pages",
+              "Unknown page"]
 
 
 def source_group(channel: str) -> str:
@@ -28,11 +29,13 @@ def source_group(channel: str) -> str:
 
 
 def page_family(host: str, path: str) -> str | None:
-    """None = not a web landing (the email-open pixel and server-side purchase events have no page)."""
+    """None = not a web session at all (the email-open pixel and server-side purchase events have no host)."""
     host = (host or "").strip()
     path = (path or "").strip()
-    if not host or host == "(not set)" or not path or path == "(not set)":
+    if not host or host == "(not set)":
         return None
+    if not path or path == "(not set)":
+        return "Unknown page"  # a real web session (host known) whose first hit was not a page view
     p = path.lower()
     if "who_attracts_you" in p:
         return "Who Attracts You study"
