@@ -6,6 +6,7 @@ import { ChannelsTab } from "./channels-tab";
 import { MonetizationTab } from "./monetization-tab";
 import { FunnelTab } from "./funnel-tab";
 import { PersonasTab } from "./personas-tab";
+import { FlowTab } from "./flow-tab";
 import { presetLabel } from "@/lib/format";
 import { buildCustomPeriod } from "@/lib/aggregate";
 import { PeriodEntry, PresetKey, Snapshot } from "@/lib/snapshot";
@@ -14,11 +15,12 @@ interface Props {
   snapshot: Snapshot;
 }
 
-type TabKey = "overview" | "funnel" | "channels" | "monetization" | "personas";
+type TabKey = "overview" | "funnel" | "flow" | "channels" | "monetization" | "personas";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "funnel", label: "Funnel" },
+  { key: "flow", label: "Flow" },
   { key: "channels", label: "Modules by Channel" },
   { key: "monetization", label: "Monetization" },
   { key: "personas", label: "Personas" },
@@ -162,6 +164,7 @@ export function Dashboard({ snapshot }: Props) {
         )}
         {tab === "overview" && <OverviewTab snapshot={snapshot} period={period} />}
         {tab === "funnel" && <FunnelTab period={period} snapshot={snapshot} />}
+        {tab === "flow" && <FlowTab period={period} />}
         {tab === "channels" && <ChannelsTab period={period} />}
         {tab === "monetization" && <MonetizationTab snapshot={snapshot} period={period} />}
         {tab === "personas" && <PersonasTab />}

@@ -26,7 +26,8 @@ SOURCE_COLORS_DARK = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#0
 
 
 def main() -> None:
-    data = json.loads((HERE / "data.json").read_text())
+    src = HERE / "data.json" if (HERE / "data.json").exists() else HERE / "data_interim.json"
+    data = json.loads(src.read_text())
     stamp = datetime.now().strftime("%Y-%m-%d %I:%M%p").replace("AM", "am").replace("PM", "pm")
     payload = {
         "windows": data["windows"],
@@ -35,6 +36,7 @@ def main() -> None:
         "colorsLight": SOURCE_COLORS_LIGHT,
         "colorsDark": SOURCE_COLORS_DARK,
         "fetched": data["fetched"],
+        "interimSessionSource": bool(data.get("interim_session_source")),
     }
     html = TEMPLATE.replace("__DATA__", json.dumps(payload)).replace("__STAMP__", stamp)
     OUT.write_text(html)
@@ -202,15 +204,16 @@ function model(w, showNone) {
   const sources = DATA.sourceOrder.filter(s => sp.has(s));
   const pages = DATA.pageOrder.filter(p => [...sp.values()].some(m => m.has(p)));
   const outcomes = ["Email Submitted", "CT+ Sign Up"].concat(showNone ? ["No tracked outcome"] : []);
-  const nodes = [...sources.map(n => ({ name: n, col: 0 })), ...pages.map(n => ({ name: n, col: 1 })), ...outcomes.map(n => ({ name: n, col: 2 }))];
-  const idx = new Map(nodes.map((n, i) => [n.name, i]));
+  // Node ids are column-prefixed: "Other" is both a source and a page, and d3-sankey must not see a loop.
+  const nodes = [...sources.map(n => ({ id: "s:" + n, name: n, col: 0 })), ...pages.map(n => ({ id: "p:" + n, name: n, col: 1 })), ...outcomes.map(n => ({ id: "o:" + n, name: n, col: 2 }))];
+  const idx = new Map(nodes.map((n, i) => [n.id, i]));
   const links = [];
-  for (const s of sources) for (const p of pages) { const v = sp.get(s)?.get(p) || 0; if (v > 0) links.push({ source: idx.get(s), target: idx.get(p), value: v, kind: "source", src: s }); }
+  for (const s of sources) for (const p of pages) { const v = sp.get(s)?.get(p) || 0; if (v > 0) links.push({ source: idx.get("s:" + s), target: idx.get("p:" + p), value: v, kind: "source", src: s }); }
   const pageUsers = new Map(pages.map(p => [p, d3.sum(sources, s => sp.get(s)?.get(p) || 0)]));
   for (const p of pages) {
     let tracked = 0;
-    for (const o of ["Email Submitted", "CT+ Sign Up"]) { const v = po.get(p)?.get(o) || 0; if (v > 0) { links.push({ source: idx.get(p), target: idx.get(o), value: v, kind: "outcome" }); tracked += v; } }
-    if (showNone) { const rest = Math.max(0, pageUsers.get(p) - tracked); if (rest > 0) links.push({ source: idx.get(p), target: idx.get("No tracked outcome"), value: rest, kind: "none" }); }
+    for (const o of ["Email Submitted", "CT+ Sign Up"]) { const v = po.get(p)?.get(o) || 0; if (v > 0) { links.push({ source: idx.get("p:" + p), target: idx.get("o:" + o), value: v, kind: "outcome" }); tracked += v; } }
+    if (showNone) { const rest = Math.max(0, pageUsers.get(p) - tracked); if (rest > 0) links.push({ source: idx.get("p:" + p), target: idx.get("o:No tracked outcome"), value: rest, kind: "none" }); }
   }
   const totals = { users, email: d3.sum(w.outcomes.filter(r => r.outcome === "Email Submitted"), r => r.users),
                    plus: d3.sum(w.outcomes.filter(r => r.outcome === "CT+ Sign Up"), r => r.users) };
@@ -223,6 +226,10 @@ function render() {
   const m = model(w, showNone);
   document.getElementById("sub").textContent = `${w.start} → ${w.end} · ${w.days} days · Mockup built __STAMP__ (GA4 + Stripe pulled ${DATA.fetched})`;
   document.querySelectorAll("#presets button").forEach(b => b.setAttribute("aria-selected", b.dataset.w === windowKey));
+  const missing = ["7d", "30d", "90d"].filter(k => !DATA.windows[k]);
+  document.querySelector(".mock-note").innerHTML = "Mockup for review, not the live dashboard: real GA4 and Stripe numbers, static HTML. The header and tab row are reproduced so the new tab can be judged in context."
+    + (missing.length ? ` The ${missing.join(" and ")} presets are disabled: GA4's API refused those pulls (backend errors, not our quota); the real tab carries every window.` : "")
+    + (DATA.interimSessionSource ? " <strong>Interim build:</strong> the source column still uses the SESSION channel; the first-touch (first-user channel) pull is being retried and will replace it." : "");
   document.querySelectorAll("#presets button[data-w]").forEach(b => { if (!DATA.windows[b.dataset.w]) { b.disabled = true; b.title = "GA4's hourly API quota was exhausted while building this mockup; the real tab carries every window."; } });
 
   // KPI row

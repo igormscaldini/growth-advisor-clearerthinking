@@ -37,6 +37,8 @@ _materialize_ci_secrets()
 # Imports happen after secret materialization so client modules see the files at import time.
 from data_layer import (  # noqa: E402
     beehiiv_avg_unique_opens_per_campaign,
+    ga4_flow_daily,
+    ga4_flow_ranges,
     beehiiv_daily_new_subscribers,
     beehiiv_daily_rates,
     beehiiv_engaged_readers,
@@ -191,6 +193,17 @@ def main() -> None:
         cm_res = f_cm.result()
         rc_res = f_rc.result()
         fp_res = f_fp.result()
+    # Flow tab: exact per-preset blocks (one set of multi-range queries, 8 requests) and daily rows for
+    # custom ranges (8 more). Each is a light date x first-user-channel report with the page rules as
+    # filters (flow_model.py); a failure leaves the tab showing "awaiting the next refresh".
+    preset_labels = list(PRESETS)
+    flow_blocks = _safe(ga4_flow_ranges, [(date.fromisoformat(periods[k]["start"]), date.fromisoformat(periods[k]["end"]))
+                                          for k in preset_labels])
+    if isinstance(flow_blocks, list):
+        for label, block in zip(preset_labels, flow_blocks):
+            periods[label]["current"]["flow"] = block
+    flow_daily = _safe(ga4_flow_daily, win_start, win_end)
+
     daily_window = {
         "start": win_start.isoformat(),
         "end": win_end.isoformat(),
@@ -199,6 +212,7 @@ def main() -> None:
         "campaign": cm_res if isinstance(cm_res, list) else [],
         "revenue_category": rc_res if isinstance(rc_res, list) else [],
         "funnel_by_page": fp_res if isinstance(fp_res, list) else [],
+        "flow": flow_daily if isinstance(flow_daily, list) else [],
     }
 
     # Current beehiiv list size — a snapshot value (same across all windows). Used as the anchor

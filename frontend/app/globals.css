@@ -12,10 +12,39 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Flow tab palette: validated categorical slots (dataviz skill reference instance) for the first-touch
+   sources in SOURCE_ORDER, with Other = gray; outcome bands green, untracked band light gray. */
+:root {
+  --flow-1: #2a78d6;
+  --flow-2: #eb6834;
+  --flow-3: #1baf7a;
+  --flow-4: #eda100;
+  --flow-5: #e87ba4;
+  --flow-6: #008300;
+  --flow-7: #6250d6;
+  --flow-8: #a1a1aa;
+  --flow-node: #3f3f46;
+  --flow-outcome: #16a34a;
+  --flow-none: #d4d4d8;
+  --flow-leader: #a1a1aa;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
+    --flow-1: #3987e5;
+    --flow-2: #d95926;
+    --flow-3: #199e70;
+    --flow-4: #c98500;
+    --flow-5: #d55181;
+    --flow-6: #008300;
+    --flow-7: #9085e9;
+    --flow-8: #71717a;
+    --flow-node: #d4d4d8;
+    --flow-outcome: #4ade80;
+    --flow-none: #3f3f46;
+    --flow-leader: #71717a;
   }
 }
 

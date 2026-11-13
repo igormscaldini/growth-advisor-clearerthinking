@@ -31,25 +31,45 @@ WINDOWS = {"30d": 30, "7d": 7, "90d": 90}  # 30d first: the review window
 OUTCOME_EVENTS = {"Submitted Email": "Email Submitted", "plus_sign_up": "CT+ Sign Up"}
 
 
-def ga4_rows(start: date, end: date, dims: list[str], metrics: list[str], event_names: list[str] | None = None) -> list[dict]:
-    from google.analytics.data_v1beta.types import DateRange, Dimension, Filter, FilterExpression, Metric, RunReportRequest
+def _run(start: date, end: date, dims: list[str], metrics: list[str], filt=None, limit: int = 50_000) -> list[dict]:
+    from google.analytics.data_v1beta.types import DateRange, Dimension, Metric, RunReportRequest
     from ga4_client import get_client, property_path
 
-    filt = None
-    if event_names:
-        filt = FilterExpression(filter=Filter(field_name="eventName", in_list_filter=Filter.InListFilter(values=event_names)))
     req = RunReportRequest(property=property_path(), date_ranges=[DateRange(start_date=str(start), end_date=str(end))],
                            dimensions=[Dimension(name=d) for d in dims], metrics=[Metric(name=m) for m in metrics],
-                           limit=100_000, dimension_filter=filt)
-    for attempt in range(8):
+                           limit=limit, dimension_filter=filt)
+    for attempt in range(4):
         try:
-            resp = get_client().run_report(req, timeout=240)
+            resp = get_client().run_report(req, timeout=120)
             return [dict(zip(dims, [v.value for v in r.dimension_values]),
                          **dict(zip(metrics, [float(v.value) for v in r.metric_values]))) for r in resp.rows]
-        except Exception as e:  # 429s and deadline errors: back off and retry
-            print(f"  GA4 attempt {attempt + 1} failed: {type(e).__name__}: {str(e)[:100]}", file=sys.stderr)
-            time.sleep(300)
-    raise RuntimeError("GA4 query failed after 8 attempts")
+        except Exception as e:  # 429s and backend errors: short back-off, then retry
+            print(f"  GA4 attempt {attempt + 1} failed ({dims}): {type(e).__name__}: {str(e)[:80]}", file=sys.stderr)
+            time.sleep(20 * (attempt + 1))
+    raise RuntimeError(f"GA4 query failed after 4 attempts: {dims}")
+
+
+def ga4_rows(start: date, end: date, dims: list[str], metrics: list[str], event_names: list[str] | None = None) -> list[dict]:
+    """The big (channel x host x page [x event]) report, fetched one first-user channel at a time: GA4 refused
+    the single query during the 2026-11-13 pull (429/503 while the quota was untouched), and a user has exactly
+    one first-user channel, so per-channel user counts add up exactly."""
+    from google.analytics.data_v1beta.types import Filter, FilterExpression, FilterExpressionList
+
+    channels = [r[CHANNEL_KEY] for r in _run(start, end, [CHANNEL_KEY], ["totalUsers"])]
+    rest = [d for d in dims if d != CHANNEL_KEY]
+    out: list[dict] = []
+    for ch in channels:
+        exprs = [FilterExpression(filter=Filter(field_name=CHANNEL_KEY, string_filter=Filter.StringFilter(value=ch)))]
+        if event_names:
+            exprs.append(FilterExpression(filter=Filter(field_name="eventName", in_list_filter=Filter.InListFilter(values=event_names))))
+        filt = FilterExpression(and_group=FilterExpressionList(expressions=exprs))
+        rows = _run(start, end, rest, metrics, filt)
+        for r in rows:
+            r[CHANNEL_KEY] = ch
+        out.extend(rows)
+        print(f"    {ch}: {len(rows)} rows", file=sys.stderr)
+        time.sleep(2)
+    return out
 
 
 def main() -> None:

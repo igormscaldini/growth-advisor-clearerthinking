@@ -83,6 +83,8 @@ export interface RevenueByCategory {
   other: number;
 }
 
+import type { FlowBlock, FlowDailyRow } from "./flow";
+
 export interface RangeSlice {
   ga4: Ga4Aggregates;
   ga4_daily: {
@@ -106,6 +108,8 @@ export interface RangeSlice {
   modules_by_campaign: { campaign: string; count: number }[];
   kw_pos: KwPosDaily;
   revenue_cat: RevenueByCategory;
+  /** Flow tab (first-touch source -> landing-page category -> outcome). Presets since 2026-11-13. */
+  flow?: FlowBlock;
 }
 
 export interface PeriodEntry {
@@ -161,6 +165,8 @@ export interface Snapshot {
     channel: { date: string; channel: string; count: number }[];
     campaign: { date: string; campaign: string; count: number }[];
     revenue_category: { date: string; subscriptions: number; pdf: number; cognitive: number; other: number }[];
+    /** Daily Flow rows for custom ranges (since 2026-11-13). */
+    flow?: FlowDailyRow[];
     funnel_by_page: {
       date: string;
       page: string;

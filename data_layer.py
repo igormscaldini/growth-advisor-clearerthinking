@@ -585,6 +585,83 @@ def gsc_keyword_position_daily(keyword: str, start: date, end: date) -> dict:
     }
 
 
+def _ga4_flow_report(date_ranges: list[tuple[date, date]], page_expr, events: Optional[list[str]] = None,
+                     daily: bool = False) -> list[dict]:
+    """One light Flow query: users by first-user channel (plus date when `daily`, plus eventName when
+    `events`) for the sessions whose landing page matches `page_expr` (a flow_model rule tree compiled
+    into the dimension filter, so GA4 never has to return the page-level report). Up to 4 date ranges per
+    request; rows carry `dateRange` ("date_range_0"...) when more than one is asked for."""
+    from google.analytics.data_v1beta.types import (
+        DateRange,
+        Dimension,
+        Filter,
+        FilterExpression,
+        FilterExpressionList,
+        Metric,
+        RunReportRequest,
+    )
+    from flow_model import CHANNEL_KEY, to_ga4_filter
+    from ga4_client import get_client, property_path
+
+    dims = ([ "date"] if daily else []) + [CHANNEL_KEY] + (["eventName"] if events else [])
+    exprs = [to_ga4_filter(page_expr)]
+    if events:
+        exprs.append(FilterExpression(filter=Filter(field_name="eventName", in_list_filter=Filter.InListFilter(values=events))))
+    resp = get_client().run_report(RunReportRequest(
+        property=property_path(),
+        date_ranges=[DateRange(start_date=str(s), end_date=str(e)) for s, e in date_ranges],
+        dimensions=[Dimension(name=d) for d in dims],
+        metrics=[Metric(name="totalUsers")],
+        dimension_filter=FilterExpression(and_group=FilterExpressionList(expressions=exprs)),
+        limit=100_000,
+    ), timeout=240)
+    names = dims + (["dateRange"] if len(date_ranges) > 1 else [])
+    return [dict(zip(names, [v.value for v in r.dimension_values]), totalUsers=int(r.metric_values[0].value))
+            for r in resp.rows]
+
+
+def ga4_flow_ranges(date_ranges: list[tuple[date, date]]) -> list[dict]:
+    """Flow blocks (flow_model.flow_block) for up to 4 date ranges at once: exact unique users per
+    (first-touch source, landing-page category) and per outcome. 8 requests in all."""
+    from collections import defaultdict
+
+    from flow_model import OUTCOME_EVENTS, PAGE_CATEGORIES, flow_block, fold_sources
+
+    landing: list[dict] = [defaultdict(dict) for _ in date_ranges]
+    outcomes: list[dict] = [defaultdict(lambda: defaultdict(dict)) for _ in date_ranges]
+    multi = len(date_ranges) > 1
+    for page, expr in PAGE_CATEGORIES.items():
+        rows = _ga4_flow_report(date_ranges, expr)
+        for i in range(len(date_ranges)):
+            sel = [r for r in rows if not multi or r["dateRange"] == f"date_range_{i}"]
+            landing[i][page] = fold_sources(sel)
+        rows = _ga4_flow_report(date_ranges, expr, events=list(OUTCOME_EVENTS))
+        for i in range(len(date_ranges)):
+            for ev, label in OUTCOME_EVENTS.items():
+                sel = [r for r in rows if r["eventName"] == ev and (not multi or r["dateRange"] == f"date_range_{i}")]
+                outcomes[i][page][label] = fold_sources(sel)
+    return [flow_block(landing[i], outcomes[i]) for i in range(len(date_ranges))]
+
+
+def ga4_flow_daily(start: date, end: date) -> list[dict]:
+    """Daily Flow rows for custom ranges: {date, source, page, users, email_submitted, plus_sign_up}.
+    Summing days overcounts a person active on several days, as the other daily series do."""
+    from collections import defaultdict
+
+    from flow_model import OUTCOME_EVENTS, PAGE_CATEGORIES, source_group
+
+    acc: dict[tuple[str, str, str], dict] = defaultdict(lambda: {"users": 0, "email_submitted": 0, "plus_sign_up": 0})
+    col = {"Submitted Email": "email_submitted", "plus_sign_up": "plus_sign_up"}
+    for page, expr in PAGE_CATEGORIES.items():
+        for r in _ga4_flow_report([(start, end)], expr, daily=True):
+            d = f"{r['date'][:4]}-{r['date'][4:6]}-{r['date'][6:]}"
+            acc[(d, source_group(r["firstUserDefaultChannelGroup"]), page)]["users"] += r["totalUsers"]
+        for r in _ga4_flow_report([(start, end)], expr, events=list(OUTCOME_EVENTS), daily=True):
+            d = f"{r['date'][:4]}-{r['date'][4:6]}-{r['date'][6:]}"
+            acc[(d, source_group(r["firstUserDefaultChannelGroup"]), page)][col[r["eventName"]]] += r["totalUsers"]
+    return [{"date": d, "source": s, "page": p, **v} for (d, s, p), v in sorted(acc.items())]
+
+
 @st.cache_data(ttl=CACHE_TTL, show_spinner=False)
 def ga4_modules_finished_by_campaign(start: date, end: date) -> list[dict]:
     """Count of 'Submitted Email' events grouped by sessionCampaignName."""

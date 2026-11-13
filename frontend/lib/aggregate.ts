@@ -9,6 +9,7 @@
 
 import { PeriodEntry, RangeSlice, Snapshot } from "./snapshot";
 import { daysBetween } from "./format";
+import { sliceFlowDaily } from "./flow";
 
 type DailyRow<K extends string> = { date: string } & Record<K, number>;
 
@@ -186,6 +187,7 @@ function buildSlice(snapshot: Snapshot, start: string, end: string): RangeSlice 
     modules_by_campaign: modulesByCampaign,
     kw_pos: { daily: kwDaily, avg_position: kwAvg, clicks: kwClicks, impressions: kwImps, keyword: win.kw_pos.keyword },
     revenue_cat: cat,
+    flow: snapshot.daily_window.flow ? sliceFlowDaily(snapshot.daily_window.flow, start, end) : undefined,
   };
 }
 
