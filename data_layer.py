@@ -16,7 +16,7 @@ load_dotenv()
 CACHE_TTL = 600  # 10 minutes
 
 # One-off Stripe charges that are sponsorship payments. The same money is already booked in
-# fetch_snapshot.MANUAL_REVENUE ("Newsletter Sponsorships"), so every Stripe revenue metric
+# fetch_snapshot.MANUAL_REVENUE ("Content Sponsorships"), so every Stripe revenue metric
 # skips these charges to avoid counting it twice. Add the charge id (Stripe dashboard >
 # Payments) whenever a sponsor pays through Stripe.
 SPONSORSHIP_CHARGE_IDS: dict[str, str] = {
