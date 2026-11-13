@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Do Newsletters Throttle Non-Openers</title>
+<style>
+:root{--fg:#1d2330;--muted:#5d6675;--line:#e3e6eb;--accent:#1f6feb;--warn:#b45309;--bg:#fff}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--fg);background:var(--bg);max-width:920px;margin:0 auto;padding:32px 16px 64px;line-height:1.55}
+h1{font-size:28px;margin:0 0 4px}h2{font-size:20px;margin:36px 0 10px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.sub{color:var(--muted);margin:0 0 24px}table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0 16px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--muted);font-weight:600}
+td.n{text-align:right;font-variant-numeric:tabular-nums}.box{border-left:4px solid var(--accent);background:#f5f8ff;padding:12px 16px;margin:16px 0}
+.warn{border-left-color:var(--warn);background:#fff8ef}code{background:#f2f3f5;padding:1px 4px;border-radius:3px;font-size:13px}
+ul{padding-left:20px}li{margin:4px 0}
+</style></head><body>
+<h1>Do they email less when you stop opening?</h1>
+<p class="sub">Marketing Brew, McKinsey &amp; Company and theSkimm, from the full headers of every email they sent to Igor's Gmail (967 + 2,265 + 3,222 messages) · Generated 2026-11-13 08:09am</p>
+
+<div class="box"><b>Answer: none of the three throttles you.</b> Igor has opened 1 to 13% of these emails in most years, and all three kept their full cadence through no-open stretches of 181 days (Marketing Brew), 439 days (McKinsey) and 1,083 days (theSkimm). What not opening does trigger is <i>extra</i> email: Marketing Brew sent one "confirm your subscription" message, McKinsey sent five "Are we sending you the right email?" messages, and Marketing Brew sends "FW:" resends to people who skipped a promo. On sender domains, theSkimm changed ESP once (2018) and kept its old From subdomain. McKinsey only rotated a DKIM key. Marketing Brew changed its From address and moved promos onto a separate subdomain on another ESP.</div>
+
+<h2>a. Volume while not opening</h2>
+<p>Method: each month's email count divided by that sender's median for the same calendar month across all years. That removes seasonal swings like summer lulls and year-end recaps. Months are grouped by how long it had been since Igor last opened one. 1.00 = a typical month. If they throttled, the ratio would fall as the gap grows.</p>
+<table><tr><th>Days since last open</th><th class="n">McKinsey (all)</th><th class="n">McKinsey topic alerts</th><th class="n">theSkimm</th></tr>
+<tr><td>0-30</td><td class="n">1.01 (33 mo)</td><td class="n">1.03</td><td class="n">1.32 (31 mo)</td></tr>
+<tr><td>31-90</td><td class="n">0.92 (24)</td><td class="n">0.93</td><td class="n">1.21 (28)</td></tr>
+<tr><td>91-180</td><td class="n">1.02 (15)</td><td class="n">0.98</td><td class="n">1.22 (25)</td></tr>
+<tr><td>181-365</td><td class="n">0.93 (6)</td><td class="n">0.84</td><td class="n">1.02 (16)</td></tr>
+<tr><td>Over a year</td><td class="n">1.37 (3)</td><td class="n">1.25</td><td class="n">0.95 (24)</td></tr></table>
+<ul>
+<li><b>McKinsey:</b> flat, within plus or minus 10% with no trend. During the longest no-open stretch (Jan 23, 2021 to Apr 8, 2022: 439 days) they sent 396 emails at the normal rate. There's one ambiguous episode. The topic alerts fell to 7 to 13 a month in Feb to May 2026, during a no-open stretch, and rose to 20 in June, right after Igor opened one on May 25. But the 2021 stretch, which was longer, caused no drop, and most of the decline is the newsletter lineup changing (Daily Read, Shortlist and Weekend Read were retired). So this is not evidence of a rule.</li>
+<li><b>theSkimm:</b> the falling ratio is a schedule artifact, not throttling. The "over a year" months are almost all 2019 to 2022, when the Daily Skimm ran on weekdays only, and in 2022 it went to 7 days a week. Since 2023 Igor has opened about 1% of issues, and the Daily Skimm arrived on 1,389 of 1,411 days. The 22 missing days are holidays (Memorial Day, July 4, Labor Day, Thanksgiving, Christmas, New Year's, MLK Day), Sundays in January 2023 before the Sunday edition existed, and 2 unexplained days (Dec 8, 2025 and Jun 30, 2026).</li>
+<li><b>Marketing Brew</b> (from the previous analysis): a scheduled issue arrived on 98 to 100% of send days at every length of no-open stretch.</li>
+</ul>
+
+<h2>Their reaction to non-opening: more email, not less</h2>
+<table><tr><th>Sender</th><th>What arrived</th><th>When</th></tr>
+<tr><td>McKinsey</td><td>"Are we sending you the right email? Take control of your inbox" (preference-center nudge)</td><td>5 times: Mar 13 and Sep 12, 2021, Oct 3, 2021, Jan 30 and Aug 14, 2022. Every one came 49 to 372 days after Igor's last open, and none have come since 2022.</td></tr>
+<tr><td>Marketing Brew</td><td>"Action Required: Confirm your subscription" plus "FW:" resends of promos to non-openers</td><td>Once, about 3 weeks into a new subscription (Feb 2023), and 14 resends between 2023 and 2025</td></tr>
+<tr><td>theSkimm</td><td>No re-engagement email found in the subject lines</td><td>Its song-lyric subject lines ("I still see your shadows…") make a keyword search unreliable, so this isn't conclusive</td></tr></table>
+
+<h2>b. Sender domain changes over time</h2>
+<table><tr><th>Sender</th><th>From address</th><th>Bounce / DKIM domain</th><th>ESP and sending hosts</th></tr>
+<tr><td><b>McKinsey</b></td><td><code>publishing@email.mckinsey.com</code> for every newsletter since Nov 2019. They vary the display name (Highlights, Top Ten, CEO Shortlist…), not the address.</td><td><code>email.mckinsey.com</code> throughout. DKIM selector <code>ep1</code> changed to <code>ep2</code> on Feb 25, 2022 (a key rotation, not a domain change).</td><td>Same host family (<code>pmx*.epsl*.com</code>, Epsilon) from 2019 to now. Surveys came from separate domains (<code>bounce.broadcast.mckinsey.com</code>, <code>executivepanel.mckinsey.com</code>).</td></tr>
+<tr><td><b>theSkimm</b></td><td>Daily: <code>dailyskimm@morning7.theskimm.com</code> since 2016 (the display name became "The Daily Skimm" in Feb 2023). Promos and spin-offs (Shopping, Sports, Well Played): <code>skimmhq@theskimm.com</code>, which grew from 25 to 39 a year to 123 in 2026.</td><td><b>Changed Oct 4, 2018:</b> <code>bounce.morning7.theskimm.com</code> became <code>bounce.theskimm.com</code>, and DKIM moved from <code>morning7.theskimm.com</code> to <code>theskimm.com</code>.</td><td><b>Changed ESP Oct 4, 2018:</b> from Salesforce Marketing Cloud (ExactTarget list IDs, their own <code>morning7</code> hosts) to Sailthru, with 8 dedicated hosts <code>theskimm-a</code> to <code>h.sailthru.com</code>. Two new hosts (<code>-i</code>, <code>-j</code>) were added in Oct 2026, which suggests more IPs.</td></tr>
+<tr><td><b>Marketing Brew</b></td><td><code>crew@morningbrew.com</code> became <code>marketingbrew@morningbrew.com</code> on Nov 11, 2025. Promos come from <code>crew@community.morningbrew.com</code>.</td><td><code>bounce.morningbrew.com</code> for the daily, and a separate one for promos</td><td>Sailthru on 4 dedicated IPs. Promos moved to SparkPost in May 2024.</td></tr></table>
+<p><b>Pattern across the three:</b> all of them keep the editorial From domain stable for years, and none of them hops domains. When they change, they change the ESP and DKIM underneath and leave the address readers see alone (theSkimm still sends from a <code>morning7.</code> subdomain eight years after leaving the ESP it was built for). Two of the three separate promotional mail onto another address or subdomain.</p>
+
+<div class="box warn"><b>Caveats.</b> One inbox, so these are the rules that applied to Igor, not each sender's full policy. "Opened" means Gmail's read flag. If this account is read in Apple Mail, those apps load images automatically, so the senders may have recorded opens Igor never made, and none of them would have treated him as inactive. Igor reads almost none of these, so a sender that sunsets only after, say, 2 years of zero opens <i>and</i> zero clicks could still exist. The data rules out any rule shorter than 181 days (Marketing Brew), 439 days (McKinsey) or 1,083 days (theSkimm) while the read flag is the signal.</div>
+</body></html>
