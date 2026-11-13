@@ -35,7 +35,6 @@ def main() -> None:
         "colorsLight": SOURCE_COLORS_LIGHT,
         "colorsDark": SOURCE_COLORS_DARK,
         "fetched": data["fetched"],
-        "only30d": bool(data.get("only_30d")),
     }
     html = TEMPLATE.replace("__DATA__", json.dumps(payload)).replace("__STAMP__", stamp)
     OUT.write_text(html)
@@ -153,17 +152,17 @@ TEMPLATE = r"""<!doctype html>
   <div class="wrap">
     <div class="mock-note">Mockup for review, not the live dashboard: real GA4 and Stripe numbers for the three date presets, static HTML. The header and tab row are reproduced so the new tab can be judged in context.</div>
     <h3>Flow</h3>
-    <p class="lead">Where unique users come from, which page they land on, and what they do: GA4 sessions in the window, grouped by traffic source and landing page, with the outcome events of those sessions. Hover any band or box for the numbers; switch to the table for every row.</p>
+    <p class="lead">How we first met each user, which page they landed on in the window, and what they did there: GA4 users grouped by first-touch acquisition channel and landing page, with the outcome events of those sessions. Hover any band or box for the numbers; switch to the table for every row.</p>
 
     <div class="kpis" id="kpis"></div>
 
     <div class="card">
       <div class="toolbar">
         <div class="seg" role="tablist"><button data-view="diagram" aria-selected="true">Diagram</button><button data-view="table" aria-selected="false">Table</button></div>
-        <label><input type="checkbox" id="showNone" checked> Show users with no tracked outcome</label>
+        <label><input type="checkbox" id="showNone"> Show users with no tracked outcome</label>
       </div>
       <div id="diagram">
-        <div class="cols"><span>Traffic source</span><span>Landing page</span><span>Outcome</span></div>
+        <div class="cols"><span>First-touch source</span><span>Landing page</span><span>Outcome</span></div>
         <svg id="sankey"></svg>
         <div class="legend" id="legend"></div>
       </div>
@@ -224,7 +223,7 @@ function render() {
   const m = model(w, showNone);
   document.getElementById("sub").textContent = `${w.start} → ${w.end} · ${w.days} days · Mockup built __STAMP__ (GA4 + Stripe pulled ${DATA.fetched})`;
   document.querySelectorAll("#presets button").forEach(b => b.setAttribute("aria-selected", b.dataset.w === windowKey));
-  if (DATA.only30d) document.querySelectorAll("#presets button[data-w]").forEach(b => { if (b.dataset.w !== "30d") { b.disabled = true; b.title = "GA4's hourly API quota was exhausted while building this mockup; the real tab carries every window."; } });
+  document.querySelectorAll("#presets button[data-w]").forEach(b => { if (!DATA.windows[b.dataset.w]) { b.disabled = true; b.title = "GA4's hourly API quota was exhausted while building this mockup; the real tab carries every window."; } });
 
   // KPI row
   const k = [
@@ -337,9 +336,9 @@ function drawNotes(w) {
   document.getElementById("notes").innerHTML = `
     <h4>How this is measured</h4>
     <ul>
-      <li><strong>Users</strong>: GA4 <code>totalUsers</code> by session default channel group and landing page (host + path). A person with sessions from two sources is counted under both. Sessions with no landing page are left out: in this window ${fmt(w.dropped_no_landing_page)} users, almost all the One Helpful Idea open pixel (<code>email_open</code>) and server-side purchase events.</li>
-      <li><strong>Traffic source</strong> folds GA4's channel groups: Paid Media = Paid Search, Paid Social, Paid Other, Display and Cross-network (Performance Max); Social = Organic Social + Organic Video; Other = Unassigned and the rest. Sources under 0.4% of users fold into Other; pages under 0.1% into Other pages. "Unknown page" = sessions on a known host whose first hit was not a page view (GA4 records no landing page).</li>
-      <li><strong>Landing page</strong> families: Who Attracts You study, Homepage, Personality Test (incl. the report page), Rationality Test, Cognitive Assessment page, Coaching page, CT+ page, Tools gallery, Articles (every /post/), Podcast, Other tools (other programs.* pages), Other pages. Top raw pages in this window: ${top}.</li>
+      <li><strong>Users</strong>: GA4 <code>totalUsers</code> by first-user default channel group (the channel of the user's first ever session, GA4's user-scoped acquisition) and the landing page of their sessions in the window (host + path). A person who landed on two pages is counted under both. Sessions that are not web visits are left out: in this window ${fmt(w.dropped_no_landing_page)} users, almost all the One Helpful Idea open pixel (<code>email_open</code>) and server-side purchase events.</li>
+      <li><strong>First-touch source</strong> folds GA4's channel groups: Paid Media = Paid Search, Paid Social, Paid Other, Display and Cross-network (Performance Max); Social = Organic Social + Organic Video; Other = Unassigned and the rest. Sources under 0.4% of users fold into Other.</li>
+      <li><strong>Landing page</strong> categories: Home = the www homepage; Articles = every /post/ page; Tools = the programs.* tool pages, the tools gallery and the www copy of the Who Attracts You study; Other = coaching and CT+ pages, podcast, list-management pages and sessions with no landing page recorded (first hit was not a page view). Top raw pages in this window: ${top}.</li>
       <li><strong>Email Submitted</strong> = users whose session fired GA4 "Submitted Email" (a tool finished, per GA4_EVENTS.md). <strong>CT+ Sign Up</strong> = users whose session fired <code>plus_sign_up</code> (the thank-you page of the sign-up flow). Stripe counts ${fmt(w.stripe.new_subscriptions)} new subscriptions in the window: the difference is sign-ups from the member dashboard, the article paywall and sessions GA4 could not tie to a page.</li>
       <li><strong>Cognitive Assessment and Personality PDF</strong> are Stripe sale counts. GA4 receives their purchase events from Paytics with source "(not set)", so they cannot be placed on a source or page until checkout carries the GA client id (the ct-checkout project). The <em>page</em> is known in principle (Cognitive page, Personality Test report); the <em>source</em> is not.</li>
       <li><strong>No tracked outcome</strong> = users of that landing page minus the two tracked outcomes (a user with both outcomes is counted in both, so this can be slightly low).</li>
@@ -348,14 +347,11 @@ function drawNotes(w) {
     <ul>
       <li>Daily rows (date × source × page × outcome) in the snapshot, so This month, Year to date and custom ranges slice client-side like every other tab; about 60k small rows for the 2026 window.</li>
       <li>A click on a page node to open the Funnel tab filtered to that page; a click on a source to filter the table.</li>
-      <li>Optional fourth column "Tool started" (Accepted Privacy Policy) between landing page and outcome, if the drop-off inside tools matters here.</li>
     </ul>
     <h4>Open questions for this round</h4>
     <ul>
-      <li>Session source (shown) or first-touch user acquisition (<code>firstUserDefaultChannelGroup</code>)? Session source answers "what brought this visit"; first-touch answers "how did we first meet them".</li>
-      <li>Keep the "No tracked outcome" band (shows scale honestly, makes conversions look thin) or hide it by default (toggle above)?</li>
-      <li>Page families: right level of detail? Each family can be split or merged.</li>
-      <li>Outcomes: add "Tool started", coaching button clicks, or newsletter clicks as outcomes?</li>
+      <li>Stripe-only outcomes: keep the dashed boxes until purchases carry the GA client id, or drop them from this tab?</li>
+      <li>Decided 2026-11-13: first-touch source, the no-outcome band off by default (toggle above), four page categories, no extra outcomes, no fourth column.</li>
     </ul>`;
 }
 

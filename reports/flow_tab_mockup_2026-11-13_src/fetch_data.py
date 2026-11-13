@@ -1,4 +1,4 @@
-"""Pull the Flow mockup's data: GA4 users by session channel x landing page (and the outcome events
+"""Pull the Flow mockup's data: GA4 users by first-user channel x landing page (and the outcome events
 by the same split) for the last 7, 30 and 90 days, plus Stripe sale counts for the same windows.
 Writes data.json beside this file (aggregates only).
 
@@ -25,9 +25,9 @@ logging.disable(logging.WARNING)
 
 import data_layer as dl  # noqa: E402
 from fetch_snapshot import COG_AMOUNTS, PERSONALITY_AMOUNTS  # noqa: E402
-from flow_model import group_landing, group_outcomes  # noqa: E402
+from flow_model import CHANNEL_KEY, group_landing, group_outcomes  # noqa: E402
 
-WINDOWS = {"7d": 7, "30d": 30, "90d": 90}
+WINDOWS = {"30d": 30, "7d": 7, "90d": 90}  # 30d first: the review window
 OUTCOME_EVENTS = {"Submitted Email": "Email Submitted", "plus_sign_up": "CT+ Sign Up"}
 
 
@@ -53,16 +53,22 @@ def ga4_rows(start: date, end: date, dims: list[str], metrics: list[str], event_
 
 
 def main() -> None:
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--windows", default=",".join(WINDOWS), help="comma-separated subset of 30d,7d,90d")
+    a = ap.parse_args()
     today = date.today()
     end = today - timedelta(days=1)
-    out = {"fetched": today.isoformat(), "windows": {}}
-    raw: dict = {}
-    for key, days in WINDOWS.items():
+    existing = json.loads((HERE / "data.json").read_text()) if (HERE / "data.json").exists() else {}
+    raw = json.loads((HERE / "data_raw.json").read_text()) if (HERE / "data_raw.json").exists() else {}
+    out = {"fetched": today.isoformat(), "windows": existing.get("windows", {}), "channel_key": CHANNEL_KEY}
+    for key in a.windows.split(","):
+        days = WINDOWS[key]
         start = end - timedelta(days=days - 1)
         print(f"[{key}] {start} to {end}")
-        landing = ga4_rows(start, end, ["sessionDefaultChannelGroup", "hostName", "landingPage"], ["totalUsers"])
+        landing = ga4_rows(start, end, [CHANNEL_KEY, "hostName", "landingPage"], ["totalUsers"])
         time.sleep(5)
-        outcomes = ga4_rows(start, end, ["sessionDefaultChannelGroup", "hostName", "landingPage", "eventName"],
+        outcomes = ga4_rows(start, end, [CHANNEL_KEY, "hostName", "landingPage", "eventName"],
                             ["totalUsers"], list(OUTCOME_EVENTS))
         time.sleep(5)
         raw[key] = {"start": start.isoformat(), "end": end.isoformat(), "landing": landing, "outcomes": outcomes}
@@ -82,13 +88,13 @@ def main() -> None:
                 ({"host": r["hostName"], "path": r["landingPage"], "users": int(r["totalUsers"])} for r in landing),
                 key=lambda r: -r["users"])[:40],
         }
+        (HERE / "data.json").write_text(json.dumps(out, indent=1))
+        (HERE / "data_raw.json").write_text(json.dumps(raw, indent=0))
         w = out["windows"][key]
         print(f"  users {sum(r['users'] for r in w['landing']):,} (dropped {dropped:,} with no landing page); "
               f"email {sum(r['users'] for r in w['outcomes'] if r['outcome'] == 'Email Submitted'):,}; "
               f"plus_sign_up {sum(r['users'] for r in w['outcomes'] if r['outcome'] == 'CT+ Sign Up'):,}; "
               f"stripe {w['stripe']}")
-    (HERE / "data.json").write_text(json.dumps(out, indent=1))
-    (HERE / "data_raw.json").write_text(json.dumps(raw, indent=0))
     print("saved", HERE / "data.json", "and data_raw.json")
 
 
