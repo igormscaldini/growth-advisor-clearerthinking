@@ -13,8 +13,9 @@
 -- 2. In GuidedTrack: Settings -> Branding, set "Email display name" to "Clearer Thinking"
 --    and the Reply-To address, so the email does not arrive from the program name.
 -- 3. Share the run link with ?src=newsletter, ?src=social, etc. src is saved per sign-up.
--- 4. Accountability pairs: filter the data export on accountabilityOptIn = 1. The column
---    projectToWorkOn helps match people with similar projects.
+-- 4. Accountability pairs: filter the data export on accountabilityOptIn = 1 and match within partnerGender
+--    (man/woman). Intros go out on the 1st of Dec, Jan and Feb (a new partner each time), with conversation
+--    starters and tips. projectToWorkOn helps match people with similar projects.
 -- 5. Unlike the career workshop, there is NO live Google Sheet sync: the /api/workshop-signup
 --    endpoint writes to the career workshop's sheet. The GT data export has every field.
 -- 6. Embedded at programs.clearerthinking.org/procrastination-workshop-with-spencer-greenberg/
@@ -40,12 +41,12 @@
 >> workshopSubtitle = "Learn and apply research-backed techniques to finally get going on personal and professional projects."
 >> workshopDate = "Tuesday, November 24"
 >> workshopTime = "12:30 to 1:30 pm Eastern Time (9:30 am Pacific, 5:30 pm UK)"
->> joinLinkKnown = 0
->> workshopJoinLink = ""
->> workshopMeetingId = ""
->> workshopPasscode = ""
+>> joinLinkKnown = 1
+>> workshopJoinLink = "https://us06web.zoom.us/j/82477443557?pwd=NZzaMDf6cUkEaDSEUQ5dMbUqkVlvL8.1"
+>> workshopMeetingId = "824 7744 3557"
+>> workshopPasscode = "443579"
 -- Google Calendar link: 17:30 to 18:30 UTC (EST is UTC-5 in late November). Use + for spaces.
->> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Overcoming+Procrastination+(Clearer+Thinking+workshop)&dates=20261124T173000Z/20261124T183000Z&details=Free+live+online+workshop+from+Clearer+Thinking+with+Spencer+Greenberg.+We'll+email+the+Zoom+link+before+the+session."
+>> calendarLink = "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Overcoming+Procrastination+(Clearer+Thinking+workshop)&dates=20261124T173000Z/20261124T183000Z&details=Free+live+online+workshop+from+Clearer+Thinking+with+Spencer+Greenberg.+Join+Zoom+Meeting:+https://us06web.zoom.us/j/82477443557?pwd=NZzaMDf6cUkEaDSEUQ5dMbUqkVlvL8.1+(Meeting+ID+824+7744+3557,+passcode+443579).&location=https://us06web.zoom.us/j/82477443557?pwd=NZzaMDf6cUkEaDSEUQ5dMbUqkVlvL8.1"
 >> facilitatorName = "Spencer Greenberg"
 >> facilitatorLine = "Founder of ClearerThinking.org"
 >> icsLink = "https://programs.clearerthinking.org/procrastination-workshop-with-spencer-greenberg/overcoming-procrastination.ics"
@@ -157,8 +158,8 @@
 *component
 	*classes: ct-callout ct-pair
 	*html
-		<p><b>Optional: an accountability partner.</b> When you sign up, you can choose to be paired with another participant after the workshop, so you can keep each other on track with your projects.</p>
-		<p>Each month for six months, we'll introduce you by email to a new partner. We only make the introductions; the rest is up to the two of you. The only thing we share with your partner is your email address. It's entirely optional.</p>
+		<p><b>Optional: an accountability partner.</b> Want someone in your corner after the workshop? Say yes when you sign up, and on the 1st of each month for three months, starting December 1, we'll introduce you by email to a new participant who is also working on a project. Men are paired with men, and women with women.</p>
+		<p>The intro email comes with a few conversation starters and tips on how to get the most out of an accountability partner. After that, it's up to the two of you: a quick check-in message, a call, or nothing at all. There's no obligation, and it's no big deal: it's simply an introduction. The only thing we share with your partner is your email address.</p>
 
 *html
 	<h2 class="ct-h2">Who it's for</h2>
@@ -241,7 +242,7 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 		*save: signupFirstName
 
 	*question: Would you like an accountability partner after the workshop?
-		*tip: Optional and free. Each month for six months, we'll introduce you by email to a new participant, so you can keep each other on track.
+		*tip: Optional and free. On the 1st of each month for three months, starting December 1, we'll introduce you by email to a new participant (men with men, women with women), with a few conversation starters and tips. No obligation: it's just an introduction.
 		*save: accountabilityPair
 		Yes, pair me with someone
 		No, thanks
@@ -301,6 +302,56 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 *if: accountabilityPair = "Yes, pair me with someone"
 	>> accountabilityOptIn = 1
 
+-- Accountability partners: men are paired with men and women with women, so opt-ins get one extra page.
+-- Everyone else skips it. "I'd rather not be paired after all" turns the opt-in off.
+>> partnerGender = ""
+*if: accountabilityOptIn = 1
+	*page
+		*html
+			<style>
+				.program_container .main { max-width: 640px; margin-left: auto; margin-right: auto; padding-top: 28px; padding-bottom: 96px; }
+				@media (max-width: 767px) { .program_container .main { padding-top: 64px; padding-left: 20px; padding-right: 20px; } }
+				.program_container p { font-size: 17px; line-height: 1.6; color: #2a2a2a; font-weight: 400; margin: 0 0 14px 0; }
+				.program_container a { color: #0A6FD6; text-decoration: underline; overflow-wrap: anywhere; word-break: break-word; }
+				.program_container .btn { background-color: #0885F8; border: none; border-radius: 8px; padding: 15px 30px; font-size: 19px; font-weight: 700; color: #fff; }
+				.program_container .btn:hover, .program_container .btn:focus { background-color: #0A6FD6; border: none; color: #fff; }
+				.program_container .btn:focus-visible { outline: 3px solid #0A6FD6; outline-offset: 3px; }
+				@media (min-width: 600px) { .program_container .btn.btn-block { display: inline-block; width: auto; min-width: 300px; } }
+				.program_container .ct-brandrow { display: flex; align-items: center; gap: 10px; margin: 0 0 22px 0; }
+				.program_container .ct-logo { display: inline-block; width: 30px; height: 30px; background-image: url("https://media.beehiiv.com/cdn-cgi/image/format=auto,fit=scale-down,onerror=redirect/uploads/publication/logo/d0ed5a5f-0bca-4054-ab2c-73fd51707f71/Logo-01.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }
+				.program_container .ct-wordmark { font-size: 15px; font-weight: 700; color: #1a1a1a; letter-spacing: 0.01em; }
+				.program_container:has(#ct-logo) .ct-brandrow { display: none; }
+				.program_container h1.ct-title { color: #1a1a1a !important; font-size: 30px !important; line-height: 1.2 !important; font-weight: 700 !important; letter-spacing: -0.01em; margin: 0 0 10px 0 !important; }
+				@media (max-width: 480px) { .program_container h1.ct-title { font-size: 28px !important; } }
+				.program_container .prompt { font-size: 17px; font-weight: 600; color: #1a1a1a; }
+				.program_container .tip { color: #6b7380; font-size: 15px; line-height: 1.45; }
+				.program_container .form-control { border-radius: 8px; border: 1px solid #cfd6e0; padding: 12px 14px; height: auto; font-size: 17px; box-shadow: none; }
+				.program_container .form-control:focus { border-color: #0885F8; box-shadow: 0 0 0 3px rgba(8,133,248,0.22); outline: none; }
+				.program_container li.answer { border: 1px solid #dfe6f0; border-radius: 8px; margin-bottom: 8px; }
+				.program_container li.answer:hover, .program_container li.answer:focus-within { border-color: #0885F8; }
+				.program_container .ct-warn { border: 1px solid #f3c98b !important; border-radius: 10px !important; box-shadow: none !important; background: #fff7ea !important; padding: 12px 16px !important; margin: 0 0 18px 0 !important; }
+				.program_container .ct-warn p { margin: 0; font-size: 16px; color: #6b4a12; }
+			</style>
+
+		*html
+			<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
+			<h1 class="ct-title">One more thing for your accountability partner</h1>
+
+		We pair men with men and women with women. Which describes you?
+
+		*question: I am a...
+			*save: partnerGenderAnswer
+			Man
+			Woman
+			I'd rather not be paired after all
+
+	*if: partnerGenderAnswer = "Man"
+		>> partnerGender = "man"
+	*if: partnerGenderAnswer = "Woman"
+		>> partnerGender = "woman"
+	*if: partnerGenderAnswer = "I'd rather not be paired after all"
+		>> accountabilityOptIn = 0
+
 --------------------------------------------------------------------------------
 -- CONFIRMATION EMAIL
 --------------------------------------------------------------------------------
@@ -330,8 +381,8 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 >> emailPairLine = "You chose not to be paired with an accountability partner. If you change your mind, reply to this email."
 >> afterSessionText = "if you'd like an accountability partner after all, reply to your confirmation email and we'll add you."
 *if: accountabilityOptIn = 1
-	>> emailPairLine = "You asked to be paired with an accountability partner. After the workshop, and then each month for six months, we'll introduce you by email to a new participant. We only make the introductions; the rest is up to the two of you. If you change your mind, reply to this email."
-	>> afterSessionText = "we'll introduce you by email to your first accountability partner, then to a new partner each month, for six months. We only share your email address."
+	>> emailPairLine = "You asked for an accountability partner. On the 1st of each month for three months, starting December 1, we'll introduce you by email to a new participant (men are paired with men, women with women). The intro email comes with a few conversation starters and tips on using an accountability partner. There's no obligation: we only make the introduction, and the rest is up to the two of you. If you change your mind, reply to this email."
+	>> afterSessionText = "on December 1 we'll introduce you by email to your first accountability partner, with a few conversation starters and tips, and then to a new partner on January 1 and February 1. No obligation: it's just an introduction."
 
 *email
 	*to: {signupEmail}
