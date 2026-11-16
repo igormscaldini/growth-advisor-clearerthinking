@@ -159,7 +159,8 @@
 	*classes: ct-callout ct-pair
 	*html
 		<p><b>Optional: an accountability partner.</b> Want someone in your corner after the workshop? Say yes when you sign up, and on the 1st of each month for three months, starting December 1, we'll introduce you by email to a new participant who is also working on a project. Men are paired with men, and women with women.</p>
-		<p>The intro email comes with a few conversation starters and tips on how to get the most out of an accountability partner. After that, it's up to the two of you: a quick check-in message, a call, or nothing at all. There's no obligation, and it's no big deal: it's simply an introduction. The only thing we share with your partner is your email address.</p>
+		<p>The intro email comes with a few conversation starters and tips on how to get the most out of an accountability partner. After that, it's up to the two of you: a quick check-in message, a call, or nothing at all. There's no obligation, and it's no big deal: it's simply an introduction.</p>
+		<p>The only thing we share with your partner is your email address, and you can sign up with any address you like (for example, one you keep for sign-ups). You can opt out at any time, no explanation needed. And if anyone ever makes you uncomfortable, just stop replying and let us know: we'll remove them from future pairings.</p>
 
 *html
 	<h2 class="ct-h2">Who it's for</h2>
@@ -235,14 +236,8 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 		*placeholder: you@example.com
 		*save: signupEmail
 
-	*question: First name (optional)
-		*type: text
-		*blank
-		*placeholder: Your first name
-		*save: signupFirstName
-
 	*question: Would you like an accountability partner after the workshop?
-		*tip: Optional and free. On the 1st of each month for three months, starting December 1, we'll introduce you by email to a new participant (men with men, women with women), with a few conversation starters and tips. No obligation: it's just an introduction.
+		*tip: Optional and free. On the 1st of each month for three months, starting December 1, we'll introduce you by email to a new participant (men with men, women with women), with a few conversation starters and tips. No obligation: it's just an introduction. We only share your email address, so feel free to use any address you like above, such as one you keep for sign-ups. You can opt out at any time, no explanation needed.
 		*save: accountabilityPair
 		Yes, pair me with someone
 		No, thanks
@@ -251,7 +246,7 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 		*type: paragraph
 		*blank
 		*placeholder: e.g., Finishing my portfolio, starting a newsletter, my thesis
-		*tip: You'll work on it during the session. If you opted in above, it also helps us pair you well.
+		*tip: You'll work on it during the session. If you asked for a partner, we'll use it only to pair you with someone likely to be a good fit, and we won't show it to them. Whether you tell your partner about your project is entirely up to you.
 		*save: projectToWorkOn
 
 	*question: Anything you'd like to ask Spencer in the Q&A? (optional)
@@ -355,15 +350,6 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 --------------------------------------------------------------------------------
 -- CONFIRMATION EMAIL
 --------------------------------------------------------------------------------
->> greetingName = ""
->> headingName = ""
->> hasFirstName = 0
-*if: signupFirstName
-	*if: signupFirstName.size > 0
-		>> hasFirstName = 1
-*if: hasFirstName = 1
-	>> greetingName = " {signupFirstName}"
-	>> headingName = ", {signupFirstName}"
 
 -- Where-to-join lines for the email and the confirmation page. Empty Zoom lines until known.
 >> emailWhereLine = "Online, on Zoom. We'll email you the link to join before the session."
@@ -388,7 +374,7 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 	*to: {signupEmail}
 	*subject: You're registered: {workshopTitle}
 	*body
-		Hi{greetingName},
+		Hi,
 
 		You're registered for *{workshopTitle}*, a free live workshop from Clearer Thinking with {facilitatorName}.
 
@@ -444,7 +430,7 @@ Sign up below. You'll get a confirmation email right away, and the link to join 
 
 *html
 	<div class="ct-brandrow"><span class="ct-logo"></span><span class="ct-wordmark">Clearer Thinking</span></div>
-	<h1 class="ct-title">You're registered{headingName}.</h1>
+	<h1 class="ct-title">You're registered.</h1>
 
 A confirmation is on its way to {signupEmail}. If it isn't there in a few minutes, check your spam folder and mark it as not spam so the link to join doesn't end up there too.
 
