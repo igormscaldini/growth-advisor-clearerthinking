@@ -201,8 +201,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   research agents' JSON + an overrides file (both scratchpad-only, they hold named people's emails); sheet id in the memory note.
 - `reports/year_end_appeal_theories_of_change_2026-10-19_src/`: donor-facing theories of change for the two 2027
   projects (free AI advisor, critical-thinking games) for the year-end donation email; `theories_of_change.md` is the
-  source, `render.py` builds the HTML and copies the Markdown to `~/Downloads`. Donations are NOT tax-deductible
-  (not a 501(c)(3), per the support page): say so in any appeal or arrange a fiscal sponsor first.
+  source, `render.py` builds the HTML and copies the Markdown to `~/Downloads`. Tax: CT is not a 501(c)(3); the support
+  page (checked 2026-11-16) says gifts under $1,000 are not tax-deductible and larger donors should email info@ for a
+  tax-deductible route (mechanism unconfirmed): say so in any appeal.
 - `newsletter_editions.py`: the one classifier of beehiiv sends into regular EDITIONS (One Helpful Idea + main article
   newsletter; same-US-Eastern-day sends summed, promos/reminders/debriefs/tests dropped by subject or internal title, 100k+
   readers, 15%+ opens). Powers the "Average Unique Opens Per Campaign" goal (`beehiiv_avg_unique_opens_per_campaign`, rolling
