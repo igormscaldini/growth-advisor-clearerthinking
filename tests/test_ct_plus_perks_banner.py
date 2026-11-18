@@ -104,11 +104,15 @@ def test_reflow_without_the_deck(original):
     # Left and right of the two cards there is only background and shadow, and the picture is symmetric there.
     left_of_cards = new[pb.ROW_TOP[2] + 40:pb.ROW_TOP[2] + pb.CARD_H - 40, :pb.card_columns(2)[0] - 30]
     assert (left_of_cards == pb.BG).all()
-    # No pixel outside a card is lighter than the background (no white seams).
+    # Outside the cards there is nothing lighter than the background (no white seams) and nothing darker than
+    # the darkest shadow of the original (no black bars); far from any card it is plain background.
     outside = np.ones(new.shape[:2], dtype=bool)
     for x in pb.card_columns(2):
         outside[pb.ROW_TOP[2] - 1:pb.ROW_TOP[2] + pb.CARD_H + 1, x:x + pb.W] = False
-    assert new[pb.GAP_TOP:][outside[pb.GAP_TOP:]].max() <= pb.BG
+    region = new[pb.GAP_TOP:][outside[pb.GAP_TOP:]]
+    assert region.max() <= pb.BG
+    assert region.min() >= original[pb.ROW_TOP[2] + pb.CARD_H + 1:].min()
+    assert (new[pb.GAP_TOP:, :90] == pb.BG).all() and (new[pb.GAP_TOP:, -90:] == pb.BG).all()
 
 
 def test_shadows_between_rows_add_up_to_within_a_few_grey_levels(original):

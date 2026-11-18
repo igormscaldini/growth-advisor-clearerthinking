@@ -53,8 +53,9 @@ WRAP_UP, EARLY_ACCESS, TSHIRT = (2, 0), (2, 1), (2, 2)
 
 
 def compose_row(band, keep):
-    """Return `band` (rows x width x channels, one 3-tile row with its shadows) holding only the tiles whose
-    column index is in `keep`, in that order, centred, each edge with the shadow the original draws there."""
+    """Return `band` (rows x width x channels of pixel values, one 3-tile row with its shadows) holding only the
+    tiles whose column index is in `keep`, in that order, centred, each edge with the shadow the original draws
+    there. The freed space is filled with the background grey."""
     pieces = [band[:, :X[0] + STRIP]]                                  # canvas edge .. left margin of a card
     for n, col in enumerate(keep):
         if n:
@@ -98,17 +99,16 @@ def reflow(rgb, row2, row3):
 
     # Rows between row 2 and row 3: swap the old row 3's upper shadow for the new one's.
     gap = slice(GAP_TOP, ROW_TOP[2])
-    top_shadow = BG - rgb[GAP_TOP - TOP_SHADOW_SHIFT:ROW_TOP[2] - TOP_SHADOW_SHIFT]
-    new[gap] = np.clip(rgb[gap] + top_shadow - compose_row(top_shadow, keep), 0, BG)
+    above_row1 = rgb[GAP_TOP - TOP_SHADOW_SHIFT:ROW_TOP[2] - TOP_SHADOW_SHIFT]     # 3 tiles' upper shadow, clean
+    new[gap] = np.clip(rgb[gap] - above_row1 + compose_row(above_row1, keep), 0, BG)
 
     # Row 3 and everything below it: the composed row, plus the last traces of row 2's lower shadow where it is
     # no longer covered by a card (2 grey levels at most).
     below = slice(ROW_TOP[2], height)
     composed = compose_row(rgb[below], keep)
-    row2_trace = np.zeros_like(composed)
-    n = height - ROW_TOP[2] - ROW_STEP
-    row2_trace[:n] = BG - rgb[ROW_TOP[2] + ROW_STEP:]          # the same shadow, seen clean below row 3
-    shadow = np.clip((BG - composed) - compose_row(row2_trace, keep) + row2_trace, 0, BG)
+    below_row3 = np.full_like(composed, BG)                    # the same lower shadow, seen clean below row 3
+    below_row3[:height - ROW_TOP[2] - ROW_STEP] = rgb[ROW_TOP[2] + ROW_STEP:]
+    shadow = np.clip((BG - composed) - (BG - compose_row(below_row3, keep)) + (BG - below_row3), 0, BG)
     in_card = np.zeros(composed.shape[:2], dtype=bool)
     for x in card_columns(len(keep)):
         in_card[:CARD_H + 1, x:x + W] = True                   # + the anti-aliased bottom row
