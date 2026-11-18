@@ -1,56 +1,90 @@
-"""New beehiiv subscribers per month in 2026, with Ads (cpc) and the Who Attracts You study taken out.
+"""New beehiiv subscribers per month in 2026, with Ads and the Who Attracts You study taken out.
 
     .venv/bin/python reports/subscribers_by_month_2026-11-18_src/analysis.py
 
-Reads data/subscriptions.jsonl (from fetch_data.py), writes datapoints.json. Every rule that decides which
-bucket a subscriber falls in lives in this file; build_report.py only renders.
+Reads data/subscriptions.jsonl (fetch_data.py) and cross_checks.json (fetch_cross_checks.py), writes
+datapoints.json. Every rule that decides which bucket a subscriber falls in lives in this file;
+report_notes.py and build_report.py only word and render the result.
 
 How a record is read
-- beehiiv keeps, per subscriber, the tools they finished (`Tools Tried (Pipe-Separated)`) and the UTM
-  medium of each of those visits (`UTM Media (Comma-Separated)`), both in the order they happened. The
-  FIRST entry is therefore the visit that created the subscriber: later entries are an existing reader
-  coming back, which is not where the subscriber came from. Between 2026-09-29 and 2026-10-08 the tools
-  wrote these lists with a leading separator ("|Who Attracts You", ",cpc"), so empty entries are skipped.
 - Month = the UTC month of beehiiv's `created` (the day the record entered beehiiv), the same clock the
-  dashboard uses.
+  dashboard uses. The walk is cut at END so the last month is a clean "through Nov 17".
 - A record whose status is "invalid" (the address failed beehiiv's validation or hard-bounced) is not a
   subscriber and is left out of every count, as beehiiv's own growth report does: with them removed the
   walk reproduces beehiiv's daily "subscribed" figure to the record (cross_check.py).
+- beehiiv keeps, per subscriber, the tools they finished (`Tools Tried (Pipe-Separated)`) and the UTM
+  medium of each of those visits (`UTM Media (Comma-Separated)`), both in the order they happened. The
+  FIRST entry is the visit that created the subscriber; later entries are an existing reader coming back,
+  which is not where the subscriber came from. Some writers left a leading separator ("|Who Attracts You",
+  ",cpc": the Sep uploads and the tools from Sep 29 to Oct 8), so empty entries are skipped.
+- Those two lists only describe the sign-up visit for records created AFTER the tools started writing
+  them (measured hour by hour in the walk): UTM media from 2026-03-27 15:00 UTC, the tools list from
+  2026-03-31 10:00 UTC. On an older record their first entry is a later visit, so:
+    * nobody created before TOOLS_FROM is counted as coming from the study (the older tools field, which
+      did record the sign-up tool from Mar 10, never names the study);
+    * ad sign-ups created before MEDIA_FROM cannot be seen on the record and are ESTIMATED from GA4:
+      "Submitted Email" events in cpc sessions on CT's own tool pages, times the share of such events
+      that became a new tagged subscriber once tagging existed (calibration window CAL).
+- Partner ad campaigns (MailList Accelerator: BlueDot, ACE, FarmKind, HIP, Hive) arrive with an
+  `MLA Tags` value and no tool of their own. Those pages are fed by paid campaigns (98% google/cpc in GA4
+  in Jan-Feb, Meta paid social later), so they count as Ads, in their own bucket.
+- The upload of 2026-01-01 01:15 UTC can only hold people who signed up in December 2025 (tools did not
+  write to beehiiv directly until Mar 10; sign-ups were uploaded in batches). It is set aside as backlog.
 """
 import json
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 HERE = Path(__file__).parent
 DATA = HERE / "data" / "subscriptions.jsonl"
+CROSS = HERE / "cross_checks.json"
 OUT = HERE / "datapoints.json"
+UTC = timezone.utc
+
+END = datetime(2026, 11, 18, tzinfo=UTC)             # exclusive: the report covers Jan 1 to Nov 17
+BACKLOG_UNTIL = datetime(2026, 1, 1, 2, tzinfo=UTC)  # the Jan 1 01:15 UTC upload of December sign-ups
+API_FROM = datetime(2026, 3, 10, tzinfo=UTC)         # tools create subscribers directly; last batch Mar 9
+MEDIA_FROM = datetime(2026, 3, 27, 15, tzinfo=UTC)   # tools write each visit's UTM medium
+TOOLS_FROM = datetime(2026, 3, 31, 10, tzinfo=UTC)   # tools write the ordered tools list
+CAL = (date(2026, 3, 28), date(2026, 4, 30))         # first full days with tags: calibrates the estimate
+# Months whose GA4 ad-session counts are unusable for the low/high ratio: GA4 recorded nothing on the
+# UPT pages from Jul 22 to Aug 10, 2026, while its ad campaign kept producing subscribers.
+RATIO_SKIP_MONTHS = ("2026-07", "2026-08")
 
 STUDY_TOOL = "who attracts you"
-ADS_MEDIUM = "cpc"
+ADS_MEDIA = {"cpc", "paid_social"}
 TOOLS_FIELD = "Tools Tried (Pipe-Separated)"
+OLD_TOOLS_FIELD = "Tools Tried (DEPRECATED)"
 MEDIA_FIELD = "UTM Media (Comma-Separated)"
+MLA_FIELD = "MLA Tags (Comma-Separated)"
 DATING_FIELD = "Dating App Updates"  # opt-in offered by the study and its dating-app waitlist
+LEAF_FIELD = "Leaf"
 BLANK = {"", "(none)", "(not set)", "none"}
 INVALID = "invalid"
 
-# Buckets, in the order they are tested. The first two are the ones Igor asked to leave out.
-STUDY, ADS = "study", "ads"
-TOOLS, FORMS, PODCAST, LEAF, UPLOADS, RECOMMENDATIONS, OTHER = (
-    "tools", "forms", "podcast", "leaf", "uploads", "recommendations", "other")
-EXCLUDED = (STUDY, ADS)
-INCLUDED = (TOOLS, FORMS, PODCAST, LEAF, UPLOADS, RECOMMENDATIONS, OTHER)
+BACKLOG, STUDY, ADS, PARTNER_ADS = "backlog", "study", "ads", "partner_ads"
+TOOLS, FORMS, PODCAST, LEAF, UPLOADS, RECOMMENDATIONS = "tools", "forms", "podcast", "leaf", "uploads", "recommendations"
+EXCLUDED = (BACKLOG, STUDY, ADS, PARTNER_ADS)
+INCLUDED = (TOOLS, FORMS, PODCAST, RECOMMENDATIONS, LEAF, UPLOADS)
 LABELS = {
+    BACKLOG: "December sign-ups uploaded Jan 1",
     STUDY: "Who Attracts You study",
-    ADS: "Ads (cpc)",
-    TOOLS: "Tools (no ad click)",
-    FORMS: "Website sign-up forms",
+    ADS: "Ads (cpc tag)",
+    PARTNER_ADS: "Partner ad campaigns (MLA)",
+    TOOLS: "Tools",
+    FORMS: "Sign-up forms, challenges, workshops",
     PODCAST: "Podcast site",
+    RECOMMENDATIONS: "beehiiv recommendations",
     LEAF: "Leaf student batches",
     UPLOADS: "Other bulk uploads",
-    RECOMMENDATIONS: "beehiiv recommendations",
-    OTHER: "Other",
 }
+
+
+# ---------- reading one record ----------
+
+def created(row: dict) -> datetime:
+    return datetime.fromtimestamp(row["created"], tz=UTC)
 
 
 def tokens(value, sep: str) -> list:
@@ -64,6 +98,10 @@ def tools_tried(row: dict) -> list:
     return tokens((row.get("cf") or {}).get(TOOLS_FIELD), "|")
 
 
+def has_any_tool(row: dict) -> bool:
+    return bool(tools_tried(row)) or bool((row.get("cf") or {}).get(OLD_TOOLS_FIELD))
+
+
 def media(row: dict) -> list:
     """UTM media of the subscriber's tool visits in order; "(none)" visits are kept as "" so that the
     first entry still means the first visit."""
@@ -71,7 +109,7 @@ def media(row: dict) -> list:
     if not isinstance(value, str):
         return []
     parts = [p.strip().lower() for p in value.split(",")]
-    while parts and parts[0] == "":  # the Sep 29-Oct 8 leading-separator bug
+    while parts and parts[0] == "":  # leading-separator bug
         parts.pop(0)
     return ["" if p in BLANK else p for p in parts]
 
@@ -82,20 +120,24 @@ def native_medium(row: dict) -> str:
 
 
 def from_ads(row: dict) -> bool:
-    """The visit that created the subscriber carried utm_medium=cpc (beehiiv's own field or the first
-    entry of the tools' list)."""
+    """The visit that created the subscriber carried an ad medium: beehiiv's own utm_medium (set at
+    creation), or the first entry of the tools' media list on a record created once that list existed."""
+    if native_medium(row) in ADS_MEDIA:
+        return True
     m = media(row)
-    return native_medium(row) == ADS_MEDIUM or (bool(m) and m[0] == ADS_MEDIUM)
+    return created(row) >= MEDIA_FROM and bool(m) and m[0] in ADS_MEDIA
 
 
 def touched_ads(row: dict) -> bool:
-    """Any visit, first or later, carried cpc. The wide reading, used only as a sensitivity check."""
-    return native_medium(row) == ADS_MEDIUM or ADS_MEDIUM in media(row)
+    """Any visit, first or later, carried an ad medium. The wide reading, a sensitivity check only."""
+    return native_medium(row) in ADS_MEDIA or bool(ADS_MEDIA & set(media(row)))
 
 
 def from_study(row: dict) -> bool:
-    """The first tool the subscriber finished was the study, or they have no tool at all and carry the
-    study's dating-app opt-in (its waitlist form and the uploads of earlier participants)."""
+    """Created once the tools list existed, and the first tool finished was the study, or no tool at all
+    plus the study's dating-app opt-in (its waitlist form and the uploads of earlier participants)."""
+    if created(row) < TOOLS_FROM:
+        return False
     tools = tools_tried(row)
     if tools:
         return tools[0] == STUDY_TOOL
@@ -107,46 +149,102 @@ def touched_study(row: dict) -> bool:
     return STUDY_TOOL in tools_tried(row) or bool((row.get("cf") or {}).get(DATING_FIELD))
 
 
-def bucket(row: dict) -> str:
-    """One bucket per subscriber. The study is tested before ads, so a record that is both counts as
-    study (the overlap is reported separately)."""
-    if from_study(row):
-        return STUDY
-    if from_ads(row):
-        return ADS
-    cf = row.get("cf") or {}
-    channel = (row.get("utm_channel") or "").lower()
-    if channel == "import":
-        return LEAF if cf.get("Leaf") else UPLOADS
-    if channel == "recommendation":
-        return RECOMMENDATIONS
-    if tools_tried(row):
-        return TOOLS
-    if (row.get("utm_source") or "").lower() == "podcast":
-        return PODCAST
-    if channel in ("embed", "website", "api"):
-        return FORMS
-    return OTHER
-
-
-def month_of(row: dict) -> str:
-    return datetime.fromtimestamp(row["created"], tz=timezone.utc).strftime("%Y-%m")
-
-
-def day_of(row: dict) -> str:
-    return datetime.fromtimestamp(row["created"], tz=timezone.utc).strftime("%Y-%m-%d")
+def from_partner_ads(row: dict) -> bool:
+    """Signed up on a partner-branded (MailList Accelerator) page: an MLA tag and no tool of their own."""
+    return bool((row.get("cf") or {}).get(MLA_FIELD)) and not has_any_tool(row)
 
 
 def is_subscriber(row: dict) -> bool:
     return row.get("status") != INVALID
 
 
-def summarize(rows) -> dict:
-    """Per-month counts over real subscribers (invalid addresses set aside): every bucket, the kept total,
-    how many are still active, the study/ads overlap and the wide-reading sensitivity."""
+def bucket(row: dict) -> str:
+    """One bucket per subscriber, tested in this order. A record that is both study and ad counts as
+    study (the overlap is reported separately)."""
+    channel = (row.get("utm_channel") or "").lower()
+    when = created(row)
+    if channel == "import" and when < BACKLOG_UNTIL:
+        return BACKLOG
+    if from_study(row):
+        return STUDY
+    if from_ads(row):
+        return ADS
+    if from_partner_ads(row):
+        return PARTNER_ADS
+    cf = row.get("cf") or {}
+    if channel == "import":
+        if cf.get(LEAF_FIELD):
+            return LEAF
+        if has_any_tool(row):
+            return TOOLS
+        flags = [k for k, v in cf.items() if v is True and k not in (DATING_FIELD, "ClearerThinking.org", "One Helpful Idea")]
+        if flags:  # a workshop or challenge list uploaded as a file
+            return FORMS
+        # Until Mar 9 the tools' sign-ups reached beehiiv as plain twice-weekly uploads.
+        return TOOLS if when < API_FROM else UPLOADS
+    if channel == "recommendation":
+        return RECOMMENDATIONS
+    if has_any_tool(row):
+        return TOOLS
+    if (row.get("utm_source") or "").lower() == "podcast":
+        return PODCAST
+    return FORMS
+
+
+def month_of(row: dict) -> str:
+    return created(row).strftime("%Y-%m")
+
+
+def day_of(row: dict) -> str:
+    return created(row).strftime("%Y-%m-%d")
+
+
+# ---------- ad sign-ups from before the tags existed ----------
+
+def calibration_ratio(tagged_by_day: dict, ga4_by_day: dict, first: date, last: date) -> float:
+    """Tagged ad sign-ups per GA4 cpc-session "Submitted Email" event over [first, last]."""
+    days = [str(first + timedelta(days=i)) for i in range((last - first).days + 1)]
+    events = sum(ga4_by_day.get(d, 0) for d in days)
+    return sum(tagged_by_day.get(d, 0) for d in days) / events if events else 0.0
+
+
+def estimate_untagged_ads(ga4_by_day: dict, tagged_by_day: dict, ratio: float, until: date) -> dict:
+    """Per month, ad sign-ups the records cannot show: ratio x GA4 events on the days up to `until`
+    (the last day without full tagging), minus the ad sign-ups already tagged on those days."""
+    events, tagged = Counter(), Counter()
+    for d, n in ga4_by_day.items():
+        if d <= str(until):
+            events[d[:7]] += n
+    for d, n in tagged_by_day.items():
+        if d <= str(until):
+            tagged[d[:7]] += n
+    return {m: max(0, round(ratio * events[m] - tagged[m])) for m in events}
+
+
+def monthly_ratios(tagged_by_day: dict, ga4_by_day: dict, after: date) -> dict:
+    """Tagged ad sign-ups per GA4 cpc event for each full-tagging month after `after` (the spread of
+    these gives the low/high bounds of the estimate)."""
+    t, e = Counter(), Counter()
+    for d, n in tagged_by_day.items():
+        if d > str(after):
+            t[d[:7]] += n
+    for d, n in ga4_by_day.items():
+        if d > str(after):
+            e[d[:7]] += n
+    return {m: round(t[m] / e[m], 3) for m in sorted(e) if e[m] and m not in RATIO_SKIP_MONTHS and m > str(after)[:7]}
+
+
+# ---------- the monthly table ----------
+
+def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
+    """Per-month counts over real subscribers. With `ga4_cpc_by_day`, ad sign-ups from before MEDIA_FROM
+    are estimated and taken out of the Tools bucket; without it the estimate is zero."""
     months = defaultdict(lambda: {"records": 0, "invalid": 0, "buckets": Counter(), "active": Counter(),
-                                  "both": 0, "included_wide": 0, "imports": 0})
+                                  "both": 0, "kept_wide": 0})
+    tagged_by_day = Counter()
     for row in rows:
+        if created(row) >= END:
+            continue
         m = months[month_of(row)]
         m["records"] += 1
         if not is_subscriber(row):
@@ -156,31 +254,56 @@ def summarize(rows) -> dict:
         m["buckets"][b] += 1
         if row.get("status") == "active":
             m["active"][b] += 1
+        if b == ADS:
+            tagged_by_day[day_of(row)] += 1
         if from_study(row) and from_ads(row):
             m["both"] += 1
-        if not (touched_study(row) or touched_ads(row)):
-            m["included_wide"] += 1
-        if (row.get("utm_channel") or "").lower() == "import":
-            m["imports"] += 1
+        if b in INCLUDED and not (touched_study(row) or touched_ads(row)):
+            m["kept_wide"] += 1
+
+    untagged_last_day = MEDIA_FROM.date()  # Mar 27 was tagged only from 15:00 UTC
+    est = low = high = {}
+    calibration = None
+    if ga4_cpc_by_day:
+        ratio = calibration_ratio(tagged_by_day, ga4_cpc_by_day, *CAL)
+        spread = monthly_ratios(tagged_by_day, ga4_cpc_by_day, CAL[1])
+        lo, hi = min([ratio, *spread.values()]), max([ratio, *spread.values()])
+        est = estimate_untagged_ads(ga4_cpc_by_day, tagged_by_day, ratio, untagged_last_day)
+        low = estimate_untagged_ads(ga4_cpc_by_day, tagged_by_day, lo, untagged_last_day)
+        high = estimate_untagged_ads(ga4_cpc_by_day, tagged_by_day, hi, untagged_last_day)
+        calibration = {"window": [str(CAL[0]), str(CAL[1])], "ratio": round(ratio, 3), "low": lo, "high": hi,
+                       "later_months": spread}
+
     out = []
     for month in sorted(months):
         m = months[month]
+        b = m["buckets"]
         total = m["records"] - m["invalid"]
-        included = sum(m["buckets"][b] for b in INCLUDED)
+        on_record = sum(b[k] for k in INCLUDED)
+        e = min(est.get(month, 0), b[TOOLS])
+        e_low, e_high = min(low.get(month, 0), b[TOOLS]), min(high.get(month, 0), b[TOOLS])
+        active_on_record = sum(m["active"][k] for k in INCLUDED)
+        # The estimated ad sign-ups are assumed to have stayed subscribed at the month's Tools rate.
+        active_share = m["active"][TOOLS] / b[TOOLS] if b[TOOLS] else 0
         out.append({
             "month": month,
             "records": m["records"],
             "invalid": m["invalid"],
             "total": total,
-            "buckets": {b: m["buckets"][b] for b in EXCLUDED + INCLUDED},
-            "excluded": total - included,
-            "included": included,
-            "included_active": sum(m["active"][b] for b in INCLUDED),
-            "included_wide": m["included_wide"],
+            "buckets": {k: b[k] for k in EXCLUDED + INCLUDED},
+            "ads_untagged_est": e,
+            "ads_all": b[ADS] + b[PARTNER_ADS] + e,
+            "kept_on_record": on_record,
+            "kept": on_record - e,
+            "kept_low": on_record - e_high,
+            "kept_high": on_record - e_low,
+            "kept_tools": b[TOOLS] - e,
+            "kept_active": round(active_on_record - e * active_share),
+            "kept_wide": m["kept_wide"],
             "study_and_ads": m["both"],
-            "imports": m["imports"],
+            "estimated": e > 0,
         })
-    return {"months": out}
+    return {"months": out, "calibration": calibration}
 
 
 def load_rows(path: Path = DATA):
@@ -194,14 +317,20 @@ def main():
     rows = list(load_rows())
     ids = [r["id"] for r in rows]
     assert len(ids) == len(set(ids)), "duplicate subscription ids in the walk"
-    result = summarize(rows)
-    subscribers = [r for r in rows if is_subscriber(r)]
-    result["daily_total"] = dict(sorted(Counter(day_of(r) for r in subscribers).items()))
-    result["records"] = len(rows)
+    ga4 = json.loads(CROSS.read_text()).get("ga4_cpc_daily")
+    assert isinstance(ga4, dict) and "error" not in ga4, "cross_checks.json has no GA4 cpc series: run fetch_cross_checks.py"
+    result = summarize(rows, ga4)
+    result["records_walked"] = len(rows)
+    result["through"] = str((END - timedelta(days=1)).date())
+    result["partial_through_day"] = (END - timedelta(days=1)).day
     result["labels"] = LABELS
+    result["cutoffs"] = {"media_from": MEDIA_FROM.isoformat(), "tools_from": TOOLS_FROM.isoformat(),
+                         "api_from": API_FROM.isoformat()}
     OUT.write_text(json.dumps(result, indent=1))
+    print("calibration:", result["calibration"])
     for m in result["months"]:
-        print(m["month"], m["records"], "-invalid", m["invalid"], "=", m["total"], "included", m["included"], "active", m["included_active"], dict(m["buckets"]))
+        print(m["month"], "subscribers", m["total"], "| kept", m["kept"], f"({m['kept_low']}-{m['kept_high']})",
+              "active", m["kept_active"], "| untagged ads est", m["ads_untagged_est"], dict(m["buckets"]))
 
 
 if __name__ == "__main__":

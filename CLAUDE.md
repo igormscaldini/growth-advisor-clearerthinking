@@ -262,7 +262,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Scientific Personality Test..." title); Igor's fix branch `bugfix/2026-09-23/upt-seo-title-description` was merged as PR #9
   on 2026-10-21 (live title now "Free Personality Test: Myers-Briggs style, Big 5 & Enneagram"); the July
   title change did NOT cut CTR. Read mobile and desktop GSC separately for this query (mobile fell
-  ~65% in the week of 2026-09-28, desktop flat). The Jun 2026 "TG @SEO_LINKK_ORDER" referring domains are link-dump
+  ~65% in the week of 2026-09-28, desktop flat), and the US separately from the rest: from 2026-10-22 (the day after
+  the title + FAQ merge) the US sits at ~4.6 desktop / ~5.1 mobile (third organic result) while non-US stays ~9 and is
+  57% of impressions, so the all-country GSC average still reads ~7. The Jun 2026 "TG @SEO_LINKK_ORDER" referring domains are link-dump
   spam, not CT's: no disavow. All other tool pages share `src/templates/program.liquid` (one footer link = ~150 internal
   links). PageSpeed Insights API quota is exhausted on the shared project: run `npx -y lighthouse@12` locally.
 - `reports/supplement_paradox_paywall_results_2026-11-06_src/`: results of the first newsletter paywall (memory note
@@ -370,6 +372,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   fired no `Viewed Privacy Policy` since Sep 2025 (intentional, Igor 2026-10-01). GA4 recorded NOTHING on
   the UPT pages Jul 22 - Aug 10 2026 (through the X/Twitter wave) while its sign-ups kept reaching beehiiv:
   treat UPT GA4 numbers for that window as missing, not low.
+  Since the 2026-07-21 intro page, personality-test.html sends NOTHING to GA4 until the Start button is clicked, and the
+  click round-trips through guidedtrack.com, so the first hit carries `dr=https://www.guidedtrack.com/` (verified in
+  headless Chrome 2026-11-18): Google visitors who start are logged as Direct (5,428 Direct vs 745 Organic users in
+  Oct 19 - Nov 15 against 3,888 GSC clicks) and visitors who never start are invisible. Never read UPT channel or
+  landing-to-start numbers from GA4; use GSC clicks for search demand.
 - Tools have created beehiiv subscribers through the API (`utm_channel=api`) only since 2026-03-09.
 - The Who Attracts You study (`/who_attracts_you_study.html`) has been the dominant sign-up source since Aug 2026: three viral
   waves (Aug 4-10 12.6k, Sep 7-18 ~25k, Oct 21-23 32k sign-ups) arriving via the API as `utm_source=direct`, so the new-subs

@@ -76,6 +76,34 @@ def ga4_submitted_email_monthly() -> list:
     return [{"month": m, "medium": med, "page": pg, "events": n} for (m, med, pg), n in sorted(agg.items())]
 
 
+def ga4_cpc_daily() -> dict:
+    """Submitted Email events per day (GA4 property clock, US Eastern) in sessions whose medium is cpc, on
+    CT's own tool pages (the partner-branded /p/ pages are left out: their sign-ups carry an MLA tag in
+    beehiiv and are counted from the records). Used to estimate ad sign-ups before 2026-03-27, when the
+    tools did not yet write UTM tags into beehiiv."""
+    from google.analytics.data_v1beta.types import (DateRange, Dimension, Filter, FilterExpression,
+                                                    FilterExpressionList, Metric, RunReportRequest)
+    from ga4_client import get_client, property_path
+
+    def text(field, value, match="EXACT"):
+        return FilterExpression(filter=Filter(field_name=field, string_filter=Filter.StringFilter(
+            value=value, match_type=getattr(Filter.StringFilter.MatchType, match))))
+
+    where = FilterExpression(and_group=FilterExpressionList(expressions=[
+        text("eventName", "Submitted Email"), text("sessionMedium", "cpc"),
+        FilterExpression(not_expression=text("pagePath", "/p/", "BEGINS_WITH"))]))
+    client, out = get_client(), {}
+    for first, last in month_ranges(START, END):
+        resp = client.run_report(RunReportRequest(
+            property=property_path(), date_ranges=[DateRange(start_date=str(first), end_date=str(last))],
+            dimensions=[Dimension(name="date")], metrics=[Metric(name="eventCount")],
+            dimension_filter=where, limit=1000), timeout=120)
+        for row in resp.rows:
+            d = row.dimension_values[0].value
+            out[f"{d[:4]}-{d[4:6]}-{d[6:]}"] = int(row.metric_values[0].value)
+    return dict(sorted(out.items()))
+
+
 def month_ranges(start: date, end: date) -> list:
     """[(first_day, last_day)] for each calendar month touched by [start, end], clipped to it."""
     out, cur = [], start
@@ -88,7 +116,8 @@ def month_ranges(start: date, end: date) -> list:
 
 def main():
     out = {"window": [str(START), str(END)]}
-    for name, fn in (("google_ads", google_ads_monthly), ("ga4_submitted_email", ga4_submitted_email_monthly)):
+    for name, fn in (("google_ads", google_ads_monthly), ("ga4_submitted_email", ga4_submitted_email_monthly),
+                     ("ga4_cpc_daily", ga4_cpc_daily)):
         try:
             out[name] = fn()
         except Exception as e:  # keep whatever the other source returned

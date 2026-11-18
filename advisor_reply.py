@@ -38,6 +38,7 @@ from pathlib import Path
 # the config + data helpers we reuse here.
 import advisor_inbox
 import advisor_memory as mem
+import tool_bridge
 import weekly_advisor as wa
 from data_layer import (
     beehiiv_metrics,
@@ -242,55 +243,23 @@ TOOLS = [
 
 
 # --- Claude answer (headless Claude Code with a Bash bridge to the tools above) ----------
+# The bridge itself (command spelling, catalogue text, dispatch) is shared with task_bot.py.
 def _python_cmd() -> str:
-    """The interpreter the model invokes --tool mode with, from the repo root. The venv's
-    `.venv/bin/python` is made relative (no spaces even though the repo path has them, so
-    the Bash allow-list prefix matches what the model types); an interpreter elsewhere
-    (GitHub Actions) is used by its absolute path; a path with spaces falls back to `python`."""
-    exe = os.path.abspath(sys.executable)
-    root = os.path.abspath(wa.ROOT)
-    if exe.startswith(root + os.sep):
-        return os.path.relpath(exe, root)
-    return exe if " " not in exe else "python"
+    return tool_bridge.python_cmd(wa.ROOT)
 
 
 def tool_command_prefix() -> str:
-    return f"{_python_cmd()} {TOOL_SCRIPT} --tool"
+    return tool_bridge.command_prefix(_python_cmd(), TOOL_SCRIPT)
 
 
 def tools_prompt() -> str:
     """The tool catalogue for the system prompt: each data tool is one shell command that prints JSON."""
-    lines = [
-        "Data tools. Each one is a shell command, run from the repository root with the Bash tool, "
-        "that prints a JSON result. Call it exactly as:",
-        f"  {tool_command_prefix()} <tool_name> '<JSON object of arguments>'",
-        "(single-quote the JSON; pass '{}' when there are no arguments). Never run any other command. "
-        "Tools:",
-    ]
-    for t in TOOLS:
-        props = (t.get("input_schema") or {}).get("properties") or {}
-        args = "; ".join(f"{k}: {v.get('type', 'string')}, {v.get('description', '')}".rstrip(", ")
-                         for k, v in props.items()) or "none"
-        lines.append(f"- {t['name']}: {t['description']} Arguments: {args}")
-    return "\n".join(lines)
+    return tool_bridge.tools_prompt(TOOLS, tool_command_prefix())
 
 
 def run_tool(name: str, args_json: str) -> dict:
-    """--tool mode: run one data tool and return its result. Problems come back as
-    {"error": ...} so the model can read them instead of a stack trace."""
-    fn = TOOL_FNS.get(name)
-    if fn is None:
-        return {"error": f"unknown tool {name!r}; available: {', '.join(TOOL_FNS)}"}
-    try:
-        args = json.loads(args_json or "{}")
-    except json.JSONDecodeError as e:
-        return {"error": f"JSONDecodeError in arguments: {e}"}
-    if not isinstance(args, dict):
-        return {"error": "arguments must be a JSON object"}
-    try:
-        return fn(**args)
-    except Exception as e:  # noqa: BLE001
-        return {"error": f"{type(e).__name__}: {e}"}
+    """--tool mode: run one data tool and return its result as JSON-ready data."""
+    return tool_bridge.run_tool(TOOL_FNS, name, args_json)
 
 
 def answer_question(question: str) -> str:
@@ -323,7 +292,7 @@ def answer_question(question: str) -> str:
     # No retries here: an unread question is picked up again by the next cron tick, and a retry
     # after a partial run could save the same memory entry twice.
     return mem.run_claude_code(system, question, cwd=wa.ROOT, tools=["Bash"],
-                               allowed_tools=[f"Bash({tool_command_prefix()}:*)"])
+                               allowed_tools=tool_bridge.allowed_tools(tool_command_prefix()))
 
 
 # --- Gmail --------------------------------------------------------------------
