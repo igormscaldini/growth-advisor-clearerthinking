@@ -81,7 +81,7 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   or past_due Stripe subscription. Templates are filled and pushed with `members_only_programs.py`
   (docstring has the push commands); `gt pull` + diff first. Snippets in `newsletter_snippets/`.
 - CT+ coaching hand-off (audited 2026-10-28): the perks dashboard (programs.clearerthinking.org/dashboard.html, GT kio8ir3,
-  card text in the subprogram "CT Perks - cards", NOT in Igor's GT account) sends Navigators from a "Find Your Coach" button to
+  card text in the subprogram "CT Perks - cards", GT 34374 `vj43l7g`, which IS listed in Igor's GT account as of 2026-11-18) sends Navigators from a "Find Your Coach" button to
   Overcome's own form https://signup.overcome.org.uk/clearerthinking; the GT "Coaching Matching Form" (32851) is retired. Welcome
   series = beehiiv automation aut_fd6df732 (welcome + coaching testimonials + tier-specific check-ins). Memory note
   `project_navigator_coach_matching_wording` has the full touchpoint map; no CT copy says "choose", the button and the
