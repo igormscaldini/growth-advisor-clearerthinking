@@ -5,15 +5,19 @@ and two realistic synthetic raw folders (same file structure as the real pull) r
 builder: a NULL one (no promotion works, nobody buys) and a POSITIVE one (a known funnel).
 """
 import csv
+import importlib.util
 import json
-import sys
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "reports" / "conversion_points_audit_2026-11-06_src"))
-import analysis as A  # noqa: E402
+# Loaded by path under its own name: several report folders have an analysis.py, and a plain
+# `import analysis` picks up whichever one another test file imported first.
+_SRC = Path(__file__).resolve().parents[1] / "reports" / "conversion_points_audit_2026-11-06_src" / "analysis.py"
+_spec = importlib.util.spec_from_file_location("conversion_points_audit_analysis", _SRC)
+A = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(A)
 
 
 # ------------------------------------------------------------------ hand-worked unit cases

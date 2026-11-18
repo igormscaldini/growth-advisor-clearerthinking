@@ -327,6 +327,7 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Android-install actions and VIDEO campaigns reject mutates (UI only); counting_type of GA4-imported actions is immutable (set in GA4); a
   field mask built with protobuf_helpers.field_mask drops fields set to False/0, giving a silent no-op "ok": list mask paths by hand.
 - `reports/ct_plus_perks_banner_2026-11-18_src/build.py`: the CT+ perks banner shown at the end of tools, rebuilt without the Life-Changing Questions deck tile (the deck stopped being a CT+ perk on 2026-11-18; memory note `project_lcq_deck_perk_removal_2026_11` has what was changed and what is open). It moves the original's tiles pixel for pixel (`compose_row`); the original PNG is kept beside it. Live image (7 perks: no deck, no T-shirt, Igor's choice): https://images.guidedtrack.com/ct_plus_perks_banner_7_xvenong.png in the LCQ tool (GT 9306) and the UPT report (GT 22897). The Rationality, Philosophical Beliefs and Time & Money tools still show the old `List_of_perks_2x.png`: their main programs (GT 1225, 15137, 2390) are Igor's, but the banner sits in the report subprograms they call ("Rationality type quiz report", "Results for Learn Your Philosophical Beliefs", "Time & Money Calculator Report"), which are not in his account.
+- `reports/subscribers_by_month_2026-11-18_src/`: new subscribers per month in 2026 with Ads and the Who Attracts You study taken out (Igor's question, 2026-11-18). `fetch_data.py` walks every 2026 subscription with custom fields into `data/` (gitignored, no emails; 381k records, ~50 min), `fetch_cross_checks.py` pulls Google Ads + GA4 monthly/daily series, `analysis.py` holds every rule -> `datapoints.json`, `cross_check.py` = independent recount + completeness vs beehiiv growth, `report_notes.py` = wording, `build_report.py` = HTML. Result: ~79.4k kept of 366.8k (Jan 1 - Nov 17); a normal month is ~5-7k. Rerun all five in that order to refresh.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
@@ -378,11 +379,22 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Oct 19 - Nov 15 against 3,888 GSC clicks) and visitors who never start are invisible. Never read UPT channel or
   landing-to-start numbers from GA4; use GSC clicks for search demand.
 - Tools have created beehiiv subscribers through the API (`utm_channel=api`) only since 2026-03-09.
+- Where a beehiiv subscriber came from (verified on all 381k 2026 records, 2026-11-18): the custom fields `Tools Tried (Pipe-Separated)`
+  and `UTM Media (Comma-Separated)` list every visit in order, so the FIRST entry is the sign-up visit (later `cpc` or study entries
+  are an existing reader coming back); skip empty leading entries (`|Tool`, `,cpc` bug, Sep 13 - Oct 8). They only describe the sign-up
+  for records created after the tools began writing them: UTM media 2026-03-27 15:00 UTC, tools list 2026-03-31 10:00 UTC (Mar 10-31
+  records carry `Tools Tried (DEPRECATED)` instead; Jan 1 - Mar 9 batch uploads carry nothing). Ads = first medium `cpc` (Google and Meta
+  both use it); MailList Accelerator sign-ups have only `MLA Tags` (their /p/ pages are 98% google/cpc). `status` "invalid" records are NOT
+  subscribers: drop them and the walk equals the connector's `get_subscriber_growth` "subscribed" to the record (it takes 92 days per call),
+  while `beehiiv_new_subs_cache` keeps them and so reads 3-5% high. beehiiv relabels addresses that turn invalid as `utm_channel=import`.
+  The 2026-01-01 01:15 UTC upload (2.8k) is December sign-ups. GA4 reports over many months time out: query one month per request.
 - The Who Attracts You study (`/who_attracts_you_study.html`) has been the dominant sign-up source since Aug 2026: three viral
   waves (Aug 4-10 12.6k, Sep 7-18 ~25k, Oct 21-23 32k sign-ups) arriving via the API as `utm_source=direct`, so the new-subs
   cache counts them as genuine; its tail was still 200-300/day in early Nov. Organic tool sign-ups run ~220-280/day and
   unsubscribes ~1.5-2% of the list per month, so the no-event net is slightly negative (memory note
-  `project_net_subscribers_steady_state_2026_11`). Mar 23-Apr 17 2026 growth was a Google Ads burst; Jan-Feb sign-ups were batch uploads.
+  `project_net_subscribers_steady_state_2026_11`). The Mar 23-26 2026 spike was the Unique Traits Test launch (4.6k sign-ups in four days);
+  the Google Ads burst ran Mar 21 - Apr 17 (5.7k tagged ad sign-ups in April); Jan-Feb sign-ups were batch uploads. The Aug 3-14 wave also
+  lifted OTHER tools by ~3.4k sign-ups (UPT, Unique Traits) whose first tool was not the study; the Sep and Oct waves did not.
 - On-site promotions (floating buttons, Product Grid, in-tool CTAs) must be counted from the page URL, never from session
   dimensions: a GA4 session keeps its FIRST campaign, so a utm link clicked mid-visit is credited to the original source
   (website button: 555 sessions by `sessionManualCampaignName` vs 1,343 users by `pageLocation` CONTAINS `utm_campaign=`).

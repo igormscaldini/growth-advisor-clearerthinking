@@ -52,6 +52,14 @@ CAL = (date(2026, 3, 28), date(2026, 4, 30))         # first full days with tags
 # UPT pages from Jul 22 to Aug 10, 2026, while its ad campaign kept producing subscribers.
 RATIO_SKIP_MONTHS = ("2026-07", "2026-08")
 
+# The study's three viral waves (UTC days). For each, the Tools bucket is compared with its own baseline
+# to see how many people the wave sent to OTHER tools first (they are not study sign-ups on the record).
+WAVES = (("Aug 3-14", date(2026, 8, 3), date(2026, 8, 14)),
+         ("Sep 7-18", date(2026, 9, 7), date(2026, 9, 18)),
+         ("Oct 21-23", date(2026, 10, 21), date(2026, 10, 23)))
+WAVE_BASELINE_DAYS = 14
+LAUNCH = (date(2026, 3, 23), date(2026, 3, 26))  # the Unique Traits Test launch days
+
 STUDY_TOOL = "who attracts you"
 ADS_MEDIA = {"cpc", "paid_social"}
 TOOLS_FIELD = "Tools Tried (Pipe-Separated)"
@@ -211,14 +219,17 @@ def calibration_ratio(tagged_by_day: dict, ga4_by_day: dict, first: date, last: 
 def estimate_untagged_ads(ga4_by_day: dict, tagged_by_day: dict, ratio: float, until: date) -> dict:
     """Per month, ad sign-ups the records cannot show: ratio x GA4 events on the days up to `until`
     (the last day without full tagging), minus the ad sign-ups already tagged on those days."""
-    events, tagged = Counter(), Counter()
-    for d, n in ga4_by_day.items():
+    events, tagged = events_by_month(ga4_by_day, until), events_by_month(tagged_by_day, until)
+    return {m: max(0, round(ratio * events[m] - tagged.get(m, 0))) for m in events}
+
+
+def events_by_month(by_day: dict, until: date) -> dict:
+    """Monthly sums of a per-day series over the days up to and including `until`."""
+    out = Counter()
+    for d, n in by_day.items():
         if d <= str(until):
-            events[d[:7]] += n
-    for d, n in tagged_by_day.items():
-        if d <= str(until):
-            tagged[d[:7]] += n
-    return {m: max(0, round(ratio * events[m] - tagged[m])) for m in events}
+            out[d[:7]] += n
+    return dict(sorted(out.items()))
 
 
 def monthly_ratios(tagged_by_day: dict, ga4_by_day: dict, after: date) -> dict:
@@ -234,6 +245,22 @@ def monthly_ratios(tagged_by_day: dict, ga4_by_day: dict, after: date) -> dict:
     return {m: round(t[m] / e[m], 3) for m in sorted(e) if e[m] and m not in RATIO_SKIP_MONTHS and m > str(after)[:7]}
 
 
+# ---------- spill-over of the study's viral waves onto other tools ----------
+
+def wave_excess(daily: dict, first: date, last: date, baseline_days: int = WAVE_BASELINE_DAYS) -> dict:
+    """Sign-ups in [first, last] above the baseline, the baseline being the median day of the
+    `baseline_days` before the window and the `baseline_days` after it (days with no record count 0)."""
+    span = lambda a, n: [str(a + timedelta(days=i)) for i in range(n)]  # noqa: E731
+    window = span(first, (last - first).days + 1)
+    around = span(first - timedelta(days=baseline_days), baseline_days) + span(last + timedelta(days=1), baseline_days)
+    counts = sorted(daily.get(d, 0) for d in around)
+    mid = len(counts) // 2
+    baseline = counts[mid] if len(counts) % 2 else (counts[mid - 1] + counts[mid]) / 2
+    in_window = sum(daily.get(d, 0) for d in window)
+    return {"days": len(window), "signups": in_window, "baseline_per_day": baseline,
+            "excess": round(in_window - baseline * len(window))}
+
+
 # ---------- the monthly table ----------
 
 def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
@@ -241,7 +268,7 @@ def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
     are estimated and taken out of the Tools bucket; without it the estimate is zero."""
     months = defaultdict(lambda: {"records": 0, "invalid": 0, "buckets": Counter(), "active": Counter(),
                                   "both": 0, "kept_wide": 0})
-    tagged_by_day = Counter()
+    tagged_by_day, tools_by_day, tools_study_later_by_day = Counter(), Counter(), Counter()
     for row in rows:
         if created(row) >= END:
             continue
@@ -256,6 +283,9 @@ def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
             m["active"][b] += 1
         if b == ADS:
             tagged_by_day[day_of(row)] += 1
+        if b == TOOLS:
+            tools_by_day[day_of(row)] += 1
+            tools_study_later_by_day[day_of(row)] += touched_study(row)
         if from_study(row) and from_ads(row):
             m["both"] += 1
         if b in INCLUDED and not (touched_study(row) or touched_ads(row)):
@@ -271,8 +301,9 @@ def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
         est = estimate_untagged_ads(ga4_cpc_by_day, tagged_by_day, ratio, untagged_last_day)
         low = estimate_untagged_ads(ga4_cpc_by_day, tagged_by_day, lo, untagged_last_day)
         high = estimate_untagged_ads(ga4_cpc_by_day, tagged_by_day, hi, untagged_last_day)
-        calibration = {"window": [str(CAL[0]), str(CAL[1])], "ratio": round(ratio, 3), "low": lo, "high": hi,
-                       "later_months": spread}
+        calibration = {"window": [str(CAL[0]), str(CAL[1])], "ratio": round(ratio, 3), "low": round(lo, 3),
+                       "high": round(hi, 3), "later_months": spread,
+                       "ga4_events_before_tags": events_by_month(ga4_cpc_by_day, untagged_last_day)}
 
     out = []
     for month in sorted(months):
@@ -303,7 +334,25 @@ def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
             "study_and_ads": m["both"],
             "estimated": e > 0,
         })
-    return {"months": out, "calibration": calibration}
+    waves = [{"name": name, "first": str(a), "last": str(b), **wave_excess(tools_by_day, a, b),
+              "later_took_study": sum(n for d, n in tools_study_later_by_day.items() if str(a) <= d <= str(b))}
+             for name, a, b in WAVES]
+    return {"months": out, "calibration": calibration, "waves": waves}
+
+
+def context(rows) -> dict:
+    """Descriptive extras the report's notes quote: the Leaf batch days and the Unique Traits Test launch."""
+    leaf_days, launch = Counter(), Counter()
+    for row in rows:
+        if not is_subscriber(row) or created(row) >= END:
+            continue
+        if bucket(row) == LEAF:
+            leaf_days[day_of(row)] += 1
+        if LAUNCH[0] <= created(row).date() <= LAUNCH[1]:
+            launch["subscribers"] += 1
+            launch["unique_traits_only"] += (row.get("cf") or {}).get(OLD_TOOLS_FIELD) == ["Unique Traits Test"]
+    return {"leaf_batches": {d: n for d, n in sorted(leaf_days.items()) if n >= 100},
+            "unique_traits_launch": {"first": str(LAUNCH[0]), "last": str(LAUNCH[1]), **launch}}
 
 
 def load_rows(path: Path = DATA):
@@ -320,6 +369,7 @@ def main():
     ga4 = json.loads(CROSS.read_text()).get("ga4_cpc_daily")
     assert isinstance(ga4, dict) and "error" not in ga4, "cross_checks.json has no GA4 cpc series: run fetch_cross_checks.py"
     result = summarize(rows, ga4)
+    result["context"] = context(rows)
     result["records_walked"] = len(rows)
     result["through"] = str((END - timedelta(days=1)).date())
     result["partial_through_day"] = (END - timedelta(days=1)).day
@@ -328,6 +378,9 @@ def main():
                          "api_from": API_FROM.isoformat()}
     OUT.write_text(json.dumps(result, indent=1))
     print("calibration:", result["calibration"])
+    for w in result["waves"]:
+        print("wave", w)
+    print("context:", result["context"])
     for m in result["months"]:
         print(m["month"], "subscribers", m["total"], "| kept", m["kept"], f"({m['kept_low']}-{m['kept_high']})",
               "active", m["kept_active"], "| untagged ads est", m["ads_untagged_est"], dict(m["buckets"]))

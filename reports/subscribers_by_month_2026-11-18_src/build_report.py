@@ -20,9 +20,10 @@ MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "O
 # Chart series: (label, analysis buckets folded into it, light colour, dark colour). Order = stack order
 # from the baseline up; colours are slots 1-3 of the dataviz reference palette (validated in both modes).
 SERIES = [
-    ("Tools", ("tools",), "#2a78d6", "#3987e5"),
-    ("Website forms, podcast, other", ("forms", "podcast", "recommendations", "other"), "#eb6834", "#d95926"),
-    ("Bulk uploads", ("leaf", "uploads"), "#1baf7a", "#199e70"),
+    ("Tools", lambda m: m["kept_tools"], "#2a78d6", "#3987e5"),
+    ("Sign-up forms, podcast, recommendations",
+     lambda m: sum(m["buckets"][b] for b in ("forms", "podcast", "recommendations")), "#eb6834", "#d95926"),
+    ("Bulk uploads (Leaf batches and others)", lambda m: m["buckets"]["leaf"] + m["buckets"]["uploads"], "#1baf7a", "#199e70"),
 ]
 
 
@@ -35,17 +36,23 @@ def month_label(month: str, partial_through=None) -> str:
     return f"{name} 1-{partial_through}" if partial_through else name
 
 
+def approx(m: dict, value) -> str:
+    """Thousands separator, with a leading "about" sign in the months whose ad sign-ups are estimated."""
+    return ("≈" if m["estimated"] else "") + n(value)
+
+
 def series_values(m: dict) -> list:
-    return [sum(m["buckets"][b] for b in buckets) for _, buckets, _, _ in SERIES]
+    return [fn(m) for _, fn, _, _ in SERIES]
 
 
-def chart_svg(months: list, partial_through) -> str:
-    """Stacked columns of kept subscribers per month. Value on each cap, no gridlines, no y axis."""
-    W, H, top, bottom = 720, 300, 26, 30
+def chart_svg(months: list, partial_through, annotations: dict) -> str:
+    """Stacked columns of kept subscribers per month. Value on each cap, no gridlines, no y axis.
+    `annotations` maps a month to a short line printed above its cap."""
+    W, H, top, bottom = 720, 320, 46, 30
     plot_h = H - top - bottom
     band = W / len(months)
     col_w = 24
-    peak = max(m["included"] for m in months)
+    peak = max(m["kept"] for m in months)
     scale = plot_h / peak
     base_y = top + plot_h
     parts = [f'<svg viewBox="0 0 {W} {H}" role="img" aria-label="New subscribers kept per month, stacked by how '
@@ -70,13 +77,15 @@ def chart_svg(months: list, partial_through) -> str:
             else:
                 parts.append(f'<rect x="{x:.1f}" y="{y_top:.1f}" width="{col_w}" height="{seg_h:.1f}" class="s{k}"/>')
             y -= h
-        cap_y = base_y - m["included"] * scale - 7
-        parts.append(f'<text x="{cx:.1f}" y="{cap_y:.1f}" class="cap">{n(m["included"])}</text>')
+        cap_y = base_y - m["kept"] * scale - 7
+        parts.append(f'<text x="{cx:.1f}" y="{cap_y:.1f}" class="cap">{approx(m, m["kept"])}</text>')
+        if m["month"] in annotations:
+            parts.append(f'<text x="{cx:.1f}" y="{cap_y - 16:.1f}" class="note">{html.escape(annotations[m["month"]])}</text>')
         last = i == len(months) - 1
         parts.append(f'<text x="{cx:.1f}" y="{base_y + 19}" class="tick">'
                      f'{month_label(m["month"], partial_through if last else None)}</text>')
         tip = {"month": month_label(m["month"], partial_through if last else None) + " " + m["month"][:4],
-               "kept": n(m["included"]), "rows": [[SERIES[k][0], n(v)] for k, v in enumerate(vals)]}
+               "kept": approx(m, m["kept"]), "rows": [[SERIES[k][0], n(v)] for k, v in enumerate(vals)]}
         parts.append(f'<rect x="{band * i:.1f}" y="0" width="{band:.1f}" height="{H}" class="hit" tabindex="0" '
                      f"data-tip='{html.escape(json.dumps(tip), quote=True)}'/>")
     parts.append(f'<line x1="0" x2="{W}" y1="{base_y + 0.5}" y2="{base_y + 0.5}" class="axis"/>')
@@ -125,6 +134,7 @@ p,li{color:var(--ink)} li{margin:6px 0}
 .chart .s0{fill:var(--s0)} .chart .s1{fill:var(--s1)} .chart .s2{fill:var(--s2)}
 .chart .cap{font-size:12px;fill:var(--ink);text-anchor:middle;font-weight:600}
 .chart .tick{font-size:12px;fill:var(--muted);text-anchor:middle}
+.chart .note{font-size:11.5px;fill:var(--ink2);text-anchor:middle}
 .chart .axis{stroke:var(--axis);stroke-width:1}
 .chart .hit{fill:transparent;outline:none;cursor:default}
 .chart .hit:hover,.chart .hit:focus{fill:var(--ink);fill-opacity:.05}
@@ -141,6 +151,8 @@ th{font-weight:600;color:var(--ink2);font-size:12.5px;white-space:normal;vertica
 .l{text-align:left} td.key{background:var(--keybg);font-weight:600}
 tfoot td{font-weight:600;border-top:1px solid var(--axis);border-bottom:none}
 .small{font-size:13.5px;color:var(--ink2)}
+.callout{background:var(--surface);border:1px solid var(--hair);border-left:3px solid var(--s1);border-radius:8px;padding:12px 16px;margin:14px 0}
+.callout b{font-weight:600} .callout p{margin:0}
 code{font-size:.92em;background:var(--hair);padding:1px 5px;border-radius:4px}
 """
 
@@ -167,22 +179,35 @@ def build(dp: dict, xc: dict, notes: dict) -> str:
     tot = lambda key: sum(m[key] for m in months)  # noqa: E731
     btot = lambda b: sum(m["buckets"][b] for m in months)  # noqa: E731
     label = lambda i, m: month_label(m["month"], partial if i == len(months) - 1 else None)  # noqa: E731
+    dash = lambda v: n(v) if v else "-"  # noqa: E731
+    any_est = any(m["estimated"] for m in months)
+    total_mark = "≈" if any_est else ""
 
-    main_rows = [[label(i, m), n(m["total"]), n(m["buckets"]["study"]), n(m["buckets"]["ads"]), n(m["included"]),
-                  n(m["included_active"])] for i, m in enumerate(months)]
-    main_total = ["2026 so far", n(tot("total")), n(btot("study")), n(btot("ads")), n(tot("included")),
-                  n(tot("included_active"))]
+    main_rows = [[label(i, m), n(m["total"]), dash(m["buckets"]["study"]), approx(m, m["ads_all"]),
+                  dash(m["buckets"]["backlog"]), approx(m, m["kept"]), approx(m, m["kept_active"])]
+                 for i, m in enumerate(months)]
+    main_total = ["2026 so far", n(tot("total")), n(btot("study")), total_mark + n(tot("ads_all")), n(btot("backlog")),
+                  total_mark + n(tot("kept")), total_mark + n(tot("kept_active"))]
     main_table = table(
-        ["Month", "All new subscribers (beehiiv)", "From the Who Attracts You study", "From Ads (cpc)",
-         "Kept: neither study nor ads", "Of those, still subscribed today"],
-        main_rows, main_total, note_cols=(4,))
+        ["Month", "All new subscribers (beehiiv)", "From the Who Attracts You study", "From Ads",
+         "December backlog (uploaded Jan 1)", "Kept: neither study nor ads", "Of those, still subscribed today"],
+        main_rows, main_total, note_cols=(5,))
 
-    route_keys = ["tools", "forms", "podcast", "recommendations", "other", "leaf", "uploads"]
-    route_rows = [[label(i, m)] + [n(m["buckets"][k]) for k in route_keys] + [n(m["included"])]
-                  for i, m in enumerate(months)]
-    route_total = ["2026 so far"] + [n(btot(k)) for k in route_keys] + [n(tot("included"))]
-    route_table = table(["Month"] + [dp["labels"][k] for k in route_keys] + ["Kept"], route_rows, route_total,
-                        note_cols=(len(route_keys) + 1,))
+    ads_rows = [[label(i, m), dash(m["buckets"]["ads"]), dash(m["buckets"]["partner_ads"]),
+                 ("≈" + n(m["ads_untagged_est"])) if m["ads_untagged_est"] else "-", approx(m, m["ads_all"])]
+                for i, m in enumerate(months)]
+    ads_total = ["2026 so far", n(btot("ads")), n(btot("partner_ads")), "≈" + n(tot("ads_untagged_est")),
+                 total_mark + n(tot("ads_all"))]
+    ads_table = table(["Month", "Tagged cpc on the record", "Partner ad campaigns (MLA)",
+                       "Estimated, before tags existed", "All ads"], ads_rows, ads_total, note_cols=(4,))
+
+    route_keys = ["forms", "podcast", "recommendations", "leaf", "uploads"]
+    route_rows = [[label(i, m), approx(m, m["kept_tools"])] + [dash(m["buckets"][k]) for k in route_keys]
+                  + [approx(m, m["kept"])] for i, m in enumerate(months)]
+    route_total = (["2026 so far", total_mark + n(tot("kept_tools"))] + [n(btot(k)) for k in route_keys]
+                   + [total_mark + n(tot("kept"))])
+    route_table = table(["Month", "Tools"] + [dp["labels"][k] for k in route_keys] + ["Kept"], route_rows,
+                        route_total, note_cols=(len(route_keys) + 2,))
 
     legend = "".join(f"<span><i style='background:var(--s{k})'></i>{html.escape(s[0])}</span>"
                      for k, s in enumerate(SERIES))
@@ -196,9 +221,11 @@ def build(dp: dict, xc: dict, notes: dict) -> str:
 <p class="answer">{notes['answer']}</p>
 <div class="tiles">{tiles}</div>
 <div class="card"><h3>{notes['chart_title']}</h3><p class="cap2">{notes['chart_caption']}</p>
-<div class="legend">{legend}</div>{chart_svg(months, partial)}<div id="tip"></div></div>
+<div class="legend">{legend}</div>{chart_svg(months, partial, notes['annotations'])}<div id="tip"></div></div>
 <h2>Month by month</h2>{main_table}<p class="small">{notes['table_note']}</p>
+{notes['callouts']}
 <h2>Where the kept subscribers came from</h2>{route_table}<p class="small">{notes['route_note']}</p>
+<h2>What was counted as Ads</h2>{ads_table}<p class="small">{notes['ads_note']}</p>
 {sections}
 </main><script>{JS}</script></body></html>"""
 

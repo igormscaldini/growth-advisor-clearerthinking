@@ -204,6 +204,11 @@ def test_hand_worked_set_b_overlap_and_wide_reading():
     assert m["total"] == 7 and m["kept"] == 5
     assert m["kept_wide"] == 3
     assert m["study_and_ads"] == 1
+    # Oct 15 sits outside every wave window, so no wave picks these rows up.
+    assert all(w["signups"] == 0 and w["later_took_study"] == 0 for w in az.summarize(rows)["waves"])
+    wave_day = [sub(ts(2026, 8, 5), tools="Unique Traits Test|Who Attracts You"), sub(ts(2026, 8, 5), tools="Unique Traits Test")]
+    aug_wave = az.summarize(wave_day)["waves"][0]
+    assert (aug_wave["signups"], aug_wave["later_took_study"]) == (2, 1)
     assert m["buckets"][az.STUDY] == 1 and m["buckets"][az.ADS] == 0 and m["buckets"][az.PARTNER_ADS] == 1
     assert m["ads_all"] == 1
     assert m["buckets"][az.TOOLS] == 3 and m["buckets"][az.PODCAST] == 1 and m["buckets"][az.FORMS] == 1
@@ -249,6 +254,35 @@ def test_hand_worked_estimate_end_to_end():
     assert (jan["ads_untagged_est"], jan["kept_on_record"], jan["kept"], jan["kept_active"]) == (80, 200, 120, 60)
     assert jan["estimated"] is True and jan["kept_tools"] == 120 and jan["ads_all"] == 80
     assert (apr["ads_untagged_est"], apr["kept"], apr["buckets"][az.ADS], apr["estimated"]) == (0, 10, 80, False)
+
+
+def test_context_counts_leaf_batches_and_the_launch_days():
+    """A Leaf batch of 120 on May 10 (plus 3 strays on another day, below the 100 cut), and on the launch
+    days 5 subscribers of which 3 name only the Unique Traits Test; an invalid one is ignored."""
+    rows = [sub(ts(2026, 5, 10), channel="import", Leaf=True) for _ in range(120)]
+    rows += [sub(ts(2026, 5, 11), channel="import", Leaf=True) for _ in range(3)]
+    rows += [sub(ts(2026, 3, 24), **{az.OLD_TOOLS_FIELD: ["Unique Traits Test"]}) for _ in range(3)]
+    rows += [sub(ts(2026, 3, 24), **{az.OLD_TOOLS_FIELD: ["Unique Traits Test"]}, status="invalid")]
+    rows += [sub(ts(2026, 3, 26), **{az.OLD_TOOLS_FIELD: ["Unique Traits Test", "Philosophical Beliefs"]}), sub(ts(2026, 3, 23))]
+    rows += [sub(ts(2026, 3, 27))]
+    c = az.context(rows)
+    assert c["leaf_batches"] == {"2026-05-10": 120}
+    assert (c["unique_traits_launch"]["subscribers"], c["unique_traits_launch"]["unique_traits_only"]) == (5, 3)
+
+
+def test_wave_excess_by_hand():
+    """Three wave days with 50, 80 and 20 sign-ups. Two baseline days on each side: 10, 12 before and
+    14, 100 after (one outlier). Median of (10, 12, 14, 100) = 13 a day, so the wave's excess is
+    150 - 3 x 13 = 111."""
+    daily = {"2026-08-01": 10, "2026-08-02": 12, "2026-08-03": 50, "2026-08-04": 80, "2026-08-05": 20,
+             "2026-08-06": 14, "2026-08-07": 100}
+    w = az.wave_excess(daily, date(2026, 8, 3), date(2026, 8, 5), baseline_days=2)
+    assert w == {"days": 3, "signups": 150, "baseline_per_day": 13, "excess": 111}
+
+
+def test_wave_excess_is_zero_on_a_flat_series():
+    daily = {f"2026-09-{d:02d}": 200 for d in range(1, 31)}
+    assert az.wave_excess(daily, date(2026, 9, 12), date(2026, 9, 15), baseline_days=5)["excess"] == 0
 
 
 # ---------- 2. realistic synthetic worlds ----------
