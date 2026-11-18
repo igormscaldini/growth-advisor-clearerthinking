@@ -123,10 +123,13 @@ def build(row2, row3):
     return Image.fromarray(out.astype(np.uint8), "RGBA")
 
 
+# The 7-perk version is the one in use since 2026-11-18 (Igor's choice: the T-shirt is not a current perk either),
+# hosted at https://images.guidedtrack.com/ct_plus_perks_banner_7_xvenong.png.
 VARIANTS = {
-    "List_of_perks_2x_no_deck.png": ("Deck removed (8 perks)", [PODCASTS, BONUS, WRAP_UP], [EARLY_ACCESS, TSHIRT]),
-    "List_of_perks_2x_no_deck_no_tshirt.png": ("Deck and T-shirt removed (7 perks)",
+    "List_of_perks_2x_no_deck_no_tshirt.png": ("Deck and T-shirt removed (7 perks), the live version",
                                                [PODCASTS, BONUS, WRAP_UP], [EARLY_ACCESS]),
+    "List_of_perks_2x_no_deck.png": ("Deck removed only (8 perks), not used",
+                                     [PODCASTS, BONUS, WRAP_UP], [EARLY_ACCESS, TSHIRT]),
 }
 
 

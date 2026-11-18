@@ -115,6 +115,27 @@ def test_reflow_without_the_deck(original):
     assert (new[pb.GAP_TOP:, :90] == pb.BG).all() and (new[pb.GAP_TOP:, -90:] == pb.BG).all()
 
 
+def test_reflow_without_the_deck_and_the_tshirt(original):
+    """The version that is live: Early Access alone in row 3, in the middle column."""
+    new = pb.reflow(original, [pb.PODCASTS, pb.BONUS, pb.WRAP_UP], [pb.EARLY_ACCESS])
+    x, top = pb.card_columns(1)[0], pb.ROW_TOP[2]
+    assert x == pb.X[1]                                    # a single centred card lands on the middle column
+    rows = slice(top, top + pb.CARD_H)
+    # Early Access never moved: everything between its two margins is the original's, pixel for pixel. (The
+    # margins and rounded corners are taken from the edge columns, whose anti-aliasing differs by a few levels.)
+    body = slice(x + pb.STRIP, x + pb.W - pb.STRIP)
+    assert np.array_equal(new[rows, body], original[rows, body])
+    assert np.abs(new[rows, x:x + pb.W] - original[rows, x:x + pb.W]).max() <= 8
+    # Where Wrap-Up and the T-shirt used to be there is no card left: nothing lighter than the background.
+    for gone in (pb.X[0], pb.X[2]):
+        assert new[rows, gone:gone + pb.W].max() <= pb.BG
+    assert (new[top + 40:, :pb.X[1] - 40] == pb.BG).all() and (new[top + 40:, pb.X[1] + pb.W + 40:] == pb.BG).all()
+    # The card's left and right shadows mirror the outer shadows the original draws on its edge columns.
+    middle = slice(top + 60, top + pb.CARD_H - 60)
+    assert np.array_equal(new[middle, x - 30:x], original[middle, pb.X[0] - 30:pb.X[0]])
+    assert np.array_equal(new[middle, x + pb.W:x + pb.W + 30], original[middle, pb.X[2] + pb.W:pb.X[2] + pb.W + 30])
+
+
 def test_shadows_between_rows_add_up_to_within_a_few_grey_levels(original):
     """The additive shadow model behind the re-flow: row 2's lower shadow (seen clean below row 3) plus row 3's
     upper shadow (seen clean above row 1) should rebuild the real strip between rows 2 and 3."""
