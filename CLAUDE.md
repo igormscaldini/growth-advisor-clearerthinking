@@ -318,6 +318,7 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   old GA4 actions made secondary, search themes re-aimed at diary/journal/planner/habit tracker. API limits found: UA, Smart-campaign and
   Android-install actions and VIDEO campaigns reject mutates (UI only); counting_type of GA4-imported actions is immutable (set in GA4); a
   field mask built with protobuf_helpers.field_mask drops fields set to False/0, giving a silent no-op "ok": list mask paths by hand.
+- `reports/ct_plus_perks_banner_2026-11-18_src/build.py`: the CT+ perks banner shown at the end of tools, rebuilt without the Life-Changing Questions deck tile (the deck stopped being a CT+ perk on 2026-11-18; memory note `project_lcq_deck_perk_removal_2026_11` has what was changed and what is open). It moves the original's tiles pixel for pixel (`compose_row`); the original PNG is kept beside it. Live image: https://images.guidedtrack.com/ct_plus_perks_banner_eott76o.png in the LCQ tool (GT 9306) and the UPT report (GT 22897); three report programs outside Igor's GT account (Rationality, Philosophical Beliefs, Time & Money) still use the old `List_of_perks_2x.png`.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
@@ -473,6 +474,7 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   reload or a return visit restarts at its first `*if`/`*program`/`*for`/`*service` node (or first content) and re-runs from
   there; guard one-time effects with a flag set before that point. In `*error`, `it` is `{text: <parsed body>, code: <HTTP
   status>, ...}`; printing it dumps the association. Reading a missing association key is a runtime error.
+- GT facts verified 2026-11-18: upload an image with `POST /programs/{key}/images` (basic auth, multipart field `file`), which returns `{"url": "https://images.guidedtrack.com/..."}`. `gt pull` needs `-o`; `gt push` pushes EVERY file in the current folder, so push from a folder holding only the programs to change; right after a push the editor page can serve the old source for a few seconds (re-pull before calling it failed). `GET /programs/{key}/embed` WITH basic auth reuses the account's existing run of that program instead of creating one; `/runs/{id}/contents` returns `{"job": n}` until the build finishes, and the compiled JSON is keyed by subprogram name, which shows which program holds a string.
 - GT facts verified 2026-11-10 (Unstuck build): `*service` inside `*click` does not compile (the error names only the
   `*component` line); make the click `*goto` a label that holds the service. `{var}` is NOT filled in inside an `*html`
   block that also contains `<style>`: use two blocks. `*audio` swaps the URL's extension and requests only `.mp3` and
