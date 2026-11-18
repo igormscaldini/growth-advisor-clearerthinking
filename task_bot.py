@@ -402,7 +402,8 @@ def modify_labels(svc, msg_id: str, add=(), remove=()) -> None:
 def send_report(svc, item: dict, body: str, taken_label: str) -> None:
     """Reply in Igor's thread. Addressed to the +claude address so that his own "Reply" comes
     back to the bot; the header and the label keep the bot from ever reading its own report as a
-    task. INBOX + UNREAD because Gmail files mail from an account to itself under Sent only."""
+    task. Gmail delivers mail to the +claude address into the inbox by itself; INBOX + UNREAD are
+    added anyway so the report is seen even if that ever changes."""
     msg = MIMEText(body, "plain", "utf-8")
     msg["To"] = task_address()
     msg["From"] = f"Claude Tasks <{OWN_ADDRESS}>"
@@ -447,7 +448,9 @@ def process(svc, msg: dict, labels: dict, tasklog, contacts: list[dict], dry_run
     row = {task_log.KEY_COLUMN: item["id"]}
     if not dry_run:
         # Label BEFORE acting: if the run dies half way, the task is not repeated on the next run.
-        modify_labels(svc, item["id"], add=[labels[LABEL_TAKEN]])
+        # Gmail also delivers mail sent to the +claude address into the inbox as unread (checked
+        # live 2026-11-18); take Igor's own forward out of it, the report is what he reads.
+        modify_labels(svc, item["id"], add=[labels[LABEL_TAKEN]], remove=["INBOX", "UNREAD"])
         received = datetime.fromtimestamp(item["received_ms"] / 1000, tz=timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
         if tasklog:
             row = _safely("task log (start)", lambda: tasklog.upsert({

@@ -1,0 +1,61 @@
+name: Task bot (emailed instructions)
+
+# Igor emails an instruction to his +claude address; task_bot.py carries it out and replies.
+# Setup, the catalogue of actions and the safety limits: bots/TASK_BOT.md.
+on:
+  # The real trigger: the Apps Script in bots/task_bot_trigger.gs calls this within a minute of
+  # a task email (and every 15 minutes while drafts are waiting to be sent).
+  workflow_dispatch:
+  # Fallback only. GitHub fires scheduled runs on this repo 5 or 6 times a day whatever the
+  # interval says, so this catches a task within a few hours if the Apps Script is down.
+  schedule:
+    - cron: "*/15 * * * *"
+
+permissions:
+  contents: read
+
+# One run at a time: a task is labelled "taken" before it is acted on, and two runs must never
+# race for the same email. A trigger that arrives mid-run queues one more run behind it.
+concurrency:
+  group: task-bot
+  cancel-in-progress: false
+
+jobs:
+  tasks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Claude Code CLI
+        # Headless Claude Code on Igor's subscription (no Anthropic API credits), as in
+        # advisor-reply.yml. Needs the CLAUDE_CODE_OAUTH_TOKEN secret (bots/set_claude_token.sh).
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run pending tasks
+        # This repo's logs are PUBLIC. task_bot.py prints message ids, counts and statuses only;
+        # never add a step here that echoes an email, a name or a tool result.
+        env:
+          # Restricted Stripe key that may update subscriptions (bots/set_task_bot_secrets.sh);
+          # the shared STRIPE_SECRET_KEY is read-only and only serves look-ups if this is missing.
+          STRIPE_TASKBOT_KEY: ${{ secrets.STRIPE_TASKBOT_KEY }}
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
+          BEEHIIV_API_KEY: ${{ secrets.BEEHIIV_API_KEY }}
+          BEEHIIV_PUB_CLEARER_THINKING: ${{ secrets.BEEHIIV_PUB_CLEARER_THINKING }}
+          OAUTH_CLIENT_JSON: ${{ secrets.OAUTH_CLIENT_JSON }}
+          GOOGLE_TOKEN_JSON: ${{ secrets.GOOGLE_TOKEN_JSON }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          ADVISOR_MODEL: ${{ secrets.ADVISOR_MODEL }}
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          TASK_LOG_SHEET_ID: ${{ secrets.TASK_LOG_SHEET_ID }}
+        run: python task_bot.py

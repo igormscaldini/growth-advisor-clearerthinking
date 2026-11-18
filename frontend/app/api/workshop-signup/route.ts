@@ -6,40 +6,11 @@
 // sends), WORKSHOP_SHEET_ID, GOOGLE_TOKEN_JSON (the same OAuth blob as the GitHub secret;
 // only its spreadsheets scope is used). The Python backfill (workshop_signups_sheet.py) was deleted on 2026-10-02.
 
+import { sheetsFetch, valuesPath } from "@/lib/google";
 import { basicAuthOk, findEmailRow, normalizeSignup, parseBody, SHEET_TAB, toRow } from "@/lib/workshop-signup";
 
-let cachedToken: { value: string; expiresAt: number } | null = null;
-
-async function accessToken(): Promise<string> {
-  if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) return cachedToken.value;
-  const blob = JSON.parse(process.env.GOOGLE_TOKEN_JSON ?? "{}");
-  const res = await fetch(blob.token_uri ?? "https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: blob.client_id,
-      client_secret: blob.client_secret,
-      refresh_token: blob.refresh_token,
-      grant_type: "refresh_token",
-    }),
-  });
-  if (!res.ok) throw new Error(`token refresh failed: ${res.status} ${await res.text()}`);
-  const data = await res.json();
-  cachedToken = { value: data.access_token, expiresAt: Date.now() + Number(data.expires_in ?? 3600) * 1000 };
-  return cachedToken.value;
-}
-
-async function sheets(path: string, init: RequestInit = {}): Promise<Record<string, unknown>> {
-  const token = await accessToken();
-  const res = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${process.env.WORKSHOP_SHEET_ID}${path}`, {
-    ...init,
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-  });
-  if (!res.ok) throw new Error(`sheets ${path}: ${res.status} ${await res.text()}`);
-  return res.json();
-}
-
-const range = (a1: string) => `/values/${encodeURIComponent(`${SHEET_TAB}!${a1}`)}`;
+const sheets = (path: string, init: RequestInit = {}) => sheetsFetch(process.env.WORKSHOP_SHEET_ID, path, init);
+const range = (a1: string) => valuesPath(SHEET_TAB, a1);
 
 export async function POST(request: Request) {
   if (!basicAuthOk(request.headers.get("authorization"), process.env.WORKSHOP_SIGNUP_USER, process.env.WORKSHOP_SIGNUP_PASSWORD)) {

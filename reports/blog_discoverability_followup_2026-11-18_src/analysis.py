@@ -82,7 +82,7 @@ def link_graph(crawl: dict) -> dict:
                 "status": p.get("status"),
                 "post_links_excl_chrome": len([t for t in map(norm, p.get("post_links", [])) if t != HUB]),
                 "pagination_links": [x for x in p.get("blog_page_links", []) if x.rstrip("/") != u.rstrip("/")],
-            } for u, p in crawl["pages"].items() if u.endswith("/blog") or "/blog/page/" in u},
+            } for u, p in crawl["pages"].items() if u.rstrip("/").endswith(".org/blog") or "/blog/page/" in u},
         "category_pages": {u.rsplit("/", 1)[1]: len([t for t in map(norm, p.get("post_links", [])) if t not in chrome and t != HUB])
                            for u, p in crawl["pages"].items() if "/blog/categories/" in u},
         "canonical_mismatch": sorted(u for u in sitemap_posts if u in pages and norm(crawl_canon(crawl, u) or "") != u),

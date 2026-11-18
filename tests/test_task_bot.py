@@ -579,7 +579,8 @@ def test_process_runs_the_task_labels_first_logs_and_reports(wired, monkeypatch)
     log = FakeLog()
     status = tb.process(object(), thread[1], {tb.LABEL_TAKEN: "L1", tb.LABEL_DRAFTS: "L2"}, log, [], dry_run=False)
     assert status == tl.DONE
-    assert seen["labelled_before_model"] == [("m1", ["L1"], [])]            # at most once: label, then act
+    # at most once: label first, then act; Igor's own forward leaves the inbox
+    assert seen["labelled_before_model"] == [("m1", ["L1"], ["INBOX", "UNREAD"])]
     assert seen["scope"] == ["info@clearerthinking.org", JANE] and seen["reply_target"] == "<c1@x>"
     row = log.rows["m1"]
     assert row["Status"] == tl.DONE and row["About"] == f"Jane Doe <{JANE}>" and row["Summary"] == "Unsubscribed."
