@@ -244,6 +244,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - `gtm/`: sources of the GTM-WGXZSLV Custom HTML tags (blog audio tracking; `coaching_fab_tools.html` = the
   "Get Coaching" floating button for programs.* pages, trigger scoped by Page Hostname, assessment in
   `reports/coaching_fab_tools_assessment_2026-10-19.html`). The container is SHARED by www (Wix) and programs.*.
+  Since 2026-11-18 the button is an ALLOWLIST (Igor): it shows only on the tools listed on
+  www.clearerthinking.org/clearer-thinking-tools (95 paths, written into the snippet by
+  `gtm/coaching_fab_tools_list.py --write`; no argument = compare with the live page) plus a hand-kept
+  `RESULT_PAGES` list (UPT and Rationality reports etc.); a tool's sub-paths count as the tool. The Cognitive
+  Assessment intro is on the tools page but stays off (`KEEP_OFF`, Igor 2026-11-10). A new tool gets the button
+  only after the script is re-run AND the snippet is re-pasted into the GTM tag (no GTM API access from here).
   `gtm.js` fetched with curl is not what browsers get (it lacked tags GA4 proves are firing): judge the container
   from a live page or GA4, never from that file. programs.* pages render GuidedTrack inline (no iframe) and load
   GTM from `google_analytics_guidedtrack_trigger.js` at the end of body; `personality-test.html` loads it only after

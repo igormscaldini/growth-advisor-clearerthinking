@@ -7,6 +7,9 @@
   "Get Coaching Button" already shows this button; the hostname condition plus the
   hostname guard below keep the two from ever showing together.
 
+  Which pages show it: only the tools listed on www.clearerthinking.org/clearer-thinking-tools
+  (the TOOLS list in the script, refreshed with gtm/coaching_fab_tools_list.py) and their result pages.
+
   Source of truth for the tag body: this file. Paste it whole into the GTM tag.
   Mirrors the Wix embed's markup and styles; the additions are the guards and the
   GuidedTrack-specific spacing (see comments in the script).
@@ -82,19 +85,134 @@
     if (location.hostname !== 'programs.clearerthinking.org') return;
     if (document.querySelector('.ct-coaching-fab')) return;
 
-    // Path prefixes (lower-case) where the button must not appear. Empty = every page.
-    var HIDE_ON = [
-      // Clearer Research prize form: an academic audience, so no CT promotion on it.
-      '/unanswered-questions-in-psychology',
-      // Workshop sign-up page: keep visitors on the sign-up (Igor, 2026-11-10).
-      '/procrastination-workshop-with-spencer-greenberg',
-      // Cognitive Assessment intro (paid product page): no competing CTA (Igor, 2026-11-10).
-      '/cognitive-test-intro'
+    // Where the button shows: ONLY on the tools listed on www.clearerthinking.org/clearer-thinking-tools
+    // (Igor, 2026-11-18). Every other page of this host gets no button: workshop and sign-up forms, the
+    // members' dashboard, the unsubscribe page, partner-branded copies under /p/, paid product pages.
+    // Until that date it was the reverse: every page except a short HIDE_ON list.
+    //
+    // One path per tool, lower-case, without ".html" or a trailing slash. A tool's own sub-pages
+    // (/tool/report/) count as the tool. The list between the markers comes from the tools page:
+    // `python gtm/coaching_fab_tools_list.py` compares, `--write` refreshes it.
+    var TOOLS = [
+      // BEGIN TOOLS (written by gtm/coaching_fab_tools_list.py, do not edit by hand)
+      '/40_winks',                                   // 40 Winks: Better Sleep Made Easy
+      '/achieve_your_goals',                         // Achieve Your Goals
+      '/art_of_collaboration',                       // The Art of Collaboration
+      '/artificial_intelligence_quiz',               // Artificial Intelligence Quiz
+      '/astrology_challenge',                        // The Astrology Challenge
+      '/become_a_great_listener',                    // Become A Great Listener
+      '/biosafety_quiz',                             // Biosafety Quiz
+      '/boost_your_productivity',                    // Boost Your Productivity
+      '/building_happiness_habits',                  // Building Happiness Habits
+      '/calibrate_your_judgment',                    // Calibrate Your Judgment
+      '/can_you_detect_weak_arguments',              // Can You Detect Weak Arguments?
+      '/can_you_guess_which_charities_work',         // Charity Effectiveness
+      '/career_fulfillment_diagnostic',              // Career Fulfillment Diagnostic
+      '/challenge_your_deepest_beliefs',             // The Belief Challenger
+      '/change_behavior',                            // Change Behavior for the Better
+      '/cognitive_defusion',                         // Step Back From Your Thoughts
+      '/common_misconceptions',                      // The Common Misconceptions Test
+      '/confrontation_aid',                          // The Confrontation Aid
+      '/create_your_custom_clearer_thinking_plan',   // Clearer Thinking Paths
+      '/credentialist_test',                         // Credentialist Test
+      '/cult_assessment',                            // The Cult Assessment
+      '/daily_ritual',                               // Daily Ritual: A Habit Creation System
+      '/decisionmaker',                              // The Decision Advisor
+      '/defining_emotions',                          // Defining Emotions
+      '/design_your_own_self_experiment',            // Design Your Own Self-Experiment
+      '/earr_framework',                             // Resolve Harmful Situations
+      '/effective_trust_repair',                     // Effective Trust Repair
+      '/emotional_obstacles_to_doing_good',          // Emotional Obstacles to Doing Good
+      '/enhancing_creativity',                       // Enhancing Creativity
+      '/explanation_freeze',                         // Explanation Freeze
+      '/fail-safing_your_plans',                     // Fail-Safing Your Plans
+      '/faulty_reasoning_quiz',                      // Faulty Reasoning Quiz
+      '/flexible_thinking',                          // Flexible Thinking
+      '/gender_continuum_test',                      // Gender Continuum Test
+      '/goal_trainer_ct',                            // What Makes an Effective Goal?
+      '/hidden_meaning_of_sounds',                   // The Hidden Meaning of Sounds
+      '/how-to-compliment',                          // Craft Perfect Compliments
+      '/how_rational_are_you_really_take_the_test',  // How Rational Are You, Really?
+      '/how_to_do_more_good',                        // Leaving Your Mark on the World
+      '/how_well_anchored_are_your_estimates',       // How Airtight Are Your Estimates?
+      '/imposter_syndrome',                          // The Imposter Syndrome Test
+      '/improve_your_frequency_predictions',         // Improve Your Frequency Predictions
+      '/intrinsic_values_test',                      // The Intrinsic Values Test
+      '/introduction',                               // Mental Traps
+      '/is_your_memory_like_a_photograph',           // Is Your Memory Like A Photograph?
+      '/kind_and_effective_communication',           // Kind and Effective Communication
+      '/lcq',                                        // Life Changing Questions
+      '/life_assessment',                            // Lifetime Aspirations
+      '/long-term_future_quiz',                      // Long-Term Future Quiz
+      '/make_your_work_more_joyful',                 // Make Your Work More Joyful
+      '/managing_arguments',                         // Managing Arguments in Relationships
+      '/mistakes',                                   // Learning From Mistakes
+      '/moodboosters',                               // Mood Boosters
+      '/nuanced_thinking_techniques',                // Nuanced Thinking Techniques
+      '/overcome_procrastination',                   // Get Going: Overcome Procrastination
+      '/overconfidence_analyzer',                    // Overconfidence Analyzer
+      '/pathkeeper_intro',                           // Pathkeeper
+      '/personality-test',                           // The Ultimate Personality Test
+      '/philosophical_beliefs',                      // Learn Your Philosophical Beliefs
+      '/planning_fallacy',                           // The Planning Fallacy
+      '/political_bias_test',                        // Political Bias Test
+      '/practice_self-compassion',                   // Practice Self-Compassion
+      '/predict_correlations',                       // Predict Psychological Correlations
+      '/productive_disagreement',                    // Productive Disagreements
+      '/program_yourself',                           // Program Yourself to Improve Your life
+      '/question_of_evidence',                       // The Question of Evidence
+      '/question_your_identity',                     // Question Your Identity
+      '/reframing_negative_emotions',                // Reframing Negative Emotions
+      '/relationship_review',                        // The Relationship Review
+      '/replace_unhelpful_coping_strategies',        // Replace Unhelpful Coping Strategies
+      '/retrocaster',                                // Retrocaster
+      '/rhetorical_fallacies',                       // Rhetorical Fallacies
+      '/savoring',                                   // Savor Your Life
+      '/seek_criticism_tool',                        // Seeking Outside Criticism
+      '/should_you_trust_your_thinking',             // When Are You Overconfident?
+      '/skeptical_seekers',                          // Are you a Skeptic or a Seeker?
+      '/social_biases',                              // How Other People Can Make You Irrational
+      '/sources_of_pleasure',                        // Your Greatest Sources of Pleasure
+      '/spark_the_mood_you_want',                    // Spark the Mood You Want
+      '/sunk_costs',                                 // The Sunk Cost Fallacy
+      '/surpass_self-limiting-beliefs',              // Surpass Self-Limiting Beliefs
+      '/tactics_for_happier_living',                 // Tactics for Happier Living
+      '/uncover_your_guiding_principles',            // Uncover Your Guiding Principles
+      '/understanding-your-morality',                // Understand Your Morality
+      '/understanding_bayes_theorem',                // Understanding Bayes Theorem
+      '/unique-traits-test',                         // Unique Traits Test
+      '/what_causes_match_your_values',              // What Causes Match Your Values?
+      '/what_is_your_time_really_worth_to_you',      // Value Of Your Time Calculator
+      '/what_to_know_about_suicide',                 // What to Know About Suicide
+      '/when_to_stop_exploring',                     // When To Stop Exploring
+      '/who_attracts_you_study',                     // Who Attracts You?
+      '/worlds_biggest_problems_quiz',               // World's Biggest Problems Quiz
+      '/would_you_make_a_good_tech_startup_founder', // The Entrepreneur Test
+      '/your_primal_world_beliefs',                  // Your Primal World Beliefs
+      '/your_quarterly_life_review'                  // Your Quarterly Life Review
+      // kept off on purpose: /cognitive-test-intro: paid product page, no competing CTA (Igor, 2026-11-10)
+      // END TOOLS
     ];
-    var path = location.pathname.toLowerCase();
-    for (var i = 0; i < HIDE_ON.length; i++) {
-      if (path.indexOf(HIDE_ON[i]) === 0) return;
+    // Result pages of tools above that live at an address of their own (kept by hand).
+    var RESULT_PAGES = [
+      '/personality_report',                   // The Ultimate Personality Test
+      '/rationality-report',                   // How Rational Are You, Really? (one page per type)
+      '/daily_ritual_report',                  // Daily Ritual
+      '/daily_ritual_checkin',                 // Daily Ritual
+      '/worlds_biggest_problems_quiz_report',  // World's Biggest Problems Quiz
+      '/pathkeeper'                            // Pathkeeper (listed as /pathkeeper_intro)
+    ];
+    var path = location.pathname.toLowerCase().replace(/\/+$/, '')
+      .replace(/\/index(\.html)?$/, '').replace(/\.html$/, '').replace(/\/+$/, '');
+    var pages = TOOLS.concat(RESULT_PAGES);
+    var listed = false;
+    for (var i = 0; i < pages.length; i++) {
+      if (path === pages[i] || path.indexOf(pages[i] + '/') === 0) {
+        listed = true;
+        break;
+      }
     }
+    if (!listed) return;
 
     var fab = document.createElement('a');
     fab.className = 'ct-coaching-fab';
