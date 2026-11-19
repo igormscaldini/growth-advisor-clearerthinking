@@ -60,6 +60,24 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   see `bots/ADVISOR_ROUTINE.md`) is an optional alternative scheduler, not the default.
   `advisor_inbox.py`: Gmail scan of the week's threads. `advisor_conversations.py`: digests
   Claude Code transcripts. `advisor_memory.py`: the encrypted memory store all of them share.
+- Task bot (2026-11-18; guide, setup and limits in `bots/TASK_BOT.md`): Igor forwards an email to his `+claude` Gmail address with an
+  instruction on top and `task_bot.py` carries it out through headless Claude Code whose only tool is `task_bot.py --tool <name> '<json>'`
+  (the shared bridge is `tool_bridge.py`, also used by `advisor_reply.py`). The catalogue and EVERY safety limit live in `task_actions.py`,
+  in code, not in the prompt: actions only on addresses that appear in Igor's email, per-email budgets, Stripe cancel at period end only,
+  and emails only as Gmail DRAFTS (Igor's choice: account changes run at once, he sends the emails). Authentication = the message carries
+  Gmail's SENT label and is addressed To the +claude address; anything else is never a task. The bot labels a task "Claude tasks" BEFORE
+  acting (at most once), replies in the thread To the +claude address (so Igor's Reply comes back as a follow-up) with an `X-CT-TaskBot`
+  header, and builds the report from the tools' own record. Log = private Google Sheet "Claude tasks" (`task_log.py`, `TASK_LOG_SHEET_ID`
+  in `.env`, GitHub and Vercel; its Contacts tab is who drafts may also go to, edited by Igor), shown by the password-protected page
+  `frontend/app/tasks` (`TASKS_PAGE_PASSWORD` in Vercel; `lib/tasks.ts` uses node:crypto, so client components import its types only).
+  Runs from `task-bot.yml`: started within a minute by the Apps Script `bots/task_bot_trigger.gs` in Igor's Google account, with the
+  throttled cron as fallback. NEVER print names, addresses or email text there (public logs). Cancelling needs `STRIPE_TASKBOT_KEY`
+  (restricted key with Subscriptions: write; the shared Stripe key is read-only, a write gets 403); `bash bots/set_task_bot_secrets.sh`
+  sets it and the page password. Verified live while building: mail sent to the +claude alias IS delivered to the inbox as unread
+  (unlike mail to the plain address); `messages.insert` fakes a received email for tests; stripe-python 15 objects are not dicts (use
+  `.to_dict()`) and `current_period_end` sits on the subscription ITEMS; beehiiv unsubscribe is `PUT /subscriptions/{id}` with
+  `{"unsubscribe": true}` (status becomes `inactive`; the existing key can write); the Vercel CLI works as `npx vercel` in `frontend/`
+  (`printf value | npx vercel env add NAME production`).
 - `stripe_navigator_subscribers.py`: Navigator subscribers -> Google Sheet, synced every
   15 min (`navigator-sheet-sync.yml`, sheet id in the `NAVIGATOR_SHEET_ID` secret and
   `.env`). The sheet write is an UPSERT matched on Subscription ID: columns right of the

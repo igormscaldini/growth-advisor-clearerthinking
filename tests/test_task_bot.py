@@ -281,9 +281,9 @@ def test_recipient_kind(ctx_file):
 
 
 def test_clean_copy_removes_em_dashes():
-    assert ta.clean_copy("Done — access ends Dec 3—then nothing") == "Done, access ends Dec 3, then nothing"
-    assert ta.clean_copy("pages 3–5 stay") == "pages 3–5 stay"      # a number range keeps its en dash
-    assert ta.clean_copy("this – that") == "this, that"
+    assert ta.clean_copy("Done \u2014 access ends Dec 3\u2014then nothing") == "Done, access ends Dec 3, then nothing"
+    assert ta.clean_copy("pages 3\u20135 stay") == "pages 3\u20135 stay"      # a number range keeps its en dash
+    assert ta.clean_copy("this \u2013 that") == "this, that"
 
 
 # By hand: 1764720000 = 2025-12-03 00:00:00 UTC (20425 days after the epoch, x 86400).
@@ -446,7 +446,7 @@ def test_build_draft_replies_in_the_persons_conversation_from_the_address_they_w
     ctx_file(reply_targets={JANE: {"thread_id": "t9", "message_id": "<two@x>", "references": "<one@x>",
                                    "subject": "Fwd: Re: cancel please", "written_to": OWN}})
     ctx = ta.load_context()
-    msg, thread = ta.build_draft(ctx, JANE, "Your cancellation", "Hi Jane — it’s done.\n\nIgor")
+    msg, thread = ta.build_draft(ctx, JANE, "Your cancellation", "Hi Jane \u2014 it’s done.\n\nIgor")
     assert thread == "t9"
     assert msg["Subject"] == "Re: cancel please"            # keeps the conversation's subject
     assert msg["In-Reply-To"] == "<two@x>" and msg["References"] == "<one@x> <two@x>"
@@ -477,7 +477,7 @@ def test_draft_tool_refuses_strangers_and_dry_run_creates_nothing(ctx_file):
 def test_finish_records_a_valid_outcome_only(ctx_file):
     ctx_file()
     assert "refused" in ta.tool_finish(status="great")
-    assert ta.tool_finish(status="Needs_You", about="Jane <j@x.com>", summary="Two subscriptions — which?") == {"saved": True}
+    assert ta.tool_finish(status="Needs_You", about="Jane <j@x.com>", summary="Two subscriptions \u2014 which?") == {"saved": True}
     assert ta.load_context()["outcome"] == {"status": "needs_you", "about": "Jane <j@x.com>",
                                             "summary": "Two subscriptions, which?"}
 
@@ -509,7 +509,7 @@ def test_format_report_is_built_from_the_record_not_the_models_words():
     ctx = {"actions": [{"tool": "cancel_subscription", "text": "Stripe: Navigator set to cancel."},
                        {"tool": "draft_email", "text": 'Email drafted in Gmail: to j@x.com, "Re: cancel".', "draft": {"draft_id": "d"}}],
            "refusals": [{"tool": "cancel_subscription", "why": "not in scope"}]}
-    text = tb.format_report("All done — two things.", ctx, tl.DRAFTS_WAITING, "12")
+    text = tb.format_report("All done \u2014 two things.", ctx, tl.DRAFTS_WAITING, "12")
     assert text.startswith("All done, two things.")
     assert "- Stripe: Navigator set to cancel." in text and "1 draft is waiting in Gmail" in text
     assert "Blocked by the safety limits:\n- cancel_subscription: not in scope" in text

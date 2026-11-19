@@ -174,8 +174,8 @@ def recipient_kind(ctx: dict, email: str) -> str:
 
 def clean_copy(text: str) -> str:
     """Igor's rule: no em dashes anywhere. Enforced on everything the bot writes for him."""
-    text = re.sub(r"\s*—\s*", ", ", str(text or ""))
-    return re.sub(r"\s+–\s+", ", ", text)
+    text = re.sub(r"\s*\u2014\s*", ", ", str(text or ""))
+    return re.sub(r"\s+\u2013\s+", ", ", text)
 
 
 # --- Stripe ---------------------------------------------------------------------------------
