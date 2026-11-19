@@ -4,8 +4,8 @@
     "claude, remove them from the CT beehiiv" or "cancel their subscription on Stripe, let them
     know, and tell Angel when their billing cycle ends".
 
-Each run (GitHub Actions, started within a minute by the Apps Script in bots/task_bot_trigger.gs,
-with a throttled cron as fallback):
+Each run (GitHub Actions, started within a minute by the dashboard's every-minute check,
+frontend/app/api/task-bot-ping, with a throttled cron as fallback):
   1. Finds task emails: messages GMAIL ITSELF FILED AS SENT BY IGOR'S ACCOUNT, addressed to the
      +claude address, not yet labelled "Claude tasks". The SENT label is the authentication: a
      stranger can write to the address (this repo is public) but can never get that label.

@@ -70,10 +70,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   header, and builds the report from the tools' own record. Log = private Google Sheet "Claude tasks" (`task_log.py`, `TASK_LOG_SHEET_ID`
   in `.env`, GitHub and Vercel; its Contacts tab is who drafts may also go to, edited by Igor), shown by the password-protected page
   `frontend/app/tasks` (`TASKS_PAGE_PASSWORD` in Vercel; `lib/tasks.ts` uses node:crypto, so client components import its types only).
-  Runs from `task-bot.yml`: started within a minute by the Apps Script `bots/task_bot_trigger.gs` in Igor's Google account, with the
-  throttled cron as fallback. NEVER print names, addresses or email text there (public logs). Cancelling needs `STRIPE_TASKBOT_KEY`
+  Runs from `task-bot.yml`: started within a minute by `frontend/app/api/task-bot-ping` (Vercel Cron every minute, `frontend/vercel.json`;
+  the team is on Vercel Pro; asks Gmail for untaken task mail and dispatches the workflow with `TASK_BOT_GITHUB_TOKEN`, guarded by
+  `CRON_SECRET`; decision rules in `lib/task-ping.ts`), with the throttled cron as fallback. NEVER print names, addresses or email text there (public logs). Cancelling needs `STRIPE_TASKBOT_KEY`
   (restricted key with Subscriptions: write; the shared Stripe key is read-only, a write gets 403); `bash bots/set_task_bot_secrets.sh`
-  sets it and the page password. Verified live while building: mail sent to the +claude alias IS delivered to the inbox as unread
+  sets it, the page password and the GitHub token (three hidden prompts, each tested before saving). Verified live while building: mail sent to the +claude alias IS delivered to the inbox as unread
   (unlike mail to the plain address); `messages.insert` fakes a received email for tests; stripe-python 15 objects are not dicts (use
   `.to_dict()`) and `current_period_end` sits on the subscription ITEMS; beehiiv unsubscribe is `PUT /subscriptions/{id}` with
   `{"unsubscribe": true}` (status becomes `inactive`; the existing key can write); the Vercel CLI works as `npx vercel` in `frontend/`

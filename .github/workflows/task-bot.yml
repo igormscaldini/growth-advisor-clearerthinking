@@ -3,11 +3,12 @@ name: Task bot (emailed instructions)
 # Igor emails an instruction to his +claude address; task_bot.py carries it out and replies.
 # Setup, the catalogue of actions and the safety limits: bots/TASK_BOT.md.
 on:
-  # The real trigger: the Apps Script in bots/task_bot_trigger.gs calls this within a minute of
-  # a task email (and every 15 minutes while drafts are waiting to be sent).
+  # The real trigger: the dashboard's every-minute check (frontend/app/api/task-bot-ping, Vercel
+  # Cron) calls this within a minute of a task email, and every 15 minutes while drafts are
+  # waiting to be sent.
   workflow_dispatch:
   # Fallback only. GitHub fires scheduled runs on this repo 5 or 6 times a day whatever the
-  # interval says, so this catches a task within a few hours if the Apps Script is down.
+  # interval says, so this catches a task within a few hours if that check is down.
   schedule:
     - cron: "*/15 * * * *"
 

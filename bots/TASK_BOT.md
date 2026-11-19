@@ -2,7 +2,7 @@
 
 Forward any email to your Gmail address with `+claude` before the `@` (the same address the script prints on install), and write what you want on the first line. The bot carries it out, replies in the same thread, and logs it at https://growth-advisor-clearerthinking.vercel.app/tasks.
 
-Built 2026-11-18. Code: `task_bot.py` (reads the email, runs the task, reports), `task_actions.py` (the actions and their safety limits), `task_log.py` (the log), workflow `.github/workflows/task-bot.yml`, trigger `bots/task_bot_trigger.gs`, page `frontend/app/tasks/`.
+Built 2026-11-18. Code: `task_bot.py` (reads the email, runs the task, reports), `task_actions.py` (the actions and their safety limits), `task_log.py` (the log), workflow `.github/workflows/task-bot.yml`, the every-minute check `frontend/app/api/task-bot-ping/` (Vercel Cron, `frontend/vercel.json`), page `frontend/app/tasks/`.
 
 ## Using it
 
@@ -15,11 +15,11 @@ It also works without forwarding anything ("claude, unsubscribe jane@example.com
 
 What happens next:
 
-1. Within about three minutes (once the trigger below is installed) the bot takes the email, makes the account changes, and replies in the thread with exactly what it did.
+1. Within about three minutes (once the GitHub token below is set up) the bot takes the email, makes the account changes, and replies in the thread with exactly what it did.
 2. Emails to other people are left as **drafts in your Gmail** for you to read and send. A reply to the person who wrote the forwarded email is placed inside that same conversation when your forward is part of it in Gmail (the normal case); otherwise it is a new email.
 3. If something is unclear (no subscriber under that address, two subscriptions, a request it cannot do), it changes nothing and asks you. **Reply to its email** to answer; the reply is a follow-up instruction.
 
-Statuses on the page: **Done**; **Drafts waiting** (changes made, drafts not sent yet; flips to Done within about 15 minutes of you sending them, once the trigger is installed); **Needs you** (it asked you something); **Failed** (it did not finish; the thread says what was and was not done); **Running**.
+Statuses on the page: **Done**; **Drafts waiting** (changes made, drafts not sent yet; flips to Done within about 15 minutes of you sending them, once the GitHub token is set up); **Needs you** (it asked you something); **Failed** (it did not finish; the thread says what was and was not done); **Running**.
 
 ## What it can do, and what it cannot
 
@@ -51,47 +51,55 @@ The task log is a Google Sheet in your Drive called **Claude tasks**. Its **Cont
 
 Drafts to customers go out from igor@clearerthinking.org unless the customer wrote to another of your addresses (set `TASK_BOT_DEFAULT_FROM` to change the default).
 
-## Setup still needed from you (once)
+## Setup (once): one command, three hidden prompts
 
-### 1. Page password and Stripe key: one script
+Open a terminal in this project and run:
 
 ```
 bash bots/set_task_bot_secrets.sh
 ```
 
-It asks for two things at hidden prompts:
+It asks for three things, one after the other. Each is typed or pasted at a hidden prompt (nothing shows while you type), each is tested before it is saved, and pressing Enter skips a step so you can do it later (`bash bots/set_task_bot_secrets.sh page`, `trigger` or `stripe` runs one step alone).
 
-- **A password for the /tasks page** (12+ characters). Saved in Vercel; the page works about two minutes later. Until then the page shows "not set up yet" and nothing else.
-- **A Stripe restricted key.** The key this project already has is read-only (tested 2026-11-18: an update call is refused with 403), so the bot cannot cancel anything until it gets its own. Create it in Stripe: Developers > API keys > Create restricted key, name it "Task bot", and set **Customers: Read**, **Subscriptions: Write**, **Products: Read**, everything else None. The script checks the key can update subscriptions (with a call on an id that does not exist, so nothing changes) before saving it.
+**1. A password for the /tasks page.** Make one up, 12 characters or more. You will type it once per device at https://growth-advisor-clearerthinking.vercel.app/tasks. Until it is set, the page shows "not set up yet" and nothing else.
 
-Until the Stripe key exists, unsubscribes and drafts work, and a cancel request ends as "Needs you" with the reason.
+**2. A GitHub token, so a task starts within a minute.** Without it the bot only runs when GitHub's own schedule fires (5 or 6 times a day here), so a task can wait hours. To create it:
 
-### 2. The trigger, so tasks start within a minute (about five minutes)
+1. Open https://github.com/settings/personal-access-tokens/new
+2. Token name: `Task bot trigger`. Expiration: the longest offered ("No expiration" if it is there).
+3. Repository access: **Only select repositories**, then pick `growth-advisor-clearerthinking`.
+4. Permissions > Repository permissions > **Actions**: **Read and write**. Leave everything else alone.
+5. **Generate token** and copy it (it starts with `github_pat_`). Paste it at the script's second prompt.
 
-Without it the bot still runs, but only when GitHub's own schedule fires: 5 or 6 times a day on this repository, so a task can wait a few hours.
+The script proves the token works by starting one run of the bot, then gives it to the dashboard. From then on the dashboard checks Gmail every minute and starts the bot when a task email is waiting. It tells GitHub only "run the workflow": no email content leaves Gmail through it. If the token has an expiry date, put a reminder in your calendar; when it lapses, tasks quietly fall back to the slow schedule.
 
-1. Create a GitHub token: https://github.com/settings/personal-access-tokens/new . Repository access: **Only select repositories** > `growth-advisor-clearerthinking`. Permissions > Repository permissions > **Actions: Read and write**. Nothing else. Copy the token.
-2. Open https://script.google.com signed in to the Gmail account you forward from, **New project**, name it "Claude task bot trigger".
-3. Replace the contents of `Code.gs` with `bots/task_bot_trigger.gs`.
-4. Left sidebar: **Services +** > **Gmail API** > Add.
-5. Gear icon (Project Settings) > **Script properties** > Add: name `GITHUB_TOKEN`, value the token from step 1.
-6. Back in the editor, pick the function **install** and press Run. Approve the permission screen (for a script you wrote yourself Google shows "Advanced" > "Go to project").
-7. Check: pick **testStart** and Run. The log says "GitHub accepted the start." and a new run appears under Actions > Task bot.
+**3. A Stripe key, so the bot can cancel subscriptions.** The key this project already has is read-only (tested 2026-11-18: an update call is refused with 403). To create one that can cancel:
 
-The script checks Gmail every minute and tells GitHub only "run the workflow". No email content leaves Gmail through it. The token expires on the date you chose in step 1: put a reminder in your calendar, or tasks quietly fall back to the slow schedule.
+1. Open https://dashboard.stripe.com/apikeys in live mode and click **Create restricted key** (if Stripe asks how the key will be used, choose the option for an integration you built).
+2. Key name: `Task bot`.
+3. Set **Customers: Read**, **Subscriptions: Write** and **Products: Read**. Leave everything else on None.
+4. **Create key**, reveal it and copy it (it starts with `rk_live_`). Paste it at the script's third prompt.
+
+The script proves the key can update subscriptions with a call on a subscription id that does not exist, so nothing changes. Until this key exists, unsubscribes and drafts work, and a cancel request ends as "Needs you" with the reason.
+
+When the script finishes it redeploys the dashboard; give it two minutes.
+
+### Then try it
+
+Forward any email to your +claude address with a first line such as "claude, look this person up and tell me what you find. Change nothing." With step 2 done, the reply arrives in about three minutes and the task appears on the page.
 
 ## Checking it and fixing it
 
 ```
 gh run list --workflow task-bot.yml --limit 5     # recent runs
 gh workflow run task-bot.yml                      # run now
-gh workflow disable task-bot.yml                  # pause (and run `uninstall` in the Apps Script)
+gh workflow disable task-bot.yml                  # pause (`gh workflow enable task-bot.yml` resumes)
 python task_bot.py --dry-run                      # locally: read pending tasks, simulate, print; changes nothing
 ```
 
 - A run that ends red means a task failed or a report could not be sent; you also get GitHub's own email. A task that failed is marked "Failed" and is not retried: forward the email again once the cause is fixed.
 - "Not logged in" or "Failed to authenticate" in a report: the Claude token expired, run `bash bots/set_claude_token.sh`.
-- A task email that never gets a reply: it was probably not sent from the Gmail account itself (for example from another mailbox). Only mail in that account's Sent folder counts.
+- A task email that never gets a reply: it was probably not sent from the Gmail account itself (for example from another mailbox); only mail in that account's Sent folder counts. If it was, the GitHub token has probably expired: run `bash bots/set_task_bot_secrets.sh trigger` with a new one.
 
 ## Adding an action
 
