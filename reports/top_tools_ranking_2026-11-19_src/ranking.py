@@ -21,6 +21,8 @@ ALIASES = {"/personality": "/personality-test"}
 # Partner copies whose slug is not simply the tool's own path with hyphens: slug -> the tool's normalized path.
 PARTNER_SLUGS = {"rationality-test": "/how_rational_are_you_really_take_the_test"}
 PARTNER_RE = re.compile(r"^/p/[^/]+/([^/]+)(?:/.*)?$")
+# Tools left out of the ranking at Igor's request (2026-11-19): normalized path -> name shown in the page's notes.
+EXCLUDED = {"/who_attracts_you_study": "Who Attracts You?", "/cognitive-test-intro": "the Cognitive Assessment"}
 
 
 def base_of(url_or_path: str) -> str:
@@ -33,15 +35,15 @@ def _key(text: str) -> str:
     return re.sub(r"[^a-z0-9]", "", text.lower())
 
 
-def tools_from_cards(cards: list[tuple[str, str]]) -> tuple[dict[str, dict], list[str]]:
-    """({base: {"name", "url"}} for the cards on TOOLS_HOST, [titles of the cards hosted elsewhere])."""
+def tools_from_cards(cards: list[tuple[str, str]], excluded=EXCLUDED) -> tuple[dict[str, dict], list[str]]:
+    """({base: {"name", "url"}} for the cards on TOOLS_HOST minus `excluded`, [titles of the cards hosted elsewhere])."""
     tools, elsewhere = {}, []
     for title, link in cards:
         if urllib.parse.urlsplit(link).netloc.lower() != TOOLS_HOST:
             elsewhere.append(title)
             continue
         base = base_of(link)
-        if base:
+        if base and base not in excluded:
             tools.setdefault(base, {"name": title, "url": link})
     return tools, elsewhere
 

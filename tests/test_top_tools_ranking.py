@@ -59,6 +59,16 @@ def test_tools_from_cards_keeps_only_the_tools_host():
     assert elsewhere == ["Society Explained"]
 
 
+def test_excluded_tools_are_not_ranked():
+    cards = [("Who Attracts You?", "https://programs.clearerthinking.org/who_attracts_you_study.html"),
+             ("Cognitive Assessment (Only Free For Supporters)", "https://programs.clearerthinking.org/cognitive-test-intro.html"),
+             ("The Ultimate Personality Test", "https://programs.clearerthinking.org/personality-test.html")]
+    assert set(R.tools_from_cards(cards)[0]) == {"/personality-test"}
+    assert set(R.tools_from_cards(cards, excluded={})[0]) == {"/personality-test", "/who_attracts_you_study", "/cognitive-test-intro"}
+    # their pages then belong to no ranked tool
+    assert R.classify("/who_attracts_you_study.html", {"/personality-test"}) is None
+
+
 # ---- synthetic set 1, worked by hand: grouping and bounds ----
 
 def test_group_and_bounds_by_hand():
@@ -155,6 +165,7 @@ def _data():
                          "with_partner": {"users": 1000 * (i + 1) + (50_000 if i == 0 else 0), "lower": 0, "upper": 0, "pages": 1}}
               for i in range(12)}
     return {"host": "programs.clearerthinking.org", "top_n": 10, "tools": tools, "elsewhere": [],
+            "excluded": ["Tool X", "the Tool Y"],
             "windows": {"12m": {"start": "2025-11-19", "end": "2026-11-18", "tools": counts,
                                 "certain": {"own": True, "with_partner": True}}}}
 
@@ -182,6 +193,6 @@ def test_rendered_page():
     assert out.index("Tool 11") < out.index("Tool 10") < out.index("Tool 2<")
     assert "12,000" in out and "Tool 1<" not in out
     assert "Ranked by unique users, Nov 19, 2025 to Nov 18, 2026. Updated 2026-11-19 03:05pm." in out
-    assert "Partner-branded copies of a tool are not counted." in out
+    assert "Partner-branded copies of a tool are not counted. Not ranked: Tool X and the Tool Y." in out
     assert "count toward that tool" in page.render(_data(), "12m", "with_partner")
     assert "—" not in out and "–" not in out                # no em or en dashes

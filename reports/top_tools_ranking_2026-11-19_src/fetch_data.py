@@ -118,7 +118,7 @@ def main() -> None:
 
     client, prop = get_client(), property_path()
     data = {"fetched": datetime.now().isoformat(timespec="minutes"), "host": HOST, "top_n": TOP_N,
-            "tools": tools, "elsewhere": elsewhere, "windows": {}}
+            "tools": tools, "elsewhere": elsewhere, "excluded": list(R.EXCLUDED.values()), "windows": {}}
     for name, (start, end) in windows(args.end).items():
         data["windows"][name] = w = window_counts(client, prop, start, end, set(tools))
         print(f"\n{name}: {start} to {end}   (ranking certain: {w['certain']})")

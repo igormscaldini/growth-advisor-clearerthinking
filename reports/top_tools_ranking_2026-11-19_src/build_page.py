@@ -63,13 +63,14 @@ def notes(data: dict, window: str, variant: str) -> list[str]:
     period = f"{long_date(w['start'])} and {long_date(w['end'])}"
     partner = ("Visitors of partner-branded copies of a tool count toward that tool."
                if variant == "with_partner" else "Partner-branded copies of a tool are not counted.")
+    left_out = data.get("excluded") or []
+    not_ranked = f" Not ranked: {' and '.join(left_out)}." if left_out else ""
     return [
         f"Unique users are the people who opened a tool's page at least once between {period}, "
         "according to Google Analytics. Each person counts once per tool, however many times they came back.",
-        f"Ranked: the {len(data['tools'])} tools on the <a href=\"{TOOLS_PAGE}\">Clearer Thinking tools page</a> "
-        f"that are hosted on {data['host']}. {partner}",
-        "The numbers include visitors brought by ads and viral posts, not only regular traffic. "
-        "Who Attracts You? went viral three times between August and October 2026.",
+        f"Ranked: {len(data['tools'])} tools from the <a href=\"{TOOLS_PAGE}\">Clearer Thinking tools page</a>, "
+        f"all hosted on {data['host']}. {partner}{not_ranked}",
+        "The numbers include visitors brought by ads, not only regular traffic.",
         "The Ultimate Personality Test is undercounted: since July 21, 2026 its page only reports visitors who "
         "press Start, and nothing was recorded from July 22 to August 10, 2026.",
     ]
