@@ -10,7 +10,7 @@ Three layers, as the project's data-science rules ask:
 """
 import importlib.util
 import random
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 import pytest
@@ -145,6 +145,25 @@ def test_bucket(row, expected):
     assert az.bucket(row) == expected
 
 
+def test_pending_and_invalid_are_not_subscribers():
+    """beehiiv counts neither an address that failed validation nor one that never confirmed."""
+    rows = [sub(tools="Intrinsic Values Test"), sub(tools="Intrinsic Values Test", status="pending"),
+            sub(tools="Intrinsic Values Test", status="invalid"), sub(tools="Intrinsic Values Test", status="inactive")]
+    (m,) = az.summarize(rows)["months"]
+    assert (m["records"], m["invalid"], m["pending"], m["total"], m["kept"], m["kept_active"]) == (4, 1, 1, 2, 2, 1)
+
+
+def test_left_since_counts_unsubscribed_by_where_they_came_from():
+    """Six people joined in June and have since unsubscribed: 2 from the study, 1 tagged ad, 1 partner ad,
+    2 kept (a tool sign-up and a Leaf student). Three who are still active must not be counted."""
+    gone = dict(status="inactive")
+    rows = [sub(tools="Who Attracts You", **gone), sub(**DATING, **gone), sub(tools="X", media="cpc", **gone),
+            sub(**MLA, **gone), sub(tools="X", **gone), sub(channel="import", Leaf=True, **gone),
+            sub(tools="Who Attracts You"), sub(tools="X", media="cpc"), sub(tools="X")]
+    (m,) = az.summarize(rows)["months"]
+    assert m["left_since"] == {"study": 2, "ads": 2, "kept": 2, "backlog": 0}
+
+
 def test_every_bucket_is_either_kept_or_removed():
     assert set(az.EXCLUDED) | set(az.INCLUDED) == set(az.LABELS)
     assert not set(az.EXCLUDED) & set(az.INCLUDED)
@@ -268,6 +287,150 @@ def test_context_counts_leaf_batches_and_the_launch_days():
     c = az.context(rows)
     assert c["leaf_batches"] == {"2026-05-10": 120}
     assert (c["unique_traits_launch"]["subscribers"], c["unique_traits_launch"]["unique_traits_only"]) == (5, 3)
+
+
+# ---------- the whole list: unsubscribes and deletions ----------
+
+def test_by_day_flattens_monthly_lists():
+    assert az.by_day({"2026-01": [5, 6], "2026-02": [7]}) == {"2026-01-01": 5, "2026-01-02": 6, "2026-02-01": 7}
+
+
+NET = {"2026-01-01": 10, "2026-01-02": -5, "2026-01-03": 2, "2026-01-04": 3, "2026-01-05": 4, "2026-01-06": -1,
+       "2026-01-07": 0, "2026-01-08": 6, "2026-01-09": 8, "2026-01-10": 10}
+ANCHORS = {"2026-01-04": 1000, "2026-01-11": 1030}
+
+
+def test_active_on_by_hand():
+    """The list was 1,000 at the start of Jan 4 and 1,030 at the start of Jan 11 (3+4-1+0+6+8+10 = 30)."""
+    assert az.active_on(date(2026, 1, 4), ANCHORS, NET) == 1000
+    assert az.active_on(date(2026, 1, 6), ANCHORS, NET) == 1007          # + Jan 4 and Jan 5
+    assert az.active_on(date(2026, 1, 1), ANCHORS, NET) == 993           # backwards: 1000 - (10 - 5 + 2)
+    assert az.active_on(date(2026, 1, 9), ANCHORS, NET) == 1012          # from the nearer anchor: 1030 - 10 - 8
+    with pytest.raises(KeyError):
+        az.active_on(date(2026, 1, 13), ANCHORS, NET)                    # Jan 11 and 12 have no daily figure
+
+
+def test_unexplained_by_week_by_hand():
+    """Week of Jan 4: the list grew 30 and subscribed minus unsubscribed is 30 -> nothing unexplained.
+    Week of Jan 11: the list fell 30 but the daily figures only explain -10 -> 20 people left the list
+    without an unsubscribe. The week of Jan 18 reaches past the daily series and is skipped."""
+    net = dict(NET, **{f"2026-01-{d}": -2 for d in range(11, 16)}, **{"2026-01-16": 0, "2026-01-17": 0})
+    anchors = dict(ANCHORS, **{"2026-01-18": 1000, "2026-01-25": 990})
+    assert az.unexplained_by_week(anchors, net) == [{"week": "2026-01-04", "unexplained": 0},
+                                                    {"week": "2026-01-11", "unexplained": -20}]
+
+
+def test_list_movement_by_hand():
+    """Two months. January: 2 days, +30 and +10 new, 10 and 20 unsubscribed, list of 1,000 at the start ->
+    40 new, 30 unsubscribed (3% of the list), net +10, 1,010 at the end. February: 1 day, 5 new and 15
+    gone on a list of 1,010 -> net -10. No full week of anchors is covered, so nothing can be reconciled."""
+    subscribed = {"2026-01-30": 30, "2026-01-31": 10, "2026-02-01": 5}
+    unsubscribed = {"2026-01-30": 10, "2026-01-31": 20, "2026-02-01": 15}
+    jan, feb = az.list_movement(subscribed, unsubscribed, {"2026-01-30": 1000})
+    assert (jan["active_at_start"], jan["subscribed"], jan["unsubscribed"], jan["net"], jan["active_at_end"]) == (1000, 40, 30, 10, 1010)
+    assert jan["unsubscribe_rate"] == 0.03 and jan["days"] == 2
+    assert (feb["active_at_start"], feb["net"], feb["active_at_end"]) == (1010, -10, 1000)
+    assert jan["unexplained"] is None and jan["removed_without_unsubscribe"] is None
+
+
+def test_recorded_vs_history_interpolates_inside_the_day():
+    """beehiiv says the list was 1,000 at the start of Jan 4 and gained 3 that day (in NET, Jan 4 = +3; here
+    +300 to make the fraction visible). The dashboard recorded 1,070 at 06:00, a quarter into the day:
+    history says 1,000 + 0.25 x 300 = 1,075, so the gap is -5."""
+    net = dict(NET, **{"2026-01-04": 300})
+    (row,) = az.recorded_vs_history([{"generated_at": "2026-01-04T06:00:00+00:00", "active": 1070}], ANCHORS, net)
+    assert row == {"day": "2026-01-04", "recorded": 1070, "history": 1075, "gap": -5, "day_net": 300}
+    # a snapshot from a day beehiiv's daily series does not cover is ignored
+    assert az.recorded_vs_history([{"generated_at": "2026-03-01T06:00:00+00:00", "active": 1}], ANCHORS, net) == []
+
+
+def synthetic_list(rng, first=date(2026, 6, 1), days=153, start=450_000, noisy_days=()):
+    """A list as beehiiv would report it today: daily new subscribers and unsubscribes, the list size at
+    the start of every 7th day, and the true size at the start of each day."""
+    subscribed, unsubscribed, size_at, anchors, size = {}, {}, {}, {}, start
+    for i in range(days):
+        d = first + timedelta(days=i)
+        size_at[str(d)] = size
+        if i % 7 == 0:
+            anchors[str(d)] = size
+        subscribed[str(d)] = rng.randint(150, 600) + (40_000 if str(d) in noisy_days else 0)
+        unsubscribed[str(d)] = rng.randint(100, 700)
+        size += subscribed[str(d)] - unsubscribed[str(d)]
+    return subscribed, unsubscribed, anchors, size_at
+
+
+def dashboard_snapshots(rng, subscribed, unsubscribed, size_at, deleted=0, deleted_on=None, skip=()):
+    """What the dashboard would have recorded once a day at a random time: the live list size, which
+    before `deleted_on` still included the `deleted` subscribers beehiiv has since erased from its history."""
+    out = []
+    for day, size in size_at.items():
+        if day in skip:
+            continue
+        hour, minute = rng.randint(0, 23), rng.randint(0, 59)
+        live = size + round((hour * 3600 + minute * 60) / 86400 * (subscribed[day] - unsubscribed[day]))
+        if deleted_on and day < deleted_on:
+            live += deleted
+        out.append({"generated_at": f"{day}T{hour:02d}:{minute:02d}:00+00:00", "active": live})
+    return out
+
+
+def test_deletion_scan_null_world_finds_nothing():
+    """Nobody was deleted: what the dashboard recorded equals beehiiv's history on every day, so no month's
+    gap falls by more than rounding, and the weekly books reconcile to zero."""
+    rng = random.Random(3)
+    subscribed, unsubscribed, anchors, size_at = synthetic_list(rng)
+    net = {d: subscribed[d] - unsubscribed[d] for d in subscribed}
+    scan = az.deletion_scan(dashboard_snapshots(rng, subscribed, unsubscribed, size_at), anchors, net)
+    assert len(scan["months"]) == 5 and all(abs(m["median_gap"]) <= 1 for m in scan["months"])
+    assert scan["largest_fall"] <= 1
+    assert all(w["unexplained"] == 0 for w in az.unexplained_by_week(anchors, net))
+    assert all(m["removed_without_unsubscribe"] in (0, None) for m in az.list_movement(subscribed, unsubscribed, anchors))
+
+
+@pytest.mark.parametrize("deleted_on, month_of_fall", [("2026-08-01", "2026-08"), ("2026-08-20", "2026-09")])
+def test_deletion_scan_positive_world_finds_an_erased_bulk_deletion(deleted_on, month_of_fall):
+    """5,000 subscribers were deleted and beehiiv erased them from its history: before the deletion the
+    dashboard's recorded size runs 5,000 above today's history, afterwards it matches. The scan must report
+    a fall of 5,000 in the first month whose typical day is after the deletion."""
+    rng = random.Random(4)
+    subscribed, unsubscribed, anchors, size_at = synthetic_list(rng)
+    net = {d: subscribed[d] - unsubscribed[d] for d in subscribed}
+    snaps = dashboard_snapshots(rng, subscribed, unsubscribed, size_at, deleted=5000, deleted_on=deleted_on)
+    scan = az.deletion_scan(snaps, anchors, net)
+    falls = {m["month"]: m["fall"] for m in scan["months"]}
+    assert abs(falls[month_of_fall] - 5000) <= 2
+    assert abs(scan["largest_fall"] - 5000) <= 2
+    assert all(f is None or f <= 2 for month, f in falls.items() if month != month_of_fall)
+
+
+def test_books_positive_world_finds_removals_beehiiv_does_not_call_unsubscribes():
+    """300 people dropped off the list in the week of Jul 6 without being counted as unsubscribed (the
+    list size fell, the daily figures did not): that week is unexplained by -300 and July shows 300."""
+    rng = random.Random(5)
+    subscribed, unsubscribed, anchors, _ = synthetic_list(rng)
+    net = {d: subscribed[d] - unsubscribed[d] for d in subscribed}
+    anchors = {d: n - (300 if d > "2026-07-06" else 0) for d, n in anchors.items()}
+    weeks = {w["week"]: w["unexplained"] for w in az.unexplained_by_week(anchors, net)}
+    assert weeks["2026-07-06"] == -300 and sum(weeks.values()) == -300
+    by_month = {m["month"]: m["removed_without_unsubscribe"] for m in az.list_movement(subscribed, unsubscribed, anchors)}
+    assert by_month["2026-07"] == 300 and by_month["2026-06"] == 0 and by_month["2026-08"] == 0
+
+
+def test_deletion_scan_skips_noisy_days_and_thin_months():
+    """A day with a 40,000 import is not used (its time-of-day interpolation is meaningless), and a month
+    with fewer than three usable days neither gets a fall nor serves as the comparison for the next one."""
+    rng = random.Random(6)
+    noisy = ("2026-08-12",)
+    subscribed, unsubscribed, anchors, size_at = synthetic_list(rng, noisy_days=noisy)
+    net = {d: subscribed[d] - unsubscribed[d] for d in subscribed}
+    july_but_two = tuple(d for d in size_at if d[:7] == "2026-07" and d[8:] not in ("10", "20"))
+    scan = az.deletion_scan(dashboard_snapshots(rng, subscribed, unsubscribed, size_at, skip=july_but_two), anchors, net)
+    months = {m["month"]: m for m in scan["months"]}
+    assert months["2026-08"]["calm_days"] == 30          # 31 days minus the import day
+    assert months["2026-07"]["calm_days"] == 2 and months["2026-07"]["fall"] is None
+    assert months["2026-06"]["fall"] is None             # the first month has nothing to compare with
+    assert months["2026-08"]["fall"] is not None         # compared with June, not with thin July
+    assert scan["first_day"] == "2026-06-01"
 
 
 def test_wave_excess_by_hand():
