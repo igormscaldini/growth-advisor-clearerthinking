@@ -152,3 +152,25 @@ def test_walk_links_finds_links_at_any_depth():
                      {"buttonData": {"link": {"url": "u2"}}}, {"imageData": {"link": {"target": "BLANK"}}}]}
     assert cross_check.walk_links(doc) == ["u1", "u2"]
     assert cross_check.walk_links(None) == []
+
+
+def test_by_month_fills_silent_months_with_zero():
+    days = [{"keys": ["2025-11-30"], "impressions": 3, "clicks": 1}, {"keys": ["2026-02-01"], "impressions": 5, "clicks": 0},
+            {"keys": ["2026-02-02"], "impressions": 2, "clicks": 1}]
+    assert analysis.by_month(days) == [{"month": "2025-11", "impressions": 3, "clicks": 1}, {"month": "2025-12", "impressions": 0, "clicks": 0},
+                                       {"month": "2026-01", "impressions": 0, "clicks": 0}, {"month": "2026-02", "impressions": 7, "clicks": 1}]
+    assert analysis.by_month([]) == []
+
+
+def test_not_indexed_group():
+    assert analysis.not_indexed_group(P + "impact-bias-definition-examples-and-effects-1") == "bias glossary"
+    assert analysis.not_indexed_group(P + "2017/03/14/want-to-change-your-habits") == "2015-2020 announcements"
+    assert analysis.not_indexed_group(P + "why-don-t-chimps-run-the-world") == "other articles"
+
+
+def test_chart_axis_ceiling_and_empty_segments():
+    import charts
+    assert charts._nice_max(51) == 60 and charts._nice_max(47) == 60 and charts._nice_max(20) == 20 and charts._nice_max(21) == 40
+    bar = charts.segmented_bar([{"label": "A", "value": 9, "slot": 1}, {"label": "B", "value": 0, "slot": 2}, {"label": "C", "value": 1, "slot": 3}], 10)
+    assert bar.count('class="seg"') == 2 and "B" not in bar          # a part at zero draws nothing, in the bar or the legend
+    assert ">9<" in bar and "90.0%" in bar and "10.0%" in bar

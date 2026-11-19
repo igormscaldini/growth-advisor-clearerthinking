@@ -1,5 +1,8 @@
 """SVG pieces for the report: a tall segmented bar and a single-series weekly line with event markers.
 
+No background gridlines and no frame around the plot (Igor's chart rule): y ticks, the end label, the hover
+readout and the table view carry the values.
+
 Colours are CSS custom properties defined once in the page (light and dark), so nothing here holds a hex.
 """
 from __future__ import annotations
@@ -29,7 +32,7 @@ def segmented_bar(parts: list[dict], total: int) -> str:
 
 
 def _nice_max(v: float) -> int:
-    for step in (5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000, 10000, 20000, 50000):
+    for step in (5, 10, 15, 20, 25, 50, 100, 150, 200, 250, 500, 1000, 1500, 2000, 2500, 5000, 10000, 20000, 50000):
         if v <= step * 4:
             return step * 4
     return int(v)
@@ -47,7 +50,6 @@ def line_chart(points: list[tuple[str, float]], unit: str, events: list[tuple[st
         return top + ph * (1 - v / ymax)
 
     grid = "".join(
-        f'<line x1="{left}" x2="{left + pw}" y1="{y(t):.1f}" y2="{y(t):.1f}" class="grid"/>'
         f'<text x="{left - 8}" y="{y(t) + 4:.1f}" class="tick" text-anchor="end">{int(t):,}</text>'
         for t in (ymax / 4, ymax / 2, 3 * ymax / 4, ymax))
     base = f'<line x1="{left}" x2="{left + pw}" y1="{y(0):.1f}" y2="{y(0):.1f}" class="axis"/>' \
@@ -69,12 +71,12 @@ def line_chart(points: list[tuple[str, float]], unit: str, events: list[tuple[st
     end = (f'<circle cx="{xs[lw]:.1f}" cy="{y(lv):.1f}" r="5" class="dot"/>'
            f'<text x="{xs[lw] + 10:.1f}" y="{y(lv) + 4:.1f}" class="endlabel">{lv:,.0f}</text>')
     data = ";".join(f"{w},{v:g},{xs[w]:.1f},{y(v):.1f}" for w, v in points)
-    return (f'<svg class="line" id="{cid}" viewBox="0 0 {width} {height}" role="img" data-unit="{escape(unit)}" data-points="{data}" '
+    return (f'<div class="scroll"><svg class="line" id="{cid}" viewBox="0 0 {width} {height}" role="img" data-unit="{escape(unit)}" data-points="{data}" '
             f'data-top="{top}" data-bottom="{y(0):.1f}" aria-label="{escape(unit)} per week">'
             f'{grid}{base}{months}{marks}<path d="{path}" class="series"/>{end}'
             f'<line class="cross" y1="{top}" y2="{y(0):.1f}" x1="0" x2="0" visibility="hidden"/>'
             f'<circle class="hoverdot" r="5" visibility="hidden"/>'
-            f'<rect x="{left}" y="{top}" width="{pw}" height="{ph}" fill="transparent" class="hit"/></svg>')
+            f'<rect x="{left}" y="{top}" width="{pw}" height="{ph}" fill="transparent" class="hit"/></svg></div>')
 
 
 def data_table(headers: list[str], rows: list[list], summary: str) -> str:

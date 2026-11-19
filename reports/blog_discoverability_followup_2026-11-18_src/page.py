@@ -42,7 +42,7 @@ td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:now
 .legend{display:flex;flex-wrap:wrap;gap:6px 20px;margin-top:12px;font-size:13.5px;color:var(--ink2)}
 .key i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px}
 .key b{color:var(--ink);font-weight:600}.key em{font-style:normal;color:var(--muted)}
-svg.line{width:100%;height:auto;display:block;overflow:visible}
+svg.line{width:100%;min-width:560px;height:auto;display:block;overflow:visible}
 .grid{stroke:var(--grid);stroke-width:1}.axis{stroke:var(--axis);stroke-width:1}
 .tick{fill:var(--muted);font-size:11.5px;font-variant-numeric:tabular-nums}
 .series{fill:none;stroke:var(--series-1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}

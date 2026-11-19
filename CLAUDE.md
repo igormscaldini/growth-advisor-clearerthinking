@@ -97,11 +97,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   34235 (+ unpaid Stripe sessions), tagged `src=healthcheck` / `igormscaldini+healthcheck@gmail.com`:
   exclude them whenever that program's runs are counted as sign-up clicks.
 - `seo_hub_pages.py`: builds the /all-articles + /all-tools link hubs into `~/Downloads` (paste into a
-  NATIVE Wix text element; a Wix HTML embed is an iframe, so its links would not count). Title cache in
-  `reports/` is gitignored; re-runs only fetch what is missing.
+  NATIVE Wix text element; a Wix HTML embed is an iframe, so its links would not count). Re-runs only
+  fetch titles missing from the committed cache.
 - `wix_publish_hub.py`: publishes that articles hub as a Wix BLOG POST (post bodies are server-rendered,
   unlike the /blog gallery). Live since 2026-09-30 at /post/all-clearer-thinking-articles, backdated to
-  2026-01-01 so it stays out of the recent feed; 621 links verified in raw HTML, none nofollowed.
+  2026-01-01 so it stays out of the recent feed; 626 links in raw HTML on 2026-11-18, matching the sitemap.
   Rerun after publishing new articles. Needs `WIX_API_KEY` (Blog scope) + `WIX_SITE_ID` in `.env`.
   An API key has no member identity, so `memberId` is REQUIRED or you get "Missing post owner
   information"; it defaults to Igor's member and sets the public byline. `--sync` (weekly cron
@@ -125,6 +125,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   minute to reach the edge, and a burst of requests gets 429s whose 200 responses are then CACHED,
   which produces convincing false negatives when verifying; throttle and re-check before believing a
   failure. Redirects override live pages and survive page deletion, so no page deletion is needed.
+- `reports/blog_discoverability_followup_2026-11-18_src/`: re-test of Markus's 2026-07-30 email on blog discoverability (memory note
+  `project_seo_indexing_plan` has the results). Run in order: `crawl_site.py` (every sitemap URL as Googlebot, raw-HTML link graph,
+  ~20 min) -> `fetch_wix.py` -> `fetch_gsc.py` (URL Inspection for every post + the Aug sheet, weekly page data) -> `analysis.py`
+  -> `cross_check.py` -> `build_report.py`. Result: 574 of 626 articles indexed; the hub, not the Sep 2 sitemap work, did it; 448
+  articles still have the hub as their only internal link. Reusable facts: URL Inspection runs ~40 URLs/min on 4 threads (one client
+  per thread) and its verdict lags Search Analytics (5 "not indexed" posts had impressions); a Wix category page server-renders only
+  its first 20 posts; `GET /blog/v3/posts?fieldsets=RICH_CONTENT` returns all 632 bodies in ~20 s, the fast way to build a link graph.
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
   CI runs them on every push (`tests.yml`).
 - `reports/ct_audience_personas_2026-09-25_src/build_report.py`: rebuilds the personas + audience-breakdown
