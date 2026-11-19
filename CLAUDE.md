@@ -402,11 +402,18 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   fired no `Viewed Privacy Policy` since Sep 2025 (intentional, Igor 2026-10-01). GA4 recorded NOTHING on
   the UPT pages Jul 22 - Aug 10 2026 (through the X/Twitter wave) while its sign-ups kept reaching beehiiv:
   treat UPT GA4 numbers for that window as missing, not low.
-  Since the 2026-07-21 intro page, personality-test.html sends NOTHING to GA4 until the Start button is clicked, and the
-  click round-trips through guidedtrack.com, so the first hit carries `dr=https://www.guidedtrack.com/` (verified in
-  headless Chrome 2026-11-18): Google visitors who start are logged as Direct (5,428 Direct vs 745 Organic users in
-  Oct 19 - Nov 15 against 3,888 GSC clicks) and visitors who never start are invisible. Never read UPT channel or
-  landing-to-start numbers from GA4; use GSC clicks for search demand.
+- IMPORTANT: GA4 channel data is wrong on EVERY programs.* tool page (verified in headless Chrome 2026-11-18/19 on the UPT,
+  the Rationality test and Who Attracts You). On a first visit the GuidedTrack embed redirects the tab to
+  `guidedtrack.com/programs/<key>/embed/auth` and back (`?__gt_embed=...`, ~1 s) BEFORE the first GA4 hit, which then carries
+  `dr=https://www.guidedtrack.com/`; that host is an unwanted referral, so untagged visits (Google organic, X, other sites)
+  land in Direct. Oct 19 - Nov 15: 88% of tool sessions were Direct (42% on www) and GA4 showed ~4,800 Organic Search
+  sessions on programs.* against 15,146 GSC clicks. utm and gclid parameters survive the round trip, so tagged sources
+  are fine. Not fixed yet (fix: save `document.referrer` to sessionStorage before the embed loads, hand it to GA4 as
+  `page_referrer`). Never read organic, social or referral volume for a tool from GA4; use GSC clicks. The UPT is worse:
+  since the 2026-07-21 intro page it sends nothing at all until Start is clicked, so non-starters are invisible.
+- GSC totals: a page filter combined with a device, country or query dimension silently drops clicks from anonymized
+  queries (UPT, Oct 19 - Nov 15: 3,888 with a dimension vs the true 5,013 with none or `date` only). Take page totals
+  with no dimension; exact-query totals are unaffected.
 - Tools have created beehiiv subscribers through the API (`utm_channel=api`) only since 2026-03-09.
 - Where a beehiiv subscriber came from (verified on all 381k 2026 records, 2026-11-18): the custom fields `Tools Tried (Pipe-Separated)`
   and `UTM Media (Comma-Separated)` list every visit in order, so the FIRST entry is the sign-up visit (later `cpc` or study entries

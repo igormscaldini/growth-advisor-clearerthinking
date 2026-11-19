@@ -2,16 +2,18 @@
 
     .venv/bin/python reports/subscribers_by_month_2026-11-18_src/analysis.py
 
-Reads data/subscriptions.jsonl (fetch_data.py) and cross_checks.json (fetch_cross_checks.py), writes
-datapoints.json. Every rule that decides which bucket a subscriber falls in lives in this file;
+Reads data/subscriptions.jsonl (fetch_data.py), cross_checks.json (fetch_cross_checks.py), beehiiv_growth.json
+(beehiiv's own daily series and weekly list size) and dashboard_active_history.json
+(fetch_dashboard_history.py), writes datapoints.json. Every rule that decides which bucket a subscriber falls in lives in this file;
 report_notes.py and build_report.py only word and render the result.
 
 How a record is read
 - Month = the UTC month of beehiiv's `created` (the day the record entered beehiiv), the same clock the
   dashboard uses. The walk is cut at END so the last month is a clean "through Nov 17".
-- A record whose status is "invalid" (the address failed beehiiv's validation or hard-bounced) is not a
-  subscriber and is left out of every count, as beehiiv's own growth report does: with them removed the
-  walk reproduces beehiiv's daily "subscribed" figure to the record (cross_check.py).
+- A record whose status is "invalid" (the address failed beehiiv's validation or hard-bounced) or
+  "pending" (never confirmed) is not a subscriber and is left out of every count, as beehiiv's own growth
+  report does: with them removed the walk reproduces beehiiv's daily "subscribed" figure on every day
+  (cross_check.py).
 - beehiiv keeps, per subscriber, the tools they finished (`Tools Tried (Pipe-Separated)`) and the UTM
   medium of each of those visits (`UTM Media (Comma-Separated)`), both in the order they happened. The
   FIRST entry is the visit that created the subscriber; later entries are an existing reader coming back,
@@ -30,6 +32,16 @@ How a record is read
   in Jan-Feb, Meta paid social later), so they count as Ads, in their own bucket.
 - The upload of 2026-01-01 01:15 UTC can only hold people who signed up in December 2025 (tools did not
   write to beehiiv directly until Mar 10; sign-ups were uploaded in batches). It is set aside as backlog.
+
+The whole list (added 2026-11-19: unsubscribes and deletions per month)
+- Unsubscribes per month are beehiiv's own daily figures (beehiiv_growth.json), for the WHOLE list, not
+  only for people who joined in 2026. The list size at the start of each month comes from beehiiv's weekly
+  history plus the daily net change in between.
+- beehiiv keeps no log of deleted subscribers: a deleted record is gone from the API and from every
+  report. `deletion_scan` looks for them indirectly, by comparing the list size the dashboard RECORDED on
+  each past day (git history of snapshot.json) with what beehiiv says TODAY the list was on that day. If
+  beehiiv erases deleted people from its history, a bulk deletion shows as a fall in that gap from the
+  deletion date on; if it books them as unsubscribes, they are already inside the unsubscribe figures.
 """
 import json
 from collections import Counter, defaultdict
@@ -39,6 +51,8 @@ from pathlib import Path
 HERE = Path(__file__).parent
 DATA = HERE / "data" / "subscriptions.jsonl"
 CROSS = HERE / "cross_checks.json"
+GROWTH = HERE / "beehiiv_growth.json"
+DASHBOARD_HISTORY = HERE / "dashboard_active_history.json"
 OUT = HERE / "datapoints.json"
 UTC = timezone.utc
 
@@ -58,6 +72,8 @@ WAVES = (("Aug 3-14", date(2026, 8, 3), date(2026, 8, 14)),
          ("Sep 7-18", date(2026, 9, 7), date(2026, 9, 18)),
          ("Oct 21-23", date(2026, 10, 21), date(2026, 10, 23)))
 WAVE_BASELINE_DAYS = 14
+CALM_DAY_NET = 1000  # deletion scan: skip days whose net change makes the time-of-day interpolation noisy
+MIN_CALM_DAYS = 3    # ...and months with fewer calm days than this
 LAUNCH = (date(2026, 3, 23), date(2026, 3, 26))  # the Unique Traits Test launch days
 
 STUDY_TOOL = "who attracts you"
@@ -69,7 +85,7 @@ MLA_FIELD = "MLA Tags (Comma-Separated)"
 DATING_FIELD = "Dating App Updates"  # opt-in offered by the study and its dating-app waitlist
 LEAF_FIELD = "Leaf"
 BLANK = {"", "(none)", "(not set)", "none"}
-INVALID = "invalid"
+NOT_SUBSCRIBERS = ("invalid", "pending")  # failed validation or bounced; never confirmed
 
 BACKLOG, STUDY, ADS, PARTNER_ADS = "backlog", "study", "ads", "partner_ads"
 TOOLS, FORMS, PODCAST, LEAF, UPLOADS, RECOMMENDATIONS = "tools", "forms", "podcast", "leaf", "uploads", "recommendations"
@@ -163,7 +179,7 @@ def from_partner_ads(row: dict) -> bool:
 
 
 def is_subscriber(row: dict) -> bool:
-    return row.get("status") != INVALID
+    return row.get("status") not in NOT_SUBSCRIBERS
 
 
 def bucket(row: dict) -> str:
@@ -266,8 +282,8 @@ def wave_excess(daily: dict, first: date, last: date, baseline_days: int = WAVE_
 def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
     """Per-month counts over real subscribers. With `ga4_cpc_by_day`, ad sign-ups from before MEDIA_FROM
     are estimated and taken out of the Tools bucket; without it the estimate is zero."""
-    months = defaultdict(lambda: {"records": 0, "invalid": 0, "buckets": Counter(), "active": Counter(),
-                                  "both": 0, "kept_wide": 0})
+    months = defaultdict(lambda: {"records": 0, "not_subscribers": Counter(), "buckets": Counter(),
+                                  "active": Counter(), "left": Counter(), "both": 0, "kept_wide": 0})
     tagged_by_day, tools_by_day, tools_study_later_by_day = Counter(), Counter(), Counter()
     for row in rows:
         if created(row) >= END:
@@ -275,12 +291,14 @@ def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
         m = months[month_of(row)]
         m["records"] += 1
         if not is_subscriber(row):
-            m["invalid"] += 1
+            m["not_subscribers"][row.get("status")] += 1
             continue
         b = bucket(row)
         m["buckets"][b] += 1
         if row.get("status") == "active":
             m["active"][b] += 1
+        elif row.get("status") == "inactive":  # unsubscribed (or switched off) since joining
+            m["left"][b] += 1
         if b == ADS:
             tagged_by_day[day_of(row)] += 1
         if b == TOOLS:
@@ -309,7 +327,7 @@ def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
     for month in sorted(months):
         m = months[month]
         b = m["buckets"]
-        total = m["records"] - m["invalid"]
+        total = m["records"] - sum(m["not_subscribers"].values())
         on_record = sum(b[k] for k in INCLUDED)
         e = min(est.get(month, 0), b[TOOLS])
         e_low, e_high = min(low.get(month, 0), b[TOOLS]), min(high.get(month, 0), b[TOOLS])
@@ -319,8 +337,13 @@ def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
         out.append({
             "month": month,
             "records": m["records"],
-            "invalid": m["invalid"],
+            "invalid": m["not_subscribers"]["invalid"],
+            "pending": m["not_subscribers"]["pending"],
             "total": total,
+            # Of this month's new subscribers, how many have since unsubscribed, by where they came from
+            # (record level: the estimated ad sign-ups of Jan-Mar sit in "kept" here).
+            "left_since": {"study": m["left"][STUDY], "ads": m["left"][ADS] + m["left"][PARTNER_ADS],
+                           "kept": sum(m["left"][k] for k in INCLUDED), "backlog": m["left"][BACKLOG]},
             "buckets": {k: b[k] for k in EXCLUDED + INCLUDED},
             "ads_untagged_est": e,
             "ads_all": b[ADS] + b[PARTNER_ADS] + e,
@@ -338,6 +361,108 @@ def summarize(rows, ga4_cpc_by_day: dict = None) -> dict:
               "later_took_study": sum(n for d, n in tools_study_later_by_day.items() if str(a) <= d <= str(b))}
              for name, a, b in WAVES]
     return {"months": out, "calibration": calibration, "waves": waves}
+
+
+# ---------- the whole list: unsubscribes, and a search for deleted subscribers ----------
+
+def by_day(monthly_lists: dict) -> dict:
+    """{"2026-01": [n_day1, n_day2, ...]} -> {"2026-01-01": n_day1, "2026-01-02": n_day2, ...}."""
+    return {f"{month}-{i + 1:02d}": n for month, days in monthly_lists.items() for i, n in enumerate(days)}
+
+
+def active_on(day: date, anchors: dict, net_by_day: dict) -> int:
+    """List size at the START of `day`: the nearest anchor (a day whose starting list size beehiiv
+    reports) plus or minus the daily net change in between. KeyError if a day in between has no figure."""
+    nearest = min((date.fromisoformat(a) for a in anchors), key=lambda a: (abs((a - day).days), a))
+    size = anchors[str(nearest)]
+    step = timedelta(days=1)
+    while nearest < day:
+        size += net_by_day[str(nearest)]
+        nearest += step
+    while nearest > day:
+        nearest -= step
+        size -= net_by_day[str(nearest)]
+    return size
+
+
+def unexplained_by_week(anchors: dict, net_by_day: dict) -> list:
+    """For each pair of consecutive anchors whose days are all in the daily series: the change in list
+    size that new subscribers minus unsubscribes does NOT explain. Negative = people left the list without
+    being counted as unsubscribed (deleted, or switched to a status that is no longer active)."""
+    days = sorted(date.fromisoformat(a) for a in anchors)
+    out = []
+    for start, end in zip(days, days[1:]):
+        span = [str(start + timedelta(days=i)) for i in range((end - start).days)]
+        if all(d in net_by_day for d in span):
+            change = anchors[str(end)] - anchors[str(start)]
+            out.append({"week": str(start), "unexplained": change - sum(net_by_day[d] for d in span)})
+    return out
+
+
+def list_movement(subscribed_by_day: dict, unsubscribed_by_day: dict, anchors: dict) -> list:
+    """Per month of the daily series: list size at the start, new subscribers, unsubscribes, the net
+    change, unsubscribes as a share of the starting list, the list size at the end, and the list change
+    beehiiv's own figures leave unexplained (summed over the weeks that START in the month; None if no
+    reconciled week does)."""
+    net = {d: subscribed_by_day[d] - unsubscribed_by_day[d] for d in subscribed_by_day}
+    weeks = unexplained_by_week(anchors, net)
+    out = []
+    for month in sorted({d[:7] for d in net}):
+        days = sorted(d for d in net if d[:7] == month)
+        start = active_on(date.fromisoformat(days[0]), anchors, net)
+        new, gone = sum(subscribed_by_day[d] for d in days), sum(unsubscribed_by_day[d] for d in days)
+        residuals = [w["unexplained"] for w in weeks if w["week"][:7] == month]
+        out.append({"month": month, "days": len(days), "active_at_start": start, "subscribed": new,
+                    "unsubscribed": gone, "net": new - gone, "unsubscribe_rate": round(gone / start, 4),
+                    "active_at_end": start + new - gone,
+                    "unexplained": sum(residuals) if residuals else None,
+                    "removed_without_unsubscribe": max(0, -sum(residuals)) if residuals else None})
+    return out
+
+
+def recorded_vs_history(snapshots: list, anchors: dict, net_by_day: dict) -> list:
+    """For each list size the dashboard recorded ({"generated_at", "active"}): what beehiiv's history says
+    today the list was at that moment, and the gap between the two (recorded minus history). The moment
+    inside the day is interpolated on that day's net change, so days with a large net are noisy."""
+    out = []
+    for snap in snapshots:
+        at = datetime.fromisoformat(snap["generated_at"]).astimezone(UTC)
+        day = str(at.date())
+        if day not in net_by_day:
+            continue
+        part_of_day = (at.hour * 3600 + at.minute * 60 + at.second) / 86400
+        history = active_on(at.date(), anchors, net_by_day) + part_of_day * net_by_day[day]
+        out.append({"day": day, "recorded": snap["active"], "history": round(history),
+                    "gap": snap["active"] - round(history), "day_net": net_by_day[day]})
+    return out
+
+
+def deletion_scan(snapshots: list, anchors: dict, net_by_day: dict, calm: int = CALM_DAY_NET,
+                  min_days: int = MIN_CALM_DAYS) -> dict:
+    """Look for subscribers deleted in bulk and erased from beehiiv's history.
+
+    While a since-deleted subscriber was on the list, the dashboard counted them and today's history does
+    not, so the gap (recorded minus history) sits higher by the number deleted on every day BEFORE the
+    deletion and drops back from the deletion day on. Per month, the median gap over calm days (|net| <
+    `calm`, to keep interpolation noise out); `fall` is how far the median fell from the previous month
+    with at least `min_days` calm days, i.e. the size of a deletion that would explain it (0 if it rose)."""
+    gaps = defaultdict(list)
+    for row in recorded_vs_history(snapshots, anchors, net_by_day):
+        if abs(row["day_net"]) < calm:
+            gaps[row["day"][:7]].append(row["gap"])
+    months, previous = [], None
+    for month in sorted(gaps):
+        values = sorted(gaps[month])
+        mid = len(values) // 2
+        median = values[mid] if len(values) % 2 else (values[mid - 1] + values[mid]) / 2
+        usable = len(values) >= min_days
+        fall = max(0, round(previous - median)) if usable and previous is not None else None
+        months.append({"month": month, "calm_days": len(values), "median_gap": median, "fall": fall})
+        if usable:
+            previous = median
+    falls = [m["fall"] for m in months if m["fall"] is not None]
+    return {"months": months, "largest_fall": max(falls) if falls else None,
+            "first_day": min((s["generated_at"][:10] for s in snapshots), default=None)}
 
 
 def context(rows) -> dict:
@@ -370,6 +495,12 @@ def main():
     assert isinstance(ga4, dict) and "error" not in ga4, "cross_checks.json has no GA4 cpc series: run fetch_cross_checks.py"
     result = summarize(rows, ga4)
     result["context"] = context(rows)
+    growth = json.loads(GROWTH.read_text())
+    subscribed, unsubscribed = by_day(growth["subscribed_daily"]), by_day(growth["unsubscribed_daily"])
+    anchors = growth["active_at_start_of_day"]
+    net = {d: subscribed[d] - unsubscribed[d] for d in subscribed}
+    result["list_movement"] = list_movement(subscribed, unsubscribed, anchors)
+    result["deletion_scan"] = deletion_scan(json.loads(DASHBOARD_HISTORY.read_text())["snapshots"], anchors, net)
     result["records_walked"] = len(rows)
     result["through"] = str((END - timedelta(days=1)).date())
     result["partial_through_day"] = (END - timedelta(days=1)).day
@@ -381,6 +512,9 @@ def main():
     for w in result["waves"]:
         print("wave", w)
     print("context:", result["context"])
+    for lm in result["list_movement"]:
+        print("list", lm)
+    print("deletion scan:", result["deletion_scan"])
     for m in result["months"]:
         print(m["month"], "subscribers", m["total"], "| kept", m["kept"], f"({m['kept_low']}-{m['kept_high']})",
               "active", m["kept_active"], "| untagged ads est", m["ads_untagged_est"], dict(m["buckets"]))

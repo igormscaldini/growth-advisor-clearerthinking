@@ -11,6 +11,10 @@
 3. Shape: tool sign-ups kept per month against GA4 "Submitted Email" events outside cpc sessions and off
    the study page, and the ad buckets against GA4 events in cpc sessions (cross_checks.json). Events are
    not subscribers, so only the stability of the ratios is informative.
+4. Unsubscribes: beehiiv's weekly list size against its own daily new-subscriber and unsubscribe figures.
+   Week by week, the change in list size must equal subscribed minus unsubscribed; a week that does not
+   reconcile means a mistyped figure or a movement beehiiv reports nowhere. Also recomputes the monthly
+   unsubscribe totals with pandas and compares them with datapoints.json.
 
 Writes cross_check_results.json and exits non-zero if the recount disagrees.
 """
@@ -29,6 +33,8 @@ END = pd.Timestamp("2026-11-18", tz="UTC")
 BACKLOG_UNTIL = pd.Timestamp("2026-01-01 02:00", tz="UTC")
 MEDIA_FROM = pd.Timestamp("2026-03-27 15:00", tz="UTC")
 TOOLS_FROM = pd.Timestamp("2026-03-31 10:00", tz="UTC")
+NOT_SUBSCRIBERS = ["invalid", "pending"]
+WEEK_TOLERANCE = 10  # subscribers; beehiiv's history drifts by a handful as people resubscribe
 
 
 def load() -> pd.DataFrame:
@@ -57,7 +63,7 @@ def load() -> pd.DataFrame:
 
 
 def recount(df: pd.DataFrame) -> pd.DataFrame:
-    df = df[df["status"] != "invalid"]  # beehiiv does not count invalid addresses as subscribers
+    df = df[~df["status"].isin(NOT_SUBSCRIBERS)]  # beehiiv counts neither as subscribers
     no_tool = df["tools"].str.replace(r"[\s|]|\(none\)", "", regex=True, case=False) == ""
     backlog = (df["channel"] == "import") & (df["when"] < BACKLOG_UNTIL)
     study = (df["when"] >= TOOLS_FROM) & (
@@ -92,7 +98,7 @@ def main():
     # 2. completeness
     growth = json.loads((HERE / "beehiiv_growth.json").read_text())["subscribed_daily"]
     cache = json.loads((ROOT / "frontend" / "public" / "beehiiv_new_subs_cache.json").read_text())["daily"]
-    valid = df[df["status"] != "invalid"].groupby("day").size()
+    valid = df[~df["status"].isin(NOT_SUBSCRIBERS)].groupby("day").size()
     non_import = df[df["channel"] != "import"].groupby("day").size()  # the cache keeps invalid addresses
     comp, days_off = [], []
     for month, days in growth.items():
@@ -107,7 +113,7 @@ def main():
     results["completeness"] = comp
     results["days_compared"] = sum(len(d) for d in growth.values())
     results["days_not_matching_beehiiv"] = days_off
-    print("\nwalk (invalid addresses removed) vs beehiiv growth 'subscribed'; non-imports vs the dashboard cache:")
+    print("\nwalk (invalid and pending removed) vs beehiiv growth 'subscribed'; non-imports vs the dashboard cache:")
     for c in comp:
         print("  ", c)
     print(f"days where the walk differs from beehiiv: {len(days_off)} of {results['days_compared']}")
@@ -133,6 +139,35 @@ def main():
         print("\ntool sign-ups kept vs GA4 Submitted Email (non-cpc sessions, non-study pages); ads vs cpc sessions:")
         for s in shape:
             print("  ", s)
+
+    # 4. unsubscribes: weekly reconciliation of beehiiv's own series, and the monthly totals recomputed
+    g = json.loads((HERE / "beehiiv_growth.json").read_text())
+    daily = pd.DataFrame(
+        [{"day": pd.Timestamp(f"{month}-{i + 1:02d}"), "subscribed": n, "unsubscribed": g["unsubscribed_daily"][month][i]}
+         for month, days in g["subscribed_daily"].items() for i, n in enumerate(days)]).set_index("day").sort_index()
+    daily["net"] = daily["subscribed"] - daily["unsubscribed"]
+    sizes = pd.Series({pd.Timestamp(d): n for d, n in g["active_at_start_of_day"].items()}).sort_index()
+    weeks = []
+    for start, end in zip(sizes.index[:-1], sizes.index[1:]):
+        span = daily.loc[start:end - pd.Timedelta(days=1)]
+        if len(span) != (end - start).days:  # the week reaches outside the daily series
+            continue
+        weeks.append({"week": str(start.date()), "list_change": int(sizes[end] - sizes[start]),
+                      "subscribed_minus_unsubscribed": int(span["net"].sum()),
+                      "unexplained": int(sizes[end] - sizes[start] - span["net"].sum())})
+    off = [w for w in weeks if abs(w["unexplained"]) > WEEK_TOLERANCE]
+    monthly = daily.groupby(daily.index.strftime("%Y-%m"))["unsubscribed"].sum()
+    mine = {m["month"]: m["unsubscribed"] for m in main_result["list_movement"]}
+    unsub_ok = all(int(monthly[m]) == n for m, n in mine.items())
+    results["unsubscribes"] = {"weeks_checked": len(weeks), "weeks_not_reconciling": off,
+                               "total_unexplained": sum(w["unexplained"] for w in weeks),
+                               "monthly_totals_agree": bool(unsub_ok)}
+    print(f"\nweekly list size vs subscribed - unsubscribed: {len(weeks)} weeks, {len(off)} off by more than "
+          f"{WEEK_TOLERANCE}, total unexplained {results['unsubscribes']['total_unexplained']}")
+    for w in off:
+        print("  ", w)
+    print("monthly unsubscribe totals agree with analysis.py:", unsub_ok)
+    ok &= unsub_ok
 
     (HERE / "cross_check_results.json").write_text(json.dumps(results, indent=1))
     sys.exit(0 if ok else 1)
