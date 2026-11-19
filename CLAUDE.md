@@ -151,6 +151,17 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   articles still have the hub as their only internal link. Reusable facts: URL Inspection runs ~40 URLs/min on 4 threads (one client
   per thread) and its verdict lags Search Analytics (5 "not indexed" posts had impressions); a Wix category page server-renders only
   its first 20 posts; `GET /blog/v3/posts?fieldsets=RICH_CONTENT` returns all 632 bodies in ~20 s, the fast way to build a link graph.
+  `redirect_duplicates.py` there 301'd the 9 duplicated glossary posts (`/post/<slug>-1`) to their originals on 2026-11-19 (ledger
+  `reports/wix_duplicate_post_redirects_created.json`, `--rollback` undoes them); the copies are still published in Wix, so
+  `wix_publish_hub.listable` now drops any sitemap post whose path is a Wix redirect `from` (hub = 617 links since then).
+- `related_posts.py` (2026-11-19): article-to-article links through Wix Blog's own Related Posts (`relatedPostIds`, three per post,
+  shown server-rendered in the strip under every article, which otherwise lists the three NEWEST posts under the heading "Recent
+  Posts"). `--plan` scores every pair (title + summary + headings blended with full text, TF-IDF) and spreads links (max 5 inbound,
+  floor 0.10) into `reports/related_posts_plan.json`; `--preview` renders it; `--apply [--only <slug>]` PATCHes + publishes;
+  `--rollback` restores from `reports/related_posts_applied.json`. STATE: live on ONE test post (the-best-of-clearer-thinking-in-2024);
+  the rollout to 489 posts awaits Igor's go. Verified on that post: publishing a `relatedPostIds`-only change does NOT move
+  `lastPublishedDate` or the page's "Updated:" label (a content republish does: the label is public). 127 posts (mostly 2015-2020)
+  have `hasUnpublishedChanges` and must never be published from a script. An empty post titled "Test" is live at `/post/_test`.
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
   CI runs them on every push (`tests.yml`).
 - `reports/ct_audience_personas_2026-09-25_src/build_report.py`: rebuilds the personas + audience-breakdown

@@ -285,7 +285,8 @@ def write_preview(plan: dict, priority: list[str] = ()) -> Path:
     sys.path.insert(0, str(ROOT / "reports"))
     from md_report import render_page, timestamp
     css = ("body{max-width:1180px}table{border-collapse:collapse;width:100%;font-size:13.5px}td,th{border-bottom:1px solid #e5e5e5;"
-           "padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12.5px;color:#666}a{word-break:normal}")
+           "padding:6px 8px;text-align:left;vertical-align:top}th{font-size:12.5px;color:#666}a{word-break:normal}"
+           "td:first-child{white-space:nowrap}")
     out = ROOT / "reports" / f"related_posts_preview_{time.strftime('%Y-%m-%d')}.html"
     out.write_text(render_page(preview_markdown(plan, priority), "Related articles: proposed pairings", css,
                                extensions=("tables", "sane_lists"),
