@@ -152,7 +152,7 @@ th{font-weight:600;color:var(--ink2);font-size:12.5px;white-space:normal;vertica
 tfoot td{font-weight:600;border-top:1px solid var(--axis);border-bottom:none}
 .small{font-size:13.5px;color:var(--ink2)}
 .callout{background:var(--surface);border:1px solid var(--hair);border-left:3px solid var(--s1);border-radius:8px;padding:12px 16px;margin:14px 0}
-.callout b{font-weight:600} .callout p{margin:0}
+.callout b{font-weight:600} .callout p{margin:0} .callout ul{margin:8px 0} .callout ul+p{margin-top:8px}
 code{font-size:.92em;background:var(--hair);padding:1px 5px;border-radius:4px}
 """
 
@@ -209,6 +209,23 @@ def build(dp: dict, xc: dict, notes: dict) -> str:
     route_table = table(["Month", "Tools"] + [dp["labels"][k] for k in route_keys] + ["Kept"], route_rows,
                         route_total, note_cols=(len(route_keys) + 2,))
 
+    by_month = {m["month"]: m for m in months}
+    moves = dp["list_movement"]
+    signed = lambda v: ("+" if v > 0 else "") + n(v)  # noqa: E731
+    list_rows = [[label(i, by_month[m["month"]]), n(m["active_at_start"]), n(m["subscribed"]), n(m["unsubscribed"]),
+                  f"{m['unsubscribe_rate']:.1%}", signed(m["net"]),
+                  "-" if m["removed_without_unsubscribe"] is None else n(m["removed_without_unsubscribe"]),
+                  n(by_month[m["month"]]["invalid"])] for i, m in enumerate(moves)]
+    list_total = ["2026 so far", "", n(sum(m["subscribed"] for m in moves)), n(sum(m["unsubscribed"] for m in moves)), "",
+                  signed(sum(m["net"] for m in moves)), n(sum(m["removed_without_unsubscribe"] or 0 for m in moves)),
+                  n(tot("invalid"))]
+    list_table = table(
+        ["Month", "List size at the start", "New subscribers (all sources)", "Unsubscribed", "Unsubscribed, share of the list",
+         "Net change", "Removed without an unsubscribe", "Sign-ups marked invalid"],
+        list_rows, list_total, note_cols=(3,))
+    list_end = (f"<p class='small'>List size at the start of {MONTH_NAMES[int(moves[-1]['month'][5:]) - 1]} "
+                f"{partial + 1 if partial else 1}: {n(moves[-1]['active_at_end'])} active subscribers.</p>")
+
     legend = "".join(f"<span><i style='background:var(--s{k})'></i>{html.escape(s[0])}</span>"
                      for k, s in enumerate(SERIES))
     tiles = "".join(f"<div class='tile'><div class='v'>{v}</div><div class='k'>{k}</div></div>" for v, k in notes["tiles"])
@@ -224,6 +241,8 @@ def build(dp: dict, xc: dict, notes: dict) -> str:
 <div class="legend">{legend}</div>{chart_svg(months, partial, notes['annotations'])}<div id="tip"></div></div>
 <h2>Month by month</h2>{main_table}<p class="small">{notes['table_note']}</p>
 {notes['callouts']}
+<h2>Unsubscribes and deletions per month (whole list)</h2>{list_table}{list_end}<p class="small">{notes['list_note']}</p>
+{notes['deletions']}
 <h2>Where the kept subscribers came from</h2>{route_table}<p class="small">{notes['route_note']}</p>
 <h2>What was counted as Ads</h2>{ads_table}<p class="small">{notes['ads_note']}</p>
 {sections}

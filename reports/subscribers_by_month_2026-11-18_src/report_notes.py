@@ -6,6 +6,9 @@ MONTHS = ["January", "February", "March", "April", "May", "June", "July", "Augus
           "November", "December"]
 
 
+WAVE_RATE = 0.022  # a month losing more of the list than this to unsubscribes is called a wave month
+
+
 def n(x) -> str:
     return f"{x:,}"
 
@@ -16,6 +19,11 @@ def hundreds(x) -> str:
 
 def pct(a, b) -> str:
     return f"{round(100 * a / b)}%"
+
+
+def listed(names: list) -> str:
+    """["a", "b", "c"] -> "a, b and c"."""
+    return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
 
 
 def short_day(iso: str) -> str:
@@ -64,6 +72,20 @@ def notes(dp: dict, xc: dict) -> dict:
     cache_over = [(c["dashboard_cache"] - c["walk_non_import_all_statuses"]) for c in comp]
     invalid_share = [m["invalid"] / m["records"] for m in months]
 
+    # The whole list: unsubscribes and deletions
+    moves = dp["list_movement"]
+    scan = dp["deletion_scan"]
+    books = xc.get("unsubscribes", {})
+    unsub_total = sum(m["unsubscribed"] for m in moves)
+    full_rates = [m["unsubscribe_rate"] for m in moves[:-1]]
+    calm_rates = [m["unsubscribe_rate"] for m in moves[:-1] if m["unsubscribe_rate"] <= WAVE_RATE]
+    wave_months = [m for m in moves[:-1] if m["unsubscribe_rate"] > WAVE_RATE]
+    left = {g: sum(m["left_since"][g] for m in months) for g in ("study", "ads", "kept", "backlog")}
+    left_2026 = sum(left.values())
+    removed = [m["removed_without_unsubscribe"] or 0 for m in moves]
+    worst_week = min(books.get("weeks_not_reconciling", []), key=lambda w: w["unexplained"], default=None)
+    scanned = [m for m in scan["months"] if m["fall"] is not None]
+
     answer = (
         f"Leaving out everyone who came from an ad or from the Who Attracts You study, Clearer Thinking gained about "
         f"<b>{hundreds(tot('kept'))} new subscribers</b> from January 1 to {last_name} {dp['partial_through_day']}, 2026, "
@@ -71,7 +93,9 @@ def notes(dp: dict, xc: dict) -> dict:
         f"as well and a full month runs from {hundreds(underlying[low_month])} ({month_name(low_month)}) to "
         f"{hundreds(underlying[high_month])} ({month_name(high_month)}, a tool launch), with a median of "
         f"{hundreds(statistics.median(underlying.values()))}. April onward is an exact count from the records. {est_names} "
-        f"include an estimate, because the tools did not tag ad sign-ups in beehiiv before March 27.")
+        f"include an estimate, because the tools did not tag ad sign-ups in beehiiv before March 27. Over the same "
+        f"period {n(unsub_total)} people unsubscribed from the whole list. I found no bulk deletion: at most "
+        f"{n(sum(removed))} people left the list any other way in the whole year.")
 
     tiles = [
         ("≈" + hundreds(tot("kept")), f"new subscribers kept, Jan 1 to {last_name[:3]} {dp['partial_through_day']}"),
@@ -125,14 +149,45 @@ def notes(dp: dict, xc: dict) -> dict:
         f"({min(cal['later_months'].values()):.2f} to {max(cal['later_months'].values()):.2f}); at those rates {est_names} "
         f"would keep up to {n(est_upside)} more in total, so the figures shown are the cautious end.")
 
+    list_note = (
+        f"This table is the WHOLE list, every source included, not only the kept subscribers above. Unsubscribes are "
+        f"beehiiv's own daily count. In an ordinary month {min(calm_rates):.1%} to {max(calm_rates):.1%} of the list "
+        f"unsubscribes; {listed([MONTHS[int(m['month'][5:]) - 1] for m in wave_months])} ran higher "
+        f"({min(m['unsubscribe_rate'] for m in wave_months):.1%} to {max(m['unsubscribe_rate'] for m in wave_months):.1%}) "
+        f"because the study's sign-ups leave quickly. Of the {n(unsub_total)} unsubscribes, {n(left_2026)} were people "
+        f"who had joined in 2026: {n(left['study'])} from the study, {n(left['ads'])} from ads and {n(left['kept'])} "
+        f"of the kept; the other {n(unsub_total - left_2026)} were older subscribers. {last_name} covers "
+        f"{moves[-1]['days']} days. \"Sign-ups marked invalid\" are addresses that failed beehiiv's validation in "
+        f"the month they arrived: they were never on the list, so they are neither unsubscribes nor deletions.")
+
+    deletions = (
+        "<div class='callout'><p><b>Deletions: no bulk deletion found.</b> beehiiv keeps no record of deleted subscribers "
+        "(a deleted person disappears from the API and from every report), so there is no figure to read off. I looked "
+        "for them in the two places they would leave a mark:</p><ul>"
+        f"<li><b>beehiiv's own books.</b> Each week, the change in list size should equal new subscribers minus "
+        f"unsubscribes. Over {books.get('weeks_checked', 0)} weeks the two differ by {abs(books.get('total_unexplained', 0))} "
+        f"people in total"
+        + (f"; the one week off by more than 10 is the week of {short_day(worst_week['week'])}, when "
+           f"{abs(worst_week['unexplained'])} people left the list without an unsubscribe" if worst_week else "")
+        + ". That is the \"Removed without an unsubscribe\" column.</li>"
+        f"<li><b>What our dashboard recorded at the time.</b> The dashboard has saved the live list size every day "
+        f"since {short_day(scan['first_day'])}. Had someone deleted subscribers in bulk and beehiiv erased them from its "
+        f"history, the size we recorded before the deletion would sit above what beehiiv says today for those days, and "
+        f"drop back afterwards. Across the {len(scanned)} months that can be compared, the largest such drop is "
+        f"{scan['largest_fall']} subscribers.</li></ul>"
+        f"<p>If beehiiv books a deletion as an unsubscribe instead, it is already inside the Unsubscribed column. The "
+        f"one case I cannot rule out is a bulk deletion before {short_day(scan['first_day'])} that beehiiv erased from "
+        f"its history, because nothing recorded the list size independently back then.</p></div>")
+
     sections = [
         ("How each subscriber was classified", "<ul>"
          f"<li><b>Source.</b> Every beehiiv subscription created from January 1 to {last_name} {dp['partial_through_day']}, "
          f"2026: {n(tot('records'))} records, read one by one with their custom fields. Month = the UTC date the record "
          "entered beehiiv.</li>"
          f"<li><b>Invalid addresses are not subscribers.</b> {n(tot('invalid'))} records "
-         f"({min(invalid_share):.0%} to {max(invalid_share):.0%} a month) failed beehiiv's validation or hard-bounced. "
-         "beehiiv leaves them out of its own growth numbers and so does this report.</li>"
+         f"({min(invalid_share):.0%} to {max(invalid_share):.0%} a month) failed beehiiv's validation or hard-bounced, "
+         f"and {n(tot('pending'))} never confirmed. beehiiv leaves them out of its own growth numbers and so does this "
+         "report.</li>"
          "<li><b>From the study</b> = the first tool the person finished was Who Attracts You, or they finished no tool "
          f"and carry the study's dating-app opt-in. {n(btot('study'))} people, most of them uploads of earlier "
          "participants in August. Someone who joined through another tool and took the study later is kept.</li>"
@@ -156,13 +211,19 @@ def notes(dp: dict, xc: dict) -> dict:
          "</ul>"),
 
         ("Checks run", "<ul>"
-         f"<li><b>Against beehiiv's own count.</b> The records, with invalid addresses removed, match beehiiv's daily "
-         f"\"subscribed\" figure on {xc.get('days_compared', 0) - len(days_off)} of {xc.get('days_compared', 0)} days; "
-         f"the other {len(days_off)} differ by one record each.</li>"
+         f"<li><b>Against beehiiv's own count.</b> The records, with invalid and unconfirmed addresses removed, match "
+         f"beehiiv's daily \"subscribed\" figure on {xc.get('days_compared', 0) - len(days_off)} of "
+         f"{xc.get('days_compared', 0)} days.</li>"
+         f"<li><b>Unsubscribes.</b> beehiiv's weekly list size reconciles with its daily new-subscriber and unsubscribe "
+         f"figures in {books.get('weeks_checked', 0) - len(books.get('weeks_not_reconciling', []))} of "
+         f"{books.get('weeks_checked', 0)} weeks (within 10 subscribers), and a second script recomputes the same "
+         "monthly unsubscribe totals.</li>"
          "<li><b>Independent recount.</b> A second script that shares no code with the analysis (pandas and two regular "
          f"expressions on the raw fields) returns the identical figure in all {len(months)} months.</li>"
          "<li><b>Unit tests.</b> Each rule, hand-worked tables, a synthetic world with no ads and no study "
-         "(nothing removed) and one with planted numbers (all recovered exactly, including untagged ad sign-ups).</li>"
+         "(nothing removed) and one with planted numbers (all recovered exactly, including untagged ad sign-ups). "
+         "The deletion search is tested the same way: a synthetic list with no deletions (nothing found) and ones "
+         "with a planted bulk deletion (found at its size, in the right month).</li>"
          f"<li><b>Against GA4.</b> Tool sign-ups kept per GA4 email submission outside ad sessions and off the study page "
          f"run {min(steady):.2f} to {max(steady):.2f} from March to November (July and August set aside: GA4 recorded "
          f"nothing on the personality test for three weeks, and study participants then took other tools). January and "
@@ -187,6 +248,8 @@ def notes(dp: dict, xc: dict) -> dict:
         "annotations": {"2026-08": f"≈{hundreds(aug['excess'])} from the Aug 3-14 wave"},
         "table_note": table_note,
         "callouts": callouts,
+        "list_note": list_note,
+        "deletions": deletions,
         "route_note": route_note,
         "ads_note": ads_note,
         "sections": sections,

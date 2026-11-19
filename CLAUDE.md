@@ -356,7 +356,7 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   Android-install actions and VIDEO campaigns reject mutates (UI only); counting_type of GA4-imported actions is immutable (set in GA4); a
   field mask built with protobuf_helpers.field_mask drops fields set to False/0, giving a silent no-op "ok": list mask paths by hand.
 - `reports/ct_plus_perks_banner_2026-11-18_src/build.py`: the CT+ perks banner shown at the end of tools, rebuilt without the Life-Changing Questions deck tile (the deck stopped being a CT+ perk on 2026-11-18; memory note `project_lcq_deck_perk_removal_2026_11` has what was changed and what is open). It moves the original's tiles pixel for pixel (`compose_row`); the original PNG is kept beside it. Live image (7 perks: no deck, no T-shirt, Igor's choice): https://images.guidedtrack.com/ct_plus_perks_banner_7_xvenong.png in the LCQ tool (GT 9306) and the UPT report (GT 22897). The Rationality, Philosophical Beliefs and Time & Money tools still show the old `List_of_perks_2x.png`: their main programs (GT 1225, 15137, 2390) are Igor's, but the banner sits in the report subprograms they call ("Rationality type quiz report", "Results for Learn Your Philosophical Beliefs", "Time & Money Calculator Report"), which are not in his account.
-- `reports/subscribers_by_month_2026-11-18_src/`: new subscribers per month in 2026 with Ads and the Who Attracts You study taken out (Igor's question, 2026-11-18). `fetch_data.py` walks every 2026 subscription with custom fields into `data/` (gitignored, no emails; 381k records, ~50 min), `fetch_cross_checks.py` pulls Google Ads + GA4 monthly/daily series, `analysis.py` holds every rule -> `datapoints.json`, `cross_check.py` = independent recount + completeness vs beehiiv growth, `report_notes.py` = wording, `build_report.py` = HTML. Result: ~79.4k kept of 366.8k (Jan 1 - Nov 17); a normal month is ~5-7k. Rerun all five in that order to refresh.
+- `reports/subscribers_by_month_2026-11-18_src/`: new subscribers per month in 2026 with Ads and the Who Attracts You study taken out (Igor's question, 2026-11-18). `fetch_data.py` walks every 2026 subscription with custom fields into `data/` (gitignored, no emails; 381k records, ~50 min), `fetch_cross_checks.py` pulls Google Ads + GA4 monthly/daily series, `analysis.py` holds every rule -> `datapoints.json`, `cross_check.py` = independent recount + completeness vs beehiiv growth, `report_notes.py` = wording, `build_report.py` = HTML. Result: ~79.4k kept of 366.8k (Jan 1 - Nov 17); a normal month is ~5-7k. Rerun all five in that order to refresh. Since 2026-11-19 it also has whole-list unsubscribes per month (118k; 1.4-2.0% of the list in a normal month, 2.6-4.7% in the study's wave months) and a search for deletions (none found): `beehiiv_growth.json` holds the connector's daily subscribed/unsubscribed series and weekly list size (typed in, verified by chunk totals and the weekly reconciliation), `fetch_dashboard_history.py` reads the list size the dashboard recorded each day out of git.
 - Reference docs: `GOALS.md`, `GA4_EVENTS.md`, `GUIDEDTRACK.md`, `CT_TOOLS.md`, `DEPLOY.md`.
 
 ## Advisor memory (advisor_memory/)
@@ -420,10 +420,17 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   are an existing reader coming back); skip empty leading entries (`|Tool`, `,cpc` bug, Sep 13 - Oct 8). They only describe the sign-up
   for records created after the tools began writing them: UTM media 2026-03-27 15:00 UTC, tools list 2026-03-31 10:00 UTC (Mar 10-31
   records carry `Tools Tried (DEPRECATED)` instead; Jan 1 - Mar 9 batch uploads carry nothing). Ads = first medium `cpc` (Google and Meta
-  both use it); MailList Accelerator sign-ups have only `MLA Tags` (their /p/ pages are 98% google/cpc). `status` "invalid" records are NOT
-  subscribers: drop them and the walk equals the connector's `get_subscriber_growth` "subscribed" to the record (it takes 92 days per call),
-  while `beehiiv_new_subs_cache` keeps them and so reads 3-5% high. beehiiv relabels addresses that turn invalid as `utm_channel=import`.
-  The 2026-01-01 01:15 UTC upload (2.8k) is December sign-ups. GA4 reports over many months time out: query one month per request.
+  both use it); MailList Accelerator sign-ups have only `MLA Tags` (their /p/ pages are 98% google/cpc). `status` "invalid" and "pending"
+  records are NOT subscribers: drop them and the walk equals the connector's `get_subscriber_growth` "subscribed" on every day (it takes
+  92 days per call), while `beehiiv_new_subs_cache` keeps them and so reads 3-5% high. beehiiv relabels addresses that turn invalid as
+  `utm_channel=import`. The 2026-01-01 01:15 UTC upload (2.8k) is December sign-ups. GA4 reports over many months time out: query one
+  month per request.
+- beehiiv has NO record of deleted subscribers (gone from the API and every report), and its history is rewritten as records change.
+  The connector's `get_subscriber_history` (weekly buckets beyond 92 days; each entry = list size at the START of that day) equals
+  cumulative subscribed minus unsubscribed to within ~10 a week, so it cannot reveal deletions by itself. The only independent record of
+  past list size is git history of `frontend/public/snapshot.json` (`snapshots.total_subscribers`, since 2026-05-26): it runs a steady
+  ~500 BELOW what beehiiv now says for those days (shrinking to 0 near today; resubscribers get their old unsubscribe erased), with no
+  step that a bulk deletion would leave. "Unsubscribed" counts every exit to inactive (clicks, manual, automations), not only clicks.
 - The Who Attracts You study (`/who_attracts_you_study.html`) has been the dominant sign-up source since Aug 2026: three viral
   waves (Aug 4-10 12.6k, Sep 7-18 ~25k, Oct 21-23 32k sign-ups) arriving via the API as `utm_source=direct`, so the new-subs
   cache counts them as genuine; its tail was still 200-300/day in early Nov. Organic tool sign-ups run ~220-280/day and
