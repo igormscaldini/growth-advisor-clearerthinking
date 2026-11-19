@@ -493,7 +493,7 @@ def tool_draft_email(ctx, to=None, subject=None, body=None, **_):
         message["threadId"] = thread_id
     draft = advisor_inbox.gmail_service().users().drafts().create(
         userId="me", body={"message": message}).execute()
-    record(ctx, "draft_email", f"Draft waiting in Gmail: {line}.", changed=True,
+    record(ctx, "draft_email", f"Email drafted in Gmail: {line}.", changed=True,
            draft={"draft_id": draft["id"], "thread_id": (draft.get("message") or {}).get("threadId"),
                   "to": to, "kind": kind, "subject": msg["Subject"], "created_ms": int(time.time() * 1000)})
     return {"result": "drafted", "from": msg["From"], "subject": msg["Subject"],

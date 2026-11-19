@@ -78,7 +78,22 @@ def main() -> None:
     indexed = {a for a in articles if state.get(a, {}).get("coverageState") in INDEXED}
     contradiction = sorted(a for a in articles if a in seen and a not in indexed)
 
+    # Markus's July counts, rebuilt from today's data with the hub taken out: the 300 newest posts were
+    # reachable by scrolling /blog, and his "zero inbound links" are the older posts no article links to.
+    july = sorted((p for p in wixp["posts"] if (p["firstPublishedDate"] or "")[:10] <= "2026-07-30" and norm(p["url"]) in set(articles)),
+                  key=lambda p: p["firstPublishedDate"], reverse=True)
+    july_urls = {norm(p["url"]) for p in july}
+    july_inbound = lib.inbound({u: v for u, v in bodies.items() if u in july_urls})
+    beyond_scroll = july_urls - {norm(p["url"]) for p in july[:300]}
+
     out = {
+        "markus_reconstruction": {
+            "posts_live_on_2026_07_30": len(july_urls),
+            "beyond_the_300_post_scroll": len(beyond_scroll),
+            "beyond_scroll_and_not_linked_from_any_article": sum(1 for u in beyond_scroll if not july_inbound.get(u)),
+            "not_linked_from_any_article_in_july": sum(1 for u in july_urls if not july_inbound.get(u)),
+            "not_linked_from_any_article_today": sum(1 for a in articles if not inbound.get(a)),
+        },
         "links": {
             "linked_from_another_article_body_wix_api": len(api_linked),
             "linked_from_another_article_crawl": len(crawl_linked),

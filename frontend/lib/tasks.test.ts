@@ -37,13 +37,13 @@ test("rowsToTasks maps cells by header name, newest first, and drops blank rows"
       "beehiiv: jane@example.com unsubscribed (confirmed).", "Unsubscribed.", "", "2026-11-18 10:02:00", GMAIL, "m1", ""],
     [],
     ["2", "2026-11-18 12:00:00", "Drafts waiting", "cancel and tell Angel", "Bob <bob@example.com>",
-      "Stripe: set to cancel.\nDraft waiting in Gmail: to bob@example.com.\n", "Cancelled.", "2 waiting",
+      "Stripe: set to cancel.\nEmail drafted in Gmail: to bob@example.com.\n", "Cancelled.", "2 waiting",
       "2026-11-18 12:03:00", "javascript:alert(1)", "m2", "[]"],
     ["3", "2026-11-18 11:00:00", "", "short row"],            // no Message ID: not a task
   ];
   const tasks = rowsToTasks(values);
   assert.deepEqual(tasks.map((t) => t.id), ["m2", "m1"]);
-  assert.deepEqual(tasks[0].actions, ["Stripe: set to cancel.", "Draft waiting in Gmail: to bob@example.com."]);
+  assert.deepEqual(tasks[0].actions, ["Stripe: set to cancel.", "Email drafted in Gmail: to bob@example.com."]);
   assert.equal(tasks[0].threadUrl, "");                       // not a Gmail link: never rendered as one
   assert.equal(tasks[0].drafts, "2 waiting");
   assert.equal(tasks[1].receivedIso, "2026-11-18T10:00:00Z");

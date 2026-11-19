@@ -507,7 +507,7 @@ def test_derive_status():
 
 def test_format_report_is_built_from_the_record_not_the_models_words():
     ctx = {"actions": [{"tool": "cancel_subscription", "text": "Stripe: Navigator set to cancel."},
-                       {"tool": "draft_email", "text": 'Draft waiting in Gmail: to j@x.com, "Re: cancel".', "draft": {"draft_id": "d"}}],
+                       {"tool": "draft_email", "text": 'Email drafted in Gmail: to j@x.com, "Re: cancel".', "draft": {"draft_id": "d"}}],
            "refusals": [{"tool": "cancel_subscription", "why": "not in scope"}]}
     text = tb.format_report("All done — two things.", ctx, tl.DRAFTS_WAITING, "12")
     assert text.startswith("All done, two things.")

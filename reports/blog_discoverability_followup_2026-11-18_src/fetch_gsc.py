@@ -7,6 +7,7 @@
 
 Writes data/gsc_inspection.json, data/baseline_sheet.json, data/gsc_weekly_pages.json, data/gsc_markus.json.
 Resumable: URLs already inspected are skipped. The Inspection API allows 2,000 calls a day per property.
+`--markus-only` refreshes just the flagged article's search data.
 """
 from __future__ import annotations
 
@@ -94,24 +95,26 @@ def weekly_pages(last_day: date) -> list[dict]:
     return out
 
 
+def markus_pull(last: date) -> dict:
+    page_filter = [{"filters": [{"dimension": "page", "operator": "equals", "expression": MARKUS}]}]
+    return {
+        "by_week": query({"startDate": "2025-07-07", "endDate": last.isoformat(), "dimensions": ["date"],
+                          "type": "web", "dimensionFilterGroups": page_filter}),
+        "queries_since_email": query({"startDate": "2026-07-30", "endDate": last.isoformat(),
+                                      "dimensions": ["query"], "type": "web", "dimensionFilterGroups": page_filter}),
+    }
+
+
 if __name__ == "__main__":
     DATA.mkdir(exist_ok=True)
-    base = baseline_rows()
-    (DATA / "baseline_sheet.json").write_text(json.dumps(base, indent=1))
-    crawl = json.loads((DATA / "crawl.json").read_text()) if (DATA / "crawl.json").exists() else {}
-    wix = json.loads((DATA / "wix_posts.json").read_text())
-    sitemap_posts = [e["url"] for e in crawl.get("sitemaps", {}).get("posts", [])]
-    run_inspections(sitemap_posts + [p["url"] for p in wix["posts"]] + [b["url"] for b in base])
-
     last = date.today() - timedelta(days=3)  # Search Console lags about three days
-    (DATA / "gsc_weekly_pages.json").write_text(json.dumps(weekly_pages(last)))
-    markus = {
-        "by_week": query({"startDate": "2025-07-07", "endDate": last.isoformat(), "dimensions": ["date"],
-                          "type": "web", "dimensionFilterGroups": [{"filters": [
-                              {"dimension": "page", "operator": "equals", "expression": MARKUS}]}]}),
-        "queries_since_oct": query({"startDate": "2026-10-01", "endDate": last.isoformat(),
-                                    "dimensions": ["query"], "type": "web", "dimensionFilterGroups": [{"filters": [
-                                        {"dimension": "page", "operator": "equals", "expression": MARKUS}]}]}),
-    }
-    (DATA / "gsc_markus.json").write_text(json.dumps(markus))
+    if "--markus-only" not in sys.argv:
+        base = baseline_rows()
+        (DATA / "baseline_sheet.json").write_text(json.dumps(base, indent=1))
+        crawl = json.loads((DATA / "crawl.json").read_text()) if (DATA / "crawl.json").exists() else {}
+        wix = json.loads((DATA / "wix_posts.json").read_text())
+        sitemap_posts = [e["url"] for e in crawl.get("sitemaps", {}).get("posts", [])]
+        run_inspections(sitemap_posts + [p["url"] for p in wix["posts"]] + [b["url"] for b in base])
+        (DATA / "gsc_weekly_pages.json").write_text(json.dumps(weekly_pages(last)))
+    (DATA / "gsc_markus.json").write_text(json.dumps(markus_pull(last)))
     print("done", flush=True)

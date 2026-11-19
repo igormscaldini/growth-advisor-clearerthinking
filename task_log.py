@@ -12,6 +12,11 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime, timezone
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent / ".env")   # so the sheet id is found whoever imports this first
 
 SHEET_ENV = "TASK_LOG_SHEET_ID"
 TASKS_TAB = "Tasks"
@@ -178,9 +183,6 @@ def create_sheet(title: str = "Claude tasks") -> str:
 if __name__ == "__main__":
     import argparse
 
-    from dotenv import load_dotenv
-
-    load_dotenv()
     ap = argparse.ArgumentParser()
     ap.add_argument("--create", action="store_true", help="create the sheet and print its id")
     if ap.parse_args().create:

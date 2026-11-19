@@ -20,7 +20,8 @@ import lib  # noqa: E402
 DATA = HERE / "data"
 HUB = "https://www.clearerthinking.org/post/all-clearer-thinking-articles"
 MARKUS = "https://www.clearerthinking.org/post/what-20-000-people-taught-us-about-entrepreneurship-and-startups"
-HUB_LIVE = "2026-09-30"          # hub published and added to the site menu
+HUB_LIVE = "2026-09-30"          # hub published and added to the site menu (a Wednesday)
+HUB_WEEK = "2026-09-28"          # the Monday of that week: weekly figures count it as "after"
 EMAIL = "2026-07-30"             # Markus's email
 INDEXED = ("Submitted and indexed", "Indexed, not submitted in sitemap")
 MARKUS_CLAIMS = {"posts": 611, "no_category": 585, "zero_inbound": 272, "unreachable_from_blog": 316,
@@ -140,6 +141,15 @@ def tools(crawl: dict) -> dict:
             "tools_page_anchors": tools_page.get("n_anchors")}
 
 
+def not_indexed_group(url: str) -> str:
+    """Three kinds of article Google is skipping; the split decides what is worth fixing."""
+    if "definition-examples-and-effects" in url:
+        return "bias glossary"
+    if re.search(r"/post/20\d\d/\d\d/\d\d/", url):
+        return "2015-2020 announcements"
+    return "other articles"
+
+
 def index_status(crawl: dict, wix: dict, gsc: dict, base: list[dict]) -> dict:
     state = {norm(u): v for u, v in gsc.items()}
     sitemap_posts = [norm(e["url"]) for e in crawl["sitemaps"]["posts"]]
@@ -176,7 +186,12 @@ def index_status(crawl: dict, wix: dict, gsc: dict, base: list[dict]) -> dict:
         "hub_status": {k: state.get(HUB, {}).get(k) for k in ("coverageState", "lastCrawlTime", "googleCanonical")},
         "not_indexed": not_indexed,
         "bias_series_not_indexed": sum(1 for r in not_indexed if "definition-examples-and-effects" in r["url"]),
+        "not_indexed_groups": dict(Counter(not_indexed_group(r["url"]) for r in not_indexed)),
+        "soft_404": [r["url"] for r in not_indexed if r["coverage"] == "Soft 404"],
+        "crawled_declined_recently": [r for r in not_indexed if r["coverage"] == "Crawled - currently not indexed" and (r["last_crawl"] or "") >= HUB_LIVE],
         "baseline": {"rows": len(base), "posts": len(base_posts), "posts_now_indexed": base_now_indexed,
+                     "posts_crawled_since_hub": sum(1 for b in base_posts if crawled(norm(b["url"])) >= HUB_LIVE),
+                     "posts_never_crawled": sum(1 for b in base_posts if not crawled(norm(b["url"]))),
                      "transitions": [{"then": r, "now": now, "n": n} for (r, now), n in sorted(trans.items(), key=lambda kv: -kv[1])],
                      "by_group": {k: dict(v) for k, v in by_domain.items()}},
         "wix_posts_missing_from_sitemap": [{"url": u, "coverage": state.get(u, {}).get("coverageState")} for u in wix_only],
@@ -207,7 +222,7 @@ def search(weekly: list[dict], base: list[dict], idx: dict) -> dict:
                 "avg_baseline_clicks": round(sum(r["baseline_clicks"] for r in rows) / n, 1),
                 "avg_baseline_impressions": round(sum(r["baseline_impressions"] for r in rows) / n)}
 
-    before = [r for r in series if r["week"] < HUB_LIVE][-6:]
+    before = [r for r in series if r["week"] < HUB_WEEK][-6:]
     after = series[-6:]
     return {"weekly": series, "before_hub": window(before), "latest": window(after)}
 
@@ -232,10 +247,26 @@ def baseline_timing(weekly: list[dict], base: list[dict], gsc: dict) -> dict:
         if s.get("coverageState") not in INDEXED:
             continue
         f = first.get(u)
-        when["never seen in search" if not f else "before the hub" if f < "2026-09-28" else "after the hub"] += 1
+        when["never seen in search" if not f else "before the hub" if f < HUB_WEEK else "after the hub"] += 1
         c = (s.get("lastCrawlTime") or "")[:10]
         crawl["last crawl after the hub" if c >= HUB_LIVE else "last crawl before the hub" if c else "no crawl date"] += 1
     return {"first_impressions": dict(when), "last_crawl": dict(crawl)}
+
+
+def by_month(days: list[dict]) -> list[dict]:
+    """Daily Search Analytics rows -> one row per calendar month, months with no row filled with zero."""
+    tot = defaultdict(lambda: [0, 0])
+    for r in days:
+        tot[r["keys"][0][:7]][0] += r["impressions"]
+        tot[r["keys"][0][:7]][1] += r["clicks"]
+    if not tot:
+        return []
+    out, (y, mth) = [], map(int, min(tot).split("-"))
+    while f"{y}-{mth:02d}" <= max(tot):
+        k = f"{y}-{mth:02d}"
+        out.append({"month": k, "impressions": tot[k][0] if k in tot else 0, "clicks": tot[k][1] if k in tot else 0})
+        y, mth = (y + 1, 1) if mth == 12 else (y, mth + 1)
+    return out
 
 
 def markus_article(gsc: dict, m: dict, graph: dict) -> dict:
@@ -254,8 +285,10 @@ def markus_article(gsc: dict, m: dict, graph: dict) -> dict:
         "since_email": tot([r for r in days if r["keys"][0] >= EMAIL]),
         "last_28_days": tot(days and [r for r in days if r["keys"][0] >= (date.fromisoformat(days[-1]["keys"][0]) - timedelta(days=27)).isoformat()]),
         "last_day_in_data": days[-1]["keys"][0] if days else None,
-        "top_queries_since_oct": [{"query": r["keys"][0], "clicks": r["clicks"], "impressions": r["impressions"], "position": round(r["position"], 1)}
-                                  for r in sorted(m["queries_since_oct"], key=lambda r: -r["impressions"])[:8]],
+        "since_september": tot([r for r in days if r["keys"][0] >= "2026-09-01"]),
+        "by_month": by_month(days),
+        "queries_since_email": [{"query": r["keys"][0], "clicks": r["clicks"], "impressions": r["impressions"], "position": round(r["position"], 1)}
+                                for r in sorted(m["queries_since_email"], key=lambda r: -r["impressions"])[:8]],
         "other_pages_linking_to_it": graph["markus_article_sources"],
     }
 
