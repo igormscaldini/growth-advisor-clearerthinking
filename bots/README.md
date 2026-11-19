@@ -8,6 +8,7 @@ Last verified: 2026-10-02 (states and last runs below are from that day).
 
 | Bot | What it does | When (UTC) | Runs on | Since | State on 2026-10-02 |
 |---|---|---|---|---|---|
+| [Task bot](#task-bot) | Carries out instructions Igor emails to his +claude address (beehiiv unsubscribe, Stripe cancel at period end, Gmail drafts) and logs them on /tasks | On each task email (Apps Script trigger), plus the throttled schedule | GitHub Actions + Google Apps Script | 2026-11-18 | Live on the schedule; waiting on Igor for the Stripe write key, the page password and the trigger install |
 | [UQP researcher outreach send](#uqp-researcher-outreach-send) | Sends 10 "UQP researcher outreach" Gmail drafts per weekday (temporary) | Weekdays hourly 14:30-21:30 (sends from 9:30am ET) | GitHub Actions | 2026-11-12 | Active until the 90 remaining drafts are gone (Nov 25); delete afterwards |
 | [Daily site health check](#daily-site-health-check) | Six checks of the CT site; emails only when one does not pass | Daily 10:00 | GitHub Actions | 2026-10-01 | Active. Only run so far (manual, 2026-10-01) reported failed sign-up links on /plus and /coaching |
 | [All Articles hub sync](#all-articles-hub-sync) | Keeps the Wix "All Clearer Thinking Articles" post in step with the sitemap | Mondays 12:20 | GitHub Actions | 2026-09-30 | Active. Two manual runs passed; first scheduled run 2026-10-05 |
@@ -47,6 +48,13 @@ None are scheduled right now (checked 2026-10-02).
 The Friday letter can also run as a cloud routine instead of through GitHub Actions. It is documented in [ADVISOR_ROUTINE.md](ADVISOR_ROUTINE.md) and is not set up as a routine today; the GitHub workflow below is the live path.
 
 ## GitHub Actions bots (this repository)
+
+### Task bot
+
+- **Does:** Igor forwards an email to his `+claude` Gmail address with an instruction on top; the bot makes the account changes (beehiiv unsubscribe, Stripe cancel at period end), leaves any emails to other people as Gmail drafts, replies in the thread with what it did and logs the task in a private Google Sheet shown at https://growth-advisor-clearerthinking.vercel.app/tasks (password-protected). Only mail Gmail filed as sent by Igor's own account is obeyed. Never logs names, addresses or email text (the Actions logs are public).
+- **Code:** `task_bot.py`, `task_actions.py` (actions + safety limits), `task_log.py`, workflow `task-bot.yml`, trigger `bots/task_bot_trigger.gs` (Google Apps Script in Igor's account, starts the workflow within a minute). Full guide, setup and limits: [TASK_BOT.md](TASK_BOT.md).
+- **Try it safely:** `python task_bot.py --dry-run` (reads pending task emails, looks things up for real, simulates every change, prints the report; local only).
+- **Where failures show up:** the task's row turns "Failed" or "Needs you", the bot's reply in the thread says why, and a run with a failed task ends red.
 
 ### UQP researcher outreach send
 
