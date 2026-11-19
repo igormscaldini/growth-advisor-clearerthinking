@@ -207,7 +207,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   the two buttons and `custom_live_url` all point at the Wix post, which exists only once the team publishes it.
   The two buttons (audio, key takeaways) jump to `#viewer-<id>` anchors that differ per Wix post and are inherited stale
   from the duplicated draft (a missing id just opens the post at the top): read the ids from the live post's raw HTML
-  (`id="viewer-..."`: the empty paragraph right above the audio player, and the takeaways collapsible) and test on a phone
+  (`id="viewer-..."`: the empty paragraph right above the audio player, and the takeaways collapsible; they are the Wix
+  richContent node ids, so `GET /posts/slugs/<slug>?fieldsets=RICH_CONTENT` lists them: AUDIO, COLLAPSIBLE_LIST) and test on a phone
   width, because an anchor above the sponsor box leaves the player two screens down.
   Images: `save_image` wants a public URL; relaying bytes as base64 through the model corrupts anything above ~15 KB
   (verify by downloading + PIL decode) and public hosting via GitHub is blocked by the permission classifier, so reuse
