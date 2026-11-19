@@ -5,7 +5,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from seo_hub_pages import render_ricos  # noqa: E402
-from wix_publish_hub import HUB_URL, linked_urls, linked_urls_in_order  # noqa: E402
+from wix_publish_hub import HUB_URL, linked_urls, linked_urls_in_order, listable  # noqa: E402
 
 
 def test_linked_urls_round_trips_a_rendered_document():
@@ -86,3 +86,12 @@ def test_payload_size_guard_raises_a_catchable_error():
     src = Path(w.__file__).read_text()
     guard = src.split("over the {MAX_POST_BYTES:,} byte post limit")[0].splitlines()[-1]
     assert "SystemExit" not in guard
+
+
+def test_listable_drops_the_hub_and_posts_that_redirect():
+    site = "https://www.clearerthinking.org"
+    entries = [{"url": HUB_URL}, {"url": site + "/post/impact-bias"}, {"url": site + "/post/impact-bias-1"},
+               {"url": site + "/post/what%27s-new"}, {"url": site + "/post/kept"}]
+    got = listable(entries, {"/post/impact-bias-1", "/post/what's-new", "/tools/unrelated"})
+    assert [e["url"] for e in got] == [site + "/post/impact-bias", site + "/post/kept"]
+    assert [e["url"] for e in listable(entries, set())] == [e["url"] for e in entries[1:]]   # no redirects: only the hub goes

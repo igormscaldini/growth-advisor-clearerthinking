@@ -32,6 +32,7 @@ import os
 import re
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -81,10 +82,30 @@ def _call(method: str, path: str, body: dict | None = None) -> dict:
         raise RuntimeError(f"Wix API {method} {path} failed: HTTP {e.code}\n{detail}") from e
 
 
+def listable(entries: list[dict], redirected_paths: set[str]) -> list[dict]:
+    """Sitemap entries the hub should link to: not the hub itself, and not a post whose path now redirects.
+
+    Wix keeps a published post in the sitemap after a redirect is put on its path (the nine duplicated
+    glossary posts, 2026-11-19), and a link from the hub to a URL that 301s is wasted.
+    """
+    site = HUB_URL.split("/post/")[0]
+    return [e for e in entries
+            if e["url"].rstrip("/") != HUB_URL and urllib.parse.unquote(e["url"].replace(site, "")) not in redirected_paths]
+
+
+def redirected_paths() -> set[str]:
+    """`from` paths of every Wix redirect. A failed lookup must not stop the weekly sync: list everything."""
+    try:
+        import tools_redirects
+        return tools_redirects.existing_from_paths()
+    except Exception as e:  # noqa: BLE001
+        print(f"  could not read the redirect list ({type(e).__name__}); redirected posts stay listed this run")
+        return set()
+
+
 def build_payload() -> tuple[dict, int]:
     """Returns (request body, article count). All titles come from the cached page <title>s."""
-    posts = [p for p in hub.enrich(hub.fetch_sitemap(hub.BLOG_SITEMAP))
-             if p["url"].rstrip("/") != HUB_URL]
+    posts = hub.enrich(listable(hub.fetch_sitemap(hub.BLOG_SITEMAP), redirected_paths()))
     intro = (f"Every article Clearer Thinking has published, {len(posts)} in total, "
              "grouped by year with the most recent first.")
     body = {"draftPost": {
