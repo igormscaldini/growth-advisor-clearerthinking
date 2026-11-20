@@ -80,10 +80,10 @@ PERSONALITY_AMOUNTS = (900,)
 # or the payment is counted twice (here and in the Stripe "Other" bucket / gross revenue).
 # Beehiiv Ad Network = 2026 year to date from beehiiv's Monetize > Ad Network earnings:
 # the paid-out total plus placements that ran but are still awaiting payout.
-MANUAL_REVENUE_LAST_UPDATED = "2026-11-13"
+MANUAL_REVENUE_LAST_UPDATED = "2026-11-20"
 MANUAL_REVENUE: dict[str, list[tuple[str, float]]] = {
     "MLA": [("ACE", 2_500.00), ("FarmKind", 2_500.00), ("Hive", 2_500.00)],
-    "Affiliates": [("Kitted Decks", 350.00)],
+    "Affiliates": [("Kitted Decks", 350.00), ("Reconstellation", 500.00)],
     # One line for every newsletter, podcast and YouTube sponsorship deal: the deals listed per
     # sponsor until 2026-11-13 (80,000 Hours $4,200 + $5,000, Game Over $3,000, Non-Trivial $1,500,
     # Settled $1,500, ACE podcast $800 = $16,000) plus Igor's round figure of ~$35,000 for the
