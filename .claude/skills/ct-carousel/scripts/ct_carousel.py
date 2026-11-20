@@ -1,62 +1,39 @@
-"""Instagram carousel (4:5, 1080 x 1350) of the key takeaways from the CT post
-"What to Think About When You're Thinking About a Job Change"
-(https://www.clearerthinking.org/post/what-to-think-about-when-youre-thinking-about-a-job-change).
+"""CT Instagram/LinkedIn carousel (4:5, 1080 x 1350): cover, one slide per key takeaway, closing slide with the owl.
 
-The six takeaways are Igor's copy, VERBATIM (2026-11-20): never edit their wording here. Each one is split
-at its first sentence into a headline and a body, nothing else changes. The emoji that opened each takeaway
-are drawn as flat SVG icons (house style: no emoji). The cover and closing slide wording is ours: edit freely.
+This file is the single source of the carousel's LOOK (layout, type sizes, icons, owl, colours via the
+ct-infographic kit). A carousel's WORDING lives in a JSON spec next to its output, so a new carousel never
+copies or edits layout code. Approved look: the job-change carousel of 2026-11-20
+(reports/job_change_carousel_2026-11-20_src/carousel.json).
 
-Run:  .venv/bin/python reports/job_change_carousel_2026-11-20_src/build.py
-Out:  ~/Downloads/ct_job_change_carousel_2026-11-20/slide_01.png ... slide_08.png
-      reports/job_change_carousel_2026-11-20.html  (overview of all slides, open in Chrome)
+Run:  .venv/bin/python .claude/skills/ct-carousel/scripts/ct_carousel.py <spec.json>
+Out:  ~/Downloads/ct_<slug>_carousel_<date>/slide_01.png ...  +  reports/<slug>_carousel_<date>.html (overview)
+
+Spec (JSON):
+  slug          "job_change"               file-name stem
+  date          "2026-11-20"
+  article_url   full URL of the article     (shown nowhere on the slides; kept for the captions)
+  title         ["dark line", "blue line"]  the article title split in two, as on the cover
+  takeaways     [{"icon": <name in ICONS>, "headline": "...", "paragraphs": ["...", ...],
+                  "list": ["...", ...] (optional, drawn as pale-blue chips after the first paragraph)}]
+  cover_label   optional, default "<n> Key Takeaways"
+  end_lines     optional, default ["Read the full article on", "ClearerThinking.org/Blog"]
 """
-from pathlib import Path
+from __future__ import annotations
+
+import json
 import sys
 import tempfile
+from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
+SKILL_DIR = Path(__file__).resolve().parents[1]
+ROOT = SKILL_DIR.parents[2]
 sys.path.insert(0, str(ROOT / ".claude/skills/ct-infographic/scripts"))
 import ct_infographic as kit  # noqa: E402
 
-DATE = "2026-11-20"
-OUT_DIR = Path.home() / "Downloads" / f"ct_job_change_carousel_{DATE}"
-OVERVIEW = ROOT / "reports" / f"job_change_carousel_{DATE}.html"
-
-# ---- wording: cover and closing slide (ours) -------------------------------------------------
-ARTICLE_TITLE_1 = "What to Think About When You’re"
-ARTICLE_TITLE_2 = "Thinking About a Job Change"
-COVER_LABEL = "6 Key Takeaways"
+DEFAULT_END_LINES = ["Read the full article on", "ClearerThinking.org/Blog"]
 SWIPE = "Swipe"
-END_LINE_1 = "Read the full article on"
-END_LINE_2 = "ClearerThinking.org/Blog"
 
-# ---- wording: the takeaways (Igor's, verbatim) ------------------------------------------------
-# (icon, headline, body paragraphs, optional list placed after the first body paragraph)
-TAKEAWAYS = [
-    ("compass", "Decide what you want to improve by changing your job.",
-     ["Three things you might want to improve include:",
-      "Those are different goals, and the same career move may affect them differently."],
-     ["Job satisfaction", "Moment-to-moment happiness", "Overall life satisfaction"]),
-    ("puzzle", "Interestingness is a weak guide to job satisfaction.",
-     ["Career quizzes tend to focus on finding jobs that fit your interests, but it's important to consider "
-      "other (stronger) predictors of satisfaction such as autonomy, connection with colleagues, and whether "
-      "the work feels meaningful."], None),
-    ("search", "Diagnose your dissatisfaction before deciding to leave.",
-     ["Some feelings are likely to follow you from job to job, but others won't. Consider whether reshaping "
-      "your current role could help."], None),
-    ("coins", "A bigger salary does not guarantee a happier working life.",
-     ["Higher income is more strongly associated with life satisfaction than with job satisfaction or "
-      "moment-to-moment happiness, so weigh a raise against your other priorities."], None),
-    ("flask", "Learn what a job feels like before committing to it.",
-     ["Imagination is often a bad guide, and it is subject to biases. It can be better to ask people doing "
-      "the work about their typical day, and test potential career changes through small projects, courses, "
-      "volunteering, or temporary roles."], None),
-    ("sun", "A fading honeymoon period does not mean a job change was a mistake.",
-     ["Even if you do change job and experience a boost in happiness/satisfaction, that boost is likely to "
-      "fade with time. That being said, temporary improvements can still make a move worthwhile."], None),
-]
-
-# ---- look ------------------------------------------------------------------------------------
+# ---- look (do not change without Igor's approval: every carousel must match) -------------------
 FMT = kit.FORMATS["portrait"]          # 1600 x 2000 canvas
 SCALE = 1080 / FMT["width"]            # export straight to Instagram's 1080 x 1350
 MARGIN = 130
@@ -65,7 +42,8 @@ HEAD_PX, BODY_PX = 100, 60
 S = 'fill="none" stroke="{c}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"'
 INK, BLUE, ORANGE = kit.INK, kit.BLUE_RAMP[3], kit.ORANGE
 
-# Flat icons on a 100 x 100 grid: blue line work, one orange detail each.
+# Flat icons on a 100 x 100 grid: blue line work (stroke 4), one orange detail each.
+# A new carousel may ADD icons here in the same style; never restyle existing ones.
 ICONS = {
     "compass": f'<circle cx="50" cy="50" r="34" {S.format(c=BLUE)}/>'
                f'<path d="M50 24 L58 50 L50 76 L42 50 Z" fill="{BLUE}"/>'
@@ -87,7 +65,6 @@ ICONS = {
            + f'<path d="M36 78 a12 12 0 0 1 4 -23 a16 16 0 0 1 30 4 a10 10 0 0 1 2 19 Z" fill="#fff" {S.format(c=BLUE)}/>',
 }
 
-
 # Closing-slide owl: same flat line style as the icons (blue line work, orange details), perched on an open book.
 OWL = (f'<svg class="owl" viewBox="0 0 240 262" width="400" height="437">'
        f'<path d="M66 92 L52 30 L104 56 Z M174 92 L188 30 L136 56 Z" fill="{kit.BLUE_RAMP[0]}" stroke="{BLUE}" stroke-width="6" stroke-linejoin="round"/>'
@@ -106,17 +83,6 @@ OWL = (f'<svg class="owl" viewBox="0 0 240 262" width="400" height="437">'
        f'<path d="M98 230 v10 M106 230 v10 M134 230 v10 M142 230 v10" {S.format(c=ORANGE)} stroke-width="6"/>'
        f'<path d="M40 238 Q80 226 120 240 Q160 226 200 238 V256 Q160 244 120 258 Q80 244 40 256 Z" fill="{ORANGE}"/>'
        f'<path d="M120 241 V256" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>')
-
-
-def icon(name: str, size: int) -> str:
-    return (f'<div class="badge" style="width:{size}px;height:{size}px">'
-            f'<svg viewBox="0 0 100 100" width="{size * 0.62:.0f}" height="{size * 0.62:.0f}">{ICONS[name]}</svg></div>')
-
-
-def dots(current: int, total: int) -> str:
-    return '<div class="dots">' + "".join(
-        f'<span class="{"on" if i == current else ""}"></span>' for i in range(total)) + "</div>"
-
 
 CSS = f"""
 #canvas {{ position:relative; }}
@@ -147,66 +113,126 @@ CSS = f"""
 ARROW = (f'<svg width="64" height="24" viewBox="0 0 64 24"><path d="M2 12 H58 M46 2 L60 12 L46 22" '
          f'{S.format(c=kit.BLUE)}/></svg>')
 
+MAX_TAKEAWAYS = 8        # cover + 8 + end = 10 slides, Instagram's carousel limit
+MAX_HEADLINE_CHARS = 75  # ~3 lines at 100 px
+MAX_BODY_CHARS = 330     # paragraphs + list items; ~8 lines at 60 px still clear the dots
 
-def cover_body(total: int) -> str:
-    return (f'<div class="main cover"><div class="label">{COVER_LABEL}</div>'
-            f'<div class="t"><div>{ARTICLE_TITLE_1}</div><div class="l2">{ARTICLE_TITLE_2}</div></div>'
-            f'<div class="row">{"".join(icon(t[0], 150) for t in TAKEAWAYS)}</div>'
+
+def validate(spec: dict) -> list[str]:
+    """Problems that would break the layout or the house rules; empty list = OK."""
+    errs = []
+    for key in ("slug", "date", "title", "takeaways"):
+        if key not in spec:
+            errs.append(f"missing '{key}'")
+    if errs:
+        return errs
+    if len(spec["title"]) != 2:
+        errs.append("title must be two lines [dark, blue]")
+    tks = spec["takeaways"]
+    if not 1 <= len(tks) <= MAX_TAKEAWAYS:
+        errs.append(f"{len(tks)} takeaways; allowed 1-{MAX_TAKEAWAYS}")
+    for n, t in enumerate(tks, 1):
+        if t.get("icon") not in ICONS:
+            errs.append(f"takeaway {n}: unknown icon {t.get('icon')!r} (have {', '.join(ICONS)})")
+        if len(t.get("headline", "")) > MAX_HEADLINE_CHARS:
+            errs.append(f"takeaway {n}: headline over {MAX_HEADLINE_CHARS} characters")
+        body = sum(len(p) for p in t.get("paragraphs", [])) + sum(len(x) for x in t.get("list") or [])
+        if body > MAX_BODY_CHARS:
+            errs.append(f"takeaway {n}: body {body} characters, over {MAX_BODY_CHARS}")
+    text = json.dumps(spec, ensure_ascii=False)
+    if "—" in text:
+        errs.append("em dash found (house rule: none)")
+    return errs
+
+
+def icon(name: str, size: int) -> str:
+    return (f'<div class="badge" style="width:{size}px;height:{size}px">'
+            f'<svg viewBox="0 0 100 100" width="{size * 0.62:.0f}" height="{size * 0.62:.0f}">{ICONS[name]}</svg></div>')
+
+
+def dots(current: int, total: int) -> str:
+    return '<div class="dots">' + "".join(
+        f'<span class="{"on" if i == current else ""}"></span>' for i in range(total)) + "</div>"
+
+
+def cover_body(spec: dict, total: int) -> str:
+    t1, t2 = spec["title"]
+    label = spec.get("cover_label") or f"{len(spec['takeaways'])} Key Takeaways"
+    return (f'<div class="main cover"><div class="label">{label}</div>'
+            f'<div class="t"><div>{t1}</div><div class="l2">{t2}</div></div>'
+            f'<div class="row">{"".join(icon(t["icon"], 150) for t in spec["takeaways"])}</div>'
             f'<div class="swipe">{SWIPE} {ARROW}</div></div>{dots(0, total)}')
 
 
-def takeaway_body(i: int, total: int) -> str:
-    name, head, paras, items = TAKEAWAYS[i]
+def takeaway_body(spec: dict, i: int, total: int) -> str:
+    t = spec["takeaways"][i]
+    paras, items = t["paragraphs"], t.get("list")
     parts = [f"<p>{paras[0]}</p>"]
     if items:
         parts.append('<div class="list">' + "".join(f"<div>{x}</div>" for x in items) + "</div>")
     parts += [f"<p>{p}</p>" for p in paras[1:]]
-    return (f'<div class="main"><div class="top">{icon(name, 210)}'
-            f'<div class="label">Key takeaway {i + 1} of {len(TAKEAWAYS)}</div></div>'
-            f'<h1 class="head">{head}</h1><div class="rule"></div>'
+    return (f'<div class="main"><div class="top">{icon(t["icon"], 210)}'
+            f'<div class="label">Key takeaway {i + 1} of {len(spec["takeaways"])}</div></div>'
+            f'<h1 class="head">{t["headline"]}</h1><div class="rule"></div>'
             f'<div class="body">{"".join(parts)}</div></div>{dots(i + 1, total)}')
 
 
-def end_body(total: int) -> str:
-    return (f'<div class="main cover end">{OWL}<div class="t"><div>{END_LINE_1}</div><div class="l2">{END_LINE_2}</div></div>'
-            f'<div class="src">“{ARTICLE_TITLE_1} {ARTICLE_TITLE_2}”</div>'
+def end_body(spec: dict, total: int) -> str:
+    e1, e2 = spec.get("end_lines") or DEFAULT_END_LINES
+    t1, t2 = spec["title"]
+    return (f'<div class="main cover end">{OWL}<div class="t"><div>{e1}</div><div class="l2">{e2}</div></div>'
+            f'<div class="src">“{t1} {t2}”</div>'
             f'</div>{dots(total - 1, total)}')
 
 
-def slides() -> list[tuple[str, str]]:
+def slides(spec: dict) -> list[tuple[str, str]]:
     """(alt text, body html) for every slide, in order."""
-    total = len(TAKEAWAYS) + 2
-    out = [(f"Cover: {ARTICLE_TITLE_1} {ARTICLE_TITLE_2}", cover_body(total))]
-    out += [(TAKEAWAYS[i][1], takeaway_body(i, total)) for i in range(len(TAKEAWAYS))]
-    out.append((f"{END_LINE_1} {END_LINE_2}", end_body(total)))
+    n = len(spec["takeaways"])
+    total = n + 2
+    e1, e2 = spec.get("end_lines") or DEFAULT_END_LINES
+    out = [(f"Cover: {' '.join(spec['title'])}", cover_body(spec, total))]
+    out += [(spec["takeaways"][i]["headline"], takeaway_body(spec, i, total)) for i in range(n)]
+    out.append((f"{e1} {e2}", end_body(spec, total)))
     return out
 
 
-def overview(paths: list[Path]) -> str:
+def out_paths(spec: dict) -> tuple[Path, Path]:
+    out_dir = Path.home() / "Downloads" / f"ct_{spec['slug']}_carousel_{spec['date']}"
+    overview = ROOT / "reports" / f"{spec['slug']}_carousel_{spec['date']}.html"
+    return out_dir, overview
+
+
+def overview(spec: dict, paths: list[Path], out_dir: Path) -> str:
     imgs = "".join(f'<img src="{p.as_uri()}" alt="slide {n}">' for n, p in enumerate(paths, 1))
-    return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Job Change Carousel</title>
+    return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{spec['slug'].replace('_', ' ').title()} Carousel</title>
 <style>body {{ margin:0; padding:32px; background:#eee; font-family:{kit.FONT_STACK}; color:{INK}; }}
 h1 {{ font-size:24px; font-weight:600; margin:0 0 4px; }} .sub {{ color:#666; margin:0 0 24px; font-size:15px; }}
 .strip {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:20px; }}
 img {{ width:100%; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,.12); background:#fff; }}</style></head>
-<body><h1>Instagram carousel: job change key takeaways</h1>
-<p class="sub">{kit.timestamp()} · {len(paths)} slides, 1080 x 1350 · PNGs in {OUT_DIR}</p>
+<body><h1>Carousel: {' '.join(spec['title'])}</h1>
+<p class="sub">{kit.timestamp()} · {len(paths)} slides, 1080 x 1350 · PNGs in {out_dir}</p>
 <div class="strip">{imgs}</div></body></html>"""
 
 
-def main() -> None:
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+def render(spec: dict) -> list[Path]:
+    errs = validate(spec)
+    if errs:
+        raise SystemExit("Spec problems:\n  " + "\n  ".join(errs))
+    out_dir, overview_path = out_paths(spec)
+    out_dir.mkdir(parents=True, exist_ok=True)
     tmp = Path(tempfile.mkdtemp())
     paths = []
-    for n, (alt, body) in enumerate(slides(), 1):
-        png = OUT_DIR / f"slide_{n:02d}.png"
+    for n, (alt, body) in enumerate(slides(spec), 1):
+        png = out_dir / f"slide_{n:02d}.png"
         html = kit.page_html(body_html=body, css=CSS, width=FMT["width"], height=FMT["height"],
-                             name=f"Job change carousel, slide {n}", alt=alt, png_path=png)
+                             name=f"{spec['slug']} carousel, slide {n}", alt=alt, png_path=png)
         kit.export(html, tmp / f"slide_{n:02d}.html", png, width=FMT["width"], height=FMT["height"], scale=SCALE)
         paths.append(png)
-    OVERVIEW.write_text(overview(paths), encoding="utf-8")
-    print("\n".join(str(p) for p in paths + [OVERVIEW]))
+    overview_path.write_text(overview(spec, paths, out_dir), encoding="utf-8")
+    return paths + [overview_path]
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) != 2:
+        raise SystemExit(__doc__)
+    print("\n".join(str(p) for p in render(json.loads(Path(sys.argv[1]).read_text(encoding="utf-8")))))
