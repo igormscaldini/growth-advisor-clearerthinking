@@ -60,8 +60,8 @@ TAKEAWAYS = [
 # ---- look ------------------------------------------------------------------------------------
 FMT = kit.FORMATS["portrait"]          # 1600 x 2000 canvas
 SCALE = 1080 / FMT["width"]            # export straight to Instagram's 1080 x 1350
-MARGIN = 140
-HEAD_PX, BODY_PX = 84, 50
+MARGIN = 130
+HEAD_PX, BODY_PX = 100, 60
 
 S = 'fill="none" stroke="{c}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"'
 INK, BLUE, ORANGE = kit.INK, kit.BLUE_RAMP[3], kit.ORANGE
@@ -101,20 +101,21 @@ def dots(current: int, total: int) -> str:
 
 CSS = f"""
 #canvas {{ position:relative; }}
-.main {{ flex:1; display:flex; flex-direction:column; justify-content:center; padding:0 {MARGIN}px; }}
+.main {{ flex:1; display:flex; flex-direction:column; justify-content:flex-start; padding:190px {MARGIN}px 0; }}
+.main.cover {{ justify-content:center; padding-top:0; }}
 .badge {{ border-radius:50%; background:{kit.BLUE_RAMP[0]}; display:flex; align-items:center; justify-content:center; flex:none; }}
-.label {{ font-size:28px; font-weight:600; text-transform:uppercase; letter-spacing:3.4px; opacity:.7; }}
+.label {{ font-size:32px; font-weight:600; text-transform:uppercase; letter-spacing:3.8px; opacity:.7; }}
 .head {{ font-size:{HEAD_PX}px; font-weight:600; line-height:1.18; letter-spacing:-0.3px; text-wrap:balance; margin:0; }}
-.rule {{ width:120px; height:6px; border-radius:3px; background:{ORANGE}; margin:56px 0 52px; }}
+.rule {{ width:120px; height:6px; border-radius:3px; background:{ORANGE}; margin:60px 0 60px; }}
 .body p {{ font-size:{BODY_PX}px; font-weight:400; line-height:1.5; margin:0 0 34px; text-wrap:pretty; }}
 .list {{ display:flex; flex-direction:column; gap:16px; margin:6px 0 40px; }}
 .list div {{ background:{kit.BLUE_RAMP[0]}; border-radius:12px; padding:24px 34px; font-size:{BODY_PX}px; font-weight:600; }}
-.top {{ display:flex; align-items:center; gap:40px; margin-bottom:64px; }}
+.top {{ display:flex; align-items:center; gap:40px; margin-bottom:80px; }}
 .dots {{ display:flex; gap:16px; justify-content:center; padding:0 0 56px; }}
 .dots span {{ width:16px; height:16px; border-radius:50%; background:{kit.BLUE_RAMP[1]}; }}
 .dots span.on {{ background:{ORANGE}; width:48px; border-radius:8px; }}
 .cover {{ align-items:center; text-align:center; }}
-.cover .t {{ font-size:112px; font-weight:600; line-height:1.14; letter-spacing:-0.5px; text-wrap:balance; }}
+.cover .t {{ font-size:124px; font-weight:600; line-height:1.14; letter-spacing:-0.5px; text-wrap:balance; }}
 .cover .t .l2 {{ color:{kit.BLUE}; }}
 .cover .label {{ margin-bottom:64px; }}
 .row {{ display:flex; gap:28px; justify-content:center; margin-top:110px; }}
@@ -131,7 +132,7 @@ ARROW = (f'<svg width="64" height="24" viewBox="0 0 64 24"><path d="M2 12 H58 M4
 def cover_body(total: int) -> str:
     return (f'<div class="main cover"><div class="label">{COVER_LABEL}</div>'
             f'<div class="t"><div>{ARTICLE_TITLE_1}</div><div class="l2">{ARTICLE_TITLE_2}</div></div>'
-            f'<div class="row">{"".join(icon(t[0], 132) for t in TAKEAWAYS)}</div>'
+            f'<div class="row">{"".join(icon(t[0], 150) for t in TAKEAWAYS)}</div>'
             f'<div class="swipe">{SWIPE} {ARROW}</div></div>{dots(0, total)}')
 
 
@@ -141,7 +142,7 @@ def takeaway_body(i: int, total: int) -> str:
     if items:
         parts.append('<div class="list">' + "".join(f"<div>{x}</div>" for x in items) + "</div>")
     parts += [f"<p>{p}</p>" for p in paras[1:]]
-    return (f'<div class="main"><div class="top">{icon(name, 190)}'
+    return (f'<div class="main"><div class="top">{icon(name, 210)}'
             f'<div class="label">Key takeaway {i + 1} of {len(TAKEAWAYS)}</div></div>'
             f'<h1 class="head">{head}</h1><div class="rule"></div>'
             f'<div class="body">{"".join(parts)}</div></div>{dots(i + 1, total)}')
