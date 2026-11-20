@@ -568,3 +568,58 @@ def test_positive_world_recovers_the_planted_counts():
             assert m["buckets"][az.ADS] == 0 and m["ads_untagged_est"] == n_ads and m["estimated"]
         assert m["total"] == n_org + n_study + n_ads + n_partner + n_both
         assert m["kept_wide"] <= m["kept_on_record"]
+
+
+# ---------- net change without manual imports ----------
+
+def test_routine_upload_rule():
+    tool_batch = sub(created=EARLY, channel="import", tools="Rationality Test")
+    plain_batch = sub(created=EARLY, channel="import")  # pre-Mar 10 tool uploads often carry no list
+    backlog = sub(created=ts(2026, 1, 1, 1, 15), channel="import")
+    leaf = sub(created=EARLY, channel="import", Leaf=True)
+    workshop = sub(created=EARLY, channel="import", **{"Career workshop": True})
+    later_upload = sub(created=ts(2026, 4, 2), channel="import")
+    api = sub(created=EARLY, channel="api", tools="Rationality Test")
+    assert az.is_routine_upload(tool_batch) and az.is_routine_upload(plain_batch)
+    assert not any(az.is_routine_upload(r) for r in (backlog, leaf, workshop, later_upload, api))
+    assert not az.is_import(api)
+
+
+def test_net_without_imports_by_hand():
+    # January: 3 genuine (1 api + 2 routine uploads), 2 manual (backlog + Leaf), 1 invalid import ignored.
+    # Unsubscribes 4, so net = (5 - 2) - 4 = -1. February: 1 genuine, 1 manual upload after Mar 10 is in
+    # March, so February = 1 - 0 - 0 = 1.
+    rows = [sub(created=ts(2026, 1, 5)), sub(created=ts(2026, 1, 6), channel="import"),
+            sub(created=ts(2026, 1, 7), channel="import", tools="UPT"),
+            sub(created=ts(2026, 1, 1, 1, 15), channel="import"), sub(created=ts(2026, 1, 16), channel="import", Leaf=True, status="inactive"),
+            sub(created=ts(2026, 1, 20), channel="import", status="invalid"),
+            sub(created=ts(2026, 2, 3)), sub(created=ts(2026, 3, 12), channel="import")]
+    movement = [{"month": "2026-01", "subscribed": 5, "unsubscribed": 4},
+                {"month": "2026-02", "subscribed": 1, "unsubscribed": 0},
+                {"month": "2026-03", "subscribed": 1, "unsubscribed": 3}]
+    jan, feb, mar = az.net_without_imports(rows, movement)
+    assert (jan["manual_imports"], jan["routine_tool_uploads"], jan["new_without_imports"], jan["net"]) == (2, 2, 3, -1)
+    assert jan["manual_imports_unsubscribed_since"] == 1
+    assert (feb["manual_imports"], feb["new_without_imports"], feb["net"]) == (0, 1, 1)
+    assert (mar["manual_imports"], mar["new_without_imports"], mar["net"]) == (1, 0, -3)
+
+
+def test_net_without_imports_null_and_positive_worlds():
+    rng = random.Random(7)
+    months = ["2026-%02d" % m for m in range(4, 10)]
+    genuine = {m: rng.randint(200, 400) for m in months}
+    gone = {m: rng.randint(100, 500) for m in months}
+    rows = [sub(created=ts(2026, int(m[5:]), rng.randint(1, 28), rng.randint(0, 23)),
+                tools=rng.choice(["UPT", "Rationality Test", ""])) for m in months for _ in range(genuine[m])]
+    movement = [{"month": m, "subscribed": genuine[m], "unsubscribed": gone[m]} for m in months]
+    # null world: no imports at all, so net = new - unsubscribed exactly
+    for r in az.net_without_imports(rows, movement):
+        assert r["manual_imports"] == 0 and r["net"] == genuine[r["month"]] - gone[r["month"]]
+    # positive world: plant a bulk import in two months; it enters beehiiv's count but not the net
+    planted = {"2026-05": 1310, "2026-08": 5000}
+    for m, n in planted.items():
+        rows += [sub(created=ts(2026, int(m[5:]), 10), channel="import", Leaf=(m == "2026-05")) for _ in range(n)]
+        next(x for x in movement if x["month"] == m)["subscribed"] += n
+    for r in az.net_without_imports(rows, movement):
+        assert r["manual_imports"] == planted.get(r["month"], 0)
+        assert r["net"] == genuine[r["month"]] - gone[r["month"]]

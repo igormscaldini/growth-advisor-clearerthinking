@@ -160,6 +160,24 @@ def notes(dp: dict, xc: dict) -> dict:
         f"{moves[-1]['days']} days. \"Sign-ups marked invalid\" are addresses that failed beehiiv's validation in "
         f"the month they arrived: they were never on the list, so they are neither unsubscribes nor deletions.")
 
+    nets = dp["net_without_imports"]
+    imported = sum(m["manual_imports"] for m in nets)
+    imported_left = sum(m["manual_imports_unsubscribed_since"] for m in nets)
+    aug_net = next(m for m in nets if m["month"] == "2026-08")
+    routine = [m for m in nets if m["routine_tool_uploads"]]
+    net_note = (
+        f"New subscribers who signed up, minus everyone who unsubscribed, for the whole list. Taken out: the "
+        f"{n(imported)} manual imports (the Jan 1 December backlog, the Leaf student batches, workshop and challenge "
+        f"lists, and in August the {n(aug_net['manual_imports'])} earlier study participants uploaded in bulk). Kept in: "
+        f"the {n(sum(m['routine_tool_uploads'] for m in routine))} tool sign-ups of "
+        f"{listed([MONTHS[int(m['month'][5:]) - 1] for m in routine])} that beehiiv labels as imports, because until "
+        f"March 9 the tools delivered every new sign-up as a twice-weekly upload; taking them out would erase "
+        f"real sign-ups. Deletions are in neither column (beehiiv books none, see above). One thing this cannot "
+        f"separate: {n(imported_left)} of the manually imported people have unsubscribed since, mostly the August "
+        f"upload, and their unsubscribes are still in the Unsubscribed column, because beehiiv records no "
+        f"unsubscribe date to take them out by month. Most of them left from August onward, so those months' net "
+        f"change is understated by up to that many in total.")
+
     deletions = (
         "<div class='callout'><p><b>Deletions: no bulk deletion found.</b> beehiiv keeps no record of deleted subscribers "
         "(a deleted person disappears from the API and from every report), so there is no figure to read off. I looked "
@@ -250,6 +268,7 @@ def notes(dp: dict, xc: dict) -> dict:
         "callouts": callouts,
         "list_note": list_note,
         "deletions": deletions,
+        "net_note": net_note,
         "route_note": route_note,
         "ads_note": ads_note,
         "sections": sections,

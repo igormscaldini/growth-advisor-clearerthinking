@@ -433,17 +433,24 @@ def is_routine_upload(row: dict) -> bool:
 
 def net_without_imports(rows, movement: list) -> list:
     """Per month: beehiiv's new subscribers minus the manual imports among them, minus unsubscribes.
-    Deleted subscribers are in neither series (beehiiv books no deletion), so they are left out too."""
-    manual, routine = Counter(), Counter()
+    Deleted subscribers are in neither series (beehiiv books no deletion), so they are left out too.
+    `manual_imports_unsubscribed_since` counts the month's manual imports whose record is now inactive: their
+    unsubscribes stay in the unsubscribe column, because beehiiv records no unsubscribe date to take them out by."""
+    manual, routine, manual_left = Counter(), Counter(), Counter()
     for row in rows:
         if is_subscriber(row) and created(row) < END and is_import(row):
-            (routine if is_routine_upload(row) else manual)[month_of(row)] += 1
+            if is_routine_upload(row):
+                routine[month_of(row)] += 1
+            else:
+                manual[month_of(row)] += 1
+                manual_left[month_of(row)] += row.get("status") == "inactive"
     out = []
     for m in movement:
         month = m["month"]
         new = m["subscribed"] - manual[month]
         out.append({"month": month, "subscribed": m["subscribed"], "manual_imports": manual[month],
                     "routine_tool_uploads": routine[month], "new_without_imports": new,
+                    "manual_imports_unsubscribed_since": manual_left[month],
                     "unsubscribed": m["unsubscribed"], "net": new - m["unsubscribed"]})
     return out
 

@@ -226,6 +226,15 @@ def build(dp: dict, xc: dict, notes: dict) -> str:
     list_end = (f"<p class='small'>List size at the start of {MONTH_NAMES[int(moves[-1]['month'][5:]) - 1]} "
                 f"{partial + 1 if partial else 1}: {n(moves[-1]['active_at_end'])} active subscribers.</p>")
 
+    nets = dp["net_without_imports"]
+    net_rows = [[label(i, by_month[m["month"]]), n(m["subscribed"]), dash(m["manual_imports"]), n(m["new_without_imports"]),
+                 n(m["unsubscribed"]), signed(m["net"])] for i, m in enumerate(nets)]
+    net_total = ["2026 so far"] + [n(sum(m[k] for m in nets)) for k in
+                                   ("subscribed", "manual_imports", "new_without_imports", "unsubscribed")] + [
+        signed(sum(m["net"] for m in nets))]
+    net_table = table(["Month", "New subscribers (beehiiv)", "Manual imports taken out", "New subscribers without imports",
+                       "Unsubscribed", "Net change"], net_rows, net_total, note_cols=(5,))
+
     legend = "".join(f"<span><i style='background:var(--s{k})'></i>{html.escape(s[0])}</span>"
                      for k, s in enumerate(SERIES))
     tiles = "".join(f"<div class='tile'><div class='v'>{v}</div><div class='k'>{k}</div></div>" for v, k in notes["tiles"])
@@ -243,6 +252,7 @@ def build(dp: dict, xc: dict, notes: dict) -> str:
 {notes['callouts']}
 <h2>Unsubscribes and deletions per month (whole list)</h2>{list_table}{list_end}<p class="small">{notes['list_note']}</p>
 {notes['deletions']}
+<h2>Net change from sign-ups and unsubscribes only (whole list)</h2>{net_table}<p class="small">{notes['net_note']}</p>
 <h2>Where the kept subscribers came from</h2>{route_table}<p class="small">{notes['route_note']}</p>
 <h2>What was counted as Ads</h2>{ads_table}<p class="small">{notes['ads_note']}</p>
 {sections}

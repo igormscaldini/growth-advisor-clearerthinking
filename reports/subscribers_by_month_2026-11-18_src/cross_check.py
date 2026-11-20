@@ -53,6 +53,7 @@ def load() -> pd.DataFrame:
                 "media": cf.get("UTM Media (Comma-Separated)") or "",
                 "dating": bool(cf.get("Dating App Updates")),
                 "mla": bool(cf.get("MLA Tags (Comma-Separated)")),
+                "leaf": bool(cf.get("Leaf")),
             })
     df = pd.DataFrame(recs)
     df["when"] = pd.to_datetime(df["created"], unit="s", utc=True)
@@ -168,6 +169,22 @@ def main():
         print("  ", w)
     print("monthly unsubscribe totals agree with analysis.py:", unsub_ok)
     ok &= unsub_ok
+
+    # 5. net change without manual imports, recounted with a cruder rule: every import is manual except
+    # those between the Jan 1 backlog and Mar 10 without the Leaf flag. analysis.py also treats the
+    # workshop lists and partner-ad records uploaded in that window as manual, so it may be lower by those.
+    subs = df[~df["status"].isin(NOT_SUBSCRIBERS)]
+    imp = subs["channel"] == "import"
+    routine = imp & (subs["when"] >= BACKLOG_UNTIL) & (subs["when"] < pd.Timestamp("2026-03-10", tz="UTC")) & ~subs["leaf"]
+    crude_manual = (imp & ~routine).groupby(subs["month"]).sum()
+    net_rows = []
+    for m in main_result["net_without_imports"]:
+        crude = m["subscribed"] - int(crude_manual.get(m["month"], 0)) - m["unsubscribed"]
+        net_rows.append({"month": m["month"], "analysis_net": m["net"], "crude_net": crude, "diff": crude - m["net"]})
+    results["net_without_imports"] = net_rows
+    print("\nnet change without manual imports: analysis.py vs the crude rule")
+    for r in net_rows:
+        print("  ", r)
 
     (HERE / "cross_check_results.json").write_text(json.dumps(results, indent=1))
     sys.exit(0 if ok else 1)
