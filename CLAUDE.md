@@ -64,7 +64,14 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   instruction on top and `task_bot.py` carries it out through headless Claude Code whose only tool is `task_bot.py --tool <name> '<json>'`
   (the shared bridge is `tool_bridge.py`, also used by `advisor_reply.py`). The catalogue and EVERY safety limit live in `task_actions.py`,
   in code, not in the prompt: actions only on addresses that appear in Igor's email, per-email budgets, Stripe cancel at period end only,
-  and emails only as Gmail DRAFTS (Igor's choice: account changes run at once, he sends the emails). Authentication = the message carries
+  refunds up to the unrefunded amount of that person's charge (no other cap, Igor 2026-11-20), and emails only as Gmail DRAFTS.
+  CONFIRM FIRST since 2026-11-20 (Igor): a new task is read-only; the model proposes changes (`propose_changes`, validated live) and the
+  reply opens with "What I understood" + the numbered plan; the plan rides in the `X-CT-TaskBot-Plan` header (trusted only with the SENT
+  label); a plain "yes" (rule-based `reply_kind`, never the model) makes `execute_plan` call the gated tools with exactly those arguments;
+  "no" cancels, anything else re-plans, 7-day expiry. Questions about CT are answered with advisor_reply's read-only tools + memory
+  (`READ_ONLY_TOOLS`, `advisor_background`). The log is also the dashboard's Tasks tab (`#tasks`, `/api/tasks`, same password; cookie
+  path is `/`). Stripe gotcha: a refund on a made-up charge id returns 404 BEFORE the permission check, so the key probe refunds more
+  than the latest charge (always rejected: 400 with permission, 403 without). Authentication = the message carries
   Gmail's SENT label and is addressed To the +claude address; anything else is never a task. The bot labels a task "Claude tasks" BEFORE
   acting (at most once), replies in the thread To the +claude address (so Igor's Reply comes back as a follow-up) with an `X-CT-TaskBot`
   header, and builds the report from the tools' own record. Log = private Google Sheet "Claude tasks" (`task_log.py`, `TASK_LOG_SHEET_ID`
