@@ -19,9 +19,11 @@ import ct_infographic as kit  # noqa: E402
 
 SPEAKER = "Spencer Greenberg"
 EPISODE = "Episode 328: Is it intent or impact that matters in our relationships?"
-QUOTE = ('I actually have a term I call "light gassing" for when someone reinforces your false '
-         "perceptions, so it's the opposite of gaslighting.")
-HIGHLIGHT = '"light gassing"'          # drawn in CT blue; the words themselves are unchanged
+# Igor's pick (2026-11-20) after rejecting the vote winner ("light gassing"): candidate B.
+QUOTE = ("Sometimes we want there to be this dichotomy: either you're a victim and there's nothing you "
+         "can do, or you're not a victim. But actually, you can be a victim, and also there's something "
+         "you can do, and actually there's something you really should do just for your own benefit.")
+HIGHLIGHT = "you can be a victim, and also there's something you can do"  # drawn in CT blue; words unchanged
 URL = "www.clearerthinking.org/podcast"
 
 FMT = kit.FORMATS["portrait"]          # 1600 x 2000 canvas
@@ -60,7 +62,7 @@ CSS = f"""
 .top .logo {{ height:70px; }}
 .mark {{ font-family:Georgia, "Times New Roman", serif; font-size:300px; line-height:.6; height:150px;
          color:{kit.ORANGE}; margin-left:-12px; }}
-.q {{ font-size:96px; font-weight:600; line-height:1.24; letter-spacing:-0.4px; text-wrap:balance; margin:0; }}
+.q {{ font-size:74px; font-weight:600; line-height:1.28; letter-spacing:-0.4px; text-wrap:pretty; margin:0; }}
 .q .hl {{ color:{kit.BLUE}; }}
 .rule {{ width:120px; height:6px; border-radius:3px; background:{kit.ORANGE}; margin:84px 0 52px; }}
 .who {{ font-size:46px; line-height:1.4; text-wrap:balance; margin:0; }}

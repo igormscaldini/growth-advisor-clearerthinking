@@ -18,3 +18,5 @@ Ten independent voter agents, each given the quotes in a different shuffled orde
 | J | Spencer | I find that often what people want to bring to those conversations when someone else is in need is what they would want in the same scenario. | 0 |
 
 Top-3 points (3/2/1): A 26, B 23, D 6, F 3, J 1, H 1. Every voter who picked B ranked A second.
+
+**Final choice (Igor, 2026-11-20):** B. Igor rejected the vote winner A; B was the runner-up.
