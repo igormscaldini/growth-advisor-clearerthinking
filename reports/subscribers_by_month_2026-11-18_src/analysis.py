@@ -420,6 +420,34 @@ def list_movement(subscribed_by_day: dict, unsubscribed_by_day: dict, anchors: d
     return out
 
 
+def is_import(row: dict) -> bool:
+    return (row.get("utm_channel") or "").lower() == "import"
+
+
+def is_routine_upload(row: dict) -> bool:
+    """Until Mar 9 the tools' new sign-ups reached beehiiv as twice-weekly file uploads, so they carry
+    utm_channel "import" although each one is a genuine new sign-up. Every other import (the Jan 1
+    December backlog, Leaf batches, workshop lists, the study's back-uploads) is a manual import."""
+    return is_import(row) and BACKLOG_UNTIL <= created(row) < API_FROM and bucket(row) == TOOLS
+
+
+def net_without_imports(rows, movement: list) -> list:
+    """Per month: beehiiv's new subscribers minus the manual imports among them, minus unsubscribes.
+    Deleted subscribers are in neither series (beehiiv books no deletion), so they are left out too."""
+    manual, routine = Counter(), Counter()
+    for row in rows:
+        if is_subscriber(row) and created(row) < END and is_import(row):
+            (routine if is_routine_upload(row) else manual)[month_of(row)] += 1
+    out = []
+    for m in movement:
+        month = m["month"]
+        new = m["subscribed"] - manual[month]
+        out.append({"month": month, "subscribed": m["subscribed"], "manual_imports": manual[month],
+                    "routine_tool_uploads": routine[month], "new_without_imports": new,
+                    "unsubscribed": m["unsubscribed"], "net": new - m["unsubscribed"]})
+    return out
+
+
 def recorded_vs_history(snapshots: list, anchors: dict, net_by_day: dict) -> list:
     """For each list size the dashboard recorded ({"generated_at", "active"}): what beehiiv's history says
     today the list was at that moment, and the gap between the two (recorded minus history). The moment
@@ -500,6 +528,7 @@ def main():
     anchors = growth["active_at_start_of_day"]
     net = {d: subscribed[d] - unsubscribed[d] for d in subscribed}
     result["list_movement"] = list_movement(subscribed, unsubscribed, anchors)
+    result["net_without_imports"] = net_without_imports(rows, result["list_movement"])
     result["deletion_scan"] = deletion_scan(json.loads(DASHBOARD_HISTORY.read_text())["snapshots"], anchors, net)
     result["records_walked"] = len(rows)
     result["through"] = str((END - timedelta(days=1)).date())
@@ -514,6 +543,8 @@ def main():
     print("context:", result["context"])
     for lm in result["list_movement"]:
         print("list", lm)
+    for n in result["net_without_imports"]:
+        print("net without imports", n)
     print("deletion scan:", result["deletion_scan"])
     for m in result["months"]:
         print(m["month"], "subscribers", m["total"], "| kept", m["kept"], f"({m['kept_low']}-{m['kept_high']})",
