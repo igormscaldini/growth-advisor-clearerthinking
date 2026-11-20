@@ -262,15 +262,31 @@ def run_tool(name: str, args_json: str) -> dict:
     return tool_bridge.run_tool(TOOL_FNS, name, args_json)
 
 
-def answer_question(question: str) -> str:
-    today = date.today().isoformat()
+# Tools a bot that only READS may share (task_bot.py answers questions about CT with them).
+READ_ONLY_TOOLS = [name for name in TOOL_FNS if name != "remember_this"]
+
+
+def advisor_background() -> str:
+    """What the advisor knows beyond live data: durable memory, the knowledge base and the last two
+    weeks of session digests. Shared with task_bot.py so both answer questions the same way."""
     memory_text = wa.load_memory()
     try:
         knowledge_text = mem.load_knowledge(max_chars=30_000)
         conversations_text = mem.load_recent_conversations(days=14, max_chars=40_000)
     except Exception as e:  # noqa: BLE001
-        print(f"[warn] memory unavailable: {e}", file=sys.stderr)
+        print(f"[warn] memory unavailable: {type(e).__name__}", file=sys.stderr)
         knowledge_text = conversations_text = ""
+    return (
+        f"Durable memory of things Igor has told you before:\n{memory_text or '(nothing recorded yet)'}\n\n"
+        f"Knowledge base (audience and communication):\n{knowledge_text or '(none)'}\n\n"
+        f"Digests of Igor's Claude Code working sessions in the last two weeks (what he has been "
+        f"working on; use them to answer questions about his own projects):\n"
+        f"{conversations_text or '(none)'}"
+    )
+
+
+def answer_question(question: str) -> str:
+    today = date.today().isoformat()
     system = (
         "You are Igor's AI growth advisor for Clearer Thinking (clearerthinking.org). Igor replied "
         "to your weekly report with a question. Answer it precisely using the data tools when you "
@@ -281,11 +297,7 @@ def answer_question(question: str) -> str:
         "verbatim, so it must contain only the answer. If a question is ambiguous, state your "
         "assumption and answer anyway. If you genuinely can't get the data, say so plainly.\n\n"
         f"{tools_prompt()}\n\n"
-        f"Durable memory of things Igor has told you before:\n{memory_text or '(nothing recorded yet)'}\n\n"
-        f"Knowledge base (audience and communication):\n{knowledge_text or '(none)'}\n\n"
-        f"Digests of Igor's Claude Code working sessions in the last two weeks (what he has been "
-        f"working on; use them to answer questions about his own projects):\n"
-        f"{conversations_text or '(none)'}\n\n"
+        f"{advisor_background()}\n\n"
         "Never use em dashes. If THIS reply contains a new durable preference, correction, or standing context worth "
         "carrying into future reports, run the remember_this tool to save it (in addition to answering)."
     )

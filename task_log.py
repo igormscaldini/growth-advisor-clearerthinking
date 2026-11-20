@@ -24,11 +24,13 @@ CONTACTS_TAB = "Contacts"
 # The page maps cells by these header names (frontend/lib/tasks.ts), so order may change freely
 # but a rename must be made in both places.
 COLUMNS = ["Task", "Received (UTC)", "Status", "Instruction", "About", "Actions", "Summary", "Drafts",
-           "Updated (UTC)", "Thread", "Message ID", "Draft data"]
+           "Updated (UTC)", "Thread", "Message ID", "Draft data", "Understood"]
 CONTACT_COLUMNS = ["Name", "Email", "Send from", "Notes"]
 KEY_COLUMN = "Message ID"
 
 RUNNING, DONE, DRAFTS_WAITING, NEEDS_YOU, FAILED = "Running", "Done", "Drafts waiting", "Needs you", "Failed"
+# Confirm-first (2026-11-20): a plan waits for Igor's yes; "no" cancels it; a correction replaces it.
+AWAITING, CANCELLED, REPLACED, EXPIRED = "Awaiting your OK", "Cancelled", "Replaced", "Expired"
 STALE_RUNNING_MINUTES = 30
 CELL_LIMIT = 4000   # keeps one runaway text from bloating the sheet (a cell allows 50,000)
 
@@ -93,6 +95,21 @@ def is_stale_running(record: dict, now: datetime, minutes: int = STALE_RUNNING_M
     return (now - updated).total_seconds() > minutes * 60
 
 
+def is_expired_plan(record: dict, now: datetime, days: int) -> bool:
+    """A plan Igor never answered: by then a "yes" no longer counts (task_bot.PLAN_TTL_DAYS)."""
+    if record.get("Status") != AWAITING:
+        return False
+    try:
+        updated = datetime.strptime(record.get("Updated (UTC)", ""), "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return False
+    return (now - updated).total_seconds() > days * 86400
+
+
+def missing_columns(header: list[str]) -> list[str]:
+    return [c for c in COLUMNS if c not in header]
+
+
 def parse_draft_data(record: dict) -> list[dict]:
     try:
         data = json.loads(record.get("Draft data") or "[]")
@@ -153,6 +170,16 @@ class TaskLog:
                 spreadsheetId=self.id, range=f"{TASKS_TAB}!A:A", valueInputOption="RAW",
                 insertDataOption="INSERT_ROWS", body={"values": [record_to_row(merged, header)]}).execute()
         return merged
+
+    def ensure_columns(self) -> None:
+        """Add any COLUMNS the sheet's header lacks, at the right end (a sheet made before a column
+        existed keeps working; upsert only writes columns that are in the header)."""
+        header = self.header()
+        extra = missing_columns(header)
+        if extra:
+            start = column_letter(len(header))
+            self._values().update(spreadsheetId=self.id, range=f"{TASKS_TAB}!{start}1", valueInputOption="RAW",
+                                  body={"values": [extra]}).execute()
 
     def contacts(self) -> list[dict]:
         resp = self._values().get(spreadsheetId=self.id, range=f"{CONTACTS_TAB}!A:D").execute()
