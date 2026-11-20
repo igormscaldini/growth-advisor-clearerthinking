@@ -27,9 +27,8 @@ ARTICLE_TITLE_1 = "What to Think About When You’re"
 ARTICLE_TITLE_2 = "Thinking About a Job Change"
 COVER_LABEL = "6 Key Takeaways"
 SWIPE = "Swipe"
-END_LINE_1 = "Read the full article"
-END_LINE_2 = "on ClearerThinking.org"
-END_NOTE = "Save this post for your next career decision."
+END_LINE_1 = "Read the full article on"
+END_LINE_2 = "ClearerThinking.org/Blog"
 
 # ---- wording: the takeaways (Igor's, verbatim) ------------------------------------------------
 # (icon, headline, body paragraphs, optional list placed after the first body paragraph)
@@ -89,6 +88,26 @@ ICONS = {
 }
 
 
+# Closing-slide owl: same flat line style as the icons (blue line work, orange details), perched on an open book.
+OWL = (f'<svg class="owl" viewBox="0 0 240 262" width="400" height="437">'
+       f'<path d="M66 92 L52 30 L104 56 Z M174 92 L188 30 L136 56 Z" fill="{kit.BLUE_RAMP[0]}" stroke="{BLUE}" stroke-width="6" stroke-linejoin="round"/>'
+       f'<path d="M120 42 C182 42 202 100 202 150 C202 205 166 234 120 234 C74 234 38 205 38 150 C38 100 58 42 120 42 Z" '
+       f'fill="{kit.BLUE_RAMP[0]}" stroke="{BLUE}" stroke-width="6"/>'
+       f'<ellipse cx="120" cy="188" rx="48" ry="36" fill="#fff"/>'
+       + "".join(f'<path d="M{x} {y} q6 7 12 0" {S.format(c=BLUE)} opacity=".55"/>'
+                 for y, xs in [(176, (90, 108, 126, 144)), (196, (99, 117, 135))] for x in xs)
+       + f'<path d="M50 142 C58 172 70 196 90 210 M190 142 C182 172 170 196 150 210" {S.format(c=BLUE)} stroke-width="6"/>'
+       f'<circle cx="86" cy="112" r="34" fill="#fff" stroke="{BLUE}" stroke-width="6"/>'
+       f'<circle cx="154" cy="112" r="34" fill="#fff" stroke="{BLUE}" stroke-width="6"/>'
+       f'<circle cx="90" cy="116" r="16" fill="{INK}"/><circle cx="150" cy="116" r="16" fill="{INK}"/>'
+       f'<circle cx="96" cy="109" r="5.5" fill="#fff"/><circle cx="156" cy="109" r="5.5" fill="#fff"/>'
+       f'<circle cx="62" cy="150" r="9" fill="{ORANGE}" opacity=".3"/><circle cx="178" cy="150" r="9" fill="{ORANGE}" opacity=".3"/>'
+       f'<path d="M110 136 H130 L120 154 Z" fill="{ORANGE}" stroke="{ORANGE}" stroke-width="4" stroke-linejoin="round"/>'
+       f'<path d="M98 230 v10 M106 230 v10 M134 230 v10 M142 230 v10" {S.format(c=ORANGE)} stroke-width="6"/>'
+       f'<path d="M40 238 Q80 226 120 240 Q160 226 200 238 V256 Q160 244 120 258 Q80 244 40 256 Z" fill="{ORANGE}"/>'
+       f'<path d="M120 241 V256" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>')
+
+
 def icon(name: str, size: int) -> str:
     return (f'<div class="badge" style="width:{size}px;height:{size}px">'
             f'<svg viewBox="0 0 100 100" width="{size * 0.62:.0f}" height="{size * 0.62:.0f}">{ICONS[name]}</svg></div>')
@@ -121,7 +140,7 @@ CSS = f"""
 .row {{ display:flex; gap:28px; justify-content:center; margin-top:110px; }}
 .swipe {{ margin-top:110px; font-size:34px; font-weight:600; color:{kit.BLUE}; display:flex; align-items:center; gap:18px; }}
 .end .t {{ font-size:104px; }}
-.end .note {{ margin-top:80px; font-size:{BODY_PX}px; line-height:1.45; opacity:.8; }}
+.end .owl {{ margin-bottom:70px; }}
 .end .src {{ margin-top:72px; font-size:40px; font-style:italic; font-weight:500; opacity:.75; text-wrap:balance; }}
 """
 
@@ -149,9 +168,9 @@ def takeaway_body(i: int, total: int) -> str:
 
 
 def end_body(total: int) -> str:
-    return (f'<div class="main cover end"><div class="t"><div>{END_LINE_1}</div><div class="l2">{END_LINE_2}</div></div>'
+    return (f'<div class="main cover end">{OWL}<div class="t"><div>{END_LINE_1}</div><div class="l2">{END_LINE_2}</div></div>'
             f'<div class="src">“{ARTICLE_TITLE_1} {ARTICLE_TITLE_2}”</div>'
-            f'<div class="note">{END_NOTE}</div></div>{dots(total - 1, total)}')
+            f'</div>{dots(total - 1, total)}')
 
 
 def slides() -> list[tuple[str, str]]:
