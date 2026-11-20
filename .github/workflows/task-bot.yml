@@ -47,7 +47,7 @@ jobs:
         # This repo's logs are PUBLIC. task_bot.py prints message ids, counts and statuses only;
         # never add a step here that echoes an email, a name or a tool result.
         env:
-          # Restricted Stripe key that may update subscriptions (bots/set_task_bot_secrets.sh);
+          # Restricted Stripe key that may cancel subscriptions and refund (bots/set_task_bot_secrets.sh);
           # the shared STRIPE_SECRET_KEY is read-only and only serves look-ups if this is missing.
           STRIPE_TASKBOT_KEY: ${{ secrets.STRIPE_TASKBOT_KEY }}
           STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
@@ -59,4 +59,9 @@ jobs:
           ADVISOR_MODEL: ${{ secrets.ADVISOR_MODEL }}
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           TASK_LOG_SHEET_ID: ${{ secrets.TASK_LOG_SHEET_ID }}
+          # Questions about CT: the advisor's read-only data tools and its encrypted memory
+          # (same secrets as advisor-reply.yml).
+          GA4_PROPERTY_ID: ${{ secrets.GA4_PROPERTY_ID }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+          ADVISOR_MEMORY_KEY: ${{ secrets.ADVISOR_MEMORY_KEY }}
         run: python task_bot.py

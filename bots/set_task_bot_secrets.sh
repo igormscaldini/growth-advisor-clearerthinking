@@ -12,7 +12,8 @@
 # trigger: a GitHub fine-grained token (this repository only, Actions: Read and write). The
 #          dashboard's every-minute check (frontend/app/api/task-bot-ping) uses it to start the
 #          bot as soon as a task email arrives. Proven here by starting one run of the workflow.
-# stripe:  a Stripe RESTRICTED key (Customers: Read, Subscriptions: Write, Products: Read).
+# stripe:  a Stripe RESTRICTED key (Customers: Read, Subscriptions: Write, Products: Read,
+#          Charges and Refunds: Write, Checkout Sessions: Read).
 #          Proven here with an update call on a subscription id that does not exist, so nothing
 #          changes; saved as the STRIPE_TASKBOT_KEY GitHub secret and in .env.
 # How to create the token and the key: bots/TASK_BOT.md.
@@ -76,7 +77,7 @@ if wants trigger; then
 fi
 
 if wants stripe; then
-  echo; echo "== 3. Stripe key, so the bot can cancel subscriptions =="
+  echo; echo "== 3. Stripe key, so the bot can cancel subscriptions and refund =="
   read -r -s -p "Paste the restricted key, rk_live_... (hidden; Enter to skip): " KEY; echo
   if [ -z "$KEY" ]; then
     echo "  skipped"
@@ -91,8 +92,19 @@ try:
 except Exception as e:
     if getattr(e, "http_status", None) != 404:
         problems.append("Subscriptions: Write")
+# A refund larger than the charge is always rejected, so this moves no money: a key with the
+# permission gets 400 ("greater than the charge"), one without it 403. (A made-up charge id is no
+# test: Stripe answers 404 before it checks permissions, checked 2026-11-20.)
+try:
+    recent = stripe.Charge.list(limit=1).data
+    if recent:
+        stripe.Refund.create(charge=recent[0].id, amount=recent[0].amount + 100_000_000)
+except Exception as e:
+    if getattr(e, "http_status", None) == 403:
+        problems.append("Charges and Refunds: Write")
 for label, call in (("Customers: Read", lambda: stripe.Customer.list(limit=1)),
-                    ("Products: Read", lambda: stripe.Product.list(limit=1))):
+                    ("Products: Read", lambda: stripe.Product.list(limit=1)),
+                    ("Checkout Sessions: Read", lambda: stripe.checkout.Session.list(limit=1))):
     try:
         call()
     except Exception:
@@ -107,8 +119,8 @@ EOF
     fi
     printf %s "$KEY" | gh secret set STRIPE_TASKBOT_KEY
     # Appended, never rewritten: .env holds every other credential, and the last line for a name wins.
-    printf '\n# Task bot: Stripe restricted key that may update subscriptions (bots/TASK_BOT.md)\nSTRIPE_TASKBOT_KEY=%s\n' "$KEY" >> .env
-    echo "  the key can update subscriptions; saved as the STRIPE_TASKBOT_KEY GitHub secret and in .env"
+    printf '\n# Task bot: Stripe restricted key that may cancel subscriptions and refund (bots/TASK_BOT.md)\nSTRIPE_TASKBOT_KEY=%s\n' "$KEY" >> .env
+    echo "  the key can cancel subscriptions and refund; saved as the STRIPE_TASKBOT_KEY GitHub secret and in .env"
   fi
   unset KEY
 fi

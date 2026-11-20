@@ -12,7 +12,9 @@ export const SESSION_COOKIE = "ct_tasks";
 export const SESSION_DAYS = 180;
 
 /** Display order: what needs Igor first, finished work last. */
-export const STATUSES = ["Needs you", "Drafts waiting", "Running", "Failed", "Done"] as const;
+export const STATUSES = [
+  "Awaiting your OK", "Needs you", "Drafts waiting", "Running", "Failed", "Done", "Cancelled", "Replaced", "Expired",
+] as const;
 
 export type Task = {
   id: string;
@@ -21,6 +23,7 @@ export type Task = {
   updatedIso: string;
   status: string;
   instruction: string;
+  understood: string;
   about: string;
   actions: string[];
   summary: string;
@@ -60,6 +63,7 @@ export function rowsToTasks(values: unknown[][]): Task[] {
       updatedIso: utcToIso(cell(row, "Updated (UTC)")),
       status: cell(row, "Status") || "Running",
       instruction: cell(row, "Instruction"),
+      understood: cell(row, "Understood"),
       about: cell(row, "About"),
       actions: cell(row, "Actions").split("\n").map((s) => s.trim()).filter(Boolean),
       summary: cell(row, "Summary"),

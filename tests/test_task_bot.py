@@ -241,6 +241,15 @@ def ctx_file(tmp_path, monkeypatch):
     return make
 
 
+def approve(*changes):
+    """ctx_file kwargs for a run that carries out an approved plan."""
+    return {"mode": ta.EXECUTE, "approved": list(changes)}
+
+
+UNSUB = {"kind": "unsubscribe_newsletter", "email": JANE}
+CANCEL = {"kind": "cancel_subscription", "email": JANE}
+
+
 def test_find_emails_and_clean_email():
     assert ta.find_emails("Write to <Jane.Doe@Example.com>, or mailto:bob@mail.example.co.uk. Not a@b") == [
         JANE, "bob@mail.example.co.uk"]
@@ -345,9 +354,9 @@ def fake_stripe(monkeypatch):
 
 
 def test_cancel_sets_period_end_cancellation_and_records_it(ctx_file, fake_stripe):
-    ctx_file()
+    ctx_file(**approve({**CANCEL, "subscription_id": "sub_1"}))
     stripe, _ = fake_stripe
-    out = ta.tool_cancel_subscription(email=JANE.upper())
+    out = ta.tool_cancel_subscription(email=JANE.upper(), subscription_id="sub_1")
     assert out["result"] == "cancelled_at_period_end" and out["access_until"] == "2025-12-03"
     assert stripe.Subscription.modified == [("sub_1", {"cancel_at_period_end": True})]
     ctx = ta.load_context()
@@ -357,7 +366,7 @@ def test_cancel_sets_period_end_cancellation_and_records_it(ctx_file, fake_strip
 
 
 def test_cancel_refuses_out_of_scope_and_foreign_subscription_ids(ctx_file, fake_stripe):
-    ctx_file()
+    ctx_file(**approve(CANCEL, {**CANCEL, "subscription_id": "sub_someone_else"}))
     stripe, _ = fake_stripe
     assert "refused" in ta.tool_cancel_subscription(email="victim@example.com")
     assert "refused" in ta.tool_cancel_subscription(email=JANE, subscription_id="sub_someone_else")
@@ -366,7 +375,7 @@ def test_cancel_refuses_out_of_scope_and_foreign_subscription_ids(ctx_file, fake
 
 
 def test_cancel_changes_nothing_when_ambiguous_missing_or_already_cancelling(ctx_file, fake_stripe):
-    ctx_file()
+    ctx_file(**approve(CANCEL, CANCEL, CANCEL, {**CANCEL, "subscription_id": "sub_2"}))
     stripe, subs = fake_stripe
     subs["list"] = [ta.describe_subscription(stripe_sub(id="sub_1"), "A"), ta.describe_subscription(stripe_sub(id="sub_2"), "B")]
     assert ta.tool_cancel_subscription(email=JANE)["result"] == "several_live_subscriptions"
@@ -383,7 +392,7 @@ def test_cancel_changes_nothing_when_ambiguous_missing_or_already_cancelling(ctx
 
 
 def test_cancel_dry_run_never_calls_stripe(ctx_file, fake_stripe):
-    ctx_file(dry_run=True)
+    ctx_file(dry_run=True, **approve(CANCEL))
     stripe, _ = fake_stripe
     out = ta.tool_cancel_subscription(email=JANE)
     assert out["dry_run"] is True and out["access_until_text"] == "December 3, 2025"
@@ -416,14 +425,14 @@ def fake_beehiiv(monkeypatch):
 
 
 def test_unsubscribe_puts_the_flag_and_confirms_by_reading_back(ctx_file, fake_beehiiv):
-    ctx_file()
+    ctx_file(**approve(UNSUB))
     assert ta.tool_unsubscribe_newsletter(email=JANE) == {"result": "unsubscribed", "status_after": "inactive"}
     assert fake_beehiiv["puts"] == [("PUT", "https://api.example/subs/sub_abc", {"unsubscribe": True})]
     assert "confirmed" in ta.load_context()["actions"][0]["text"]
 
 
 def test_unsubscribe_reports_unconfirmed_missing_and_already_out(ctx_file, fake_beehiiv):
-    ctx_file()
+    ctx_file(**approve(UNSUB, UNSUB, UNSUB, {**UNSUB, "email": "victim@example.com"}))
     fake_beehiiv["after"] = "active"                        # beehiiv said OK but nothing changed
     out = ta.tool_unsubscribe_newsletter(email=JANE)
     assert out["result"] == "not_confirmed"
@@ -437,7 +446,7 @@ def test_unsubscribe_reports_unconfirmed_missing_and_already_out(ctx_file, fake_
 
 
 def test_unsubscribe_dry_run_changes_nothing(ctx_file, fake_beehiiv):
-    ctx_file(dry_run=True)
+    ctx_file(dry_run=True, **approve(UNSUB))
     assert ta.tool_unsubscribe_newsletter(email=JANE)["dry_run"] is True
     assert fake_beehiiv["puts"] == []
 
@@ -479,7 +488,7 @@ def test_finish_records_a_valid_outcome_only(ctx_file):
     assert "refused" in ta.tool_finish(status="great")
     assert ta.tool_finish(status="Needs_You", about="Jane <j@x.com>", summary="Two subscriptions \u2014 which?") == {"saved": True}
     assert ta.load_context()["outcome"] == {"status": "needs_you", "about": "Jane <j@x.com>",
-                                            "summary": "Two subscriptions, which?"}
+                                            "summary": "Two subscriptions, which?", "understood": ""}
 
 
 def test_tool_mode_dispatch_prints_json(ctx_file, monkeypatch, capsys):
@@ -557,7 +566,8 @@ def wired(monkeypatch):
     ]
     monkeypatch.setattr(tb, "thread_of", lambda svc, tid: thread)
     monkeypatch.setattr(tb, "modify_labels", lambda svc, mid, add=(), remove=(): calls["labels"].append((mid, list(add), list(remove))))
-    monkeypatch.setattr(tb, "send_report", lambda svc, item, body, label: calls["reports"].append(body))
+    monkeypatch.setattr(tb, "send_report", lambda svc, item, body, label, plan=None: calls["reports"].append(body)
+                        or calls.setdefault("plans", []).append(plan))
     return thread, calls
 
 
@@ -720,3 +730,283 @@ def test_tasklog_upsert_appends_new_and_updates_existing_as_raw_text(monkeypatch
     kind, kw = svc.calls[1]
     assert kind == "update" and kw["range"] == "Tasks!A2:E2" and kw["valueInputOption"] == "RAW"
     assert kw["body"]["values"] == [["1", "Failed", "first", "2026-11-18 12:00:00", "m1"]]   # other cells kept
+
+
+# --- confirm first: the approval gate (task_actions) ------------------------------------------------
+def test_change_tools_refuse_everything_in_plan_mode(ctx_file, fake_beehiiv, fake_stripe):
+    ctx_file()                                                     # a new task is always plan mode
+    assert "refused" in ta.tool_unsubscribe_newsletter(email=JANE)
+    assert "refused" in ta.tool_cancel_subscription(email=JANE, subscription_id="sub_1")
+    assert "refused" in ta.tool_refund_payment(email=JANE, charge_id="ch_1", amount_cents=900)
+    assert fake_beehiiv["puts"] == [] and fake_stripe[0].Subscription.modified == []
+    assert ta.load_context()["actions"] == []
+
+
+def test_require_approved_matches_normalised_and_consumes_each_item_once(ctx_file):
+    ctx_file(**approve({"kind": "refund_payment", "email": JANE, "charge_id": "ch_1", "amount_cents": 4500}))
+    ctx = ta.load_context()
+    with pytest.raises(ta.Refused, match="not in the plan"):
+        ta.require_approved(ctx, "refund_payment", email=JANE, charge_id="ch_1", amount_cents=4501)
+    with pytest.raises(ta.Refused, match="not in the plan"):
+        ta.require_approved(ctx, "unsubscribe_newsletter", email=JANE)
+    item = ta.require_approved(ctx, "refund_payment", email=JANE.upper(), charge_id="ch_1", amount_cents="4500")
+    assert item["done"] is True
+    with pytest.raises(ta.Refused):                                # the same yes cannot be spent twice
+        ta.require_approved(ctx, "refund_payment", email=JANE, charge_id="ch_1", amount_cents=4500)
+
+
+# By hand: 4500 paid, 1500 already refunded -> 3000 refundable; Dec 3 2025 as in the subscription tests.
+def charge(**over):
+    ch = {"id": "ch_1", "amount": 4500, "amount_refunded": 1500, "currency": "usd", "status": "succeeded",
+          "created": DEC_3_2025, "description": "CT Plus - Navigator", "disputed": False}
+    ch.update(over)
+    return ch
+
+
+def test_money_and_describe_charge_by_hand():
+    assert ta.money(9900) == "$99" and ta.money(950) == "$9.50" and ta.money(2000, "eur") == "20.00 EUR"
+    d = ta.describe_charge(charge())
+    assert (d["amount"], d["refundable_cents"], d["date_text"]) == ("$45", 3000, "December 3, 2025")
+    assert ta.describe_charge(charge(status="failed"))["refundable_cents"] == 0
+    assert ta.describe_charge(charge(disputed=True))["refundable_cents"] == 0
+    assert ta.describe_charge(charge(amount_refunded=4500))["refundable_cents"] == 0
+
+
+class _Listing:
+    def __init__(self, data):
+        self.data = data
+
+
+def test_stripe_charges_merges_customer_and_guest_payments_newest_first(monkeypatch):
+    class FakeStripe:
+        class Charge:
+            @staticmethod
+            def list(customer, limit):
+                return _Listing([charge(id="ch_old", created=DEC_3_2025 - 86400)])
+
+        class checkout:
+            class Session:
+                @staticmethod
+                def list(**kw):
+                    assert kw["customer_details"] == {"email": JANE}
+                    guest = {"customer_details": {"email": JANE},
+                             "payment_intent": {"latest_charge": charge(id="ch_pdf", amount=900, amount_refunded=0)}}
+                    other = {"customer_details": {"email": "someone@else.example"},
+                             "payment_intent": {"latest_charge": charge(id="ch_foreign")}}
+                    return _Listing([guest, other])
+    monkeypatch.setattr(ta, "stripe_customers", lambda stripe, email: [{"id": "cus_1"}])
+    out = ta.stripe_charges(FakeStripe, JANE)
+    assert [c["charge_id"] for c in out] == ["ch_pdf", "ch_old"]       # the foreign session is ignored
+    assert "_created" not in out[0]
+
+
+@pytest.fixture
+def fake_refunds(monkeypatch):
+    calls = []
+
+    class Refund:
+        @staticmethod
+        def create(**kw):
+            calls.append(kw)
+            return {"id": "re_1", "status": "succeeded"}
+
+    class Stripe:
+        pass
+    Stripe.Refund = Refund
+    monkeypatch.setattr(ta, "_stripe", lambda write=False: Stripe)
+    monkeypatch.setattr(ta, "stripe_charges", lambda s, email: [ta.describe_charge(charge())])
+    return calls
+
+
+REFUND = {"kind": "refund_payment", "email": JANE, "charge_id": "ch_1", "amount_cents": 3000}
+
+
+def test_refund_makes_exactly_the_approved_refund_once(ctx_file, fake_refunds):
+    ctx_file(task_id="m7", **approve(REFUND))
+    assert ta.tool_refund_payment(email=JANE, charge_id="ch_1", amount_cents=3000)["result"] == "refunded"
+    assert fake_refunds == [{"charge": "ch_1", "amount": 3000, "reason": "requested_by_customer",
+                             "metadata": {"source": "task_bot", "task": "m7"},
+                             "idempotency_key": "taskbot-m7-ch_1-3000"}]
+    ctx = ta.load_context()
+    assert ctx["actions"][0]["changed"] is True and "refunded $30 of the $45 payment of December 3, 2025" in ctx["actions"][0]["text"]
+    assert "refused" in ta.tool_refund_payment(email=JANE, charge_id="ch_1", amount_cents=3000)   # consumed
+    assert len(fake_refunds) == 1
+
+
+def test_refund_never_exceeds_what_is_left_and_dry_run_pays_nothing(ctx_file, fake_refunds):
+    ctx_file(**approve({**REFUND, "amount_cents": 4500}))            # approved, but $15 was refunded since
+    assert ta.tool_refund_payment(email=JANE, charge_id="ch_1", amount_cents=4500)["result"] == "not_refundable"
+    assert ta.load_context()["actions"][0]["problem"] is True and fake_refunds == []
+    ctx_file(dry_run=True, **approve(REFUND))
+    assert ta.tool_refund_payment(**{k: REFUND[k] for k in ("email", "charge_id", "amount_cents")})["dry_run"] is True
+    assert fake_refunds == []
+
+
+# --- confirm first: propose_changes ---------------------------------------------------------------
+def test_propose_checks_each_change_against_live_data(ctx_file, fake_beehiiv, fake_stripe, fake_refunds):
+    ctx_file()
+    out = ta.tool_propose_changes(changes=[
+        {"action": "unsubscribe_newsletter", "email": JANE},
+        {"action": "cancel_subscription", "email": JANE},                 # the only live one is picked
+        {"action": "refund_payment", "email": JANE, "charge_id": "ch_1"},  # amount = what is refundable
+        {"action": "unsubscribe_newsletter", "email": JANE.upper()}],      # duplicate, kept once
+        drafts=[{"to": JANE, "purpose": "tell her it is done"}])
+    assert out["saved"] is True and len(out["plan"]) == 3
+    plan = ta.load_context()["plan"]
+    assert plan[1] == {"kind": "cancel_subscription", "email": JANE, "subscription_id": "sub_1",
+                       "text": f"Set CT Plus - Navigator ($99/month) for {JANE} to cancel at the end of the billing "
+                               "period, December 3, 2025: no further charges, access until then."}
+    assert plan[2]["amount_cents"] == 3000 and plan[2]["text"].startswith("Refund $30 of the $45 payment")
+    assert ta.load_context()["drafts_plan"] == [{"to": JANE, "purpose": "tell her it is done"}]
+    assert fake_beehiiv["puts"] == [] and fake_refunds == [] and fake_stripe[0].Subscription.modified == []
+
+
+def test_propose_rejects_invalid_out_of_scope_and_execute_mode(ctx_file, fake_beehiiv, fake_stripe, fake_refunds):
+    ctx_file()
+    fake_beehiiv["sub"]["status"] = "inactive"
+    assert "already unsubscribed" in ta.tool_propose_changes(changes=[{"action": "unsubscribe_newsletter", "email": JANE}])["invalid"]
+    assert "invalid" in ta.tool_propose_changes(changes=[{"action": "refund_payment", "email": JANE, "charge_id": "ch_1", "amount_cents": 3001}])
+    assert "invalid" in ta.tool_propose_changes(changes=[{"action": "delete_customer", "email": JANE}])
+    assert "invalid" in ta.tool_propose_changes(changes=[])
+    assert "refused" in ta.tool_propose_changes(changes=[{"action": "refund_payment", "email": "victim@example.com", "charge_id": "ch_1"}])
+    assert "refused" in ta.tool_propose_changes(changes=[{"action": "cancel_subscription", "email": JANE}],
+                                                drafts=[{"to": "press@newspaper.example", "purpose": "x"}])
+    ctx = ta.load_context()
+    assert ctx["plan"] == [] and [r["tool"] for r in ctx["refusals"]] == ["propose_changes", "propose_changes"]
+    ctx_file(**approve(UNSUB))
+    assert "refused" in ta.tool_propose_changes(changes=[{"action": "unsubscribe_newsletter", "email": JANE}])
+
+
+# --- confirm first: the plan in the thread and Igor's answer (task_bot) -----------------------------
+@pytest.mark.parametrize("text,kind", [
+    ("yes", "approve"), ("Yes!", "approve"), ("ok, go ahead", "approve"), ("Sim, pode", "approve"),
+    ("do it please", "approve"), ("yes\n\nSent from my iPhone", "approve"), ("looks good, go", "approve"),
+    ("no", "reject"), ("No thanks", "reject"), ("don't do it", "reject"), ("cancel that", "reject"),
+    ("yes but only refund $20", "other"), ("not yet", "other"), ("ok, and also unsubscribe her", "other"),
+    ("", "other"), ("yes " * 13, "other")])
+def test_reply_kind(text, kind):
+    assert tb.reply_kind(text) == kind
+
+
+def test_plan_header_round_trip_and_garbage():
+    plan = {"task_key": "m1", "changes": [{"kind": "refund_payment", "email": JANE, "charge_id": "ch_1",
+                                           "amount_cents": 3000, "text": "x" * 500}], "drafts": []}
+    value = tb.encode_plan(plan)
+    assert max(len(w) for w in value.split(" ")) <= 76                 # folds into legal header lines
+    assert tb.decode_plan(value) == plan
+    assert tb.decode_plan("not base64 at all!") is None
+    assert tb.decode_plan(tb.encode_plan({**plan, "changes": [{"kind": "delete_everything"}]})) is None
+    assert tb.decode_plan(tb.encode_plan({"changes": []})) is None
+
+
+def plan_msg(mid, internal, plan, labels=("SENT",)):
+    headers = {"To": TASK, "Subject": "Re: x", tb.BOT_HEADER: "plan"}
+    if plan is not None:
+        headers[tb.PLAN_HEADER] = tb.encode_plan(plan)
+    return gmail_msg(mid, list(labels), headers, "plan text", internal=internal)
+
+
+PLAN = {"task_key": "m1", "changes": [{**UNSUB, "text": f"Unsubscribe {JANE}."}], "drafts": []}
+
+
+def test_pending_plan_trusts_only_the_bots_latest_sent_reply_within_the_ttl():
+    yes = tb.parse_task(gmail_msg("m3", ["SENT"], {"To": TASK, "Subject": "Re: x"}, "yes", internal=3000))
+    assert tb.pending_plan([plan_msg("r1", 2000, PLAN)], yes) == PLAN
+    # a stranger's message with the bot headers (no SENT label) never counts
+    assert tb.pending_plan([plan_msg("r1", 2000, PLAN, labels=("INBOX",))], yes) is None
+    # carried out or replaced since: the latest bot reply has no plan
+    assert tb.pending_plan([plan_msg("r1", 2000, PLAN), plan_msg("r2", 2500, None)], yes) is None
+    late = dict(yes, received_ms=2000 + tb.PLAN_TTL_DAYS * 86_400_000 + 1)
+    assert tb.pending_plan([plan_msg("r1", 2000, PLAN)], late) is None
+
+
+@pytest.fixture
+def plan_thread(wired):
+    thread, calls = wired
+    thread.append(plan_msg("r1", 300, PLAN))
+    return thread, calls
+
+
+def answer(text, mid="m3"):
+    return gmail_msg(mid, ["SENT"], {"To": TASK, "Subject": "Re: Fwd: please unsubscribe me", "Message-ID": f"<{mid}@x>"},
+                     f"{text}\n\nOn Tue, Nov 17, 2026 at 3:04 PM Claude Tasks wrote:\n> plan text", internal=400)
+
+
+def test_yes_carries_out_exactly_the_plan_in_code_and_updates_the_plans_row(plan_thread, fake_beehiiv, monkeypatch):
+    thread, calls = plan_thread
+    msg = answer("Yes, go ahead")
+    thread.append(msg)
+    monkeypatch.setattr(tb, "run_model", lambda *a: pytest.fail("no drafts planned: the model must not run"))
+    log = FakeLog()
+    status = tb.process(object(), msg, {tb.LABEL_TAKEN: "L1", tb.LABEL_DRAFTS: "L2"}, log, [], dry_run=False)
+    assert status == tl.DONE
+    assert fake_beehiiv["puts"] == [("PUT", "https://api.example/subs/sub_abc", {"unsubscribe": True})]
+    assert list(log.rows) == ["m1"] and log.rows["m1"]["Status"] == tl.DONE      # the plan's row, no new one
+    assert "unsubscribed from the newsletter (confirmed)" in log.rows["m1"]["Actions"]
+    assert calls["plans"] == [None]                                  # the report carries no new plan
+
+
+def test_no_drops_the_plan_without_running_anything(plan_thread, fake_beehiiv, monkeypatch):
+    thread, calls = plan_thread
+    msg = answer("no thanks")
+    thread.append(msg)
+    monkeypatch.setattr(tb, "run_model", lambda *a: pytest.fail("the model must not run"))
+    log = FakeLog()
+    assert tb.process(object(), msg, {tb.LABEL_TAKEN: "L1", tb.LABEL_DRAFTS: "L2"}, log, [], dry_run=False) == tl.CANCELLED
+    assert fake_beehiiv["puts"] == [] and log.rows["m1"]["Status"] == tl.CANCELLED
+    assert "Nothing was changed" in calls["reports"][0]
+
+
+def test_a_correction_replaces_the_plan_with_a_new_one(plan_thread, monkeypatch):
+    thread, calls = plan_thread
+    msg = answer("yes but use jane@other.example instead")
+    thread.append(msg)
+
+    def model(system, user):
+        assert "NOTHING IS CHANGED BEFORE IGOR SAYS YES" in system
+        ctx = ta.load_context()
+        assert ctx["mode"] == ta.PLAN
+        ctx["plan"] = [{"kind": "unsubscribe_newsletter", "email": "jane@other.example", "text": "Unsubscribe jane@other.example."}]
+        ctx["outcome"] = {"status": "done", "understood": "You want the other address unsubscribed.", "about": "", "summary": "Plan sent."}
+        ta.save_context(ctx)
+        return "Found her under the other address."
+
+    monkeypatch.setattr(tb, "run_model", model)
+    monkeypatch.setattr(tb, "data_tools", lambda: ([], {}))
+    monkeypatch.setattr(tb, "background", lambda: "")
+    log = FakeLog()
+    status = tb.process(object(), msg, {tb.LABEL_TAKEN: "L1", tb.LABEL_DRAFTS: "L2"}, log, [], dry_run=False)
+    assert status == tl.AWAITING
+    assert log.rows["m1"]["Status"] == tl.REPLACED and log.rows["m3"]["Status"] == tl.AWAITING
+    assert log.rows["m3"]["Understood"] == "You want the other address unsubscribed."
+    assert calls["plans"][0]["task_key"] == "m3" and calls["plans"][0]["changes"][0]["email"] == "jane@other.example"
+    report = calls["reports"][0]
+    assert report.startswith("What I understood: You want the other address unsubscribed.")
+    assert '1. Unsubscribe jane@other.example.' in report and "Nothing has been changed yet." in report
+
+
+def test_derive_status_and_report_for_a_plan():
+    ctx = {"mode": ta.PLAN, "plan": [{"text": "Refund $30."}], "drafts_plan": [{"to": JANE, "purpose": "say so"}],
+           "actions": [], "outcome": {"status": "done", "understood": "Refund Jane."}}
+    assert tb.derive_status(ctx) == tl.AWAITING
+    assert tb.derive_status({**ctx, "mode": ta.EXECUTE, "outcome": {"status": "done"}}) != tl.AWAITING
+    text = tb.format_report("", ctx, tl.AWAITING, "4")
+    assert f"1. Refund $30.\n2. Then leave a draft to {JANE} for you to send: say so" in text
+    assert "What was done" not in text and "Status: Awaiting your OK | Task #4" in text
+
+
+def test_expired_plans_and_missing_columns():
+    now = datetime(2026, 11, 20, 12, 0, 0, tzinfo=timezone.utc)
+    rec = {"Status": tl.AWAITING, "Updated (UTC)": "2026-11-12 11:59:59"}
+    assert tl.is_expired_plan(rec, now, 7) is True
+    assert tl.is_expired_plan({**rec, "Updated (UTC)": "2026-11-14 00:00:00"}, now, 7) is False
+    assert tl.is_expired_plan({**rec, "Status": tl.DONE}, now, 7) is False
+    assert tl.missing_columns(tl.COLUMNS[:-1]) == ["Understood"] and tl.missing_columns(tl.COLUMNS) == []
+
+
+def test_tool_mode_reaches_the_advisor_data_tools(ctx_file, monkeypatch, capsys):
+    ctx_file()
+    monkeypatch.setattr(tb, "data_tools", lambda: ([], {"beehiiv_metrics": lambda **kw: {"subs": 1, **kw}}))
+    monkeypatch.setattr(tb.sys, "argv", ["task_bot.py", "--tool", "beehiiv_metrics", '{"start": "2026-11-01"}'])
+    assert tb.main() == 0
+    assert json.loads(capsys.readouterr().out) == {"subs": 1, "start": "2026-11-01"}

@@ -13,7 +13,7 @@ import {
 
 // The header as task_log.py writes it (COLUMNS).
 const HEADER = ["Task", "Received (UTC)", "Status", "Instruction", "About", "Actions", "Summary", "Drafts",
-  "Updated (UTC)", "Thread", "Message ID", "Draft data"];
+  "Updated (UTC)", "Thread", "Message ID", "Draft data", "Understood"];
 const GMAIL = "https://mail.google.com/mail/?authuser=x@example.com#all/abc";
 
 test("utcToIso converts the sheet's UTC stamp and rejects anything else", () => {
@@ -60,6 +60,14 @@ test("rowsToTasks follows the header when the sheet's columns are reordered", ()
   assert.equal(t.number, "9");
   assert.equal(t.instruction, "which one?");
   assert.equal(t.about, "");
+  assert.equal(t.understood, "");                             // a sheet made before the column existed
+});
+
+test("the Understood column and the confirm-first statuses", () => {
+  const [t] = rowsToTasks([["Message ID", "Status", "Understood"], ["m1", "Awaiting your OK", "You want Jane refunded."]]);
+  assert.equal(t.understood, "You want Jane refunded.");
+  const tasks = rowsToTasks([["Message ID", "Status"], ["a", "Done"], ["b", "Awaiting your OK"], ["c", "Cancelled"], ["d", "Needs you"]]);
+  assert.deepEqual(statusesPresent(tasks), ["Awaiting your OK", "Needs you", "Done", "Cancelled"]);
 });
 
 test("countByStatus and statusesPresent order what needs Igor first", () => {

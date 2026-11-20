@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { OverviewTab } from "./overview-tab";
 import { ChannelsTab } from "./channels-tab";
 import { MonetizationTab } from "./monetization-tab";
 import { FunnelTab } from "./funnel-tab";
 import { PersonasTab } from "./personas-tab";
 import { FlowTab } from "./flow-tab";
+import { TasksTab } from "./tasks-tab";
 import { presetLabel } from "@/lib/format";
 import { buildCustomPeriod } from "@/lib/aggregate";
 import { describeErrors } from "@/lib/normalize";
@@ -16,7 +17,7 @@ interface Props {
   snapshot: Snapshot;
 }
 
-type TabKey = "overview" | "funnel" | "flow" | "channels" | "monetization" | "personas";
+type TabKey = "overview" | "funnel" | "flow" | "channels" | "monetization" | "personas" | "tasks";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Overview" },
@@ -25,6 +26,7 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "channels", label: "Modules by Channel" },
   { key: "monetization", label: "Monetization" },
   { key: "personas", label: "Personas" },
+  { key: "tasks", label: "Tasks" },
 ];
 
 const PRESETS: PresetKey[] = ["7d", "30d", "90d", "thisMonth", "yearToDate", "custom"];
@@ -40,7 +42,17 @@ export function Dashboard({ snapshot }: Props) {
   });
   const [customEnd, setCustomEnd] = useState<string>(snapshot.today);
 
-  const [tab, setTab] = useState<TabKey>("overview");
+  const [tab, setTabState] = useState<TabKey>("overview");
+  // The URL hash names the tab (#tasks is the link in the task bot's emails), so a tab can be linked to.
+  const setTab = (key: TabKey) => {
+    setTabState(key);
+    history.replaceState(null, "", key === "overview" ? location.pathname : `#${key}`);
+  };
+  useEffect(() => {
+    const fromHash = location.hash.slice(1) as TabKey;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- read the hash once, after hydration
+    if (TABS.some((t) => t.key === fromHash)) setTabState(fromHash);
+  }, []);
 
   // Derive the active period
   const period: PeriodEntry = useMemo(() => {
@@ -175,6 +187,7 @@ export function Dashboard({ snapshot }: Props) {
         {tab === "channels" && <ChannelsTab period={period} />}
         {tab === "monetization" && <MonetizationTab snapshot={snapshot} period={period} />}
         {tab === "personas" && <PersonasTab />}
+        {tab === "tasks" && <TasksTab />}
       </main>
 
       <footer className="max-w-7xl mx-auto px-6 pt-2 pb-10 text-xs text-zinc-500 dark:text-zinc-400">

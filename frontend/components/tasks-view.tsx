@@ -1,8 +1,10 @@
 "use client";
 
 // The task log as Igor reads it on his phone: what needs him first, then everything else,
-// newest first. Data arrives from the server component (app/tasks/page.tsx); this file only
-// filters, formats times in the browser's timezone and refreshes once a minute.
+// newest first. Two hosts: the /tasks page (server component, refreshes with router.refresh) and
+// the dashboard's Tasks tab (components/tasks-tab.tsx, passes onRefresh / onSignOut and
+// `embedded`). This file only filters, formats times in the browser's timezone and refreshes
+// once a minute.
 // Type-only import on purpose: lib/tasks.ts uses node:crypto and must stay out of the browser.
 
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -15,9 +17,13 @@ interface Props {
   statuses: string[]; // the statuses present, in display order
   error: string;
   loadedIso: string;
+  embedded?: boolean; // inside the dashboard: no page chrome
+  onRefresh?: () => void; // default: router.refresh() (the /tasks page)
+  onSignOut?: () => void; // default: the logout form posting to /api/tasks-login
 }
 
 const PILL: Record<string, string> = {
+  "Awaiting your OK": "bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-200",
   "Needs you": "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
   "Drafts waiting": "bg-blue-100 text-blue-900 dark:bg-blue-950 dark:text-blue-200",
   Running: "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200",
@@ -27,6 +33,8 @@ const PILL: Record<string, string> = {
 const PILL_OTHER = "bg-zinc-200 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200";
 
 const HINT: Record<string, string> = {
+  "Awaiting your OK": "Nothing changed yet. Reply \"yes\" in the Gmail thread to go ahead, \"no\" to drop it.",
+  Expired: "Not approved within 7 days, nothing changed. Reply in the thread to start again.",
   "Needs you": "The bot stopped to ask you something. Reply in the Gmail thread.",
   "Drafts waiting": "Changes are made. Emails are in your Gmail drafts for you to send.",
   Running: "Being worked on right now.",
@@ -70,6 +78,12 @@ function TaskCard({ task }: { task: Task }) {
         </button>
       )}
 
+      {task.understood && (
+        <p className="mt-2 break-words text-sm text-zinc-700 dark:text-zinc-300">
+          <span className="text-zinc-500">Understood </span>{task.understood}
+        </p>
+      )}
+
       {task.about && (
         <p className="mt-2 break-words text-sm text-zinc-600 dark:text-zinc-400">
           <span className="text-zinc-500">About </span>{task.about}
@@ -98,17 +112,18 @@ function TaskCard({ task }: { task: Task }) {
   );
 }
 
-export function TasksView({ tasks, statuses, error, loadedIso }: Props) {
+export function TasksView({ tasks, statuses, error, loadedIso, embedded = false, onRefresh, onSignOut }: Props) {
   const router = useRouter();
   const [filter, setFilter] = useState<string>("All");
+  const refresh = onRefresh ?? router.refresh;
 
   // Fresh data once a minute while the page is on screen (one Sheets read per refresh).
   useEffect(() => {
     const id = setInterval(() => {
-      if (document.visibilityState === "visible") router.refresh();
+      if (document.visibilityState === "visible") refresh();
     }, 60_000);
     return () => clearInterval(id);
-  }, [router]);
+  }, [refresh]);
 
   const count = (status: string) => tasks.filter((t) => t.status === status).length;
   const active = filter !== "All" && !statuses.includes(filter) ? "All" : filter;
@@ -116,24 +131,28 @@ export function TasksView({ tasks, statuses, error, loadedIso }: Props) {
   const chips = [{ label: "All", n: tasks.length }, ...statuses.map((s) => ({ label: s, n: count(s) }))];
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:py-10">
+    <main className={embedded ? "mx-auto w-full max-w-3xl" : "mx-auto w-full max-w-3xl px-4 py-6 sm:py-10"}>
       <header className="flex flex-wrap items-end gap-x-4 gap-y-2">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Claude tasks</h1>
+          <h1 className={embedded ? "text-lg font-semibold" : "text-2xl font-semibold tracking-tight"}>Claude tasks</h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Everything you have emailed to the task bot, newest first.
+            Everything you have emailed to your +claude address, newest first.
           </p>
         </div>
         <div className="ml-auto flex items-center gap-3 text-xs text-zinc-500">
           <span>Updated <LocalTime iso={loadedIso} timeOnly /></span>
-          <button type="button" onClick={() => router.refresh()}
+          <button type="button" onClick={() => refresh()}
             className="rounded-lg border border-zinc-300 px-2.5 py-1 font-medium text-zinc-800 dark:border-zinc-700 dark:text-zinc-200">
             Refresh
           </button>
-          <form method="post" action="/api/tasks-login">
-            <input type="hidden" name="logout" value="1" />
-            <button type="submit" className="underline">Sign out</button>
-          </form>
+          {onSignOut ? (
+            <button type="button" onClick={onSignOut} className="underline">Sign out</button>
+          ) : (
+            <form method="post" action="/api/tasks-login">
+              <input type="hidden" name="logout" value="1" />
+              <button type="submit" className="underline">Sign out</button>
+            </form>
+          )}
         </div>
       </header>
 
