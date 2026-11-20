@@ -178,6 +178,19 @@ def notes(dp: dict, xc: dict) -> dict:
         f"unsubscribe date to take them out by month. Most of them left from August onward, so those months' net "
         f"change is understated by up to that many in total.")
 
+    flows = {f["month"]: f for f in dp["steady_flow"]}
+    calm_flow = [f for k, f in flows.items() if "2026-02" <= k <= "2026-07"]
+    flow_note = (
+        "What the list does with no viral study, no partner batch and no launch: organic sign-ups (the kept "
+        "subscribers minus the Leaf batches and the Unique Traits launch days, Mar 23-26) plus every ad sign-up, minus "
+        f"all unsubscribes. From February to July the net without ads runs "
+        f"{n(min(f['net_without_ads'] for f in calm_flow))} to {n(max(f['net_without_ads'] for f in calm_flow))} a month; "
+        f"with ads it is {n(min(f['net_with_ads'] for f in calm_flow))} to {n(max(f['net_with_ads'] for f in calm_flow))}, "
+        f"positive only in the months ads brought 2,000 or more. August to October are not comparable: their "
+        f"unsubscribes include tens of thousands of study joiners leaving, whose sign-ups are not counted here. "
+        f"August's organic figure also holds about {hundreds(aug['excess'])} from the viral wave. "
+        f"≈ marks the months whose ad figure includes the estimate.")
+
     deletions = (
         "<div class='callout'><p><b>Deletions: no bulk deletion found.</b> beehiiv keeps no record of deleted subscribers "
         "(a deleted person disappears from the API and from every report), so there is no figure to read off. I looked "
@@ -269,6 +282,7 @@ def notes(dp: dict, xc: dict) -> dict:
         "list_note": list_note,
         "deletions": deletions,
         "net_note": net_note,
+        "flow_note": flow_note,
         "route_note": route_note,
         "ads_note": ads_note,
         "sections": sections,

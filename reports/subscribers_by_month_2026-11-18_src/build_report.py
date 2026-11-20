@@ -235,6 +235,13 @@ def build(dp: dict, xc: dict, notes: dict) -> str:
     net_table = table(["Month", "New subscribers (beehiiv)", "Manual imports taken out", "New subscribers without imports",
                        "Unsubscribed", "Net change"], net_rows, net_total, note_cols=(5,))
 
+    flows = dp["steady_flow"]
+    flow_rows = [[label(i, by_month[f["month"]]), approx(by_month[f["month"]], f["organic"]),
+                  approx(by_month[f["month"]], f["ads"]), dash(f["leaf"] + f["launch"]), n(f["unsubscribed"]),
+                  signed(f["net_without_ads"]), signed(f["net_with_ads"])] for i, f in enumerate(flows)]
+    flow_table = table(["Month", "Organic sign-ups", "Ad sign-ups", "One-offs left out (Leaf, launch)", "Unsubscribed",
+                        "Net without ads", "Net with ads"], flow_rows, None, note_cols=(6,))
+
     legend = "".join(f"<span><i style='background:var(--s{k})'></i>{html.escape(s[0])}</span>"
                      for k, s in enumerate(SERIES))
     tiles = "".join(f"<div class='tile'><div class='v'>{v}</div><div class='k'>{k}</div></div>" for v, k in notes["tiles"])
@@ -252,6 +259,7 @@ def build(dp: dict, xc: dict, notes: dict) -> str:
 {notes['callouts']}
 <h2>Unsubscribes and deletions per month (whole list)</h2>{list_table}{list_end}<p class="small">{notes['list_note']}</p>
 {notes['deletions']}
+<h2>Everyday flow: organic and ad sign-ups against unsubscribes</h2>{flow_table}<p class="small">{notes['flow_note']}</p>
 <h2>Net change from sign-ups and unsubscribes only (whole list)</h2>{net_table}<p class="small">{notes['net_note']}</p>
 <h2>Where the kept subscribers came from</h2>{route_table}<p class="small">{notes['route_note']}</p>
 <h2>What was counted as Ads</h2>{ads_table}<p class="small">{notes['ads_note']}</p>

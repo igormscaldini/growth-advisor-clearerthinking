@@ -455,6 +455,23 @@ def net_without_imports(rows, movement: list) -> list:
     return out
 
 
+def steady_flow(months: list, movement: list, launch: dict) -> list:
+    """Per month, the everyday flow against unsubscribes: organic = kept minus Leaf batches minus the
+    Unique Traits launch days (one-offs); ads = all ad sign-ups (tagged, partner and estimated). The study
+    and the Jan 1 backlog are out because `kept` already excludes them. Unsubscribes are the whole list's."""
+    unsub = {m["month"]: m["unsubscribed"] for m in movement}
+    launch_month = launch["first"][:7]
+    out = []
+    for m in months:
+        one_off_launch = launch.get("kept", 0) if m["month"] == launch_month else 0
+        organic = m["kept"] - m["buckets"][LEAF] - one_off_launch
+        gone = unsub[m["month"]]
+        out.append({"month": m["month"], "organic": organic, "ads": m["ads_all"], "leaf": m["buckets"][LEAF],
+                    "launch": one_off_launch, "unsubscribed": gone, "net_without_ads": organic - gone,
+                    "net_with_ads": organic + m["ads_all"] - gone, "estimated": m["estimated"]})
+    return out
+
+
 def recorded_vs_history(snapshots: list, anchors: dict, net_by_day: dict) -> list:
     """For each list size the dashboard recorded ({"generated_at", "active"}): what beehiiv's history says
     today the list was at that moment, and the gap between the two (recorded minus history). The moment
@@ -510,6 +527,7 @@ def context(rows) -> dict:
             leaf_days[day_of(row)] += 1
         if LAUNCH[0] <= created(row).date() <= LAUNCH[1]:
             launch["subscribers"] += 1
+            launch["kept"] += bucket(row) in INCLUDED and bucket(row) != LEAF
             launch["unique_traits_only"] += (row.get("cf") or {}).get(OLD_TOOLS_FIELD) == ["Unique Traits Test"]
     return {"leaf_batches": {d: n for d, n in sorted(leaf_days.items()) if n >= 100},
             "unique_traits_launch": {"first": str(LAUNCH[0]), "last": str(LAUNCH[1]), **launch}}
@@ -536,6 +554,7 @@ def main():
     net = {d: subscribed[d] - unsubscribed[d] for d in subscribed}
     result["list_movement"] = list_movement(subscribed, unsubscribed, anchors)
     result["net_without_imports"] = net_without_imports(rows, result["list_movement"])
+    result["steady_flow"] = steady_flow(result["months"], result["list_movement"], result["context"]["unique_traits_launch"])
     result["deletion_scan"] = deletion_scan(json.loads(DASHBOARD_HISTORY.read_text())["snapshots"], anchors, net)
     result["records_walked"] = len(rows)
     result["through"] = str((END - timedelta(days=1)).date())
@@ -550,6 +569,8 @@ def main():
     print("context:", result["context"])
     for lm in result["list_movement"]:
         print("list", lm)
+    for n in result["steady_flow"]:
+        print("steady flow", n)
     for n in result["net_without_imports"]:
         print("net without imports", n)
     print("deletion scan:", result["deletion_scan"])

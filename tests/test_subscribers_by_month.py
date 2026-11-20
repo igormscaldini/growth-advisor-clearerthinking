@@ -623,3 +623,15 @@ def test_net_without_imports_null_and_positive_worlds():
     for r in az.net_without_imports(rows, movement):
         assert r["manual_imports"] == planted.get(r["month"], 0)
         assert r["net"] == genuine[r["month"]] - gone[r["month"]]
+
+
+def test_steady_flow_by_hand():
+    # March: 9,000 kept, of which 500 Leaf and a 3,000 launch -> organic 5,500; ads 2,000; 7,000 gone.
+    # April: 6,000 kept, no one-offs; ads 0 (null world for ads: both nets equal).
+    def month(m, kept, leaf, ads):
+        return {"month": m, "kept": kept, "ads_all": ads, "estimated": False, "buckets": {az.LEAF: leaf}}
+    months = [month("2026-03", 9000, 500, 2000), month("2026-04", 6000, 0, 0)]
+    movement = [{"month": "2026-03", "unsubscribed": 7000}, {"month": "2026-04", "unsubscribed": 6500}]
+    mar, apr = az.steady_flow(months, movement, {"first": "2026-03-23", "kept": 3000})
+    assert (mar["organic"], mar["net_without_ads"], mar["net_with_ads"]) == (5500, -1500, 500)
+    assert (apr["organic"], apr["launch"], apr["net_without_ads"], apr["net_with_ads"]) == (6000, 0, -500, -500)
