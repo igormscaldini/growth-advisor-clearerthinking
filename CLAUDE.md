@@ -158,8 +158,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   shown server-rendered in the strip under every article, which otherwise lists the three NEWEST posts under the heading "Recent
   Posts"). `--plan` scores every pair (title + summary + headings blended with full text, TF-IDF) and spreads links (max 5 inbound,
   floor 0.10) into `reports/related_posts_plan.json`; `--preview` renders it; `--apply [--only <slug>]` PATCHes + publishes;
-  `--rollback` restores from `reports/related_posts_applied.json`. STATE: live on ONE test post (the-best-of-clearer-thinking-in-2024);
-  the rollout to 489 posts awaits Igor's go. Verified on that post: publishing a `relatedPostIds`-only change does NOT move
+  `--rollback` restores from `reports/related_posts_applied.json`. STATE: rolled out 2026-11-20 to 484 posts (5 had no match above the floor);
+  Verified on a test post: publishing a `relatedPostIds`-only change does NOT move
   `lastPublishedDate` or the page's "Updated:" label (a content republish does: the label is public). 127 posts (mostly 2015-2020)
   have `hasUnpublishedChanges` and must never be published from a script. An empty post titled "Test" is live at `/post/_test`.
 - `tests/` (pytest, `pytest.ini`): pure-function tests; run `.venv/bin/python -m pytest -q`.
