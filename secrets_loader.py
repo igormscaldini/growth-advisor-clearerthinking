@@ -34,6 +34,8 @@ _ENV_KEYS = (
 _FILE_KEYS = {
     "OAUTH_CLIENT_JSON": ("oauth-client.json", "GA4_OAUTH_CLIENT_FILE"),
     "GOOGLE_TOKEN_JSON": ("ga4-token.json", "GA4_TOKEN_FILE"),
+    # The task bot's own Drive login (drive.file only; auth_taskbot_google.py).
+    "TASKBOT_GOOGLE_TOKEN_JSON": ("taskbot-google-token.json", "TASKBOT_GOOGLE_TOKEN_FILE"),
 }
 
 
