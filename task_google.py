@@ -114,13 +114,19 @@ def clean_slides(slides) -> list[dict]:
     return out
 
 
+def slide_id(i: int) -> str:
+    """Google wants object ids of 5+ characters."""
+    return f"slide_{i}"
+
+
 def slide_requests(slides: list[dict], remove_id: str | None = None) -> list[dict]:
     """Slides API batchUpdate requests: one slide per entry from Google's standard layouts, text
     in the layout's own boxes, content bodies as bullets. `remove_id` = the blank slide a new
     presentation starts with."""
     reqs = []
     for i, s in enumerate(slides):
-        sid, tid, bid = f"s{i}", f"s{i}_title", f"s{i}_body"
+        sid = slide_id(i)
+        tid, bid = f"{sid}_title", f"{sid}_body"
         title_type = "CENTERED_TITLE" if s["layout"] == "title" else "TITLE"
         body_type = "SUBTITLE" if s["layout"] in ("title", "section") else "BODY"
         mappings = [{"layoutPlaceholder": {"type": title_type, "index": 0}, "objectId": tid}]
@@ -146,7 +152,7 @@ def notes_requests(presentation: dict, slides: list[dict]) -> list[dict]:
     by_id = {p["objectId"]: p for p in presentation.get("slides", [])}
     reqs = []
     for i, s in enumerate(slides):
-        page = by_id.get(f"s{i}")
+        page = by_id.get(slide_id(i))
         notes_id = (((page or {}).get("slideProperties") or {}).get("notesPage") or {}) \
             .get("notesProperties", {}).get("speakerNotesObjectId")
         if s["notes"] and notes_id:

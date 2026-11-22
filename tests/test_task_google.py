@@ -101,15 +101,15 @@ def test_slide_requests_worked_by_hand():
     first = reqs[0]["createSlide"]
     assert first["slideLayoutReference"] == {"predefinedLayout": "TITLE"}
     assert [m["layoutPlaceholder"]["type"] for m in first["placeholderIdMappings"]] == ["CENTERED_TITLE", "SUBTITLE"]
-    assert reqs[5] == {"insertText": {"objectId": "s1_body", "text": "a\nb"}}
-    assert [m["objectId"] for m in reqs[7]["createSlide"]["placeholderIdMappings"]] == ["s2_title"]
+    assert reqs[5] == {"insertText": {"objectId": "slide_1_body", "text": "a\nb"}}
+    assert [m["objectId"] for m in reqs[7]["createSlide"]["placeholderIdMappings"]] == ["slide_2_title"]
     assert reqs[-1] == {"deleteObject": {"objectId": "p"}}
 
 
 def test_notes_requests_use_each_slides_notes_box():
     slides = tg.clean_slides([{"title": "A", "notes": "first"}, {"title": "B"}, {"title": "C", "notes": "third"}])
-    pres = {"slides": [{"objectId": f"s{i}", "slideProperties": {"notesPage": {"notesProperties": {
-        "speakerNotesObjectId": f"n{i}"}}}} for i in range(2)]}          # s2 missing: skipped, no crash
+    pres = {"slides": [{"objectId": f"slide_{i}", "slideProperties": {"notesPage": {"notesProperties": {
+        "speakerNotesObjectId": f"n{i}"}}}} for i in range(2)]}          # slide_2 missing: skipped, no crash
     assert tg.notes_requests(pres, slides) == [{"insertText": {"objectId": "n0", "text": "first"}}]
 
 
