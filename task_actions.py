@@ -18,6 +18,9 @@ judgement for safety. The limits are enforced in code:
   * a refund is only ever made on a payment of that person, up to what is left unrefunded on it
     (Igor: no cap beyond the charge), with an idempotency key so a repeated run cannot pay twice.
     No immediate cancellations and no deletions exist here;
+  * Google Docs, Sheets and Slides are only ever CREATED, in a "Claude tasks" folder of Igor's
+    Drive, with a login that can touch nothing but the files it made, and never shared (his
+    choices, 2026-11-22; task_google.py). Like drafts, they need no yes: nothing leaves his account;
   * emails are never sent: draft_email leaves a Gmail draft for Igor to review and send
     (his choice, 2026-11-18), addressed only to those people, a contact from the task log's
     Contacts tab, or Igor himself;
@@ -52,7 +55,7 @@ BEEHIIV_BASE = "https://api.beehiiv.com/v2"
 
 # Per task (one emailed instruction). Small on purpose: a task is about one person, sometimes two.
 BUDGET = {"lookup_person": 8, "lookup_payments": 8, "unsubscribe_newsletter": 3, "cancel_subscription": 2,
-          "refund_payment": 3, "draft_email": 4}
+          "refund_payment": 3, "draft_email": 4, "create_doc": 3, "create_sheet": 3, "create_slides": 3}
 # The account changes. Each needs Igor's yes first; drafts do not (nothing leaves until he sends them).
 GATED = ("unsubscribe_newsletter", "cancel_subscription", "refund_payment")
 # The arguments that identify one change: what the plan stores and what the approval is matched on.
@@ -733,6 +736,63 @@ def tool_draft_email(ctx, to=None, subject=None, body=None, **_):
             "in_original_conversation": bool(thread_id)}
 
 
+def _create_file(ctx: dict, kind: str, label: str, title, build, make) -> dict:
+    """Shared path of the three file tools: check, spend the budget, create, record with the link."""
+    import task_google
+
+    title = clean_copy(str(title or "").strip())[:200]
+    if not title:
+        raise Refused(f"a {label} needs a title")
+    try:
+        content = build()
+    except task_google.BadInput as e:
+        raise Invalid(str(e)) from None
+    spend(ctx, kind)
+    if ctx["dry_run"]:
+        record(ctx, kind, f'{label} (dry run, not created): "{title}".', changed=False)
+        return {"result": "created", "dry_run": True}
+    made = make(title, content)
+    record(ctx, kind, f'{label} created in your Drive (folder "{task_google.FOLDER_NAME}"): "{title}" {made["url"]}',
+           changed=True, file={"kind": kind, "id": made["id"], "url": made["url"], "title": title})
+    return {"result": "created", "url": made["url"], "note": "Private to Igor; only he can share it."}
+
+
+@tool
+def tool_create_doc(ctx, title=None, content=None, **_):
+    import task_google
+
+    def build():
+        text = clean_copy(str(content or "")).strip()
+        if not text:
+            raise task_google.BadInput("the document has no content")
+        task_google.markdown_to_html("", text)   # checks the length and that it converts
+        return text
+
+    return _create_file(ctx, "create_doc", "Google Doc", title, build, task_google.create_doc)
+
+
+@tool
+def tool_create_sheet(ctx, title=None, tabs=None, **_):
+    import task_google
+
+    return _create_file(ctx, "create_sheet", "Google Sheet", title,
+                        lambda: task_google.clean_tabs(tabs), task_google.create_sheet)
+
+
+@tool
+def tool_create_slides(ctx, title=None, slides=None, **_):
+    import task_google
+
+    def build():
+        cleaned = task_google.clean_slides(slides)
+        for s in cleaned:
+            s["title"], s["notes"] = clean_copy(s["title"]), clean_copy(s["notes"])
+            s["body"] = [clean_copy(b) for b in s["body"]]
+        return cleaned
+
+    return _create_file(ctx, "create_slides", "Google Slides deck", title, build, task_google.create_slides)
+
+
 @tool
 def tool_finish(ctx, status=None, about=None, summary=None, understood=None, **_):
     status = str(status or "").strip().lower()
@@ -749,6 +809,9 @@ TOOL_FNS = {
     "lookup_payments": tool_lookup_payments,
     "propose_changes": tool_propose_changes,
     "draft_email": tool_draft_email,
+    "create_doc": tool_create_doc,
+    "create_sheet": tool_create_sheet,
+    "create_slides": tool_create_slides,
     "finish": tool_finish,
     # The change tools. Not in TOOLS (the model is never told about them): task_bot.py calls them
     # itself with the approved arguments, and require_approved refuses anything else.
@@ -797,6 +860,36 @@ TOOLS = [
             "to": {"type": "string", "description": "One recipient email address."},
             "subject": {"type": "string", "description": "Subject line."},
             "body": {"type": "string", "description": "Plain-text body, ready to send, signed as Igor."}}},
+    },
+    {
+        "name": "create_doc",
+        "description": "Create a NEW Google Doc in Igor's Drive (folder \"Claude tasks\", private to him) and get its "
+                       "link. Write the content in Markdown: # headings, **bold**, lists, links and | tables | "
+                       "become real Doc formatting. You cannot open or edit his existing files.",
+        "input_schema": {"type": "object", "properties": {
+            "title": {"type": "string", "description": "File name."},
+            "content": {"type": "string", "description": "The whole document in Markdown."}}},
+    },
+    {
+        "name": "create_sheet",
+        "description": "Create a NEW Google Sheet in Igor's Drive (folder \"Claude tasks\", private to him) and get "
+                       "its link. The first row of each tab is the header (bolded and frozen). Numbers stay numbers; "
+                       "formulas such as =SUM(B2:B10) work (none that fetch from the web).",
+        "input_schema": {"type": "object", "properties": {
+            "title": {"type": "string", "description": "File name."},
+            "tabs": {"type": "array", "description": "[{\"name\": \"Tab name\", \"rows\": [[\"Header\", ...], "
+                     "[value, ...], ...]}] (up to 10 tabs)."}}},
+    },
+    {
+        "name": "create_slides",
+        "description": "Create a NEW Google Slides deck in Igor's Drive (folder \"Claude tasks\", private to him) "
+                       "and get its link. Plain Google theme: keep slides short (a title and 3 to 6 bullets) and "
+                       "put the detail in the speaker notes.",
+        "input_schema": {"type": "object", "properties": {
+            "title": {"type": "string", "description": "File name."},
+            "slides": {"type": "array", "description": "[{\"layout\": \"title\" | \"section\" | \"content\", "
+                       "\"title\": ..., \"body\": [\"bullet\", ...] (the subtitle for title and section slides), "
+                       "\"notes\": \"speaker notes\"}] (up to 40)."}}},
     },
     {
         "name": "finish",
