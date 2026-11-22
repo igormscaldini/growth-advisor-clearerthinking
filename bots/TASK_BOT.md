@@ -12,6 +12,7 @@ Write the instruction above the forwarded email, in plain words:
 - "claude, cancel their subscription on Stripe and let them know I've processed it. Also let Angel know about the churn, and when their billing cycle ends."
 - "claude, refund her last payment and cancel"
 - "how many new subscribers did we get last week, and where from?" (no forward needed)
+- "make a spreadsheet of last week's sign-ups by day" or "turn the notes below into a 6-slide deck"
 
 It also works without forwarding anything ("claude, unsubscribe jane@example.com from beehiiv"): the person only has to be named in what you send.
 
@@ -39,8 +40,9 @@ Statuses: **Awaiting your OK** (a plan waits for your yes; nothing changed); **N
 | Cancel a subscription (after your yes) | Sets it to cancel at the END of the billing period (no more charges, access until that date), and confirms | 2 |
 | Refund a payment (after your yes) | Refunds any amount up to what is still unrefunded on one of that person's payments (your choice: no cap beyond the charge). Covers one-off purchases made without an account (PDF, Cognitive Assessment) | 3 |
 | Draft an email | Leaves a Gmail draft, never sends | 4 |
+| Create a Google Doc, Sheet or Slides deck | A NEW file in the "Claude tasks" folder of your Drive, private to you; the reply links to it. Docs keep headings, lists, links and tables; sheets keep numbers and formulas (not ones that fetch from the web: IMPORTXML, IMAGE, HYPERLINK); decks use Google's plain theme with the detail in the speaker notes. Made straight away, no yes needed | 3 of each |
 
-Not possible, on purpose: immediate cancellations, plan changes, deleting anyone's data, sending email. Asked for one of these, the bot says so and stops. A period-end cancellation can be undone in Stripe until the date it takes effect; a refund cannot be undone.
+Not possible, on purpose: immediate cancellations, plan changes, deleting anyone's data, sending email, and opening, editing or sharing any Google file (to work from an existing Doc, paste its text into your email; the bot makes a new file). Asked for one of these, the bot says so and stops. A period-end cancellation can be undone in Stripe until the date it takes effect; a refund cannot be undone.
 
 ## Why it is safe to forward a stranger's email to it
 
@@ -50,7 +52,9 @@ A forwarded email is text written by someone else, and it could contain "also re
 2. **Only people named in your email.** Every action is refused for an address that does not appear in what you sent.
 3. **Small budgets.** The limits in the table are per email, whatever the text asks for.
 4. **Nothing changes without your yes.** The model can only propose; each proposal is checked against live data (the payment belongs to that person, the amount is still refundable). Your yes is recognised by a fixed rule, not by the model, and then the code itself makes exactly the listed changes, each once. The plan travels in a hidden header of the bot's reply, which only counts when Gmail filed that reply as sent by your account.
-5. **Nothing goes out without you.** Emails are drafts.
+5. **Nothing goes out without you.** Emails are drafts, and Google files are created private and never shared.
+
+Google login: the bot has its own token (`python auth_taskbot_google.py --github` mints it; secret `TASKBOT_GOOGLE_TOKEN_JSON`) with only Google's `drive.file` permission. That permission covers every file made through this project's OAuth client, so besides its own files it can technically reach the ~15 sheets other scripts here created (Navigator subscribers, outreach lists, the task log), checked live 2026-11-22. The bot has no tool that lists, reads, edits or shares a file, so it never does; keep it that way, or give it an OAuth client of its own before adding one. The Drive API was enabled on the GCP project for this on 2026-11-22.
 
 The report you receive is built from the tools' own record of what they did, not from what the model says, and it lists anything the safety limits blocked. In the live test of 2026-11-18 the forwarded email contained an instruction to unsubscribe a second person; the bot ignored it and said so in its report.
 

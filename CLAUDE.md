@@ -69,7 +69,9 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   reply opens with "What I understood" + the numbered plan; the plan rides in the `X-CT-TaskBot-Plan` header (trusted only with the SENT
   label); a plain "yes" (rule-based `reply_kind`, never the model) makes `execute_plan` call the gated tools with exactly those arguments;
   "no" cancels, anything else re-plans, 7-day expiry. Questions about CT are answered with advisor_reply's read-only tools + memory
-  (`READ_ONLY_TOOLS`, `advisor_background`). The log is also the dashboard's Tasks tab (`#tasks`, `/api/tasks`, same password; cookie
+  (`READ_ONLY_TOOLS`, `advisor_background`). Google Docs/Sheets/Slides (2026-11-22, `task_google.py`): CREATE only, into a Drive folder "Claude tasks", never
+  shared, no yes needed; own token `TASKBOT_GOOGLE_TOKEN_JSON` (drive.file, `auth_taskbot_google.py --github`). drive.file is per OAuth
+  client, so that token can also reach sheets other scripts made with the same client: never add a list/read/edit/share tool. The log is also the dashboard's Tasks tab (`#tasks`, `/api/tasks`, same password; cookie
   path is `/`). Stripe gotcha: a refund on a made-up charge id returns 404 BEFORE the permission check, so the key probe refunds more
   than the latest charge (always rejected: 400 with permission, 403 without). Authentication = the message carries
   Gmail's SENT label and is addressed To the +claude address; anything else is never a task. The bot labels a task "Claude tasks" BEFORE

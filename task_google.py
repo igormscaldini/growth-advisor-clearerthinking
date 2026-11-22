@@ -1,8 +1,11 @@
 """Google Docs, Sheets and Slides for the task bot: create new files in Igor's Drive.
 
-Igor's choices (2026-11-22): the bot may only touch files it creates itself (Google's
-`drive.file` permission: it cannot see or open anything else in his Drive) and it never shares
-them (he clicks Share himself). Every file goes into one "Claude tasks" folder.
+Igor's choices (2026-11-22): the bot only creates files and never shares them (he clicks Share
+himself). Every file goes into one "Claude tasks" folder. The login is Google's `drive.file`
+permission, which is granted per OAuth CLIENT, not per token: checked live 2026-11-22, it also
+sees the ~15 sheets other scripts made with the same client (Navigator subscribers, outreach
+lists, the task log). The real limit is therefore this module: it only ever creates, and offers
+no tool that lists, reads, edits or shares. Keep it that way, or give the bot its own OAuth client.
 
 The login is a token of its own (secrets/taskbot-google-token.json locally, the
 TASKBOT_GOOGLE_TOKEN_JSON secret on GitHub), minted once by `python auth_taskbot_google.py`, so
@@ -180,8 +183,8 @@ def _service(name: str, version: str):
 
 
 def folder_id(drive) -> str:
-    """The "Claude tasks" folder, created on first use. With drive.file the search only sees
-    folders this login created, so a folder of the same name made by Igor is never reused."""
+    """The "Claude tasks" folder, created on first use. drive.file only sees files made through
+    this OAuth client, so a folder of the same name that Igor made by hand is never reused."""
     q = f"name = '{FOLDER_NAME}' and mimeType = '{FOLDER_MIME}' and trashed = false"
     found = drive.files().list(q=q, fields="files(id)", pageSize=1).execute().get("files", [])
     if found:
