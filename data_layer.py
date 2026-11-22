@@ -1008,19 +1008,6 @@ def google_ads_metrics(start: date, end: date) -> dict:
 BEEHIIV_BASE = "https://api.beehiiv.com/v2"
 
 
-def _beehiiv_period(days: int) -> str:
-    """Map a date-range size to beehiiv's nearest canned period."""
-    if days <= 1:
-        return "last_24_hours"
-    if days <= 7:
-        return "last_7_days"
-    if days <= 30:
-        return "last_4_weeks"
-    if days <= 95:
-        return "last_3_months"
-    return "last_12_months"
-
-
 def _beehiiv_get(url: str, **kwargs):
     """requests.get with an explicit timeout and a short retry on transient connection errors.
 
@@ -1150,25 +1137,13 @@ def beehiiv_metrics(start: date, end: date) -> dict:
         })
     per_campaign.sort(key=lambda r: r["date"], reverse=True)
 
-    # ---- New subs in window: use beehiiv stats endpoint with closest canned period ----
-    days = (end - start).days + 1
-    period_used = _beehiiv_period(days)
-    new_subs = 0
-    churned = 0
-    try:
-        # The stats endpoint returns publication-level period stats
-        r = _beehiiv_get(
-            f"{BEEHIIV_BASE}/publications/{pub_id}",
-            headers=headers,
-            params={"expand[]": "stats", "stats_period": period_used},
-        )
-        r.raise_for_status()
-        ps = r.json().get("data", {}).get("stats", {})
-        # beehiiv returns these under a period key sometimes; try both shapes
-        period_block = ps.get(period_used) or ps
-        new_subs = period_block.get("subscriptions", 0) if isinstance(period_block, dict) else 0
-    except Exception:
-        pass
+    # ---- New subs in window: the same daily count the dashboard and the letter use ----
+    # (Until 2026-11-22 this asked /publications/{id}?expand[]=stats&stats_period=... for a
+    # "subscriptions" field. beehiiv ignores stats_period and returns no such field, so it was
+    # always 0, silently; the advisor's reply tools and the task bot repeated that 0.)
+    period_used = "daily"
+    new_subs_block = beehiiv_daily_new_subscribers(start, end)
+    new_subs = new_subs_block.get("total", 0) if not new_subs_block.get("error") else 0
 
     open_rate = (opens / emails_sent) if emails_sent else 0
     click_rate = (clicks / emails_sent) if emails_sent else 0
