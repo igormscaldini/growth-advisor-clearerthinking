@@ -107,12 +107,12 @@ def remove_other_digests(session_id: str, keep: Path) -> list[Path]:
     return removed
 
 
-def list_conversation_digests(since: date | None = None, until: date | None = None) -> list[dict]:
-    """Digest files (metadata only, not decrypted) sorted oldest first."""
+def _list_dated(folder: Path, since: date | None, until: date | None) -> list[dict]:
+    """Files named <YYYY-MM-DD>_<8 hex>.md.enc in `folder` (metadata only, not decrypted), oldest first."""
     out = []
-    if not CONVERSATIONS_DIR.exists():
+    if not folder.exists():
         return out
-    for p in CONVERSATIONS_DIR.iterdir():
+    for p in folder.iterdir():
         m = DIGEST_NAME_RE.match(p.name)
         if not m:
             continue
@@ -124,6 +124,11 @@ def list_conversation_digests(since: date | None = None, until: date | None = No
         out.append({"path": p, "date": d, "session": m.group(2)})
     out.sort(key=lambda r: (r["date"], r["session"]))
     return out
+
+
+def list_conversation_digests(since: date | None = None, until: date | None = None) -> list[dict]:
+    """Digest files (metadata only, not decrypted) sorted oldest first."""
+    return _list_dated(CONVERSATIONS_DIR, since, until)
 
 
 def load_recent_conversations(days: int = 7, ref: date | None = None, max_chars: int = 80_000) -> str:
@@ -144,6 +149,48 @@ def load_recent_conversations(days: int = 7, ref: date | None = None, max_chars:
         dropped += 1
     if dropped:
         blocks.insert(0, f"({dropped} older session digest(s) omitted to fit the size limit.)\n")
+    return "\n".join(blocks)
+
+
+# --- meeting notes (Granola) ---------------------------------------------------------
+# Written on Igor's Mac by granola_sync.py (the Granola connector only exists there), read by the
+# Friday letter and by the reply / task bots. One file per meeting, named by the meeting date and
+# the first 8 hex characters of Granola's meeting id, re-written whenever the note changes.
+MEETINGS_DIR = MEMORY_DIR / "meetings"
+MEETINGS_SYNC_FILE = MEETINGS_DIR / "last_sync.txt"   # plaintext ISO timestamp, nothing private
+
+
+def list_meeting_notes(since: date | None = None, until: date | None = None) -> list[dict]:
+    return _list_dated(MEETINGS_DIR, since, until)
+
+
+def last_meeting_sync() -> datetime | None:
+    try:
+        return datetime.fromisoformat(MEETINGS_SYNC_FILE.read_text().strip())
+    except (OSError, ValueError):
+        return None
+
+
+def load_meeting_notes(days: int = 7, ref: date | None = None, max_chars: int = 60_000,
+                       query: str | None = None) -> str:
+    """Decrypted notes of the meetings held in the `days` days ending at `ref` (default today),
+    oldest first. `query` keeps only notes containing every one of its words (case-insensitive).
+    If they don't fit in max_chars the OLDEST are dropped and a note says so. "" when none."""
+    ref = ref or date.today()
+    rows = list_meeting_notes(since=ref - timedelta(days=days - 1), until=ref)
+    words = (query or "").lower().split()
+    blocks = []
+    for r in rows:
+        text = read_encrypted(r["path"]).strip()
+        if words and not all(w in text.lower() for w in words):
+            continue
+        blocks.append(text + "\n")
+    dropped = 0
+    while blocks and sum(len(b) for b in blocks) > max_chars:
+        blocks.pop(0)
+        dropped += 1
+    if dropped:
+        blocks.insert(0, f"({dropped} older meeting note(s) omitted to fit the size limit.)\n")
     return "\n".join(blocks)
 
 
@@ -368,6 +415,18 @@ def claude_text(system: str, user: str, max_tokens: int = 4000) -> str:
     if advisor_backend() == "api":
         return with_retries("api", lambda: _api_text(system, user, max_tokens))
     return with_retries("claude-code", lambda: run_claude_code(system, user))
+
+
+def parse_json_array(text: str) -> list:
+    """Pull the first JSON array out of a model reply; [] if there isn't a valid one."""
+    start, end = text.find("["), text.rfind("]")
+    if start == -1 or end <= start:
+        return []
+    try:
+        val = json.loads(text[start:end + 1])
+    except json.JSONDecodeError:
+        return []
+    return val if isinstance(val, list) else []
 
 
 # --- git ----------------------------------------------------------------------------

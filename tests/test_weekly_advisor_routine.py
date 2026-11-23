@@ -20,6 +20,7 @@ def _inputs(**over):
         "knowledge_text": "Audience: US self-insight seekers.",
         "conversations_text": "Session digest: fixed the beehiiv retry.",
         "inbox_text": "Josh asked about the dashboard repo.",
+        "meetings_text": "### Meeting: Travis <> Igor monthly. Agreed to pause PMax.",
         "memory_ok": True,
         "errors": {},
     }
@@ -30,9 +31,10 @@ def _inputs(**over):
 def test_letter_prompt_includes_every_input_section():
     i = _inputs()
     text = wa.letter_prompt(i["history"], i["goals"], i["flags"], i["goals_text"], i["memory_text"],
-                            i["knowledge_text"], i["conversations_text"], i["inbox_text"])
+                            i["knowledge_text"], i["conversations_text"], i["inbox_text"], i["meetings_text"])
     for needle in ("GOALS.md:", "Hit $120k.", "GA4 users looks broken", "Igor hates em dashes.",
                    "US self-insight seekers", "fixed the beehiiv retry", "Josh asked about",
+                   "Agreed to pause PMax.",
                    '"revenue_total": 1234.5', '"mrr_usd"'):
         assert needle in text
 

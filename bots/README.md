@@ -15,6 +15,7 @@ Last verified: 2026-10-02 (states and last runs below are from that day).
 | [Navigator subscribers sync](#navigator-subscribers-sync) | Upserts CT+ Navigator subscribers from Stripe into a Google Sheet | Every 15 min (nominal) | GitHub Actions | 2026-09-09 | Active, passing |
 | [Stripe cancellations email](#stripe-cancellations-email) | Weekly email of CT+ cancellations | Fridays 11:10 | GitHub Actions | 2026-08-30 | Active. Last run 2026-09-25 passed |
 | [SEO advisor email](#seo-advisor-email) | SEO expert email from Search Console and Ahrefs | Manual only | GitHub Actions | 2026-08-30 | Schedule removed 2026-09-01. Last run 2026-09-01 |
+| [Granola meeting-notes sync](#granola-meeting-notes-sync) | Copies Igor's Granola meeting notes, encrypted, into `advisor_memory/meetings/` for the letter and the bots | Daily 08:30, 12:30, 16:30, 20:30 Sao Paulo time | launchd on Igor's Mac | 2026-11-23 | Installed; needs Full Disk Access for the Command Line Tools Python |
 | [Weekly growth-advisor letter](#weekly-growth-advisor-letter) | Friday letter: results, the week's work, next priorities; Wednesday preflight of its credentials | Fridays 11:00 (preflight Wednesdays 11:00) | GitHub Actions | 2026-06-14 | Working since 2026-10-08 (`CLAUDE_CODE_OAUTH_TOKEN` set; no letter was written 2026-09-04 to 2026-10-02) |
 | [Advisor reply handler](#advisor-reply-handler) | Answers Igor's email replies to the letter with live data | Every 5 min (nominal) | GitHub Actions | 2026-06-14 | Active, passing |
 | [Dashboard snapshot](#dashboard-snapshot) | Refreshes the data behind the Vercel dashboard | Every 30 min (nominal) | GitHub Actions | 2026-05-26 | Active, passing |
@@ -94,9 +95,9 @@ The Friday letter can also run as a cloud routine instead of through GitHub Acti
 
 ### Weekly growth-advisor letter
 
-- **Does:** gathers GA4, Stripe, beehiiv, Search Console and Ads data plus the advisor's memory, writes the Friday letter with headless Claude Code and emails it through the Gmail API, filed in the inbox as unread.
+- **Does:** gathers GA4, Stripe, beehiiv, Search Console and Ads data plus the advisor's memory (including the week's Granola meeting notes), writes the Friday letter with headless Claude Code and emails it through the Gmail API, filed in the inbox as unread.
 - **Code:** `weekly_advisor.py`, workflow `weekly-advisor-email.yml`. Needs the `CLAUDE_CODE_OAUTH_TOKEN` secret: run `bash bots/set_claude_token.sh` in a terminal (mints, tests and saves the token with no copy-paste; manual pastes failed twice on 2026-10-08). `gh secret list` shows whether it exists.
-- **Preflight (Wednesdays):** the same workflow runs `python weekly_advisor.py --preflight`, one cheap live call per credential the letter depends on (Claude login, memory key, GA4, Stripe, beehiiv, Search Console, Gmail). It emails only when one fails, with the fix, two days before the letter. Run it by hand with `gh workflow run weekly-advisor-email.yml -f preflight=true`.
+- **Preflight (Wednesdays):** the same workflow runs `python weekly_advisor.py --preflight`, one cheap live call per credential the letter depends on (Claude login, memory key, GA4, Stripe, beehiiv, Search Console, Gmail, and whether the Granola sync ran in the last 3 days). It emails only when one fails, with the fix, two days before the letter. Run it by hand with `gh workflow run weekly-advisor-email.yml -f preflight=true`.
 - **Where failures show up:** when Claude cannot write the letter, the email still goes out with the subject "NO LETTER, numbers only", the reason and fix at the top and the week's raw numbers below, and the run ends as "failure" so GitHub sends its own alert. A single failed data source only adds "PARTIAL" to the subject and the run stays green.
 - **Try it safely:** `python weekly_advisor.py --dry-run` (add `--preflight` for the credential test).
 
@@ -116,6 +117,16 @@ The Friday letter can also run as a cloud routine instead of through GitHub Acti
 ### Newsletter ratings email
 
 A Monday 12:00 São Paulo email with the newsletter rating results, sent by a Vercel cron in the separate `ct-newsletter-ratings` project (its README has the details).
+
+## On Igor's Mac
+
+### Granola meeting-notes sync
+
+- **Does:** asks headless Claude Code, allowed only Granola's two read tools through the claude.ai connector, for the meetings of the last 3 days, writes one Fernet-encrypted file per meeting to `advisor_memory/meetings/` and pushes. The Friday letter reads the week's notes; the reply bot and the email task bot get a `meeting_notes` tool. Commit messages carry counts only, never titles or names.
+- **Why the Mac:** GitHub Actions has no claude.ai connectors, Granola's API key needs its Business plan, and Granola's local cache is encrypted. So it only runs while the Mac is awake (a missed run fires on wake), and the free Granola plan limits it to the last 30 days.
+- **Code:** `granola_sync.py`; schedule written and loaded by `bash bots/install_granola_sync.sh` (`--remove` uninstalls). macOS blocks background jobs from `~/Documents` until the Command Line Tools `Python.app` (`/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/Resources/Python.app`) is in System Settings > Privacy & Security > Full Disk Access; without it the log shows `Operation not permitted`.
+- **Try it safely:** `.venv/bin/python granola_sync.py --dry-run` (lists the meetings, writes nothing); `--days 30` backfills.
+- **Where failures show up:** `.claude/granola_sync.log`; the Friday letter turns PARTIAL and the Wednesday preflight emails when the last sync is over 3 days old. A run that never reaches Granola (connector missing) fails instead of reporting "0 meetings".
 
 ## Automatic, but not on a schedule
 

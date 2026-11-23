@@ -88,6 +88,11 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `.to_dict()`) and `current_period_end` sits on the subscription ITEMS; beehiiv unsubscribe is `PUT /subscriptions/{id}` with
   `{"unsubscribe": true}` (status becomes `inactive`; the existing key can write); the Vercel CLI works as `npx vercel` in `frontend/`
   (`printf value | npx vercel env add NAME production`).
+- Granola meeting notes (2026-11-23): `granola_sync.py` runs on Igor's MAC (launchd, `bots/install_granola_sync.sh`; README has
+  why and how), headless Claude Code with only the claude.ai Granola connector -> encrypted `advisor_memory/meetings/`. Read by
+  the letter (`gather_meetings`, stale after 3 days -> PARTIAL + preflight) and the `meeting_notes` tool (reply + task bot).
+  CLI gotchas verified that day: `--setting-sources ""` WITH `--tools ""` loads zero tools, and `--system-prompt` also hid the
+  connector; a tool-less model answers `[]`, so the sync requires a search_meetings call in the stream-json. Free plan = 30 days.
 - `stripe_navigator_subscribers.py`: Navigator subscribers -> Google Sheet, synced every
   15 min (`navigator-sheet-sync.yml`, sheet id in the `NAVIGATOR_SHEET_ID` secret and
   `.env`). The sheet write is an UPSERT matched on Subscription ID: columns right of the

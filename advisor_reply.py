@@ -115,6 +115,16 @@ def _tool_inbox(days=7, **_):
     return advisor_inbox.weekly_inbox_digest(int(days))
 
 
+def _tool_meeting_notes(days=14, query=None, **_):
+    days = min(max(int(days), 1), 90)
+    last = mem.last_meeting_sync()
+    text = mem.load_meeting_notes(days=days, query=query or None)
+    return {
+        "last_synced": last.isoformat() if last else None,
+        "notes": text or f"(no meeting notes in the last {days} days" + (f" matching {query!r})" if query else ")"),
+    }
+
+
 # --dry-run must have no side effects (see module docstring). The tool runs in a child
 # process of the headless session, so the flag also travels as the DRY_RUN_ENV variable.
 DRY_RUN = False
@@ -157,6 +167,7 @@ TOOL_FNS = {
     "beehiiv_metrics": _tool_beehiiv,
     "gsc_keyword_position": _tool_gsc_keyword,
     "inbox_recent": _tool_inbox,
+    "meeting_notes": _tool_meeting_notes,
     "remember_this": _tool_remember_this,
 }
 
@@ -216,6 +227,19 @@ TOOLS = [
                        "newsletters and automated mail removed), grouped by thread. Use it when a "
                        "question is about his projects, partners, requests or commitments.",
         "input_schema": {"type": "object", "properties": {"days": {"type": "integer", "description": "Look-back window in days (default 7)."}}},
+    },
+    {
+        "name": "meeting_notes",
+        "description": "Igor's meeting notes from Granola (AI summary, participants and his own notes "
+                       "per meeting), oldest first. Use it for anything about meetings: what was "
+                       "decided, who owns which action item, what a partner or teammate said. Notes "
+                       "are copied from his Mac a few times a day, so the last few hours may be missing; "
+                       "`last_synced` says when.",
+        "input_schema": {"type": "object", "properties": {
+            "days": {"type": "integer", "description": "Look-back window in days (default 14, max 90)."},
+            "query": {"type": "string", "description": "Optional words that must all appear in a note "
+                                                       "(e.g. a person's or partner's name)."},
+        }},
     },
     {
         "name": "remember_this",

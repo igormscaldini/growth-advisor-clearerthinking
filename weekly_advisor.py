@@ -160,6 +160,9 @@ FIX_INSTRUCTIONS = {
     "conversations": "Conversation digests couldn't be read (see memory).",
     "inbox": "Gmail scan failed. The shared Google token needs the gmail.modify scope (re-run "
              "`python auth_ga4.py`, then update the GOOGLE_TOKEN_JSON secret).",
+    "meetings": "The Granola sync runs on Igor's Mac (granola_sync.py, launchd). Open the Mac, then "
+                "check `tail .claude/granola_sync.log` and the claude.ai Granola connection; "
+                "bots/README.md has the commands.",
     "narrative": mem.claude_fix_hint(),
     "consolidation": "The end-of-week memory update failed (letter still sent). Same checks as narrative.",
     "transport": email_transport.TRANSPORT_FIX,
@@ -410,7 +413,8 @@ LETTER_SYSTEM = (
     "GOALS.md; durable memory of things Igor has told you; a knowledge base about the "
     "audience and how Clearer Thinking communicates; digests of the Claude Code working "
     "sessions Igor had this week (what he actually worked on); and a digest of his email this "
-    "week (threads he wrote in or was addressed in, newsletters and automated mail removed). "
+    "week (threads he wrote in or was addressed in, newsletters and automated mail removed); "
+    "and his Granola notes of the meetings he had this week (AI summary plus his own notes). "
     "Nobody else sees the raw numbers: you are the entire email.\n\n"
     "Igor's stated priority for 2026 is hitting the targets in GOALS.md. Judge every result, "
     "every hour he spent and every recommendation against those goals, and say when something "
@@ -426,7 +430,9 @@ LETTER_SYSTEM = (
     "drift honestly, and credit real progress specifically. If there are no digests, say "
     "you have no record of his work this week and move on. Then, from his email: promising "
     "opportunities or projects worth pursuing, requests or threads left unanswered, and "
-    "commitments he made, especially anything that serves the goals. Skip routine mail and "
+    "commitments he made, especially anything that serves the goals. From his meeting notes: "
+    "decisions taken, action items he owns and whether the week's work or email shows them "
+    "done, and anything a meeting changed about the priorities. Skip routine mail and "
     "keep private details to what is needed.\n"
     "3. Next week. Three to five concrete priorities as a short numbered list (the one place "
     "a list is allowed), ranked by how hard they move the goal numbers, not by ease or "
@@ -459,7 +465,7 @@ CONSOLIDATE_SYSTEM = (
 
 def letter_prompt(history: list[dict], goals: dict, flags: list[str], goals_text: str,
                   memory_text: str, knowledge_text: str, conversations_text: str,
-                  inbox_text: str = "") -> str:
+                  inbox_text: str = "", meetings_text: str = "") -> str:
     """The user turn of the letter request (LETTER_SYSTEM is the system turn). Shared by the
     API path (build_narrative) and the routine path (--brief) so both see identical inputs."""
     return (
@@ -472,29 +478,21 @@ def letter_prompt(history: list[dict], goals: dict, flags: list[str], goals_text
         f"Digests of Igor's working sessions this week:\n{conversations_text or '(no sessions recorded this week)'}\n\n"
         f"Igor's email this week (threads he took part in or was addressed in; automated mail removed):\n"
         f"{inbox_text or '(not available)'}\n\n"
+        f"Igor's meeting notes this week (Granola):\n{meetings_text or '(no meeting notes this week)'}\n\n"
         f"Weekly metrics (most recent first), JSON:\n{json.dumps(history, indent=1, default=str)}"
     )
 
 
 def build_narrative(history: list[dict], goals: dict, flags: list[str], goals_text: str,
                     memory_text: str, knowledge_text: str, conversations_text: str,
-                    inbox_text: str = "") -> str:
+                    inbox_text: str = "", meetings_text: str = "") -> str:
     """Ask Claude (Anthropic API) to write the entire advisor letter (the whole email body)."""
     user = letter_prompt(history, goals, flags, goals_text, memory_text, knowledge_text,
-                         conversations_text, inbox_text)
+                         conversations_text, inbox_text, meetings_text)
     return mem.claude_text(LETTER_SYSTEM, user, max_tokens=4000)
 
 
-def parse_json_array(text: str) -> list:
-    """Pull the first JSON array out of a model reply; [] if there isn't a valid one."""
-    start, end = text.find("["), text.rfind("]")
-    if start == -1 or end <= start:
-        return []
-    try:
-        val = json.loads(text[start:end + 1])
-    except json.JSONDecodeError:
-        return []
-    return val if isinstance(val, list) else []
+parse_json_array = mem.parse_json_array   # re-exported: one parser for every model JSON reply
 
 
 def consolidation_prompt(conversations_text: str, memory_text: str) -> str:
@@ -662,6 +660,36 @@ def refresh_dashboard_snapshot() -> str | None:
     return f"couldn't publish updated snapshot: {err}" if err else None
 
 
+# --- meeting notes ------------------------------------------------------------
+MEETINGS_STALE_AFTER = timedelta(days=3)
+
+
+def meetings_sync_problem(last: datetime | None, now: datetime) -> str | None:
+    """Why the Granola notes can't be trusted as complete, or None. They are copied by a job on
+    Igor's Mac (granola_sync.py), which silently stops when the Mac is off or the login expires."""
+    if last is None:
+        return "Granola meeting notes have never been synced."
+    if now - last > MEETINGS_STALE_AFTER:
+        return f"Granola meeting notes last synced {last:%Y-%m-%d %H:%M}, so this week's meetings may be missing."
+    return None
+
+
+def gather_meetings(now: datetime) -> tuple[str, dict[str, str]]:
+    try:
+        text = mem.load_meeting_notes(days=7, ref=now.date())
+    except Exception as e:  # noqa: BLE001
+        return "", {"meetings": f"{type(e).__name__}: {e}"}
+    problem = meetings_sync_problem(mem.last_meeting_sync(), now)
+    print(f"[advisor] meetings: {len(text)} chars of Granola notes", file=sys.stderr)
+    return text, ({"meetings": problem} if problem else {})
+
+
+def _check_meetings_sync() -> None:
+    problem = meetings_sync_problem(mem.last_meeting_sync(), datetime.now(timezone.utc))
+    if problem:
+        raise RuntimeError(problem)
+
+
 # --- main -------------------------------------------------------------------
 def gather_inputs(weeks: int, ref: date) -> dict:
     """Everything the letter needs, gathered with no Claude call. Failed sources land in
@@ -697,12 +725,15 @@ def gather_inputs(weeks: int, ref: date) -> dict:
         print(f"[advisor] inbox: scanned {inbox['scanned']}, included {inbox['included']} "
               f"({inbox['sent']} sent, {inbox['received']} received)", file=sys.stderr)
 
+    meetings_text, meeting_errors = gather_meetings(datetime.now(timezone.utc))
+
     return {
         "history": history, "goals": goals, "flags": flags, "goals_text": goals_text,
         "memory_text": memory_text, "knowledge_text": knowledge_text,
         "conversations_text": conversations_text, "inbox_text": inbox_text,
+        "meetings_text": meetings_text,
         "memory_ok": not mem_errors,
-        "errors": collect_errors(history, goal_errors, mem_errors, inbox_errors),
+        "errors": collect_errors(history, goal_errors, mem_errors, inbox_errors, meeting_errors),
     }
 
 
@@ -727,7 +758,8 @@ def build_brief(inputs: dict) -> dict:
         "week": week,
         "letter_system": LETTER_SYSTEM,
         "letter_user": letter_prompt(i["history"], i["goals"], i["flags"], i["goals_text"], i["memory_text"],
-                                     i["knowledge_text"], i["conversations_text"], i["inbox_text"]),
+                                     i["knowledge_text"], i["conversations_text"], i["inbox_text"],
+                                     i["meetings_text"]),
         "consolidate_system": CONSOLIDATE_SYSTEM,
         "consolidate_user": consolidation_prompt(i["conversations_text"], i["memory_text"]) if can_consolidate else None,
         "history": i["history"],
@@ -822,6 +854,7 @@ def preflight_checks(ref: date) -> dict:
         "beehiiv": lambda: beehiiv_metrics(ref, ref),
         "goals_personality_test_google_position": lambda: gsc_keyword_position(PERSONALITY_KEYWORD),
         "inbox": lambda: advisor_inbox.gmail_service().users().getProfile(userId="me").execute(),
+        "meetings": _check_meetings_sync,
     }
 
 
@@ -937,7 +970,8 @@ def main() -> int:
     try:
         narrative = build_narrative(inputs["history"], inputs["goals"], inputs["flags"], inputs["goals_text"],
                                     inputs["memory_text"], inputs["knowledge_text"],
-                                    inputs["conversations_text"], inputs["inbox_text"])
+                                    inputs["conversations_text"], inputs["inbox_text"],
+                                    inputs["meetings_text"])
         if not narrative:
             narrative_err = "Claude returned an empty letter"
     except Exception as e:  # noqa: BLE001
