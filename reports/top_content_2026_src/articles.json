@@ -1,0 +1,278 @@
+{
+ "_rules": "One row per article = a Wix blog post first published in 2026 (the All Articles hub left out). A study report published as its own page is merged into its article (GA4 users are counted across both pages in one query, so nobody is counted twice). Email sends are beehiiv post id prefixes (first 8 hex chars); every split, A/B variant and re-send of the article counts; test sends under 100 recipients are ignored by analysis.py. extra_paths = older addresses of a renamed post (GA4 keeps visits under the path used at the time).",
+ "articles": [
+  {
+   "slug": "a-better-way-to-ask-why-from-behavioral-science",
+   "sends": [
+    "c689d9c5"
+   ]
+  },
+  {
+   "slug": "what-you-need-to-know-about-sociopaths",
+   "sends": [
+    "c740b6ac"
+   ]
+  },
+  {
+   "slug": "how-to-have-conversations-that-don-t-feel-boring",
+   "sends": [
+    "ee713ee1"
+   ]
+  },
+  {
+   "slug": "what-can-a-single-data-point-teach-you",
+   "sends": [
+    "7d273b14"
+   ]
+  },
+  {
+   "slug": "how-to-find-your-false-beliefs-without-creating-a-paradox",
+   "sends": [
+    "f3f3ed08"
+   ]
+  },
+  {
+   "slug": "debunking-6-popular-psychology-myths",
+   "sends": [
+    "d89662b9"
+   ]
+  },
+  {
+   "slug": "mocking-power-finding-happiness-and-speaking-clearly",
+   "sends": [
+    "6752b314"
+   ],
+   "note": "newsletter swap with A Little Wiser (internal name 'A Little Wiser Swap')"
+  },
+  {
+   "slug": "is-it-possible-to-miss-the-present-introducing-the-concept-of-nowstalgia",
+   "sends": [
+    "aac80316"
+   ]
+  },
+  {
+   "slug": "whats-scaring-people-about-ai-we-ran-a-study-to-find-out",
+   "extra_slugs": [
+    "study-report-what-concerns-people-about-ai"
+   ],
+   "sends": [
+    "1719c919"
+   ]
+  },
+  {
+   "slug": "lies-damn-lies-and-fabricated-options",
+   "sends": [
+    "3914ee92"
+   ]
+  },
+  {
+   "slug": "the-most-important-concept-for-a-healthy-relationship",
+   "sends": [
+    "3ef801e2"
+   ]
+  },
+  {
+   "slug": "advice-for-living-in-a-world-being-changed-by-ai",
+   "sends": [
+    "68b62dfd",
+    "1c2a5a31"
+   ]
+  },
+  {
+   "slug": "how-and-when-to-learn-from-crowds",
+   "sends": [
+    "8a1873d9",
+    "91060d54"
+   ]
+  },
+  {
+   "slug": "5-things-we-learned-from-writing-the-12-levers",
+   "sends": [
+    "b214e39a",
+    "f5156e42"
+   ]
+  },
+  {
+   "slug": "a-research-based-framework-for-forming-habits-that-actually-stick",
+   "sends": [
+    "6daa3917",
+    "e1fa62fe"
+   ]
+  },
+  {
+   "slug": "is-personality-4-5-or-6-dimensional",
+   "extra_slugs": [
+    "study-report-is-personality-4-5-or-6-dimensional"
+   ],
+   "sends": [
+    "9f7f0cb7",
+    "b59ba53b"
+   ]
+  },
+  {
+   "slug": "how-to-create-valuable-things-that-people-actually-want-to-use",
+   "sends": [
+    "b4d5d32d",
+    "5f93145e"
+   ]
+  },
+  {
+   "slug": "why-you-should-know-how-to-find-academic-papers-and-7-ways-to-do-so",
+   "sends": [
+    "51007f4d",
+    "c4c40efb"
+   ]
+  },
+  {
+   "slug": "self-help-advice-people-keep-overlooking",
+   "sends": [
+    "68e96896"
+   ]
+  },
+  {
+   "slug": "how-to-tell-strong-evidence-from-weak-evidence",
+   "sends": [
+    "61f20867"
+   ]
+  },
+  {
+   "slug": "the-strangest-things-that-correlate-with-iq",
+   "sends": [
+    "c11f1467"
+   ]
+  },
+  {
+   "slug": "what-you-should-know-about-one-of-the-most-common-and-least-known-mental-health-disorders",
+   "sends": [
+    "6a361e11"
+   ]
+  },
+  {
+   "slug": "what-are-the-policies-that-everyone-wants-to-vote-for-regardless-of-their-political-orientation",
+   "extra_slugs": [
+    "what-are-policies-that-every-group-wants-to-vote-for"
+   ],
+   "sends": [
+    "da4976a8"
+   ]
+  },
+  {
+   "slug": "whats-the-best-self-help-tip-if-you-could-only-use-one-and-how-do-you-put-it-into-practice",
+   "sends": [
+    "04ac95de"
+   ],
+   "note": "beehiiv post kept the stale internal name of the policies post; subject 'The most important self-help tip you might be missing'"
+  },
+  {
+   "slug": "why-scams-succeed-and-cures-fail-understanding-hype-vs-value",
+   "extra_slugs": [
+    "study-report-why-scams-succeed-and-cures-fail-understanding-hype-vs-value"
+   ],
+   "sends": [
+    "7a4fef07"
+   ]
+  },
+  {
+   "slug": "things-you-probably-don-t-know-about-meditation",
+   "sends": [
+    "e2c6fd76",
+    "08da91b4"
+   ],
+   "note": "article + launch of the Demystifying Meditation tool in one email; the post's URL was shortened after launch, GA4 holds most visits under the old path",
+   "extra_paths": [
+    "/post/four-things-you-probably-don-t-know-about-meditation-and-a-free-tool-for-understanding-100-meditati"
+   ]
+  },
+  {
+   "slug": "psychology-words-that-dont-mean-what-you-think",
+   "sends": [
+    "371352cd"
+   ]
+  },
+  {
+   "slug": "what-stands-between-you-and-reality",
+   "sends": [
+    "6a0aa3bd"
+   ]
+  },
+  {
+   "slug": "what-capitalists-and-marxists-agree-and-disagree-about",
+   "sends": [
+    "d20e5865"
+   ]
+  },
+  {
+   "slug": "what-our-scientific-findings-can-teach-you-about-happiness",
+   "sends": [
+    "cf5686b9"
+   ]
+  },
+  {
+   "slug": "career-advice-from-conversations-with-experts",
+   "sends": [
+    "04eb21c8"
+   ]
+  },
+  {
+   "slug": "in-defense-of-unanswerable-questions-they-are-not-pointless-or-unscientific",
+   "sends": [
+    "2b220041"
+   ]
+  },
+  {
+   "slug": "is-what-youve-been-taught-about-biases-wrong",
+   "sends": [
+    "54bc1fbd",
+    "526daa18"
+   ]
+  },
+  {
+   "slug": "the-supplement-paradox",
+   "sends": [
+    "89bcdaf5",
+    "49066aa7",
+    "e18bfc70",
+    "3aacc4ea"
+   ],
+   "note": "paywalled (members-only full version); the Oct 30 re-send went to the whole list again, so up to its 6.8k opens may be people who opened before"
+  },
+  {
+   "slug": "should-you-steelman-people-you-disagree-with",
+   "sends": [
+    "9a5dfa42"
+   ]
+  },
+  {
+   "slug": "how-and-why-to-reason-more-complexly",
+   "sends": [
+    "e64a1c6d",
+    "2c0d7da1"
+   ]
+  },
+  {
+   "slug": "the-timescales-of-your-happiness",
+   "sends": [
+    "2504cab9",
+    "8eff8f4f"
+   ],
+   "note": "second send went only to people who had not opened the first"
+  },
+  {
+   "slug": "what-to-think-about-when-youre-thinking-about-a-job-change",
+   "sends": [
+    "6e0854e5"
+   ]
+  }
+ ],
+ "not_blog_articles": {
+  "_why": "Sends with article-like content that have no 2026 blog post; left out of the ranking, listed so the reader can decide.",
+  "sends": {
+   "ecea3f58": "The evidence behind 82 self-help techniques (Self-Help Pyramid)",
+   "1358964c": "An extract from the best career guide we know",
+   "02015ef6": "An extract from the best career guide we know (second segment)",
+   "7259698b": "How does society work? (tool launch)",
+   "0113a1f7": "How society works (tool launch re-send)",
+   "8e6ce4f8": "The 12 Levers is out now: first chapter"
+  }
+ }
+}
