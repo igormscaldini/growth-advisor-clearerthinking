@@ -1,0 +1,33 @@
+-- Productivity Workshop - Book Giveaway (GT 38686, key ysax8cl)
+-- Overcoming Procrastination workshop, Nov 24 2026: three draws for a signed copy of 12 Levers.
+-- Share one link per round in the Zoom chat:
+--   https://www.guidedtrack.com/programs/ysax8cl/run?round=1   (then round=2, round=3)
+-- The URL parameter sets `round`; a link without it saves giveawayRound = "none".
+-- Winners are drawn with workshop_giveaway_draw.py (one copy per person).
+
+*if: not round
+	>> round = "none"
+>> giveawayRound = round
+
+*page
+	*header: Win a signed copy of 12 Levers
+	*if: not (round = "none")
+		This is giveaway {round} of 3 in today's workshop. Enter below and we'll announce the winner live in a few minutes.
+	*if: round = "none"
+		Enter below and we'll announce the winner live in a few minutes.
+
+	*question: What nickname should we announce if you win?
+		*type: text
+		*save: nickname
+
+	*question: What's your email?
+		*type: text
+		*save: email
+
+*header: You're in!
+*if: not (round = "none")
+	You're entered in giveaway {round} of 3. Stay on the call: we'll read out the winner's nickname shortly, and we'll email the winner to get a mailing address.
+*if: round = "none"
+	You're entered. Stay on the call: we'll read out the winner's nickname shortly, and we'll email the winner to get a mailing address.
+
+You can enter each of the three giveaways (each has its own link in the chat). Each person can win one copy at most.
