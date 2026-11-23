@@ -102,8 +102,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
 - Newsletter ratings dashboard is a SEPARATE project: `~/Documents/Claude/ct-newsletter-ratings` (private repo
   igormscaldini/ct-newsletter-ratings, Vercel project ct-newsletter-ratings on Spark Wave, public page, env in its
   `.env.local`). It pulls GT program 38551's CSV export + beehiiv; its README has the counting rules. Email link
-  scanners click all 5 rating links right after each send; Igor chose (2026-09-29) to count every run anyway, no filter. Also sends Igor a
-  Monday 12:00 (São Paulo) email via Vercel cron + Gmail API (its README has the details).
+  scanners click all 5 rating links right after each send; Igor chose (2026-09-29) to count every run anyway, no filter. Also sends a
+  Monday 12:00 (São Paulo) email to Igor, Travis and Spencer (since 2026-11-23; `REPORT_RECIPIENTS` in its `lib/job.ts`) via
+  Vercel cron + Gmail API (its README has the details). Each row merges every send of one article (by the rating links'
+  `article` URL); re-sends to non-openers pull the merged open rate down.
   A feedback box shipped with its `ARTICLE_URL` placeholder unreplaced sends that literal to GT: `PLACEHOLDER_WINDOWS` in
   its `lib/ratings.ts` maps such runs to the article by start date (first entry: the steelman article, Oct 22-28, 2026);
   placeholder runs outside every window are dropped, so add an entry (and push main) whenever it happens again.
