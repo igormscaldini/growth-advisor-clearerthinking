@@ -449,6 +449,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   queries (UPT, Oct 19 - Nov 15: 3,888 with a dimension vs the true 5,013 with none or `date` only). Take page totals
   with no dimension; exact-query totals are unaffected.
 - Tools have created beehiiv subscribers through the API (`utm_channel=api`) only since 2026-03-09.
+- beehiiv holds no subscriber names: the `First Name` / `Last Name` custom fields were filled on 1 of 678,559 active records
+  (2026-11-25), so a person can only be identified by the email address. A full walk of every active subscription takes ~35 min
+  when two cursors run at once (`order_by=created` asc and desc, `status=active`, stop when the two frontiers cross strictly,
+  dedupe by id): 678,559 rows against 678,561 in the publication stats.
 - Where a beehiiv subscriber came from (verified on all 381k 2026 records, 2026-11-18): the custom fields `Tools Tried (Pipe-Separated)`
   and `UTM Media (Comma-Separated)` list every visit in order, so the FIRST entry is the sign-up visit (later `cpc` or study entries
   are an existing reader coming back); skip empty leading entries (`|Tool`, `,cpc` bug, Sep 13 - Oct 8). They only describe the sign-up
