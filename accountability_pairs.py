@@ -203,7 +203,8 @@ def claude_pairs(emails: list[str], people: dict[str, dict], kept: list[dict]) -
         placed = []
         for q in data.get("pairs") or []:
             a, b = ids[str(q["a"])], ids[str(q["b"])]
-            new.append({"emails": [a, b], "match": q.get("match") or "Medium", "why": q.get("why") or "",
+            why = re.sub(r"\s*[\u2014\u2013]\s*", ": ", q.get("why") or "")  # Igor's rule: no em dashes
+            new.append({"emails": [a, b], "match": q.get("match") or "Medium", "why": why,
                         "minor": bool(minors & {a, b})})
             placed += [a, b]
         if len(pool) % 2:

@@ -8,6 +8,7 @@ Last verified: 2026-10-02 (states and last runs below are from that day).
 
 | Bot | What it does | When (UTC) | Runs on | Since | State on 2026-10-02 |
 |---|---|---|---|---|---|
+| [Accountability partner intros](#accountability-partner-intros) | Pairs the procrastination-workshop opt-ins (Nov 30 evening ET) and emails each pair from igor@clearerthinking.org (Dec 1, from 9am ET) | Match hourly Dec 1 00:00-05:00, send hourly Dec 1 14:00-23:00 | GitHub Actions | 2026-11-26 | One round (Dec 1); cloud test passed 2026-11-26; delete after Dec 1 or extend for Jan 1 / Feb 1 |
 | [Task bot](#task-bot) | Carries out instructions Igor emails to his +claude address (beehiiv unsubscribe, Stripe cancel at period end, Gmail drafts) and logs them on /tasks | Within a minute of each task email (Vercel Cron check), plus the throttled schedule | GitHub Actions + Vercel Cron | 2026-11-18 | Live on the schedule; waiting on Igor to run `bots/set_task_bot_secrets.sh` (page password, GitHub token for the fast start, Stripe write key) |
 | [UQP researcher outreach send](#uqp-researcher-outreach-send) | Sends 10 "UQP researcher outreach" Gmail drafts per weekday (temporary) | Weekdays hourly 14:30-21:30 (sends from 9:30am ET) | GitHub Actions | 2026-11-12 | Active until the 90 remaining drafts are gone (Nov 25); delete afterwards |
 | [Daily site health check](#daily-site-health-check) | Six checks of the CT site; emails only when one does not pass | Daily 10:00 | GitHub Actions | 2026-10-01 | Active. Only run so far (manual, 2026-10-01) reported failed sign-up links on /plus and /coaching |
@@ -49,6 +50,13 @@ None are scheduled right now (checked 2026-10-02).
 The Friday letter can also run as a cloud routine instead of through GitHub Actions. It is documented in [ADVISOR_ROUTINE.md](ADVISOR_ROUTINE.md) and is not set up as a routine today; the GitHub workflow below is the live path.
 
 ## GitHub Actions bots (this repository)
+
+### Accountability partner intros
+
+- **Does:** on the evening of Nov 30 (ET) keeps every pair of the reviewed "Dec 1" tab of the private pairing sheet whose two people are still opted in, pairs new sign-ups and orphans (Claude reads their projects; word-overlap fallback), and writes the tab "Dec 1 (to send)", then emails Igor. On Dec 1 from 9am ET it sends one intro per pair, To the two (or three) people only, From igor@clearerthinking.org, text from the Google Doc in `INTRO_DOC` (repo copy `bots/accountability_intro_email.txt` as fallback), and stamps "Sent at" per row, so re-runs never send twice. Unticked "Send" = held (possible minors start held). Addresses on the "Not paired" tab are never paired.
+- **Code:** `accountability_pairs.py` (rules and safety checks in its docstring; tests in `tests/test_accountability_pairs.py`), workflow `accountability-pairs.yml`, secret `ACCOUNTABILITY_SHEET_ID`.
+- **Try it safely:** `gh workflow run accountability-pairs.yml -f step=test` builds a "Dec 1 (preview)" tab and sends ONE sample email to Igor's +qa address. Delete the preview tab afterwards.
+- **Where failures show up:** a red run (GitHub emails Igor); a failed send leaves "Sent at" empty and a later hourly run retries it. Stop it all with `gh workflow disable accountability-pairs.yml`.
 
 ### Task bot
 
