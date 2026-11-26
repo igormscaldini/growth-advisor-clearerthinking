@@ -22,6 +22,21 @@ for h in 8 12 16 20; do
   times+="<dict><key>Hour</key><integer>$h</integer><key>Minute</key><integer>30</integer></dict>"
 done
 
+# macOS decides whether a background job may read ~/Documents from the program launchd starts.
+# The venv's python is Apple's small launcher (.../bin/python3.9), which macOS identifies by its
+# own path: Full Disk Access granted to "Python" (Python.app) does not cover it, and macOS never
+# prompts for Apple's own binaries (checked in the TCC log, 2026-11-26). So start Python.app's
+# binary directly and tell it which venv to use, exactly as the launcher itself would.
+PY="$REPO/.venv/bin/python"
+REAL="$("$PY" -c 'import os, sys; print(os.path.realpath(sys.executable))')"
+APP_BIN="$(dirname "$(dirname "$REAL")")/Resources/Python.app/Contents/MacOS/Python"
+PROGRAM="$PY"
+VENV_ENV=""
+if [[ -x "$APP_BIN" ]]; then
+  PROGRAM="$APP_BIN"
+  VENV_ENV="<key>__PYVENV_LAUNCHER__</key><string>$PY</string>"
+fi
+
 mkdir -p "$HOME/Library/LaunchAgents"
 cat > "$PLIST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
@@ -31,13 +46,14 @@ cat > "$PLIST" <<EOF
   <key>Label</key><string>$LABEL</string>
   <key>ProgramArguments</key>
   <array>
-    <string>$REPO/.venv/bin/python</string>
+    <string>$PROGRAM</string>
     <string>$REPO/granola_sync.py</string>
   </array>
   <key>WorkingDirectory</key><string>$REPO</string>
   <key>EnvironmentVariables</key>
   <dict>
     <key>PATH</key><string>$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    $VENV_ENV
   </dict>
   <key>StartCalendarInterval</key>
   <array>$times</array>

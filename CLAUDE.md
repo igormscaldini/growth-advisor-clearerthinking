@@ -93,10 +93,13 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   the letter (`gather_meetings`, stale after 3 days -> PARTIAL + preflight) and the `meeting_notes` tool (reply + task bot).
   CLI gotchas verified that day: `--setting-sources ""` WITH `--tools ""` loads zero tools, and `--system-prompt` also hid the
   connector; a tool-less model answers `[]`, so the sync requires a search_meetings call in the stream-json. Free plan = 30 days.
-  2026-11-26: the first sync ever was a manual `.venv/bin/python granola_sync.py` (works from Terminal or Claude Code, clears the
-  preflight for 3 days). The launchd run dies on `.venv/pyvenv.cfg` with `Operation not permitted` and macOS shows NO prompt, so only
-  Full Disk Access for the Command Line Tools Python.app fixes the schedule (steps in `bots/README.md`); the job was also found
-  unloaded that day with no reboot since install, so check `launchctl print gui/$(id -u)/com.clearerthinking.granola-sync` first.
+  Working since 2026-11-26 (first sync ever; a manual `.venv/bin/python granola_sync.py` from Terminal or Claude Code also clears
+  the preflight for 3 days). Two things were wrong: the job was not loaded (no reboot since install; check `launchctl print
+  gui/$(id -u)/com.clearerthinking.granola-sync`), and macOS (TCC) refused it `~/Documents` with `Operation not permitted`. TCC
+  judges a launchd job by the program launchd STARTS: the venv's python is Apple's launcher `bin/python3.9`, identified by path,
+  never prompted for (Apple platform binary), and NOT covered by Full Disk Access given to Python.app. Fix = Igor granted Python.app
+  Full Disk Access and the plist starts `Python.app/Contents/MacOS/Python` with `__PYVENV_LAUNCHER__=<venv python>`. Diagnose with
+  `/usr/bin/log show --last 1m --info --predicate 'subsystem == "com.apple.TCC"'` (plain `log` is a zsh builtin).
 - `stripe_navigator_subscribers.py`: Navigator subscribers -> Google Sheet, synced every
   15 min (`navigator-sheet-sync.yml`, sheet id in the `NAVIGATOR_SHEET_ID` secret and
   `.env`). The sheet write is an UPSERT matched on Subscription ID: columns right of the
