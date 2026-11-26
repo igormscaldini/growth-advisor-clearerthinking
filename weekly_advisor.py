@@ -160,9 +160,13 @@ FIX_INSTRUCTIONS = {
     "conversations": "Conversation digests couldn't be read (see memory).",
     "inbox": "Gmail scan failed. The shared Google token needs the gmail.modify scope (re-run "
              "`python auth_ga4.py`, then update the GOOGLE_TOKEN_JSON secret).",
-    "meetings": "The Granola sync runs on Igor's Mac (granola_sync.py, launchd). Open the Mac, then "
-                "check `tail .claude/granola_sync.log` and the claude.ai Granola connection; "
-                "bots/README.md has the commands.",
+    "meetings": "Your Granola meeting notes are copied by a job on your Mac, and it has not delivered. "
+                "Step 1 (clears this warning by itself): on the Mac, open Terminal in the project folder "
+                "and run `.venv/bin/python granola_sync.py`, or open Claude Code there and say \"sync the "
+                "Granola notes\". Step 2 (only if this warning comes back next week): the scheduled job is "
+                "being blocked. Run `tail .claude/granola_sync.log`. `Operation not permitted` means macOS "
+                "is blocking Python: follow \"Give Python Full Disk Access\" in bots/README.md. A Granola or "
+                "connector error means reconnecting Granola in claude.ai > Settings > Connectors.",
     "narrative": mem.claude_fix_hint(),
     "consolidation": "The end-of-week memory update failed (letter still sent). Same checks as narrative.",
     "transport": email_transport.TRANSPORT_FIX,
