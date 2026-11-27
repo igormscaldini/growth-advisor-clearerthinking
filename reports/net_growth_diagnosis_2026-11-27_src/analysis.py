@@ -77,8 +77,9 @@ def compact(row: dict) -> dict:
     sent, received, opened, clicked = (row.get("st") or [0, 0, 0, 0])[:4]
     tools = rules.tools_tried(row)
     knows_tool = rules.created(row) >= rules.TOOLS_FROM and bool(tools)
-    return {"id": row["id"], "status": row.get("status"), "created": row["created"],
-            "group": GROUP_OF_BUCKET[rules.bucket(row)], "tool": tools[0] if knows_tool else None,
+    bucket = rules.bucket(row)
+    return {"id": row["id"], "status": row.get("status"), "created": row["created"], "bucket": bucket,
+            "group": GROUP_OF_BUCKET[bucket], "tool": tools[0] if knows_tool else None,
             "received": received or 0, "opened": opened or 0}
 
 
@@ -125,13 +126,26 @@ def list_movement(subscribed_daily: dict, unsubscribed_daily: dict) -> list:
     return out
 
 
-def joined_by_month(recs) -> dict:
-    """{month: {group: subscribers created that month}}."""
+def joined_by_month(recs, key="group") -> dict:
+    """{month: {group (or bucket, with key="bucket"): subscribers created that month}}."""
     out = defaultdict(Counter)
     for r in recs:
         if is_subscriber(r):
-            out[month_of(r["created"])][r["group"]] += 1
+            out[month_of(r["created"])][r[key]] += 1
     return {m: dict(c) for m, c in sorted(out.items())}
+
+
+def early_exit_shares(exits: dict) -> dict:
+    """From one group's exits_by_emails_received block: the share of all its sign-ups who left before
+    any beehiiv email (0), within one (the day-1 welcome-sequence email), within three, and at all."""
+    by = {b["emails"]: b["left"] for b in exits["bins"]}
+    joined = exits["joined"]
+    if not joined:
+        return {"before_any_email": None, "within_1": None, "within_3": None, "ever": None}
+    return {"before_any_email": round(by["0"] / joined, 4),
+            "within_1": round((by["0"] + by["1"]) / joined, 4),
+            "within_3": round((by["0"] + by["1"] + by["2-3"]) / joined, 4),
+            "ever": round(exits["left"] / joined, 4)}
 
 
 # ---------- what the sends cost ----------
@@ -419,6 +433,15 @@ def main():
     window = window_exits(old_status, recs, old_asof, window_days)
     cells = window["cells"]
     joined = joined_by_month(recs)
+    exits_mature = exits_by_emails_received(mature)
+    # The whole list's unsubscribes over the window, from beehiiv's daily series: the full days strictly
+    # inside it (low) and with both partial edge days added (high). 2026 joiners' exits sit inside it.
+    nov = growth["unsubscribed_daily"]["2026-11"]
+    first_day, last_day = (datetime.fromtimestamp(t, tz=UTC).day for t in (old_asof, as_of))
+    whole_list_window = {"low": sum(nov[first_day:last_day - 1]), "high": sum(nov[first_day - 1:last_day]),
+                         "days_in_series": len(nov)}
+    since_oct = [d for d in days if d["date"] >= "2026-10-01" and d["recipients"] >= 200_000]
+    dormant = min(since_oct, key=lambda d: d["unique_opens"] / d["recipients"])
 
     dp = {
         "as_of": datetime.fromtimestamp(as_of, tz=UTC).strftime("%Y-%m-%d %H:%M UTC"),
@@ -430,6 +453,11 @@ def main():
         "monthly_2025": growth["monthly_2025"],
         "steady_flow_to_oct": [m for m in old_dp["steady_flow"] if m["month"] < "2026-11"],
         "joined_by_month": joined,
+        "joined_by_month_bucket": joined_by_month(recs, key="bucket"),
+        "whole_list_unsubscribes_in_window": whole_list_window,
+        "least_engaged_send": {**{k: dormant[k] for k in ("date", "subject", "recipients", "unique_opens", "unsubscribes", "spam_reports")},
+                               "open_rate": round(dormant["unique_opens"] / dormant["recipients"], 4),
+                               "per_1000_recipients": round(1000 * dormant["unsubscribes"] / dormant["recipients"], 2)},
         "send_load": monthly_send_load(posts, unsub_by_month),
         "send_rates_by_kind_since_aug": send_rates(days_since_aug, kind),
         "send_rates_by_promo_since_aug": send_rates(days_since_aug, lambda d: "promo" if d["promo"] else "edition"),
@@ -442,7 +470,8 @@ def main():
              "per_1000_recipients": round(1000 * d["unsubscribes"] / d["recipients"], 2)}
             for d in days if d["date"] >= "2026-10-01"],
         "retention_by_month_group": retention(recs, lambda r: (month_of(r["created"]), r["group"])),
-        "exits_by_emails_received_mature": exits_by_emails_received(mature),
+        "exits_by_emails_received_mature": exits_mature,
+        "early_exit_shares_mature": {g: early_exit_shares(v) for g, v in exits_mature.items()},
         "window": window,
         "window_by_group": {g: pooled_rate(cells, window_days, group=g) for g in GROUP_LABELS},
         "window_by_tenure": {label: pooled_rate(cells, window_days, tenure=label) for _, _, label in TENURE_BANDS},

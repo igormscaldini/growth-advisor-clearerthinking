@@ -30,9 +30,10 @@ def ts(y, m, d, hour=12):
 _ids = iter(range(10**9))
 
 
-def rec(status="active", created=ts(2026, 6, 15), group=az.ORGANIC, tool=None, received=10, opened=5, id=None):
+def rec(status="active", created=ts(2026, 6, 15), group=az.ORGANIC, tool=None, received=10, opened=5, id=None,
+        bucket="tools"):
     return {"id": id or f"sub_{next(_ids)}", "status": status, "created": created, "group": group,
-            "tool": tool, "received": received, "opened": opened}
+            "bucket": bucket, "tool": tool, "received": received, "opened": opened}
 
 
 def post(recipients, unsubscribes, unique_opens=0, when=ts(2026, 9, 10), spam=0, subject="An article", title=""):
@@ -53,6 +54,7 @@ class TestCompact:
     def test_organic_tool_signup_keeps_first_tool_and_stats(self):
         c = az.compact(self.raw())
         assert (c["group"], c["tool"], c["received"], c["opened"]) == (az.ORGANIC, "how rational are you, really?", 11, 4)
+        assert c["bucket"] == "tools"
 
     def test_study_first_is_study_and_missing_stats_are_zero(self):
         c = az.compact(self.raw(st=None, cf={"Tools Tried (Pipe-Separated)": "|Who Attracts You"}))
@@ -150,6 +152,23 @@ class TestWhoLeaves:
         assert (out["joined"], out["left"], out["left_never_opened"]) == (5, 4, 2)
         assert {b["emails"]: b["left"] for b in out["bins"]} == \
             {"0": 1, "1": 1, "2-3": 1, "4-6": 0, "7-12": 0, "13-24": 0, "25+": 1}
+
+    def test_early_exit_shares_by_hand(self):
+        # 200 sign-ups, 50 left: 10 before any email, 6 after one, 4 after two or three, 30 later.
+        block = {"joined": 200, "left": 50, "left_never_opened": 12, "bins": [
+            {"emails": "0", "left": 10}, {"emails": "1", "left": 6}, {"emails": "2-3", "left": 4},
+            {"emails": "4-6", "left": 5}, {"emails": "7-12", "left": 5}, {"emails": "13-24", "left": 10},
+            {"emails": "25+", "left": 10}]}
+        assert az.early_exit_shares(block) == {"before_any_email": 0.05, "within_1": 0.08, "within_3": 0.1, "ever": 0.25}
+
+    def test_early_exit_shares_of_an_empty_group(self):
+        empty = az.exits_by_emails_received([])[az.STUDY]
+        assert az.early_exit_shares(empty) == {"before_any_email": None, "within_1": None, "within_3": None, "ever": None}
+
+    def test_joined_by_month_by_bucket(self):
+        recs = [rec(created=ts(2026, 5, 3), bucket="tools"), rec(created=ts(2026, 5, 4), bucket="forms"),
+                rec(created=ts(2026, 5, 5), bucket="forms"), rec(created=ts(2026, 5, 6), bucket="forms", status="pending")]
+        assert az.joined_by_month(recs, key="bucket") == {"2026-05": {"tools": 1, "forms": 2}}
 
     def test_exits_by_emails_received_empty_group(self):
         out = az.exits_by_emails_received([rec()])
