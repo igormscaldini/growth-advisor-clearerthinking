@@ -460,6 +460,10 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   (2026-11-25), so a person can only be identified by the email address. A full walk of every active subscription takes ~35 min
   when two cursors run at once (`order_by=created` asc and desc, `status=active`, stop when the two frontiers cross strictly,
   dedupe by id): 678,559 rows against 678,561 in the publication stats.
+- beehiiv list cursors can be forged (verified 2026-11-27): `next_cursor` is unpadded urlsafe base64 of
+  `{"value":"<ISO time with microseconds>Z","type":"time"}`, so a `created desc` walk can start at any timestamp and several
+  walkers can cover date segments at once: 62k records with custom fields + stats took 5 min (10 threads behind ONE shared
+  0.45 s throttle, about 2.2 requests a second, no 429s) against ~45 min serial. Dedupe by id at the segment edges.
 - Where a beehiiv subscriber came from (verified on all 381k 2026 records, 2026-11-18): the custom fields `Tools Tried (Pipe-Separated)`
   and `UTM Media (Comma-Separated)` list every visit in order, so the FIRST entry is the sign-up visit (later `cpc` or study entries
   are an existing reader coming back); skip empty leading entries (`|Tool`, `,cpc` bug, Sep 13 - Oct 8). They only describe the sign-up
@@ -495,6 +499,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   made cost per email look halved in Oct 2026 while the real cost stayed ~$3 per new subscriber. Split brand vs non-brand
   with `campaign_search_term_view` (has cost) and count the beehiiv utm cohort (memory note
   `reference_ads_conversions_vs_beehiiv_subscribers`). Ads books conversions on the click date, so recent days read low.
+  Judge the cohort's open rate against organic tool sign-ups of the SAME sign-up days (new subscribers open their first
+  emails less than older ones): level until the Nov 9, 2026 brand negatives, about 7 points lower in the first emails after.
 - GA4 attributes Google Ads (auto-tagged) sessions to the Ads CAMPAIGN NAME (e.g. `[PMAX] Rationality Test`),
   not to the `utm_campaign` in the final URL; filtering GA4 on the utm value shows ~1% of the real sessions.
 - GSC reports only against CANONICAL urls, and several CT_TOOLS.md links are the pre-redirect form.
