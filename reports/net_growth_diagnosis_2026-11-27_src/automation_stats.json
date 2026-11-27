@@ -1,0 +1,483 @@
+{
+  "pulled_at": "2026-11-27T18:23:05Z",
+  "automation_id": "aut_79311bfb-d875-4b40-adc4-be6a23b28eeb",
+  "automation_name": "[Drip Campaign] New Subscribers",
+  "stats_period": "all time. The list_automation_emails response does not state a period; established by comparison: its recipients/delivered equal get_automation_stats time_period=all_time (total_sent/total_delivered) for all four emails, to within 1 delivery. Each email's totals therefore run from its first_sent_at to pulled_at.",
+  "source": "beehiiv connector: list_automation_emails (include_stats), get_automation (live), get_automation_stats, list_custom_fields, list_tags",
+  "stat_field_names": [
+    "recipients",
+    "delivered",
+    "opens",
+    "unique_opens",
+    "open_rate",
+    "clicks",
+    "unique_clicks",
+    "click_rate",
+    "unsubscribes",
+    "spam_reports"
+  ],
+  "emails": [
+    {
+      "position_in_flow": 2,
+      "sent_on_day_after_signup": 1,
+      "automation_step_id": "01dd95ae-2f2d-4054-890e-e25d06d765ab",
+      "email_message_id": "57b27c0a-fec3-4c65-b831-8ea7cd7b44e1",
+      "subject_line": "Big news",
+      "status": "active",
+      "created_at": "2026-05-25T13:53:14Z",
+      "first_sent_at": "2026-05-29T20:45:31Z",
+      "last_sent_at": "2026-11-27T18:10:46Z",
+      "stats": {
+        "recipients": 122203,
+        "delivered": 121062,
+        "opens": 53748,
+        "unique_opens": 34950,
+        "open_rate": 28.87,
+        "clicks": 3115,
+        "unique_clicks": 2336,
+        "click_rate": 6.68,
+        "unsubscribes": 1766,
+        "spam_reports": 34
+      },
+      "derived_not_returned_by_beehiiv": {
+        "unsubscribes_pct_of_delivered": 1.459,
+        "unsubscribes_pct_of_unique_opens": 5.053,
+        "spam_reports_pct_of_delivered": 0.028
+      },
+      "footer_link_clicks": {
+        "url_pattern": "clearerthinking.beehiiv.com/subscribe/<subscription id>/preferences (one URL per subscriber, in two query-string variants)",
+        "url_rows": 2005,
+        "total_clicks": 2117,
+        "sum_of_unique_clicks_over_rows": 2005,
+        "distinct_subscribers_who_clicked": 1949,
+        "url_rows_with_unsubscribe_in_host_or_path": 0,
+        "url_rows_with_manage_in_host_or_path": 0,
+        "preferences_clickers_pct_of_email_unique_clicks": 83.433
+      },
+      "per_url_list_checks": {
+        "url_rows": 2047,
+        "sum_total_clicks": 3115,
+        "sum_unique_clicks_over_rows": 2776,
+        "hp_beehiiv_com_rows": 24
+      }
+    },
+    {
+      "position_in_flow": 6,
+      "sent_on_day_after_signup": 14,
+      "automation_step_id": "d941610c-d6fe-4340-bc37-46464267dd83",
+      "email_message_id": "4b5deb81-9030-4143-90da-66dc5e0197fd",
+      "subject_line": "Does IQ actually matter?",
+      "status": "active",
+      "created_at": "2026-03-18T14:41:24Z",
+      "first_sent_at": "2026-04-22T11:05:01Z",
+      "last_sent_at": "2026-11-27T17:58:28Z",
+      "stats": {
+        "recipients": 125902,
+        "delivered": 124790,
+        "opens": 47798,
+        "unique_opens": 32473,
+        "open_rate": 26.02,
+        "clicks": 1503,
+        "unique_clicks": 957,
+        "click_rate": 2.95,
+        "unsubscribes": 449,
+        "spam_reports": 18
+      },
+      "derived_not_returned_by_beehiiv": {
+        "unsubscribes_pct_of_delivered": 0.36,
+        "unsubscribes_pct_of_unique_opens": 1.383,
+        "spam_reports_pct_of_delivered": 0.014
+      },
+      "footer_link_clicks": {
+        "url_pattern": "clearerthinking.beehiiv.com/subscribe/<subscription id>/preferences (one URL per subscriber, in two query-string variants)",
+        "url_rows": 524,
+        "total_clicks": 555,
+        "sum_of_unique_clicks_over_rows": 524,
+        "distinct_subscribers_who_clicked": 484,
+        "url_rows_with_unsubscribe_in_host_or_path": 0,
+        "url_rows_with_manage_in_host_or_path": 0,
+        "preferences_clickers_pct_of_email_unique_clicks": 50.575
+      },
+      "per_url_list_checks": {
+        "url_rows": 562,
+        "sum_total_clicks": 1503,
+        "sum_unique_clicks_over_rows": 1308,
+        "hp_beehiiv_com_rows": 28
+      }
+    },
+    {
+      "position_in_flow": 8,
+      "sent_on_day_after_signup": 28,
+      "automation_step_id": "f7ff16aa-0479-4fee-92aa-b8a600235c6e",
+      "email_message_id": "4c1ee1c7-89b3-4c78-b0ce-28a4d066c09e",
+      "subject_line": "Should you have a life coach?",
+      "status": "active",
+      "created_at": "2026-03-18T14:41:24Z",
+      "first_sent_at": "2026-06-22T13:55:01Z",
+      "last_sent_at": "2026-11-27T18:19:45Z",
+      "stats": {
+        "recipients": 114053,
+        "delivered": 113156,
+        "opens": 33487,
+        "unique_opens": 23299,
+        "open_rate": 20.59,
+        "clicks": 897,
+        "unique_clicks": 477,
+        "click_rate": 2.05,
+        "unsubscribes": 314,
+        "spam_reports": 13
+      },
+      "derived_not_returned_by_beehiiv": {
+        "unsubscribes_pct_of_delivered": 0.277,
+        "unsubscribes_pct_of_unique_opens": 1.348,
+        "spam_reports_pct_of_delivered": 0.011
+      },
+      "footer_link_clicks": {
+        "url_pattern": "clearerthinking.beehiiv.com/subscribe/<subscription id>/preferences (one URL per subscriber, in two query-string variants)",
+        "url_rows": 372,
+        "total_clicks": 391,
+        "sum_of_unique_clicks_over_rows": 372,
+        "distinct_subscribers_who_clicked": 342,
+        "url_rows_with_unsubscribe_in_host_or_path": 0,
+        "url_rows_with_manage_in_host_or_path": 0,
+        "preferences_clickers_pct_of_email_unique_clicks": 71.698
+      },
+      "per_url_list_checks": {
+        "url_rows": 404,
+        "sum_total_clicks": 897,
+        "sum_unique_clicks_over_rows": 789,
+        "hp_beehiiv_com_rows": 21
+      }
+    },
+    {
+      "position_in_flow": 11,
+      "sent_on_day_after_signup": 42,
+      "automation_step_id": "7d3e02c7-5be6-4aa1-8982-ec14d42a5b7d",
+      "email_message_id": "2b365d45-435f-400a-9ce4-ab03248134bb",
+      "subject_line": "You can help advance psychology research",
+      "status": "active",
+      "created_at": "2026-03-18T14:41:24Z",
+      "first_sent_at": null,
+      "last_sent_at": "2026-07-08T11:02:43Z",
+      "stats": {
+        "recipients": 2656,
+        "delivered": 2595,
+        "opens": 2866,
+        "unique_opens": 1548,
+        "open_rate": 59.65,
+        "clicks": 217,
+        "unique_clicks": 42,
+        "click_rate": 2.71,
+        "unsubscribes": 3,
+        "spam_reports": 0
+      },
+      "derived_not_returned_by_beehiiv": {
+        "unsubscribes_pct_of_delivered": 0.116,
+        "unsubscribes_pct_of_unique_opens": 0.194,
+        "spam_reports_pct_of_delivered": 0.0
+      },
+      "footer_link_clicks": {
+        "url_pattern": "clearerthinking.beehiiv.com/subscribe/<subscription id>/preferences (one URL per subscriber, in two query-string variants)",
+        "url_rows": 45,
+        "total_clicks": 46,
+        "sum_of_unique_clicks_over_rows": 45,
+        "distinct_subscribers_who_clicked": 27,
+        "url_rows_with_unsubscribe_in_host_or_path": 0,
+        "url_rows_with_manage_in_host_or_path": 0,
+        "preferences_clickers_pct_of_email_unique_clicks": 64.286
+      },
+      "per_url_list_checks": {
+        "url_rows": 70,
+        "sum_total_clicks": 217,
+        "sum_unique_clicks_over_rows": 216,
+        "hp_beehiiv_com_rows": 18
+      }
+    }
+  ],
+  "flow": [
+    {
+      "position": 0,
+      "step_id": "ded73073-47fd-474f-9da8-6a5d7ebc991e",
+      "type": "update_subscription",
+      "detail": "sets custom fields one_helpful_idea = false and clearerthinking.org = false",
+      "day_after_signup": 0
+    },
+    {
+      "position": 1,
+      "step_id": "477f63b0-5d47-4364-8a9e-b47274019cde",
+      "type": "wait_for",
+      "wait_seconds": 86400,
+      "wait_days": 1
+    },
+    {
+      "position": 2,
+      "step_id": "01dd95ae-2f2d-4054-890e-e25d06d765ab",
+      "type": "send_email",
+      "subject_line": "Big news",
+      "day_after_signup": 1,
+      "conditions": "none"
+    },
+    {
+      "position": 3,
+      "step_id": "5b465e47-d27d-49f7-9ba9-4660ae81a9e6",
+      "type": "wait_for",
+      "wait_seconds": 518400,
+      "wait_days": 6
+    },
+    {
+      "position": 4,
+      "step_id": "a60d406f-dcb6-4f57-96e1-8c9eb2925918",
+      "type": "update_subscription",
+      "detail": "sets custom fields one_helpful_idea = true and clearerthinking.org = true",
+      "day_after_signup": 7
+    },
+    {
+      "position": 5,
+      "step_id": "16c84b2c-f8ac-43a3-b5ad-3e03b69a03e1",
+      "type": "wait_for",
+      "wait_seconds": 604800,
+      "wait_days": 7
+    },
+    {
+      "position": 6,
+      "step_id": "d941610c-d6fe-4340-bc37-46464267dd83",
+      "type": "send_email",
+      "subject_line": "Does IQ actually matter?",
+      "day_after_signup": 14,
+      "conditions": "none"
+    },
+    {
+      "position": 7,
+      "step_id": "ce483d88-ae35-400d-aa25-f3c8fbdfc310",
+      "type": "wait_for",
+      "wait_seconds": 1209600,
+      "wait_days": 14
+    },
+    {
+      "position": 8,
+      "step_id": "f7ff16aa-0479-4fee-92aa-b8a600235c6e",
+      "type": "send_email",
+      "subject_line": "Should you have a life coach?",
+      "day_after_signup": 28,
+      "conditions": "none"
+    },
+    {
+      "position": 9,
+      "step_id": "b3a9a7b2-947f-41fd-a057-95dcd6df3052",
+      "type": "wait_for",
+      "wait_seconds": 1209600,
+      "wait_days": 14
+    },
+    {
+      "position": 10,
+      "step_id": "e319bfd0-91e2-4b0d-9214-29577435ad82",
+      "type": "branch",
+      "day_after_signup": 42,
+      "condition": "subscriber_tag_id contains 53725cce-dcc4-4f05-b694-7861d9f4cbbe (a tag id absent from the publication's 5 current tags)",
+      "branch_decisions_all_time": {
+        "yes": 2672,
+        "no": 70013
+      }
+    },
+    {
+      "position": 11,
+      "step_id": "7d3e02c7-5be6-4aa1-8982-ec14d42a5b7d",
+      "type": "send_email",
+      "branch_arm": "yes",
+      "subject_line": "You can help advance psychology research",
+      "day_after_signup": 42,
+      "conditions": "only the yes arm of the branch at position 10; the no arm has no step"
+    }
+  ],
+  "automation": {
+    "state": "live",
+    "published_at": "2026-10-28T20:54:07Z",
+    "created_at": "2026-03-16T18:50:06Z",
+    "trigger": {
+      "event": "signup",
+      "conditions": "none"
+    },
+    "enrolment_type": "limited",
+    "max_enrolments": 1
+  },
+  "get_automation_stats": {
+    "note": "No unsubscribe field exists in this endpoint. top_line enrolled/completed were identical for both periods; counts semantics (fresh/stale/unsubscribed) are not documented in the response.",
+    "top_line_as_returned": {
+      "total_steps": 24,
+      "total_subscribers_enrolled": 44051,
+      "total_subscribers_completed": 83495,
+      "completion_rate": 54,
+      "last_enrollment_at": "2026-11-27T18:16:43Z"
+    },
+    "all_time": [
+      {
+        "subject_line": "Big news",
+        "total_sent": 122203,
+        "total_delivered": 121063,
+        "open_rate": 28.87,
+        "click_rate": 6.68,
+        "spam_rate": 0.03
+      },
+      {
+        "subject_line": "Does IQ actually matter?",
+        "total_sent": 125902,
+        "total_delivered": 124790,
+        "open_rate": 26.15,
+        "click_rate": 2.94,
+        "spam_rate": 0.02
+      },
+      {
+        "subject_line": "Should you have a life coach?",
+        "total_sent": 114053,
+        "total_delivered": 113156,
+        "open_rate": 20.59,
+        "click_rate": 2.05,
+        "spam_rate": 0.01
+      },
+      {
+        "subject_line": "You can help advance psychology research",
+        "total_sent": 2656,
+        "total_delivered": 2595,
+        "open_rate": 59.65,
+        "click_rate": 2.71,
+        "spam_rate": 0
+      }
+    ],
+    "last_4_weeks": [
+      {
+        "subject_line": "Big news",
+        "total_sent": 13603,
+        "total_delivered": 13349,
+        "open_rate": 22.7,
+        "click_rate": 9.83,
+        "spam_rate": 0.05
+      },
+      {
+        "subject_line": "Does IQ actually matter?",
+        "total_sent": 39724,
+        "total_delivered": 39413,
+        "open_rate": 26.61,
+        "click_rate": 2.47,
+        "spam_rate": 0.02
+      },
+      {
+        "subject_line": "Should you have a life coach?",
+        "total_sent": 33660,
+        "total_delivered": 33503,
+        "open_rate": 15.37,
+        "click_rate": 2.54,
+        "spam_rate": 0.01
+      }
+    ],
+    "step_counts_all_time": [
+      {
+        "position": 0,
+        "step_type": "update_subscription",
+        "fresh_in_progress": 0,
+        "fresh_completed": 43171,
+        "stale_completed": 0,
+        "fresh_failed": 3,
+        "fresh_unsubscribed": 8155
+      },
+      {
+        "position": 1,
+        "step_type": "wait_for",
+        "fresh_in_progress": 312,
+        "fresh_completed": 54547,
+        "stale_completed": 50219,
+        "fresh_failed": 19,
+        "fresh_unsubscribed": 25064
+      },
+      {
+        "position": 2,
+        "step_type": "send_email",
+        "fresh_in_progress": 0,
+        "fresh_completed": 106066,
+        "stale_completed": 0,
+        "fresh_failed": 35,
+        "fresh_unsubscribed": 16380
+      },
+      {
+        "position": 3,
+        "step_type": "wait_for",
+        "fresh_in_progress": 1994,
+        "fresh_completed": 42007,
+        "stale_completed": 0,
+        "fresh_failed": 9,
+        "fresh_unsubscribed": 5633
+      },
+      {
+        "position": 4,
+        "step_type": "update_subscription",
+        "fresh_in_progress": 0,
+        "fresh_completed": 42007,
+        "stale_completed": 0,
+        "fresh_failed": 0,
+        "fresh_unsubscribed": 2730
+      },
+      {
+        "position": 5,
+        "step_type": "wait_for",
+        "fresh_in_progress": 2910,
+        "fresh_completed": 41162,
+        "stale_completed": 59402,
+        "fresh_failed": 3,
+        "fresh_unsubscribed": 13455
+      },
+      {
+        "position": 6,
+        "step_type": "send_email",
+        "fresh_in_progress": 1,
+        "fresh_completed": 114231,
+        "stale_completed": 0,
+        "fresh_failed": 12,
+        "fresh_unsubscribed": 10825
+      },
+      {
+        "position": 7,
+        "step_type": "wait_for",
+        "fresh_in_progress": 7504,
+        "fresh_completed": 107955,
+        "stale_completed": 0,
+        "fresh_failed": 23,
+        "fresh_unsubscribed": 10808
+      },
+      {
+        "position": 8,
+        "step_type": "send_email",
+        "fresh_in_progress": 0,
+        "fresh_completed": 107942,
+        "stale_completed": 0,
+        "fresh_failed": 13,
+        "fresh_unsubscribed": 6779
+      },
+      {
+        "position": 9,
+        "step_type": "wait_for",
+        "fresh_in_progress": 30419,
+        "fresh_completed": 77296,
+        "stale_completed": 0,
+        "fresh_failed": 7,
+        "fresh_unsubscribed": 6772
+      },
+      {
+        "position": 10,
+        "step_type": "branch",
+        "fresh_in_progress": 1,
+        "fresh_completed": 77295,
+        "stale_completed": 0,
+        "fresh_failed": 0,
+        "fresh_unsubscribed": 4666
+      },
+      {
+        "position": 11,
+        "step_type": "send_email",
+        "fresh_in_progress": 0,
+        "fresh_completed": 2318,
+        "stale_completed": 0,
+        "fresh_failed": 3,
+        "fresh_unsubscribed": 351
+      }
+    ]
+  }
+}
