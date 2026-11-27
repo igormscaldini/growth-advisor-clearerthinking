@@ -2,7 +2,7 @@
 
 For analyzing a landing page's **copy** and answering: *"What could I change to convert more people?"* Sources span the advertising canon (Hopkins, Caples, Ogilvy, Schwartz), peer-reviewed psychology (Cialdini, Kahneman & Tversky, cognitive-fluency research), and tested CRO practice (NN/g, CXL, Copyhackers, Unbounce). Evidence is flagged: *[Research]* = peer-reviewed/experimental, *[Tested]* = documented A/B case (often single-source), *[Canon]* = enduring practitioner principle, *[Advice]* = heuristic.
 
-> Shared canon note: this overlaps the ad-copy canon in `ct-ad-designer/references/copywriting.md`. That file governs **CT brand voice** — when suggesting copy rewrites for a CT page, the CT voice guardrails there (no clickbait, no hype, no fake urgency, never talk down, benefit-honest, "you", American English, "Clearer Thinking"/"interactive tools") **override** anything here that conflicts.
+> Shared canon note: this overlaps the ad-copy canon in `ct-ad-designer/references/copywriting.md`. **CT brand voice** is governed by the `ct-writer` skill (`.claude/skills/ct-writer/SKILL.md`): when suggesting copy rewrites for a CT page, its voice and house rules **override** anything here that conflicts.
 
 A lens before tactics: the highest-leverage move on most pages is **clarity**, not cleverness. "When a human being is reading your value proposition, clarity trumps persuasion any day." — Peep Laja, CXL.
 

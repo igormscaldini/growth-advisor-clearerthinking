@@ -1,18 +1,16 @@
 ---
 name: ct-writer
 description: >-
-  Write, rewrite or critique any copy for Clearer Thinking (CT) in CT's house voice: reasoned, scientific and
-  confident, plain enough for a lay reader, with one thoughtful, lightly poetic beat, and never woo-woo, hyped or
-  machine-sounding. Use this skill EVERY time Igor asks for copy or wording of any kind, even when he never says
-  "copy": landing pages and web pages, page sections, headlines, taglines, subheads, CTAs and button text, in-tool
-  text (GuidedTrack intro screens, questions, results pages, email gates, microcopy, error messages), ad headlines
-  and descriptions, social posts and captions, carousel or quote-card wording, tool and product descriptions, and
-  requests such as "write", "draft", "rewrite", "reword", "polish", "tighten", "punch up", "make this sound
-  better", "this sounds like AI", "give me a headline for", "how should we phrase this". It writes full drafts for
-  pages, in-tool text, ads and social captions; it reviews and line-edits emails, sponsor boxes and host reads; it
-  critiques newsletter and blog articles without rewriting them. Also load it for the voice and the final check
-  whenever ct-ad-designer, ct-carousel, ct-podcast-quote or landing-page-analyzer produce wording. Not for images
-  or layout (those skills do that), and not for reports to Igor, code comments or internal notes.
+  Write, rewrite or critique any copy for Clearer Thinking in the house voice: reasoned, scientific and confident,
+  plain enough for a lay reader, with one lightly poetic beat, never woo-woo, hyped or machine-sounding. Use it
+  EVERY time Igor asks for copy or wording, even if he never says "copy": landing and web pages, headlines,
+  taglines, CTAs, button text, in-tool text (GuidedTrack screens, questions, results, email gates, microcopy), ad
+  headlines and descriptions, social captions, carousel or quote-card wording, and asks like "write", "rewrite",
+  "tighten", "make this sound better", "this sounds like AI", "give me a headline", "how should we phrase this".
+  It drafts pages, in-tool text, ads and social captions; line-edits emails, sponsor boxes and host reads;
+  critiques newsletter and blog articles without rewriting them. Also load it for the voice and final check when
+  ct-ad-designer, ct-carousel, ct-podcast-quote or landing-page-analyzer write wording. Not for images, layout,
+  reports to Igor or code.
 ---
 
 # CT writer

@@ -83,4 +83,4 @@ The layout, top to bottom:
 - the attribution: **Name** on the Clearer Thinking Podcast, "Episode N: Title" (the title without the "(with ...)" tail, in muted ink)
 - a grey footer band with www.clearerthinking.org/podcast in CT blue
 
-There are no em dashes anywhere. Offer to write the Instagram caption afterwards (same rules as ct-carousel: hook line, two sentences, "link in bio", about 6 lowercase hashtags ending #clearerthinking), but don't write it unasked.
+There are no em dashes anywhere. Offer to write the Instagram caption afterwards (same rules as ct-carousel: hook line, two sentences, "link in bio", about 6 lowercase hashtags ending #clearerthinking), but don't write it unasked. When you do, write it with the `ct-writer` skill (voice and `copy_lint.py`); the quote itself stays verbatim.

@@ -33,7 +33,7 @@ Two research-backed references live in `references/` — read both when doing a 
 
 Both flag **myths vs. tested findings** (e.g. button color is about contrast, not a magic color; "above the fold is everything" is false; "shorter form always wins" is conditional) and tag every claim by evidence strength. **Don't assert a "best practice" as law** — the strongest reliable wins are message match, value-prop clarity, focus/attention ratio, friction reduction, and proof. Frame the rest as hypotheses to test.
 
-**Brand voice for CT pages:** if the page is Clearer Thinking's, any copy you suggest must obey the CT voice guardrails in `ct-ad-designer/references/copywriting.md` (no clickbait/hype/fake urgency, never talk down, benefit-honest, "you", American English). The shared copy canon (Hopkins/Caples/Ogilvy/Schwartz/Cialdini) is consistent across both skills.
+**Brand voice for CT pages:** if the page is Clearer Thinking's, any copy you suggest or rewrite follows the `ct-writer` skill (`.claude/skills/ct-writer/SKILL.md`), which is the single source for CT's voice and house rules: load it, follow its process for the wording, and run its `scripts/copy_lint.py` on the result. This skill keeps deciding the page structure and what to change. The shared copy canon (Hopkins/Caples/Ogilvy/Schwartz/Cialdini) is consistent with `ct-ad-designer`.
 
 ## Workflow
 

@@ -17,7 +17,7 @@ Worked example: `reports/job_change_carousel_2026-11-20_src/carousel.json`.
 - **Igor gives the takeaways:** they are his copy and go in **word for word**. Each one is split at its first sentence: that sentence is the headline, the rest is the body. If a takeaway opens with an emoji, replace it with a matching icon (no emoji on the slides). A list inside a takeaway, like "Three things you might want to improve include:", becomes the pale-blue chips (`list`), drawn after the first paragraph.
 - **Igor gives only the article:** read the full post first. On Wix pages, read until the head is complete, because `<title>` can sit ~127 KB in. Then draft 5 to 7 takeaways. Every claim must come from the article: no added facts, examples or numbers. The headline is one declarative sentence and the body is 1 to 2 sentences on why or how. Show Igor the draft text and get his approval **before** you render anything.
 
-Wording rules, from CT's house style: no em dashes anywhere, smart reader, no marketing hype.
+Wording rules, from CT's house style: no em dashes anywhere, smart reader, no marketing hype. Any wording you draft yourself (takeaways from an article, the captions in step 4) follows the `ct-writer` skill: load it for the voice, and run its `scripts/copy_lint.py` on the final text. Igor's own takeaways stay word for word.
 
 Size limits, enforced by `validate()`: at most 8 takeaways (10 slides is Instagram's maximum), a headline of at most 75 characters (about 3 lines), and a body of at most 330 characters, paragraphs and chips together. If a takeaway is over the limit and it is Igor's verbatim copy, tell him which one and let him cut it. Never shorten it silently.
 

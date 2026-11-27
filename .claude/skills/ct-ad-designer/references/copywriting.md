@@ -63,14 +63,12 @@ When unsure whether a tactic is legitimate, ask: *is it in the canon above, or s
 - **Google RSA / search:** provide multiple distinct headlines and descriptions; include the core benefit and (where natural) the query intent; stay specific and honest.
 - **Test variety:** ship several distinct angles (different benefits/awareness levels), not minor rewordings — performance is found by testing (Hopkins' founding idea).
 
-## CT brand-voice guardrails (override anything above if in tension)
-From CT's Communication Guidelines:
-- **No clickbait, no hype, no fake urgency.** No "You won't believe…", no manufactured scarcity, no ALL-CAPS shouting (a single styled accent word is fine).
-- **Never talk down** or imply the reader is a poor thinker (beyond universal human biases). Speak as a peer.
-- **Explain the benefit honestly** — value over persuasion; don't overpromise or imply guaranteed outcomes.
-- **Benefit-focused, in the reader's own terms; "you"; American English.**
-- Refer to us as **Clearer Thinking** / **ClearerThinking.org** (never "ClearerThinking"); tools are **"interactive tools"**.
-- Keep it nuanced and quietly optimistic.
+## CT brand voice (overrides anything above if in tension)
+The voice and the house rules live in one place: the `ct-writer` skill (`.claude/skills/ct-writer/SKILL.md`). Load it for any ad copy you write, build its ledger of specifics before the first headline, and run its `scripts/copy_lint.py` on the final lines. It covers the Communication Guidelines (no hype or self-praise, never talk down, explain rather than persuade, "you", American English, "Clearer Thinking" / "interactive tools") and Igor's own rules (no em dashes, nothing that sounds generic or machine-written).
+
+Ad-specific additions:
+- **No clickbait and no fake urgency.** No "You won't believe…", no manufactured scarcity, no ALL-CAPS shouting (a single styled accent word is fine).
+- **Clarity beats the lyrical beat.** `ct-writer` allows one lightly poetic line per piece; in a headline the clear promise wins, so keep any such line for the longer text.
 
 ## Workflow when generating copy
 1. Pin the **one idea** and the reader's **awareness level**.

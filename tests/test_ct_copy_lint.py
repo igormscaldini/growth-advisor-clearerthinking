@@ -160,3 +160,9 @@ def test_json_output(tmp_path, capsys):
     assert cl.main(["--json", str(f)]) == 1
     data = json.loads(capsys.readouterr().out)
     assert data[str(f)][0]["id"] == "modules" and data[str(f)][0]["level"] == "rule"
+
+
+def test_triad_ignores_lists_of_names():
+    assert ids("Captions for LinkedIn, Instagram and X.") == []
+    assert ids("See Buehler, Griffin and Ross for the study.") == []
+    assert ids("Clear, practical and useful.") == ["triad"]

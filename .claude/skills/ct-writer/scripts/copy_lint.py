@@ -119,8 +119,9 @@ CHECKS: list[tuple[str, str, str, str]] = [
      r"\bAmerica\b"),
     ("exclamation", "tell", "Exclamation mark. Let the fact carry the energy.",
      r"(?<![<!])!(?!important|=|-|\[)"),  # not <!DOCTYPE, <!--, !important, != or a Markdown image
+    # Second and third items lowercase, so lists of names ("LinkedIn, Instagram and X") are left alone.
     ("triad", "tell", "List of three single words. Keep it only if there are exactly three things and each one is specific.",
-     r"\b[A-Za-z'-]+, [A-Za-z'-]+,? and [A-Za-z'-]+\b"),
+     r"\b[A-Za-z'-]+, [a-z'-]+,? and [a-z'-]+\b"),
 ]
 
 _COMPILED = [(cid, level, advice, re.compile(pat)) for cid, level, advice, pat in CHECKS]
