@@ -39,7 +39,8 @@ Create `reports/<slug>_carousel_<yyyy-mm-dd>_src/carousel.json`:
 
 - `title`: the article title split into two lines. The first line is dark and the second is blue, on both the cover and the closing slide. Split it where it reads naturally, with the second line carrying the subject.
 - `cover_label` is optional and defaults to "<n> Key Takeaways". `end_lines` is optional and defaults to "Read the full article on" / "ClearerThinking.org/Blog". Keep "on" on the first line, because on its own it gets stranded on a line by itself.
-- `icon`: pick from `ICONS` in the script (compass, puzzle, search, coins, flask, sun). If none fits, **add** a new icon to `ICONS` in the same style: a 100 x 100 grid, blue line work with `S.format(c=BLUE)` (stroke 4, round caps), exactly one orange detail, no text. Do not restyle the existing icons. Adding an icon does not break the look test, which pins only the original six.
+- `icon`: pick from `ICONS` in the script (compass, puzzle, search, coins, flask, sun, brain, note, wrench, flame). If none fits, **add** a new icon to `ICONS` in the same style: a 100 x 100 grid, blue line work with `S.format(c=BLUE)` (stroke 4, round caps), exactly one orange detail, no text. Do not restyle the existing icons. Adding an icon does not break the look test, which pins only the original six. `S` already sets `stroke-width="4"` and the browser keeps the FIRST of two duplicate attributes, so a `stroke-width="7"` written after `S` does nothing (checked 2026-11-27): for another width, write the attributes out by hand.
+- **The article has its own "key takeaways" box** (most CT articles do, under "Short of time? Read the key takeaways."): treat it like Igor's copy. Use those takeaways word for word, split at the first sentence, and render without a draft round.
 
 ## 3. Render and check
 
@@ -54,7 +55,7 @@ Then **look at every PNG** with Read before you report. Check for:
 - a single word stranded on its own line, in a headline or on the closing slide
 - an icon that does not match its takeaway
 
-Fix the wording or the line split in the JSON, not the layout. Commit the JSON and the overview HTML, but never the PNGs.
+Fix the wording or the line split in the JSON, not the layout. To move a line break without touching the words, join two words with a non-breaking space (` ` in the JSON): it fixed a cover title breaking as "Debunking 3 / More Myths" and a body ending on the lone word "change." (2026-11-27). Commit the JSON and the overview HTML, but never the PNGs.
 
 ## 4. Write the captions
 

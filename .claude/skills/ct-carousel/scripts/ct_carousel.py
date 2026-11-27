@@ -63,6 +63,22 @@ ICONS = {
            + "".join(f'<path d="M{40 + 20 * dx:.1f} {40 + 20 * dy:.1f} L{40 + 27 * dx:.1f} {40 + 27 * dy:.1f}" {S.format(c=ORANGE)}/>'
                      for dx, dy in [(0, -1), (-1, 0), (-0.707, -0.707), (0.707, -0.707), (-0.707, 0.707)])
            + f'<path d="M36 78 a12 12 0 0 1 4 -23 a16 16 0 0 1 30 4 a10 10 0 0 1 2 19 Z" fill="#fff" {S.format(c=BLUE)}/>',
+    # Added 2026-11-27 (psychology myths carousel).
+    "brain": f'<path d="M50 28 C50 21 44 17 38 19 C31 17 25 23 27 30 C20 32 17 41 22 47 C17 53 18 62 25 65 '
+             f'C25 73 32 78 39 76 C43 81 50 79 50 72 Z" {S.format(c=BLUE)}/>'
+             f'<path d="M50 28 C50 21 56 17 62 19 C69 17 75 23 73 30 C80 32 83 41 78 47 C83 53 82 62 75 65 '
+             f'C75 73 68 78 61 76 C57 81 50 79 50 72" {S.format(c=BLUE)}/>'
+             f'<path d="M27 30 C32 30 36 34 36 39 M25 65 C28 60 34 59 38 62" {S.format(c=BLUE)}/>'
+             f'<path d="M73 30 C68 30 64 34 64 39 M75 65 C72 60 66 59 62 62" {S.format(c=ORANGE)}/>',
+    "note": f'<path d="M24 18 H60 a4 4 0 0 1 4 4 V78 a4 4 0 0 1 -4 4 H24 a4 4 0 0 1 -4 -4 V22 a4 4 0 0 1 4 -4 Z" {S.format(c=BLUE)}/>'
+            f'<path d="M30 34 H54 M30 46 H54 M30 58 H42" {S.format(c=BLUE)}/>'
+            f'<path d="M78 36 L88 46 L62 72 L50 76 L54 64 Z" fill="{ORANGE}" stroke="{ORANGE}" stroke-width="2" stroke-linejoin="round"/>',
+    "wrench": f'<g transform="rotate(45 50 50)"><path d="M43 13.3 V32 a7 7 0 0 0 14 0 V13.3 A20 20 0 0 1 58 50.3 V80 '
+              f'a8 8 0 0 1 -16 0 V50.3 A20 20 0 0 1 43 13.3 Z" {S.format(c=BLUE)}/>'
+              f'<path d="M50 58 V76" {S.format(c=ORANGE)}/></g>',
+    "flame": f'<path d="M50 14 C54 30 74 40 74 60 C74 74 63 86 50 86 C37 86 26 74 26 60 C26 50 32 43 36 34 '
+             f'C38 42 42 46 46 46 C44 34 46 24 50 14 Z" {S.format(c=BLUE)}/>'
+             f'<path d="M50 58 C53 63 59 66 59 72 C59 77 55 80 50 80 C45 80 41 77 41 72 C41 66 47 63 50 58 Z" {S.format(c=ORANGE)}/>',
 }
 
 # Closing-slide owl: same flat line style as the icons (blue line work, orange details), perched on an open book.

@@ -28,8 +28,18 @@ def test_look_is_unchanged():
         "Carousel look changed: every carousel must match the approved one. Revert, or get Igor's OK and re-pin."
 
 
-def test_approved_spec_is_valid():
-    assert c.validate(json.loads(APPROVED_SPEC.read_text(encoding="utf-8"))) == []
+def test_every_committed_spec_is_valid():
+    specs = sorted((ROOT / "reports").glob("*_carousel_*_src/carousel.json"))
+    assert APPROVED_SPEC in specs
+    for path in specs:
+        assert c.validate(json.loads(path.read_text(encoding="utf-8"))) == [], path.parent.name
+
+
+def test_every_icon_follows_the_house_style():
+    # Blue line work, an orange detail, no text: holds for the original six and for any icon added later.
+    for name, svg in c.ICONS.items():
+        assert c.BLUE in svg and c.ORANGE in svg, name
+        assert "<text" not in svg, name
 
 
 def test_slide_count_and_order():
