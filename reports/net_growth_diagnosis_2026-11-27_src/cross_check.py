@@ -136,12 +136,14 @@ def main():
     for row in dp["send_load"]:
         if row["month"] >= "2026-08":
             check(f"unsubscribes booked on sends, {row['month']}", row["send_unsubscribes"], by_month[row["month"]])
-    # Simplest view of whole-list vs segment: the median send of each kind, not the pooled rate.
+    # Simplest view of whole-list vs part-of-list emails: the median email of each kind, not the pooled rate.
     medians = {}
     for kind in ("whole_list", "segment"):
-        rates = [1000 * s["unsubscribes"] / s["recipients"] for s in dp["biggest_sends_since_oct"] if s["kind"] == kind]
-        medians[kind] = round(statistics.median(rates), 2) if rates else None
-    note("median unsubscribes per 1,000 recipients since Oct, whole-list vs segment sends", medians)
+        picked = [s for s in dp["editions_since_oct"] if s["kind"] == kind and not s["promo"]]
+        medians[kind] = {"emails": len(picked),
+                         "median_unsubscribes": round(statistics.median(s["unsubscribes"] for s in picked)) if picked else None,
+                         "median_per_1000": round(statistics.median(s["per_1000_recipients"] for s in picked), 2) if picked else None}
+    note("editions since Oct 1, whole-list vs part of the list (medians)", medians)
 
     # --- reader yield ---
     ours = next(r for r in dp["reader_yield_by_group"] if r["key"] == "organic")

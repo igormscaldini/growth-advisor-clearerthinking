@@ -105,6 +105,23 @@ class TestSendLoad:
         assert az.send_kind(post(509_999, 0), 600_000) == "segment"
         assert az.send_kind(post(510_000, 0), 600_000) == "whole_list"
 
+    def test_day_editions_merge_the_halves_of_one_send(self):
+        # 22:00 UTC Nov 5 and 00:16 UTC Nov 6 are both the evening of Nov 5 in New York: one email.
+        half_a = post(324_457, 578, 42_224, when=ts(2026, 11, 5, 22), subject="How to think more complexly")
+        half_b = post(324_369, 2234, 98_930, when=ts(2026, 11, 6, 0), subject="How to think more complexly")
+        (d,) = az.day_editions([half_a, half_b, post(6, 3, when=ts(2026, 11, 5, 16))])
+        assert (d["date"], d["parts"], d["recipients"], d["unsubscribes"], d["unique_opens"]) == \
+            ("2026-11-05", 2, 648_826, 2812, 141_154)
+        assert az.send_kind(d, 678_767) == "whole_list" and az.send_kind(half_a, 678_767) == "segment"
+
+    def test_day_editions_keep_a_promo_apart_from_the_edition_of_the_same_day(self):
+        invite = post(114_403, 183, when=ts(2026, 11, 19, 14), subject="Workshop on overcoming procrastination - you're invited",
+                      title="Inviting readers to Overcoming Procrastination")
+        article = post(646_474, 2105, when=ts(2026, 11, 19, 22), subject="Thinking about a job change? Think again")
+        rows = az.day_editions([invite, article])
+        assert [(r["date"], r["promo"], r["recipients"]) for r in rows] == \
+            [("2026-11-19", False, 646_474), ("2026-11-19", True, 114_403)]
+
     def test_send_rates_pool_instead_of_averaging(self):
         # whole list: (2,000 + 1,000) / (600k + 400k) = 3.0 per 1,000 (the mean of the two rates would be 2.92).
         posts = [post(600_000, 2000, 100_000), post(400_000, 1000, 50_000), post(100_000, 100, 40_000), post(10, 5)]

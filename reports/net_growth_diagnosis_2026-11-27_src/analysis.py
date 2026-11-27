@@ -164,6 +164,28 @@ def monthly_send_load(posts: list, unsubscribed_by_month: dict) -> list:
     return out
 
 
+def day_editions(posts: list) -> list:
+    """Sends of MIN_SEND+ recipients merged per US Eastern day, promotions apart from editions.
+
+    beehiiv stores one send as two or three posts when it is split by variant or sending domain (two
+    halves of the list an hour apart), so how much of the list an email reached can only be judged on
+    the merged row. A promo and an edition on the same day stay separate. The subject is the largest
+    part's; `publish_ts` the earliest part's."""
+    groups = defaultdict(list)
+    for p in posts:
+        if p["recipients"] < MIN_SEND:
+            continue
+        day = datetime.fromtimestamp(p["publish_ts"], tz=UTC).astimezone(editions.SEND_TZ).strftime("%Y-%m-%d")
+        groups[(day, editions.is_promo(p["subject"], p["title"]))].append(p)
+    out = []
+    for (day, promo), parts in sorted(groups.items()):
+        biggest = max(parts, key=lambda p: p["recipients"])
+        out.append({"date": day, "promo": promo, "subject": biggest["subject"], "title": biggest["title"],
+                    "parts": len(parts), "publish_ts": min(p["publish_ts"] for p in parts),
+                    **{k: sum(p[k] for p in parts) for k in ("recipients", "unique_opens", "unsubscribes", "spam_reports")}})
+    return out
+
+
 def send_kind(post: dict, list_size: int) -> str:
     """whole_list (reaches WHOLE_LIST_SHARE of the active list), segment, or small (under MIN_SEND)."""
     if post["recipients"] < MIN_SEND:
@@ -385,14 +407,12 @@ def main():
     # List size at the start of each month, to tell a whole-list send from a segment.
     start_size = {m["month"]: m["active_at_start"] for m in old_dp["list_movement"]}
     start_size.setdefault("2026-11", old_dp["list_movement"][-1]["active_at_start"])
-    posts_2026 = [p for p in posts if post_month(p) >= "2026-01"]
     recent = [p for p in posts if post_month(p) >= "2026-08"]
+    days = day_editions(posts)
+    days_since_aug = [d for d in days if d["date"] >= "2026-08-01"]
 
-    def kind(p):
-        return send_kind(p, start_size[post_month(p)])
-
-    def promo(p):
-        return "promo" if editions.is_promo(p["subject"], p["title"]) else "edition"
+    def kind(d):
+        return send_kind(d, start_size[d["date"][:7]])
 
     mature = [r for r in recs if (as_of - r["created"]) / 86400 >= MATURE_DAYS]
     tagged = [r for r in recs if r["created"] >= rules.TOOLS_FROM.timestamp()]
@@ -411,16 +431,16 @@ def main():
         "steady_flow_to_oct": [m for m in old_dp["steady_flow"] if m["month"] < "2026-11"],
         "joined_by_month": joined,
         "send_load": monthly_send_load(posts, unsub_by_month),
-        "send_rates_by_kind_2026": send_rates(posts_2026, kind),
-        "send_rates_by_kind_since_aug": send_rates(recent, kind),
-        "send_rates_by_promo_since_aug": send_rates(recent, promo),
+        "send_rates_by_kind_since_aug": send_rates(days_since_aug, kind),
+        "send_rates_by_promo_since_aug": send_rates(days_since_aug, lambda d: "promo" if d["promo"] else "edition"),
         "send_rates_by_open_band_since_aug": send_rates(recent, lambda p: open_band(p["unique_opens"] / p["recipients"])),
-        "biggest_sends_since_oct": sorted(
-            ({"date": datetime.fromtimestamp(p["publish_ts"], tz=UTC).strftime("%Y-%m-%d"), "subject": p["subject"],
-              "recipients": p["recipients"], "unique_opens": p["unique_opens"], "unsubscribes": p["unsubscribes"],
-              "spam": p["spam_reports"], "kind": kind(p), "promo": promo(p)}
-             for p in posts if post_month(p) >= "2026-10" and p["recipients"] >= MIN_SEND),
-            key=lambda r: r["date"]),
+        "editions_since_oct": [
+            {"date": d["date"], "subject": d["subject"], "promo": d["promo"], "parts": d["parts"],
+             "recipients": d["recipients"], "unique_opens": d["unique_opens"], "unsubscribes": d["unsubscribes"],
+             "spam": d["spam_reports"], "kind": kind(d),
+             "share_of_list": round(d["recipients"] / start_size[d["date"][:7]], 3),
+             "per_1000_recipients": round(1000 * d["unsubscribes"] / d["recipients"], 2)}
+            for d in days if d["date"] >= "2026-10-01"],
         "retention_by_month_group": retention(recs, lambda r: (month_of(r["created"]), r["group"])),
         "exits_by_emails_received_mature": exits_by_emails_received(mature),
         "window": window,
