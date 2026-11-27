@@ -506,7 +506,8 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   and that cohort opens 12.6% vs 30% for organic sign-ups of the same weeks (real people, 5% invalid, they just never engage or
   leave). New countries belong in a SEPARATE campaign with its own budget and `utm_campaign` tag: beehiiv stores no country, so the
   tag is the only way to judge a geography (memory note `project_ads_worldwide_targeting_2026_11`; Igor's rule since 2026-11-27:
-  ads should reach only people who never heard of CT, 11 brand negatives are on the live campaign).
+  ads should reach only people who never heard of CT: 11 brand negatives and two site-visitor audience exclusions are on the live
+  campaign, and he chose not to open new countries for now). A PMax campaign accepts negative USER_LIST campaign criteria.
 - GA4 attributes Google Ads (auto-tagged) sessions to the Ads CAMPAIGN NAME (e.g. `[PMAX] Rationality Test`),
   not to the `utm_campaign` in the final URL; filtering GA4 on the utm value shows ~1% of the real sessions.
 - GSC reports only against CANONICAL urls, and several CT_TOOLS.md links are the pre-redirect form.
