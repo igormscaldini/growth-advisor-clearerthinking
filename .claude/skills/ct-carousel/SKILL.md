@@ -6,7 +6,7 @@ description: >-
 
 # CT carousel + captions
 
-One article in, two things out: a set of slide PNGs in `~/Downloads`, and ready-to-paste captions for LinkedIn, Instagram and X.
+One article in, three things out: a set of slide PNGs in `~/Downloads` (Instagram), one PDF of the same slides (LinkedIn document post), and ready-to-paste captions for LinkedIn, Instagram and X.
 
 The look is the point of this skill. Igor approved it on 2026-11-20 (the job-change carousel), and every carousel must look the same. All of it lives in `scripts/ct_carousel.py`: layout, type sizes, colours, icons, owl, dots, footer logo. A new carousel is only a JSON file of wording, so the look cannot drift. **Never copy the layout code into a new script, and never change the CSS, the owl or an existing icon.** `tests/test_ct_carousel.py` pins a hash of the look and fails if any of it changes. If Igor asks for a style change, make it in the script, show him, and re-pin the hash only after he approves it. That change then applies to every future carousel.
 
@@ -48,7 +48,7 @@ Create `reports/<slug>_carousel_<yyyy-mm-dd>_src/carousel.json`:
 .venv/bin/python .claude/skills/ct-carousel/scripts/ct_carousel.py reports/<slug>_carousel_<date>_src/carousel.json
 ```
 
-The output is `~/Downloads/ct_<slug>_carousel_<date>/slide_01.png ...` plus an overview page at `reports/<slug>_carousel_<date>.html`. Open the overview in Chrome (`open -a "Google Chrome" <file>`).
+The output is `~/Downloads/ct_<slug>_carousel_<date>/slide_01.png ...`, a PDF named after the folder beside them (one page per slide, vector text, printed from the same pages the PNGs are screenshots of; Igor's request 2026-11-27: LinkedIn gets the PDF), plus an overview page at `reports/<slug>_carousel_<date>.html`. Open the overview in Chrome (`open -a "Google Chrome" <file>`).
 
 Then **look at every PNG** with Read before you report. Check for:
 - text running into the dots or the footer
@@ -63,7 +63,7 @@ Deliver all three in chat, each labelled, ready to paste. Also save them to `cap
 
 The article URL is `article_url`. No em dashes. Open with the reader's question or problem, never with "We're excited" or "New post". Only state claims that are in the slides or the article.
 
-- **LinkedIn** (posted with the carousel as a document or images): a hook question in one line, 2 to 3 short sentences giving the core idea, then "The carousel covers N takeaways from our article, including:" with 3 to 4 bullets (•) that tease without giving away every answer, then "Full article: <url>", then 3 hashtags (for example #CareerChange #DecisionMaking).
+- **LinkedIn** (posted with the PDF as a document; LinkedIn asks for a document title, so give one: the article title plus "N Key Takeaways"): a hook question in one line, 2 to 3 short sentences giving the core idea, then "The carousel covers N takeaways from our article, including:" with 3 to 4 bullets (•) that tease without giving away every answer, then "Full article: <url>", then 3 hashtags (for example #CareerChange #DecisionMaking).
 - **Instagram** (posted with the carousel): a hook line with at most one emoji, 2 sentences of substance ending with "Swipe for N key takeaways on ...", then "Full article at ClearerThinking.org/Blog (link in bio).", then about 6 lowercase hashtags ending with #clearerthinking. Captions cannot carry clickable links, so remind Igor that "link in bio" only works if the bio points to the blog.
 - **X** (link post, no carousel): at most 280 characters, where the URL counts as 23. Use a hook plus the core idea in 1 to 2 sentences, then "N takeaways on <topic>:" and the URL on its own line. No hashtags. State the character count.
 

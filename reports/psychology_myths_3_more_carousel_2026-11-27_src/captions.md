@@ -4,7 +4,13 @@ Article: https://www.clearerthinking.org/post/debunking-3-more-myths-about-human
 
 Slides: `~/Downloads/ct_psychology_myths_3_more_carousel_2026-11-27/` (7 PNGs, 1080 x 1350). The five takeaways are the article's own "key takeaways" box, word for word.
 
-## LinkedIn (with the carousel)
+## LinkedIn (document post with the PDF)
+
+File: `~/Downloads/ct_psychology_myths_3_more_carousel_2026-11-27/ct_psychology_myths_3_more_carousel_2026-11-27.pdf`
+
+Document title: Debunking 3 More Myths About Human Psychology: 5 Key Takeaways
+
+Post text:
 
 Does shouting or hitting a punching bag actually make you less angry?
 

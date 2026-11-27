@@ -6,7 +6,9 @@ copies or edits layout code. Approved look: the job-change carousel of 2026-11-2
 (reports/job_change_carousel_2026-11-20_src/carousel.json).
 
 Run:  .venv/bin/python .claude/skills/ct-carousel/scripts/ct_carousel.py <spec.json>
-Out:  ~/Downloads/ct_<slug>_carousel_<date>/slide_01.png ...  +  reports/<slug>_carousel_<date>.html (overview)
+Out:  ~/Downloads/ct_<slug>_carousel_<date>/slide_01.png ...  (Instagram: upload the PNGs)
+      ~/Downloads/ct_<slug>_carousel_<date>/ct_<slug>_carousel_<date>.pdf  (LinkedIn: upload as a document)
+      reports/<slug>_carousel_<date>.html (overview)
 
 Spec (JSON):
   slug          "job_change"               file-name stem
@@ -226,8 +228,36 @@ h1 {{ font-size:24px; font-weight:600; margin:0 0 4px; }} .sub {{ color:#666; ma
 .strip {{ display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:20px; }}
 img {{ width:100%; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,.12); background:#fff; }}</style></head>
 <body><h1>Carousel: {' '.join(spec['title'])}</h1>
-<p class="sub">{kit.timestamp()} · {len(paths)} slides, 1080 x 1350 · PNGs in {out_dir}</p>
+<p class="sub">{kit.timestamp()} · {len(paths)} slides, 1080 x 1350 · PNGs (Instagram) and one PDF (LinkedIn document post) in {out_dir}</p>
 <div class="strip">{imgs}</div></body></html>"""
+
+
+# The PDF prints the very pages the PNGs are screenshots of: only the preview bar and grey backdrop are dropped.
+PDF_CSS = (f"@page {{ size:{FMT['width']}px {FMT['height']}px; margin:0; }} html, body {{ background:#fff; }} "
+           ".meta { display:none; } #canvas { zoom:1 !important; }")
+
+
+def export_pdf(html_paths: list[Path], pdf_path: Path) -> None:
+    """One PDF with a page per slide (vector text, 4:5), for a LinkedIn document post."""
+    from playwright.sync_api import sync_playwright   # imported here so the pure helpers work without it
+    from pypdf import PdfWriter
+
+    writer = PdfWriter()
+    with sync_playwright() as p:
+        browser = p.chromium.launch(channel="chrome")
+        page = browser.new_page(viewport={"width": FMT["width"], "height": FMT["height"] + 400})
+        page.emulate_media(media="screen")
+        for html_path in html_paths:
+            page.goto(html_path.as_uri())
+            page.add_style_tag(content=PDF_CSS)
+            page.evaluate("document.fonts.ready")
+            one = html_path.with_suffix(".pdf")
+            page.pdf(path=str(one), width=f"{FMT['width']}px", height=f"{FMT['height']}px", print_background=True)
+            writer.append(str(one))
+        browser.close()
+    if len(writer.pages) != len(html_paths):
+        raise SystemExit(f"PDF has {len(writer.pages)} pages for {len(html_paths)} slides: a slide spilled onto a second page")
+    writer.write(str(pdf_path))
 
 
 def render(spec: dict) -> list[Path]:
@@ -237,15 +267,18 @@ def render(spec: dict) -> list[Path]:
     out_dir, overview_path = out_paths(spec)
     out_dir.mkdir(parents=True, exist_ok=True)
     tmp = Path(tempfile.mkdtemp())
-    paths = []
+    paths, pages = [], []
     for n, (alt, body) in enumerate(slides(spec), 1):
         png = out_dir / f"slide_{n:02d}.png"
         html = kit.page_html(body_html=body, css=CSS, width=FMT["width"], height=FMT["height"],
                              name=f"{spec['slug']} carousel, slide {n}", alt=alt, png_path=png)
-        kit.export(html, tmp / f"slide_{n:02d}.html", png, width=FMT["width"], height=FMT["height"], scale=SCALE)
+        pages.append(tmp / f"slide_{n:02d}.html")
+        kit.export(html, pages[-1], png, width=FMT["width"], height=FMT["height"], scale=SCALE)
         paths.append(png)
+    pdf = out_dir / f"{out_dir.name}.pdf"
+    export_pdf(pages, pdf)
     overview_path.write_text(overview(spec, paths, out_dir), encoding="utf-8")
-    return paths + [overview_path]
+    return paths + [pdf, overview_path]
 
 
 if __name__ == "__main__":
