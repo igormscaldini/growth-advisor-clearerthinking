@@ -501,6 +501,12 @@ discussion of goals, targets or priorities: hitting those goals is Igor's 2026 p
   `reference_ads_conversions_vs_beehiiv_subscribers`). Ads books conversions on the click date, so recent days read low.
   Judge the cohort's open rate against organic tool sign-ups of the SAME sign-up days (new subscribers open their first
   emails less than older ones): level until the Nov 9, 2026 brand negatives, about 7 points lower in the first emails after.
+- Worldwide targeting on a Maximize Conversions campaign becomes an India Display campaign: `[PMAX] Rationality Test`, Mar 27 - Apr 17,
+  2026, spent $1,158 of $1,161 outside the 8 core countries (India 92% of emails, 93% Display + YouTube) at $0.21 per new subscriber,
+  and that cohort opens 12.6% vs 30% for organic sign-ups of the same weeks (real people, 5% invalid, they just never engage or
+  leave). New countries belong in a SEPARATE campaign with its own budget and `utm_campaign` tag: beehiiv stores no country, so the
+  tag is the only way to judge a geography (memory note `project_ads_worldwide_targeting_2026_11`; Igor's rule since 2026-11-27:
+  ads should reach only people who never heard of CT, 11 brand negatives are on the live campaign).
 - GA4 attributes Google Ads (auto-tagged) sessions to the Ads CAMPAIGN NAME (e.g. `[PMAX] Rationality Test`),
   not to the `utm_campaign` in the final URL; filtering GA4 on the utm value shows ~1% of the real sessions.
 - GSC reports only against CANONICAL urls, and several CT_TOOLS.md links are the pre-redirect form.
